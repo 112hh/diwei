@@ -19090,11 +19090,9 @@
         magnetization: 0.00,
         thermalConductivity: 86,
         thermalExpansion: 4.3,
-        phononFreq: 9.8,
         young: 267,
         poisson: 0.27,
         hardness: 14.2,
-        c11: 238,
         refractive: 4.18,
         extinction: 0.21,
         absorption: 120000,
@@ -19141,11 +19139,9 @@
         magnetization: 0.00,
         thermalConductivity: 3200,
         thermalExpansion: -1.2,
-        phononFreq: 47.0,
         young: 1030,
         poisson: 0.16,
         hardness: 15.1,
-        c11: 340,
         refractive: 2.65,
         extinction: 0.83,
         absorption: 23000,
@@ -19192,11 +19188,9 @@
         magnetization: 0.00,
         thermalConductivity: 420,
         thermalExpansion: 0.8,
-        phononFreq: 38.2,
         young: 780,
         poisson: 0.21,
         hardness: 23.4,
-        c11: 275,
         refractive: 1.72,
         extinction: 0.02,
         absorption: 1800,
@@ -19243,11 +19237,9 @@
         magnetization: 0.00,
         thermalConductivity: 72,
         thermalExpansion: 5.2,
-        phononFreq: 8.4,
         young: 249,
         poisson: 0.25,
         hardness: 13.9,
-        c11: 225,
         refractive: 4.62,
         extinction: 0.29,
         absorption: 138000,
@@ -19294,11 +19286,9 @@
         magnetization: 0.00,
         thermalConductivity: 24,
         thermalExpansion: 12.5,
-        phononFreq: 11.3,
         young: 144,
         poisson: 0.18,
         hardness: 3.2,
-        c11: 92,
         refractive: 3.45,
         extinction: 0.42,
         absorption: 92000,
@@ -19345,11 +19335,9 @@
         magnetization: 0.08,
         thermalConductivity: 54,
         thermalExpansion: 6.1,
-        phononFreq: 7.9,
         young: 206,
         poisson: 0.24,
         hardness: 11.7,
-        c11: 184,
         refractive: 4.01,
         extinction: 0.31,
         absorption: 115000,
@@ -21106,11 +21094,9 @@
     const visuals = [
       { key: "visualBand", label: "\u80fd\u5e26\u7ed3\u6784\u56fe" },
       { key: "visualDos", label: "\u6001\u5bc6\u5ea6\u56fe" },
-      { key: "visualPhonon", label: "\u58f0\u5b50\u8c31\u56fe" },
       { key: "visualCharge", label: "\u7535\u8377\u5bc6\u5ea6\u56fe" },
       { key: "visualDielectric", label: "\u4ecb\u7535\u51fd\u6570\u56fe" },
       { key: "visualAbsorption", label: "\u5438\u6536\u7cfb\u6570\u56fe" },
-      { key: "visualElastic", label: "\u5f39\u6027\u6a21\u91cf\u56fe" },
       { key: "visualMobility", label: "\u8fc1\u79fb\u7387\u70ed\u56fe" },
       { key: "visualWork", label: "\u529f\u51fd\u6570\u5bf9\u6bd4\u56fe" },
       { key: "visualFormation", label: "\u5f62\u6210\u80fd\u5206\u5e03\u56fe" },
@@ -21166,23 +21152,21 @@
       thermal: {
         label: "热学性质",
         title: "热学性质检索",
-        desc: "包括形成能、声子谱和声子态密度等。",
+        desc: "包括形成能、热导率和热膨胀系数等。",
         fields: [
           { key: "formation", kind: "range", title: "形成能", label: "形成能 (eV/atom)", minPlaceholder: "最小值", maxPlaceholder: "最大值" },
           { key: "thermalConductivity", kind: "range", title: "热导率", label: "热导率 (W/m·K)", minPlaceholder: "最小值", maxPlaceholder: "最大值" },
-          { key: "thermalExpansion", kind: "range", title: "热膨胀系数", label: "热膨胀系数 (10⁻⁶/K)", minPlaceholder: "最小值", maxPlaceholder: "最大值" },
-          { key: "phononFreq", kind: "range", title: "声子频率", label: "最高声子频率 (THz)", minPlaceholder: "最小值", maxPlaceholder: "最大值" }
+          { key: "thermalExpansion", kind: "range", title: "热膨胀系数", label: "热膨胀系数 (10⁻⁶/K)", minPlaceholder: "最小值", maxPlaceholder: "最大值" }
         ]
       },
       mechanical: {
         label: "力学性质",
         title: "力学性质检索",
-        desc: "包括弹性常数、杨氏模量和泊松比等。",
+        desc: "包括杨氏模量、泊松比和硬度等。",
         fields: [
           { key: "young", kind: "range", title: "杨氏模量", label: "杨氏模量 (GPa)", minPlaceholder: "最小值", maxPlaceholder: "最大值" },
           { key: "poisson", kind: "range", title: "泊松比", label: "泊松比", minPlaceholder: "最小值", maxPlaceholder: "最大值" },
-          { key: "hardness", kind: "range", title: "硬度", label: "硬度 (GPa)", minPlaceholder: "最小值", maxPlaceholder: "最大值" },
-          { key: "c11", kind: "range", title: "弹性常数", label: "弹性常数 C₁₁ (GPa)", minPlaceholder: "最小值", maxPlaceholder: "最大值" }
+          { key: "hardness", kind: "range", title: "硬度", label: "硬度 (GPa)", minPlaceholder: "最小值", maxPlaceholder: "最大值" }
         ]
       },
       optical: {
@@ -21242,14 +21226,12 @@
       thermal: [
         { label: "形成能", key: "formation", suffix: " eV/atom", digits: 2 },
         { label: "热导率", key: "thermalConductivity", suffix: " W/m·K", digits: 0 },
-        { label: "热膨胀", key: "thermalExpansion", suffix: " ×10⁻⁶/K", digits: 1 },
-        { label: "最高声子频率", key: "phononFreq", suffix: " THz", digits: 1 }
+        { label: "热膨胀", key: "thermalExpansion", suffix: " ×10⁻⁶/K", digits: 1 }
       ],
       mechanical: [
         { label: "杨氏模量", key: "young", suffix: " GPa", digits: 0 },
         { label: "泊松比", key: "poisson", digits: 2 },
-        { label: "硬度", key: "hardness", suffix: " GPa", digits: 1 },
-        { label: "弹性常数 C₁₁", key: "c11", suffix: " GPa", digits: 0 }
+        { label: "硬度", key: "hardness", suffix: " GPa", digits: 1 }
       ],
       optical: [
         { label: "折射率", key: "refractive", digits: 2 },
@@ -21269,8 +21251,6 @@
       { key: "band", label: "能带结构图" },
       { key: "dos", label: "态密度图" },
       { key: "magneticGroundState", label: "磁基态构型图" },
-      { key: "phonon", label: "声子谱图" },
-      { key: "phononDos", label: "声子态密度图" },
       { key: "dielectric", label: "介电函数图" },
       { key: "absorption", label: "光吸收系数图" },
       { key: "reflectance", label: "反射率图" },
@@ -21317,7 +21297,7 @@
         materialFormula: "h-BN",
         materialType: "二维材料",
         source: "ICSD (No.162757)",
-        description: "单层 h-BN 可视化数据，含声子谱与态密度。"
+        description: "单层 h-BN 可视化数据，含态密度。"
       },
       {
         id: "rec-04",
@@ -21355,8 +21335,8 @@
               { id: "twod-prop-electronic", slug: "electronic_structure_calc", title: "电子结构计算算法", enTitle: "Electronic Structure Calculation", desc: "基于 API 服务返回二维材料的能带结构、态密度和电荷密度分布等电子性质结果。", tags: ["DFT", "能带", "态密度"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/electronic", input: "结构索引、k 点路径、能量范围", output: "能带数据、态密度索引、图谱链接", updatedAt: "2026-04-09", version: "v1.2", packageSize: "16.5 MB" },
               { id: "twod-prop-electrical", slug: "electrical_properties_calc", title: "电学性质计算算法", enTitle: "Electrical Properties Calculation", desc: "计算二维材料的电学性质，包括载流子迁移率、电导率和霍尔系数等输运特征。", tags: ["电学", "迁移率", "输运"], status: "maintenance", endpoint: "POST /api/v1/algorithms/twod/property/electrical", input: "材料索引、载流子类型、温度区间", output: "输运性质摘要、图谱索引", updatedAt: "2026-04-05", version: "v1.1", packageSize: "12.6 MB" },
               { id: "twod-prop-magnetic", slug: "magnetic_properties_calc", title: "磁学性质计算算法", enTitle: "Magnetic Properties Calculation", desc: "计算二维材料的磁矩、磁各向异性和居里温度等磁学指标，并返回接口结果摘要。", tags: ["磁性", "磁矩", "居里温度"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/magnetic", input: "材料索引、自旋设置、温度区间", output: "磁矩表、温度响应、结果索引", updatedAt: "2026-04-07", version: "v1.0", packageSize: "13.3 MB" },
-              { id: "twod-prop-thermal", slug: "thermal_properties_calc", title: "热学性质计算算法", enTitle: "Thermal Properties Calculation", desc: "计算二维材料的热导率、比热容、热膨胀系数和声子谱相关结果，并返回可视化索引。", tags: ["热学", "热导率", "声子"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/thermal", input: "材料索引、温度区间、结果类型", output: "热学参数、声子谱索引", updatedAt: "2026-04-09", version: "v1.0", packageSize: "14.1 MB" },
-              { id: "twod-prop-mechanical", slug: "mechanical_properties_calc", title: "力学性质计算算法", enTitle: "Mechanical Properties Calculation", desc: "计算二维材料的弹性常数、杨氏模量、泊松比和断裂强度等力学性质。", tags: ["力学", "弹性", "杨氏模量"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/mechanical", input: "结构索引、应变模板、边界条件", output: "力学参数、应力应变摘要", updatedAt: "2026-04-06", version: "v1.0", packageSize: "13.1 MB" },
+              { id: "twod-prop-thermal", slug: "thermal_properties_calc", title: "热学性质计算算法", enTitle: "Thermal Properties Calculation", desc: "计算二维材料的热导率、比热容和热膨胀系数等结果，并返回可视化索引。", tags: ["热学", "热导率", "热膨胀"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/thermal", input: "材料索引、温度区间、结果类型", output: "热学参数、可视化索引", updatedAt: "2026-04-09", version: "v1.0", packageSize: "14.1 MB" },
+              { id: "twod-prop-mechanical", slug: "mechanical_properties_calc", title: "力学性质计算算法", enTitle: "Mechanical Properties Calculation", desc: "计算二维材料的杨氏模量、泊松比和断裂强度等力学性质。", tags: ["力学", "杨氏模量", "泊松比"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/mechanical", input: "结构索引、应变模板、边界条件", output: "力学参数、应力应变摘要", updatedAt: "2026-04-06", version: "v1.0", packageSize: "13.1 MB" },
               { id: "twod-prop-optical", slug: "optical_properties_calc", title: "光学性质计算算法", enTitle: "Optical Properties Calculation", desc: "计算二维材料的介电函数、吸收谱、折射率和反射率等光学性质，并通过 API 返回图谱链接。", tags: ["光学", "吸收", "介电函数"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/optical", input: "材料索引、频率区间、偏振设置", output: "光谱数据、图谱链接", updatedAt: "2026-04-08", version: "v1.1", packageSize: "15.0 MB" },
               { id: "twod-prop-defect", slug: "defect_properties_calc", title: "缺陷性质计算算法", enTitle: "Defect Properties Calculation", desc: "计算二维材料中缺陷的形成能、跃迁能级和扩散势垒等缺陷性质，并返回接口摘要。", tags: ["缺陷", "形成能", "扩散"], status: "available", endpoint: "POST /api/v1/algorithms/twod/property/defect", input: "缺陷索引、电荷态、迁移路径", output: "缺陷性质表、结果文件索引", updatedAt: "2026-04-09", version: "v1.0", packageSize: "14.4 MB" }
             ]
@@ -21668,7 +21648,6 @@
         label: "热学性质",
         fields: [
           { key: "formation", label: "形成能" },
-          { key: "phononFreq", label: "声子谱虚频" },
           { key: "thermalConductivity", label: "热导率" },
           { key: "thermalExpansion", label: "热膨胀系数" }
         ],
@@ -21681,7 +21660,6 @@
       mechanical: {
         label: "力学性质",
         fields: [
-          { key: "c11", label: "弹性常数" },
           { key: "young", label: "杨氏模量" },
           { key: "poisson", label: "泊松比" },
           { key: "hardness", label: "硬度" }
@@ -22138,22 +22116,6 @@
           series: [{ name: "DOS", color: "#5b9bd5", values: [0.2, material.dos * 0.48, material.dos, material.dos * 0.42, 0.28] }]
         },
         magneticGroundState: buildTwodDiagramVisual(material, "magneticGroundState"),
-        phonon: {
-          type: "line",
-          axisX: "高对称点路径",
-          axisY: "频率 (THz)",
-          caption: `${material.name} 的声子谱最高频率与热稳定性字段一致。`,
-          labels: ["Γ", "M", "K", "Γ"],
-          series: [{ name: "频率", color: "#70ad47", values: [material.phononFreq * 0.22, material.phononFreq * 0.46, material.phononFreq * 0.84, material.phononFreq] }]
-        },
-        phononDos: {
-          type: "line",
-          axisX: "频率 (THz)",
-          axisY: "声子态密度 (a.u.)",
-          caption: `${material.name} 的声子态密度图用于展示不同频段振动态贡献分布。`,
-          labels: ["0", "2", "4", "6", "8", "10"],
-          series: [{ name: "PhDOS", color: "#4f7ecf", values: [0.18, 0.42, 0.78, 0.94, 0.63, 0.28] }]
-        },
         dielectric: {
           type: "line",
           axisX: "光子能量 (eV)",
@@ -29295,13 +29257,6 @@
           { value: "desc", label: "降序" }
         ];
       }
-      if (category === "thermal" && fieldKey === "phononFreq") {
-        return [
-          { value: "yesno", label: "有/无虚频" },
-          { value: "asc", label: "升序" },
-          { value: "desc", label: "降序" }
-        ];
-      }
       if (category === "defect" && fieldKey === "defectType") {
         return [
           { value: "yesno", label: "有/没有" },
@@ -29367,7 +29322,6 @@
     }
 
     function getTwodPropertySortValue(item, category, fieldKey) {
-      if (category === "thermal" && fieldKey === "phononFreq") return Boolean(item.hasImaginaryPhonon);
       if (category === "magnetic" && fieldKey === "magneticOrder") {
         const order = String(item.magneticOrder || "").toLowerCase();
         return !(order.includes("非磁") || order.includes("nonmagnetic") || order === "");
@@ -41852,7 +41806,7 @@
           '支持键长测量与键角测量，鼠标悬停键上可显示成键元素及键长信息；',
           '支持超胞显示、视角切换、坐标轴显示等辅助功能；',
           '可导出 PNG 格式图片、DAE/GLTF 三维模型文件及 AR 功能文件；',
-          '支持声子振动模式可视化，可调频率与振幅直观展示原子振动。'
+          '支持超胞显示、视角切换、坐标轴显示等辅助分析能力。'
         ],
         operation: [
           '本地部署后，将结构文件放入 input 目录；',
@@ -41864,7 +41818,6 @@
         ],
         notice: [
           '三维渲染依赖本地显卡性能，建议配备独立显卡；',
-          '声子振动模式需提前准备声子谱计算数据；',
           '大体系结构文件可能导致渲染卡顿，建议控制原子数规模；',
           '导出文件路径避免中文与特殊字符，防止编码异常。'
         ]
@@ -41873,7 +41826,7 @@
         name: '第一性原理计算软件接口',
         effect: [
           '提供 VASP 和 QE 两种主流第一性原理计算软件输入文件自动生成；',
-          '支持晶体结构参数、电子能带、态密度、声子谱、形成能等性质计算；',
+          '支持晶体结构参数、电子能带、态密度、形成能等性质计算；',
           '用户可直接导入计算结果文件并与数据库结果对标校验；',
           '自动匹配推荐赝势与 KPOINTS 设置，降低参数配置门槛；',
           '统一输出 POSCAR、CIF 等标准结构文件，确保数据互通。'
@@ -42247,7 +42200,7 @@
           '自动对数据标注高 / 中 / 低质量等级，定期自动清理低质量数据、重复冗余数据，保障数据库整体数据可靠度；',
           '支持按应用场景、多目标性能需求，在材料库中快速精准筛选符合条件的二维材料；',
           '可配套导出材料结构文件、第一性原理计算输入文件，直接支撑科研分析、结构优化与仿真计算；',
-          '内置晶体可视化全套能力，支持原子编辑、键长键角测量、声子振动模式可视化预览；',
+          '内置晶体可视化全套能力，支持原子编辑、键长键角测量和结构预览；',
           '适配 VASP、QE 主流计算软件输入输出格式，实现计算文件通用适配与结果对标校验。'
         ],
         operation: [
@@ -42256,7 +42209,7 @@
           '配置定时任务，一键触发低质、重复数据批量清理流程；',
           '录入应用场景与多目标性能约束条件，执行材料逆向筛选；',
           '筛选结果可本地导出结构文件、计算输入文件；',
-          '调用可视化模块，可本地进行原子增删改、键参数测量、声子振动调试；',
+          '调用可视化模块，可本地进行原子增删改和键参数测量；',
           '选择 VASP/QE 软件接口，配置计算参数，本地生成对应输入文件并可导入结果做对标分析。'
         ],
         notice: [
@@ -42265,7 +42218,7 @@
           '数据质量标签仅为算法参考，关键科研数据建议人工复核确认；',
           '定时清理任务需自行配置周期与过滤规则，避免误删有效科研数据；',
           '第一性原理计算参数、赝势选择需结合研究场景自行适配，平台仅提供标准模板；',
-          '晶体可视化 3D 渲染、声子振动展示依赖本地硬件图形性能，与平台无关。'
+          '晶体可视化 3D 渲染依赖本地硬件图形性能，与平台无关。'
         ]
       },
       clean: {
@@ -48809,7 +48762,7 @@
           <details>
             <summary>支持的图类说明</summary>
             <div class="twod-visual-gallery-desc-body">
-              支持展示能带结构、态密度、声子谱、光学系数、缺陷结构等典型图谱，用于辅助观察材料在能级分布、稳定性、吸收响应以及缺陷演化方面的变化趋势。具体呈现内容将随当前材料的实际数据情况动态加载。
+              支持展示能带结构、态密度、光学系数、缺陷结构等典型图谱，用于辅助观察材料在能级分布、稳定性、吸收响应以及缺陷演化方面的变化趋势。具体呈现内容将随当前材料的实际数据情况动态加载。
             </div>
           </details>
         </section>
@@ -48883,8 +48836,6 @@
         band: "展示高对称 k 点路径下的能带色散关系，用于观察带隙大小、导带和价带走势。",
         dos: "展示总态密度及可能的分波态密度信息，用于分析电子态分布与费米能级附近贡献。",
         magneticGroundState: "展示磁基态构型与自旋排布，用于判断材料的磁序特征和局域磁矩分布。",
-        phonon: "展示声子频散关系，用于判断晶格动力学稳定性并观察是否存在虚频。",
-        phononDos: "展示声子态密度分布，用于分析不同频段的振动贡献与热学行为。",
         dielectric: "展示介电响应随能量变化的趋势，用于分析材料的光电耦合特征。",
         absorption: "展示光吸收系数随波长或能量变化的分布，用于评估材料的吸光能力。",
         reflectivity: "展示反射率谱线，用于观察材料在不同波段的反射特征。",

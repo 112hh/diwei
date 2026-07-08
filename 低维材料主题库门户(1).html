@@ -1536,7 +1536,7 @@ footer .footer-grid{gap:20px}
           <div class="db-num">≥ 30,600 条</div>
           <h3>二维材料数据库</h3>
           <p>涵盖结构特征、电子结构、电学、磁学、热学、力学、光学、缺陷性质八大类数据集，基于VASP第一性原理计算。</p>
-          <div class="db-tags"><span>晶胞参数</span><span>能带结构</span><span>态密度</span><span>有效质量</span><span>声子谱</span><span>弹性常数</span></div>
+          <div class="db-tags"><span>晶胞参数</span><span>能带结构</span><span>态密度</span><span>有效质量</span></div>
         </div>
       </div>
       <div class="db-card fade-up">
@@ -1605,7 +1605,7 @@ footer .footer-grid{gap:20px}
     <div class="scene-panel active" id="scene-0"><div class="scene-content">
       <div class="scene-info">
         <h3>二维材料数据应用</h3>
-        <p>支持化学式、元素组成、材料编号、交互式元素周期表等多维度精准检索。提供能带结构、态密度、声子谱、介电函数等物理性质 3D 可视化，支持材料性能快速评估与对比分析，助力科研人员高效筛选目标材料。</p>
+        <p>支持化学式、元素组成、材料编号、交互式元素周期表等多维度精准检索。提供能带结构、态密度、介电函数等物理性质 3D 可视化，支持材料性能快速评估与对比分析，助力科研人员高效筛选目标材料。</p>
         <div class="scene-features">
           <div class="scene-feature"><div class="scene-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><h4>多维度检索</h4><p>化学式、元素组成、材料编号、交互式元素周期表检索</p></div></div>
           <div class="scene-feature"><div class="scene-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></div><div><h4>性质可视化</h4><p>能带结构、态密度等八类性质图表展示与排序筛选</p></div></div>
@@ -1818,7 +1818,7 @@ const scfgs=[
       o.yAxis={type:'value',axisLine:{show:false},axisTick:{show:false},
         splitLine:{lineStyle:{color:'#f0f0f0',type:'dashed'}},axisLabel:{color:'#9ca3af',fontSize:9}
       };
-      o.legend={data:['带隙(eV)','迁移率','热导率','弹性模量'],bottom:'2%',
+      o.legend={data:['带隙(eV)','迁移率','热导率','形成能'],bottom:'2%',
         textStyle:{fontSize:9,color:'#6b7280'},itemWidth:12,itemHeight:8};
       var b1=new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#2563eb'},{offset:1,color:'#60a5fa'}]);
       var b2=new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#7c3aed'},{offset:1,color:'#a78bfa'}]);
@@ -1834,8 +1834,8 @@ const scfgs=[
         {name:'热导率',type:'bar',barWidth:18,
          data:[98,52,30,45,25,40],
          itemStyle:{color:b3,borderRadius:[3,3,0,0]},label:{show:false}},
-        {name:'弹性模量',type:'bar',barWidth:18,
-         data:[340,125,280,180,85,160],
+        {name:'形成能',type:'bar',barWidth:18,
+         data:[12,18,21,16,10,15],
          itemStyle:{color:b4,borderRadius:[3,3,0,0]},label:{show:false}}
       ];
     }
@@ -2271,8 +2271,8 @@ navLinks.forEach(function(a){
       kicker: "核心数据库",
       summary: "覆盖二维半导体、磁性材料、铁电材料等，数据量 ≥30,600 条。",
       meta: [["数据量","≥30,600条"],["数据类别","8大类"],["计算软件","VASP"]],
-      bullets: ["结构特征、电子结构、电学、磁学、热学、力学、光学、缺陷性质。","材料范围覆盖 Graphene、MoS₂、h-BN、WS₂、Phosphorene 等。","支持晶体结构、能带、态密度和声子谱等可视化。"],
-      tags: ["晶胞参数","能带结构","声子谱","缺陷性质"]
+      bullets: ["结构特征、电子结构、电学、磁学、热学、力学、光学、缺陷性质。","材料范围覆盖 Graphene、MoS₂、h-BN、WS₂、Phosphorene 等。","支持晶体结构、能带、态密度等可视化。"],
+      tags: ["晶胞参数","能带结构","态密度","缺陷性质"]
     },
     "有机光电材料数据库": {
       kicker: "核心数据库",
