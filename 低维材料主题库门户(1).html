@@ -674,6 +674,81 @@ to{opacity:1;transform:translateY(0)}
 .case-body h3{font-size:17px;font-weight:700;margin-bottom:8px;color:var(--text, #111827)}
 .case-body p{font-size:13px;color:var(--text-mid, #4b5563);line-height:1.75}
 
+.value-card,.db-card,.tool-card,.case-card,.flow-step{
+  cursor:pointer;
+}
+.value-card:focus-visible,.db-card:focus-visible,.tool-card:focus-visible,.case-card:focus-visible,.flow-step:focus-visible,.detail-modal-close:focus-visible,.detail-modal-cta:focus-visible{
+  outline:3px solid rgba(37,99,235,.35);
+  outline-offset:3px;
+}
+.detail-modal-overlay{
+  position:fixed;inset:0;z-index:300;
+  display:none;align-items:center;justify-content:center;
+  padding:24px;background:rgba(15,23,42,.46);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.detail-modal-overlay.open{display:flex}
+.detail-modal{
+  width:min(720px,100%);
+  max-height:min(82vh,760px);
+  overflow:auto;
+  background:var(--card, #fff);
+  border:1px solid rgba(226,232,240,.9);
+  border-radius:12px;
+  box-shadow:0 24px 80px rgba(15,23,42,.22);
+}
+.detail-modal-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  padding:24px 28px 18px;border-bottom:1px solid var(--border, #e5e7eb);
+}
+.detail-modal-kicker{
+  display:inline-flex;margin-bottom:8px;
+  color:var(--accent, #2563eb);font-size:12px;font-weight:700;
+}
+.detail-modal-title{font-size:24px;line-height:1.3;color:var(--text, #111827);margin:0}
+.detail-modal-close{
+  width:40px;height:40px;border:1px solid var(--border, #e5e7eb);
+  background:#fff;border-radius:8px;color:var(--text-mid, #4b5563);
+  cursor:pointer;font-size:22px;line-height:1;
+}
+.detail-modal-body{padding:22px 28px 26px}
+.detail-modal-summary{
+  color:var(--text-mid, #4b5563);font-size:15px;line-height:1.8;margin-bottom:18px;
+}
+.detail-modal-meta{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;
+}
+.detail-modal-meta div{
+  padding:12px;border:1px solid var(--border, #e5e7eb);border-radius:8px;background:var(--bg-alt, #f7f8fa);
+}
+.detail-modal-meta span{display:block;color:var(--text-light, #9ca3af);font-size:11px;margin-bottom:4px}
+.detail-modal-meta strong{display:block;color:var(--text, #111827);font-size:13px;line-height:1.5}
+.detail-modal-list{
+  display:grid;gap:10px;margin:0 0 20px;padding:0;list-style:none;
+}
+.detail-modal-list li{
+  position:relative;padding-left:18px;color:var(--text-mid, #4b5563);font-size:14px;line-height:1.7;
+}
+.detail-modal-list li::before{
+  content:"";position:absolute;left:0;top:.75em;width:6px;height:6px;border-radius:50%;background:var(--accent, #2563eb);
+}
+.detail-modal-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.detail-modal-tags span{
+  border:1px solid var(--border, #e5e7eb);background:#fff;border-radius:8px;
+  padding:6px 10px;color:var(--text-mid, #4b5563);font-size:12px;
+}
+.detail-modal-cta{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:40px;padding:9px 16px;border-radius:8px;
+  background:var(--grad-1, linear-gradient(135deg,#2563eb,#4f46e5));
+  color:#fff;text-decoration:none;font-size:13px;font-weight:700;
+}
+@media (max-width:700px){
+  .detail-modal-overlay{padding:14px}
+  .detail-modal-head,.detail-modal-body{padding-left:18px;padding-right:18px}
+  .detail-modal-meta{grid-template-columns:1fr}
+}
+
 /* Footer */
 footer{
   padding:60px 0 32px;border-top:1px solid var(--border, #e5e7eb);
@@ -1318,7 +1393,7 @@ footer .footer-grid{gap:20px}
         <div class="user-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"/></svg> 面向企业</div>
       </div>
       <div class="hero-stats fade-up delay-3">
-        <div class="stat"><div class="stat-num" data-target="101970">10万+</div><div class="stat-label">数据条目总量</div></div>
+        <div class="stat"><div class="stat-num" data-target="130000">13万+</div><div class="stat-label">数据条目总量</div></div>
         <div class="stat"><div class="stat-num">5</div><div class="stat-label">核心子数据库</div></div>
         <div class="stat"><div class="stat-num">30+</div><div class="stat-label">专业数据集</div></div>
         <div class="stat"><div class="stat-num">5</div><div class="stat-label">智能工具</div></div>
@@ -1452,7 +1527,7 @@ footer .footer-grid{gap:20px}
   <div class="wrap">
     <div class="section-header fade-up">
       <h2>五大核心数据库</h2>
-      <p>涵盖二维材料、有机光电、电解质、机器学习力场、催化材料，数据总量超 10 万条</p>
+      <p>涵盖二维材料、有机光电、电解质、机器学习力场、催化材料，规划总数据条目 ≥13 万条，支撑标准化加工与 AI-Ready 数据建设</p>
     </div>
         <div class="db-grid">
       <div class="db-card fade-up">
@@ -1470,7 +1545,7 @@ footer .footer-grid{gap:20px}
           <div class="db-num">≥ 1,000 条</div>
           <h3>有机光电材料数据库</h3>
           <p>涵盖基础信息、物性数据、表征图谱、计算数据四类数据集，基于Gaussian量子化学计算，聚焦小分子OLED材料。</p>
-          <div class="db-tags"><span>分子式</span><span>三维结构</span><span>红外光谱</span><span>拉曼光谱</span><span>HOMO-LUMO</span><span>激发能</span></div>
+          <div class="db-tags"><span>分子式</span><span>三维结构</span><span>红外光谱</span><span>拉曼光谱</span><span>HOMO-LUMO</span><span>三线态能级</span></div>
         </div>
       </div>
       <div class="db-card fade-up">
@@ -1542,7 +1617,7 @@ footer .footer-grid{gap:20px}
     <div class="scene-panel" id="scene-1"><div class="scene-content">
       <div class="scene-info">
         <h3>有机光电材料应用</h3>
-        <p>支持化学名称、分子式、分子编号、条件组合等多条件精准检索。展示三维分子结构、红外/拉曼图谱、HOMO-LUMO、激发能等特征参数，支持性能快速评估，链接外部论文与数据库实现知识关联。</p>
+        <p>支持化学名称、分子式、分子编号、条件组合等多条件精准检索。展示三维分子结构、红外/拉曼图谱、HOMO-LUMO、三线态能级（T1）等特征参数，支持分子光电性质快速评估，链接外部论文与数据库实现知识关联。</p>
         <div class="scene-features">
           <div class="scene-feature"><div class="scene-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><h4>多条件检索</h4><p>化学名称、分子式、分子编号、按分子量等多维度检索</p></div></div>
           <div class="scene-feature"><div class="scene-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div><h4>特征信息展示</h4><p>三维结构、红外/拉曼图谱、特征参数、HOMO LUMO</p></div></div>
@@ -1673,12 +1748,31 @@ footer .footer-grid{gap:20px}
         <div class="case-body">
           <span class="case-tag">科研协作</span>
           <h3>CO₂还原催化剂理性设计</h3>
-          <p>依托34,920条催化材料数据与催化剂设计优化工具，支持科研团队完成Cu基合金催化剂活性位点预测与实验验证。</p>
+          <p>依托34,920条催化材料数据、CO₂还原反应路径数据与高效催化剂设计优化工具，支持科研团队完成Cu基合金催化剂活性位点预测、Slab模型构建与实验验证。</p>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<div class="detail-modal-overlay" id="portalDetailModal" role="dialog" aria-modal="true" aria-labelledby="portalDetailTitle">
+  <div class="detail-modal">
+    <div class="detail-modal-head">
+      <div>
+        <span class="detail-modal-kicker" id="portalDetailKicker">详情</span>
+        <h3 class="detail-modal-title" id="portalDetailTitle">内容详情</h3>
+      </div>
+      <button class="detail-modal-close" type="button" aria-label="关闭详情" id="portalDetailClose">×</button>
+    </div>
+    <div class="detail-modal-body">
+      <p class="detail-modal-summary" id="portalDetailSummary"></p>
+      <div class="detail-modal-meta" id="portalDetailMeta"></div>
+      <ul class="detail-modal-list" id="portalDetailList"></ul>
+      <div class="detail-modal-tags" id="portalDetailTags"></div>
+      <a class="detail-modal-cta" id="portalDetailLink" href="low_dim_materials(7)(1).html?from=portal">进入平台查看</a>
+    </div>
+  </div>
+</div>
 
 <footer role="contentinfo">
   <div class="wrap">
@@ -2124,6 +2218,276 @@ navLinks.forEach(function(a){
     card.addEventListener('click', function(e){ handleClick(card, e); });
     // Touch support for mobile
     card.addEventListener('touchstart', function(e){ handleClick(card, e); }, {passive:true});
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var detailData = {
+    "支撑国家战略": {
+      kicker: "平台价值",
+      summary: "围绕制造强国、双碳目标和下一代光电/新能源材料研发，提供可追溯、可复用的数据底座。",
+      meta: [["支撑方向","光电显示、新能源、半导体"],["建设目标","低维材料特色数据节点"],["数据要求","AI-Ready 标准化"]],
+      bullets: ["对接国家新材料与先进制造发展需求。","通过标准化数据降低跨团队复用成本。","支撑材料筛选、性能预测和计算验证。"],
+      tags: ["中国制造2025","十四五","双碳"]
+    },
+    "赋能区域产业": {
+      kicker: "平台价值",
+      summary: "聚焦深圳及大湾区芯片设计、光电显示、新能源电池等特色产业集群，推动前沿新材料产业升级。",
+      meta: [["服务对象","企业研发团队"],["区域场景","深圳及大湾区"],["核心价值","缩短研发周期"]],
+      bullets: ["面向企业提供多维检索与性能快速评估。","支持电池、电极、光电器件等方向的材料匹配。","为产业研发提供可二次开发的数据接口。"],
+      tags: ["芯片设计","光电显示","新能源电池"]
+    },
+    "驱动科研创新": {
+      kicker: "平台价值",
+      summary: "打破课题组之间格式、单位、计算方法不统一造成的数据孤岛，提升材料发现效率。",
+      meta: [["核心痛点","数据分散"],["研发方式","检索 + 预测 + 设计"],["协作对象","高校与科研院所"]],
+      bullets: ["统一计算方法、数据格式、表格规范、图片标准和单位体系。","支持跨领域数据复用与交叉学科合作。","降低实验试错成本，缩短候选材料筛选链路。"],
+      tags: ["数据孤岛","标准规范","科研协作"]
+    },
+    "数据标准化治理": {
+      kicker: "平台价值",
+      summary: "建立统一的五维标准化体系，让数据可比、可查、可训练，满足 AI 驱动研发的数据质量要求。",
+      meta: [["标准维度","5 类"],["质量指标","缺失/错误 ≤5%"],["加工目标","≥20万条"]],
+      bullets: ["标准化计算方法、数据格式、数据表格、数据图片和单位体系。","为机器学习力场和性能预测提供高质量训练集。","通过审核入库和质量控制维护数据可信度。"],
+      tags: ["AI-Ready","数据治理","质量控制"]
+    },
+    "智能分析预测": {
+      kicker: "平台价值",
+      summary: "集成结构驰豫、图神经网络、力场建模和催化剂优化能力，辅助材料理性设计。",
+      meta: [["能力范围","算法 + 工具"],["典型方向","逆向设计"],["输出形式","模型/文件/图谱"]],
+      bullets: ["二维材料多目标逆向设计支持目标性质筛选。","高效催化剂设计优化工具支持 CO₂ 还原催化剂设计。","机器学习模型接口支持用户上传数据训练并导出模型。"],
+      tags: ["GNN","多目标优化","催化剂优化"]
+    },
+    "全流程数据共享": {
+      kicker: "平台价值",
+      summary: "覆盖数据上传、审核入库、标准化、检索、下载、格式转换和模型生成的全流程。",
+      meta: [["流程覆盖","入库到应用"],["接口能力","API 开放"],["共享方式","下载与二次开发"]],
+      bullets: ["支持结构文件、图谱、计算数据和训练数据下载。","支持 CIF/POSCAR/XYZ/拓扑文件等格式转换。","面向科研院所和企业提供标准化数据查询能力。"],
+      tags: ["开放共享","API","格式转换"]
+    },
+    "二维材料数据库": {
+      kicker: "核心数据库",
+      summary: "覆盖二维半导体、磁性材料、铁电材料等，数据量 ≥30,600 条。",
+      meta: [["数据量","≥30,600条"],["数据类别","8大类"],["计算软件","VASP"]],
+      bullets: ["结构特征、电子结构、电学、磁学、热学、力学、光学、缺陷性质。","材料范围覆盖 Graphene、MoS₂、h-BN、WS₂、Phosphorene 等。","支持晶体结构、能带、态密度和声子谱等可视化。"],
+      tags: ["晶胞参数","能带结构","声子谱","缺陷性质"]
+    },
+    "有机光电材料数据库": {
+      kicker: "核心数据库",
+      summary: "聚焦有机小分子发光、光伏和半导体材料，数据量 ≥1,000 条。",
+      meta: [["数据量","≥1,000条"],["数据类别","4大类"],["计算软件","Gaussian"]],
+      bullets: ["覆盖基础信息、物性数据、表征图谱和计算数据。","重点展示分子式、2D/3D结构、HOMO/LUMO、三线态能级（T1）等信息。","绝大部分分子暂无器件级数据，因此门户和详情页不再将其作为通用字段展示。"],
+      tags: ["分子式","三维结构","HOMO/LUMO","T1"]
+    },
+    "电解质材料数据库": {
+      kicker: "核心数据库",
+      summary: "覆盖有机电解液、固态有机电解质和固态无机电解质，数据量 ≥10,250 条。",
+      meta: [["数据量","≥10,250条"],["子库数量","3类"],["应用方向","锂离子/固态电池"]],
+      bullets: ["提供离子电导率、电化学窗口、热分解温度和 XRD 图谱等数据。","支持相似分子推荐和固态有机电解质溶解溶剂推荐。","支撑储能电池材料筛选和配方优化。"],
+      tags: ["离子电导率","电化学窗口","XRD","固态电池"]
+    },
+    "机器学习力场数据库": {
+      kicker: "核心数据库",
+      summary: "面向分子模拟与力场开发，提供 DFT 构型、训练/测试集和高精度基准数据。",
+      meta: [["数据量","≥25,200条"],["数据用途","训练/测试集"],["计算级别","CCSD(T)/CBS + MP2"]],
+      bullets: ["覆盖力场基础数据、有机小分子力场和高分子力场。","提供原子坐标、原子电荷、键长、键角、二面角、偶极矩和极化率。","支持模型快速构建、验证和复用。"],
+      tags: ["DFT构型","训练集","偶极矩","极化率"]
+    },
+    "催化材料数据库": {
+      kicker: "核心数据库",
+      summary: "聚焦铜基 CO₂ 还原催化剂、电/光催化材料，数据量 ≥34,920 条。",
+      meta: [["数据量","≥34,920条"],["数据类别","6大类"],["核心场景","CO₂转化"]],
+      bullets: ["覆盖元素特征、结构特征、单原子催化剂、二元合金、晶界特征和体系特征。","支持吸附能、过电位、d 带中心、反应路径和反应选择性分析。","为活性位点预测、Slab 模型生成和催化剂对比提供数据基础。"],
+      tags: ["CO₂RR","活性位点","吸附能","Slab模型"]
+    },
+    "多主题数据集合": {
+      kicker: "核心数据库",
+      summary: "跨五大子库整合标准化数据，支撑跨材料体系检索、统计、分析和二次开发。",
+      meta: [["覆盖范围","五大子库"],["数据目标","≥13万条"],["开放能力","API"]],
+      bullets: ["统一字段、单位和图片标准，降低跨库对比成本。","支持光电显示、新能源、半导体和催化等交叉应用。","面向科研与企业提供开放共享生态。"],
+      tags: ["跨库检索","数据融合","AI-Ready"]
+    },
+    "标准体系": {
+      kicker: "整体流程",
+      summary: "先建立五大子库的摘要规范、选择标准和计算条件，再进入数据采集与标准化流程。",
+      meta: [["标准范围","五大子库"],["规范对象","方法/格式/单位"],["目标","可比可复用"]],
+      bullets: ["明确计算参数、字段命名和数据图片规范。","为后续审核入库和质量控制提供统一依据。"],
+      tags: ["规范先行","五维标准"]
+    },
+    "数据入库": {
+      kicker: "整体流程",
+      summary: "多渠道采集原始数据，经审核整合后录入主题库。",
+      meta: [["来源","实验/计算/文献"],["流程","采集-审核-入库"],["质量","可追溯"]],
+      bullets: ["支持用户上传与管理员审核。","保留数据来源、更新时间和处理记录。"],
+      tags: ["审核入库","来源追踪"]
+    },
+    "数据标准化": {
+      kicker: "整体流程",
+      summary: "围绕计算方法、数据格式、表格、图片和单位进行五维标准化。",
+      meta: [["标准维度","5类"],["质量指标","≤5%"],["目标","AI-Ready"]],
+      bullets: ["统一不同课题组之间的数据表达。","提升机器学习训练集可用性。"],
+      tags: ["标准化","质量控制"]
+    },
+    "数据库建设": {
+      kicker: "整体流程",
+      summary: "构建五大核心子库和 30+ 专业数据集，覆盖结构、性质、图谱、计算和训练数据。",
+      meta: [["子库","5个"],["数据集","30+"],["总量","≥13万条"]],
+      bullets: ["按材料领域组织数据资产。","支持后续检索、可视化、分析和工具调用。"],
+      tags: ["五大子库","数据资产"]
+    },
+    "主题应用": {
+      kicker: "整体流程",
+      summary: "面向不同材料方向提供检索、可视化、文件下载、材料对比和外部关联。",
+      meta: [["应用场景","5大场景"],["用户","科研/企业"],["能力","检索分析"]],
+      bullets: ["二维材料、有机光电、电解质、机器学习力场和催化材料均有独立应用场景。","用户可从门户进入平台查看更完整的详情页。"],
+      tags: ["场景应用","数据服务"]
+    },
+    "分析预测": {
+      kicker: "整体流程",
+      summary: "基于算法和智能工具辅助材料筛选、结构生成、模型训练与性能预测。",
+      meta: [["能力","AI辅助"],["输出","候选材料/模型"],["覆盖","五大子库"]],
+      bullets: ["支持二维材料逆向设计、催化剂优化和机器学习模型训练。","将标准化数据转化为研发决策依据。"],
+      tags: ["AI预测","理性设计"]
+    },
+    "二维材料多目标逆向设计工具": {
+      kicker: "工具算法",
+      summary: "通过多目标优化算法进行质量评估和目标性质筛选，服务二维半导体、磁性材料和铁电材料定向筛选。",
+      meta: [["技术路线","多目标优化"],["输入","目标性质"],["输出","候选材料"]],
+      bullets: ["对比上传数据与现有数据差异度并打质量标签。","支持带隙范围、迁移率阈值等组合目标筛选。"],
+      tags: ["逆向设计","目标筛选"]
+    },
+    "分子数据集智能清洗和质量控制工具": {
+      kicker: "工具算法",
+      summary: "用于清洗不合理分子条目、分析结构与连接拓扑合理性，维护有机光电和电解质分子数据质量。",
+      meta: [["技术路线","异常检测"],["对象","分子数据集"],["目标","质量控制"]],
+      bullets: ["对存入和取出条目进行智能清洗。","识别结构异常、拓扑异常和字段缺失。"],
+      tags: ["智能清洗","拓扑分析"]
+    },
+    "复杂系统模拟智能助手工具": {
+      kicker: "工具算法",
+      summary: "协助复杂分子体系结构和力场建模，并导出 LAMMPS/GROMACS/CP2K 等模拟输入文件。",
+      meta: [["技术路线","力场建模"],["输出","模拟输入文件"],["场景","分子模拟准备"]],
+      bullets: ["支持有机光电、高分子电解质和催化表面体系建模。","提供结构化存储、分析和编辑工具。"],
+      tags: ["LAMMPS","GROMACS","CP2K"]
+    },
+    "高效催化剂设计优化工具": {
+      kicker: "工具算法",
+      summary: "面向 CO₂ 还原催化剂理性设计，提供 Slab 模型生成、结构特征生成和元素特征生成能力。",
+      meta: [["技术路线","Slab模型 + 特征提取"],["场景","CO₂还原"],["数据基础","34,920条催化数据"]],
+      bullets: ["支持体相晶格生成、多指数表面结构检索和活性位点识别。","辅助 d 带中心、吸附能等催化特征分析。"],
+      tags: ["Slab模型","活性位点","CO₂RR"]
+    },
+    "机器学习模型接口与训练": {
+      kicker: "工具算法",
+      summary: "集成随机森林、线性回归、XGBoost、DNN 和图神经网络等模型接口。",
+      meta: [["模型类型","传统ML/DNN/GNN"],["输入","用户数据"],["输出","评估与模型文件"]],
+      bullets: ["支持上传数据训练模型、评估性能并导出模型。","服务力场模型构建、带隙预测和稳定性预测。"],
+      tags: ["scikit-learn","GNN","模型导出"]
+    },
+    "数据应用算法集成": {
+      kicker: "工具算法",
+      summary: "集成晶体结构驰豫、材料性质计算、数据爬取分类、经典力场和图神经网络算法。",
+      meta: [["覆盖","五大数据库"],["用途","计算数据生成"],["方式","算法集成"]],
+      bullets: ["为综合计算平台提供底层算法能力。","支撑结构、性质、图谱和模型数据生成。"],
+      tags: ["结构驰豫","图神经网络"]
+    },
+    "二维材料高通量筛选": {
+      kicker: "合作案例",
+      summary: "联合高校基于二维材料数据库开展高通量筛选，将电子器件候选材料范围从万级压缩至百级。",
+      meta: [["合作类型","高校合作"],["数据基础","30,600+条"],["应用方向","电子器件"]],
+      bullets: ["结合能带结构、态密度和有效质量等字段筛选。","输出候选材料清单和对比分析结果。"],
+      tags: ["高通量筛选","电子器件"]
+    },
+    "新能源电池电解质优化": {
+      kicker: "合作案例",
+      summary: "与深圳新能源企业合作，利用电解质数据和推荐工具辅助固态电解质配方优化。",
+      meta: [["合作类型","产业合作"],["数据基础","10,250+条"],["周期收益","约40%缩短"]],
+      bullets: ["结合离子电导率、电化学窗口和热稳定性筛选。","辅助企业缩短配方评估和计算验证周期。"],
+      tags: ["固态电池","配方优化"]
+    },
+    "CO₂还原催化剂理性设计": {
+      kicker: "合作案例",
+      summary: "依托 34,920 条催化材料数据与催化剂设计优化工具，支持 Cu 基合金 CO₂ 还原催化剂的活性位点预测与实验验证。",
+      meta: [["合作类型","科研协作"],["数据基础","34,920条"],["对象","Cu基合金催化剂"]],
+      bullets: ["结合吸附能、d 带中心、反应路径和反应选择性数据分析。","支持 Slab 模型构建、吸附物添加与标准值对比验证。","面向 CO₂ 转化与电催化研发提供候选催化剂筛选依据。"],
+      tags: ["CO₂还原","Cu基合金","活性位点"]
+    }
+  };
+
+  var modal = document.getElementById("portalDetailModal");
+  var closeBtn = document.getElementById("portalDetailClose");
+  var lastTrigger = null;
+  if (!modal || !closeBtn) return;
+
+  function text(selector, root) {
+    var el = root.querySelector(selector);
+    return el ? el.textContent.trim() : "";
+  }
+
+  function getTitle(card) {
+    return text("h3", card) || text("h4", card) || text(".flow-title-text", card);
+  }
+
+  function renderPairs(target, pairs) {
+    target.innerHTML = (pairs || []).map(function(item){
+      return "<div><span>" + item[0] + "</span><strong>" + item[1] + "</strong></div>";
+    }).join("");
+  }
+
+  function renderList(target, items) {
+    target.innerHTML = (items || []).map(function(item){ return "<li>" + item + "</li>"; }).join("");
+  }
+
+  function renderTags(target, tags) {
+    target.innerHTML = (tags || []).map(function(item){ return "<span>" + item + "</span>"; }).join("");
+  }
+
+  function openDetail(card) {
+    var title = getTitle(card);
+    var data = detailData[title];
+    if (!data) {
+      var summary = text("p", card) || text(".flow-desc", card);
+      data = { kicker: "门户内容", summary: summary, meta: [], bullets: [], tags: [] };
+    }
+    lastTrigger = card;
+    document.getElementById("portalDetailKicker").textContent = data.kicker || "详情";
+    document.getElementById("portalDetailTitle").textContent = title || "内容详情";
+    document.getElementById("portalDetailSummary").textContent = data.summary || "";
+    renderPairs(document.getElementById("portalDetailMeta"), data.meta);
+    renderList(document.getElementById("portalDetailList"), data.bullets);
+    renderTags(document.getElementById("portalDetailTags"), data.tags);
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+    closeBtn.focus();
+  }
+
+  function closeDetail() {
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+    if (lastTrigger && typeof lastTrigger.focus === "function") lastTrigger.focus();
+  }
+
+  document.querySelectorAll(".value-card,.db-card,.tool-card,.case-card,.flow-step").forEach(function(card){
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", "查看" + (getTitle(card) || "内容") + "详情");
+    card.addEventListener("click", function(){ openDetail(card); });
+    card.addEventListener("keydown", function(e){
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openDetail(card);
+      }
+    });
+  });
+
+  closeBtn.addEventListener("click", closeDetail);
+  modal.addEventListener("click", function(e){
+    if (e.target === modal) closeDetail();
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && modal.classList.contains("open")) closeDetail();
   });
 })();
 </script>

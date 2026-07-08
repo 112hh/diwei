@@ -16152,7 +16152,7 @@
             <div class="field"><label>分子编号检索</label><input type="text" placeholder="如：OP-023"></div>
           </div>
           <div class="search-grid two" style="margin-top:18px;">
-            <div class="field"><label>条件组合检索</label><textarea placeholder="可组合输入：带隙范围、HOMO/LUMO、器件类型、吸收峰位置等条件"></textarea></div>
+            <div class="field"><label>条件组合检索</label><textarea placeholder="可组合输入：带隙范围、HOMO/LUMO、三线态能级、吸收峰位置等条件"></textarea></div>
             <div class="field">
               <label>性质数据类别</label>
               <select>
@@ -16178,7 +16178,7 @@
             </div>
             <div class="subtab-panel active" id="opto-structure"><div class="tool-stage"><div class="box"><h4>三维结构索引</h4><p>通过结构展示 API 返回分子骨架、取代基位置和预览文件地址。</p></div><div class="box"><h4>结构预览</h4><p>当前原型仅展示结构数据面板，真实结构由外部 API 返回后渲染。</p></div></div></div>
             <div class="subtab-panel" id="opto-spectra"><div class="tool-stage"><div class="box"><h4>表征图谱</h4><p>吸收谱、发射谱、循环伏安曲线等索引均通过 API 返回。</p></div><div class="box"><h4>谱图摘要</h4><p>支持展示峰位、半峰宽、测试条件与图谱下载地址。</p></div></div></div>
-            <div class="subtab-panel" id="opto-params"><div class="tool-stage"><div class="box"><h4>特征参数</h4><p>展示带隙、HOMO/LUMO、吸收峰位置、器件性能等参数。</p></div></div></div>
+            <div class="subtab-panel" id="opto-params"><div class="tool-stage"><div class="box"><h4>特征参数</h4><p>展示带隙、HOMO/LUMO、三线态能级、吸收/发射峰位等参数。绝大部分分子暂无器件级数据，因此不作为通用检索字段展示。</p></div></div></div>
             <div class="subtab-panel" id="opto-dos"><div class="tool-stage"><div class="box"><h4>态密度数据</h4><p>统一通过态密度数据 API 获取曲线点位和图谱链接。</p></div></div></div>
             <div class="subtab-panel" id="opto-external"><div class="tool-stage"><div class="box"><h4>外部关联</h4><p>聚合论文、专利、数据库条目和外部实验链接。</p></div></div></div>
           </article>
@@ -17740,7 +17740,7 @@
       <div class="modal-header">
         <div>
           <h3 id="optoParamsTitle">特征参数</h3>
-          <p id="optoParamsSubtitle">有机光电材料的电子结构与器件性能参数</p>
+          <p id="optoParamsSubtitle">有机光电材料的电子结构与分子特征参数</p>
         </div>
         <button class="modal-close" type="button" data-close-modal="optoParamsModal">×</button>
       </div>
@@ -20205,14 +20205,12 @@
         updatedAt: "2026-04-20",
         peakAbsorption: 350,
         peakEmission: 450,
-        quantumYield: 85,
         lifetime: "12.5 ns",
         structureType: "aryl-amine",
         density: "1.25 g/cm³",
         spaceGroup: "P-1",
         cell: "a=12.5, b=8.3, c=15.2 Å",
-        deviceMetrics: ["18.5%", "3.2 V", "25,000 cd/m²", "(0.15, 0.25)"],
-        externalLinks: [["Crossref 论文条目", "已关联 12 篇文献"], ["PubChem 分子数据", "CID 镜像已同步"], ["器件数据库", "OLED 器件数据 28 条"]]
+        externalLinks: [["Crossref 论文条目", "已关联 12 篇文献"], ["PubChem 分子数据", "CID 镜像已同步"], ["发射光谱数据", "光谱记录 28 条"]]
       },
       {
         id: "OP-002",
@@ -20232,14 +20230,12 @@
         updatedAt: "2026-04-18",
         peakAbsorption: 380,
         peakEmission: 520,
-        quantumYield: 73,
         lifetime: "14.1 ns",
         structureType: "metal-complex",
         density: "1.31 g/cm³",
         spaceGroup: "P2₁/c",
         cell: "a=11.8, b=14.1, c=16.4 Å",
-        deviceMetrics: ["10.8%", "3.8 V", "18,500 cd/m²", "(0.29, 0.58)"],
-        externalLinks: [["Crossref 论文条目", "已关联 23 篇文献"], ["PubChem 分子数据", "CID 镜像已同步"], ["器件数据库", "OLED 器件数据 43 条"]]
+        externalLinks: [["Crossref 论文条目", "已关联 23 篇文献"], ["PubChem 分子数据", "CID 镜像已同步"], ["发射光谱数据", "光谱记录 43 条"]]
       },
       {
         id: "OP-003",
@@ -20259,14 +20255,12 @@
         updatedAt: "2026-04-17",
         peakAbsorption: 390,
         peakEmission: 690,
-        quantumYield: 3,
         lifetime: "1.8 ns",
         structureType: "fullerene",
         density: "1.65 g/cm³",
         spaceGroup: "Fm-3m",
         cell: "a=14.2 Å",
-        deviceMetrics: ["4.6%", "0.62 V", "11.2 mA/cm²", "66%"],
-        externalLinks: [["Crossref 论文条目", "已关联 35 篇文献"], ["受体数据库", "受体材料数据 16 条"], ["器件数据库", "光伏器件数据 16 条"]]
+        externalLinks: [["Crossref 论文条目", "已关联 35 篇文献"], ["受体数据库", "受体材料数据 16 条"], ["吸收光谱数据", "光谱记录 16 条"]]
       },
       {
         id: "OP-004",
@@ -20286,14 +20280,12 @@
         updatedAt: "2026-04-19",
         peakAbsorption: 520,
         peakEmission: 650,
-        quantumYield: 24,
         lifetime: "4.2 ns",
         structureType: "polymer",
         density: "1.10 g/cm³",
         spaceGroup: "P2₁/n",
         cell: "a=7.9, b=7.7, c=15.6 Å",
-        deviceMetrics: ["4.1%", "0.61 V", "10.8 mA/cm²", "62%"],
-        externalLinks: [["Crossref 论文条目", "已关联 31 篇文献"], ["聚合物数据库", "薄膜数据 17 条"], ["器件数据库", "OPV 器件数据 22 条"]]
+        externalLinks: [["Crossref 论文条目", "已关联 31 篇文献"], ["聚合物数据库", "薄膜数据 17 条"], ["吸收光谱数据", "光谱记录 22 条"]]
       },
       {
         id: "OP-005",
@@ -20313,14 +20305,12 @@
         updatedAt: "2026-04-21",
         peakAbsorption: 385,
         peakEmission: 512,
-        quantumYield: 92,
         lifetime: "1.5 μs",
         structureType: "iridium-complex",
         density: "1.89 g/cm³",
         spaceGroup: "P2₁/c",
         cell: "a=13.2, b=15.1, c=16.0 Å",
-        deviceMetrics: ["23.8%", "2.9 V", "34,000 cd/m²", "(0.29, 0.61)"],
-        externalLinks: [["Crossref 论文条目", "已关联 27 篇文献"], ["器件数据库", "磷光 OLED 器件 36 条"], ["专利映射", "已关联 6 项专利"]]
+        externalLinks: [["Crossref 论文条目", "已关联 27 篇文献"], ["磷光光谱数据", "光谱记录 36 条"], ["专利映射", "已关联 6 项专利"]]
       },
       {
         id: "OP-006",
@@ -20340,14 +20330,12 @@
         updatedAt: "2026-04-16",
         peakAbsorption: 525,
         peakEmission: 620,
-        quantumYield: 58,
         lifetime: "6.6 ns",
         structureType: "perylene",
         density: "1.52 g/cm³",
         spaceGroup: "P-1",
         cell: "a=10.9, b=11.1, c=13.6 Å",
-        deviceMetrics: ["5.2%", "0.74 V", "12.1 mA/cm²", "58%"],
-        externalLinks: [["Crossref 论文条目", "已关联 19 篇文献"], ["受体数据库", "受体材料数据 12 条"], ["光伏器件数据库", "OPV 器件数据 14 条"]]
+        externalLinks: [["Crossref 论文条目", "已关联 19 篇文献"], ["受体数据库", "受体材料数据 12 条"], ["薄膜光谱数据", "光谱记录 14 条"]]
       },
       {
         id: "OP-007",
@@ -20367,14 +20355,12 @@
         updatedAt: "2026-04-18",
         peakAbsorption: 372,
         peakEmission: 435,
-        quantumYield: 21,
         lifetime: "3.4 ns",
         structureType: "aryl-amine",
         density: "1.19 g/cm³",
         spaceGroup: "P-1",
         cell: "a=13.8, b=9.7, c=17.4 Å",
-        deviceMetrics: ["6.4%", "3.0 V", "20,600 cd/m²", "(0.17, 0.19)"],
-        externalLinks: [["Crossref 论文条目", "已关联 11 篇文献"], ["器件数据库", "OLED 器件数据 18 条"], ["材料镜像", "蒸镀批次数据 6 条"]]
+        externalLinks: [["Crossref 论文条目", "已关联 11 篇文献"], ["发射光谱数据", "光谱记录 18 条"], ["材料镜像", "蒸镀批次数据 6 条"]]
       },
       {
         id: "OP-008",
@@ -20394,14 +20380,12 @@
         updatedAt: "2026-04-15",
         peakAbsorption: 335,
         peakEmission: 620,
-        quantumYield: 4,
         lifetime: "2.1 ns",
         structureType: "fullerene-sidechain",
         density: "1.53 g/cm³",
         spaceGroup: "P1",
         cell: "a=15.7, b=16.1, c=17.9 Å",
-        deviceMetrics: ["5.8%", "0.72 V", "12.7 mA/cm²", "64%"],
-        externalLinks: [["Crossref 论文条目", "已关联 29 篇文献"], ["受体数据库", "受体材料数据 21 条"], ["光伏器件数据库", "OPV 器件数据 27 条"]]
+        externalLinks: [["Crossref 论文条目", "已关联 29 篇文献"], ["受体数据库", "受体材料数据 21 条"], ["薄膜光谱数据", "光谱记录 27 条"]]
       }
     ];
 
@@ -20862,12 +20846,12 @@
     ], syncElectrolyteSupplement));
 
     optoMaterials.push(...createSupplementedRecords(optoMaterials, [
-      { seed: 0, id: "OP-009", code: "OP-009", name: "CBP", fullName: "4,4'-Bis(N-carbazolyl)-1,1'-biphenyl", formula: "C36H24N2", molecularWeight: 484.6, homo: -6.0, lumo: -2.6, bandGap: 3.4, application: "host material", applicationTone: "blue", emissionColor: "deep blue", category: "OLED", source: "Opto API / literature", updatedAt: "2026-04-22", peakAbsorption: 345, peakEmission: 410, quantumYield: 38, lifetime: "5.1 ns", structureType: "carbazole", density: "1.20 g/cm3", spaceGroup: "P-1", cell: "a=12.2, b=8.9, c=18.6 A", deviceMetrics: ["14.2%", "3.4 V", "21,800 cd/m2", "(0.16, 0.12)"] },
-      { seed: 0, id: "OP-010", code: "OP-010", name: "TCTA", fullName: "Tris(4-carbazoyl-9-ylphenyl)amine", formula: "C44H30N4", molecularWeight: 614.7, homo: -5.7, lumo: -2.4, bandGap: 3.3, application: "hole transport", applicationTone: "orange", emissionColor: "blue-violet", category: "OLED", source: "Opto API / experimental", updatedAt: "2026-04-23", peakAbsorption: 365, peakEmission: 428, quantumYield: 33, lifetime: "4.7 ns", structureType: "triarylamine", density: "1.18 g/cm3", spaceGroup: "P1", cell: "a=14.0, b=10.3, c=18.1 A", deviceMetrics: ["12.1%", "3.1 V", "19,200 cd/m2", "(0.17, 0.14)"] },
-      { seed: 2, id: "OP-011", code: "OP-011", name: "ITIC", fullName: "3,9-Bis(2-methylene-(3-(1,1-dicyanomethylene)-indanone))-5,5,11,11-tetrakis(4-hexylphenyl)-dithieno[2,3-d:2',3'-d']-s-indaceno[1,2-b:5,6-b']dithiophene", formula: "C82H86N4O2S2", molecularWeight: 1299.8, homo: -5.5, lumo: -3.9, bandGap: 1.6, application: "non-fullerene acceptor", applicationTone: "purple", emissionColor: "near IR", category: "OPV", source: "Opto API / literature", updatedAt: "2026-04-22", peakAbsorption: 705, peakEmission: 810, quantumYield: 9, lifetime: "0.9 ns", structureType: "fused-ring acceptor", density: "1.14 g/cm3", spaceGroup: "P-1", cell: "a=17.6, b=19.2, c=22.4 A", deviceMetrics: ["11.3%", "0.92 V", "18.2 mA/cm2", "67%"] },
-      { seed: 2, id: "OP-012", code: "OP-012", name: "Y6", fullName: "2,2'-((2Z,2'Z)-((12,13-Bis(2-butyloctyl)-3,9-diundecyl-12,13-dihydro-[1,2,5]thiadiazolo[3,4-e]thieno[2,''3'':4',5']thieno[2',3':4,5]pyrrolo[3,2-g]thieno[2',3':4,5]thieno[3,2-b]indole-2,10-diyl)bis(methanylylidene))bis(5,6-difluoro-3-oxo-2,3-dihydro-1H-indene-2,1-diylidene))dimalononitrile", formula: "C82H86F4N8O2S5", molecularWeight: 1523.0, homo: -5.7, lumo: -4.1, bandGap: 1.4, application: "non-fullerene acceptor", applicationTone: "purple", emissionColor: "deep red", category: "OPV", source: "Opto API / literature", updatedAt: "2026-04-24", peakAbsorption: 825, peakEmission: 910, quantumYield: 6, lifetime: "0.7 ns", structureType: "fused-ring acceptor", density: "1.10 g/cm3", spaceGroup: "P1", cell: "a=19.2, b=21.0, c=24.6 A", deviceMetrics: ["16.4%", "0.86 V", "25.1 mA/cm2", "74%"] },
-      { seed: 6, id: "OP-013", code: "OP-013", name: "F8BT", fullName: "Poly(9,9-dioctylfluorene-alt-benzothiadiazole)", formula: "(C26H26N2S)n", molecularWeight: 55000, homo: -5.8, lumo: -3.1, bandGap: 2.7, application: "emissive polymer", applicationTone: "green", emissionColor: "green", category: "OLED", source: "Opto API / experimental", updatedAt: "2026-04-21", peakAbsorption: 460, peakEmission: 540, quantumYield: 62, lifetime: "7.6 ns", structureType: "polymer", density: "1.08 g/cm3", spaceGroup: "amorphous", cell: "film morphology dataset", deviceMetrics: ["9.8%", "3.6 V", "16,400 cd/m2", "(0.31, 0.58)"] },
-      { seed: 3, id: "OP-014", code: "OP-014", name: "Spiro-OMeTAD", fullName: "2,2',7,7'-Tetrakis(N,N-di-p-methoxyphenylamine)-9,9'-spirobifluorene", formula: "C81H68N4O8", molecularWeight: 1225.4, homo: -5.1, lumo: -2.2, bandGap: 2.9, application: "hole transport", applicationTone: "orange", emissionColor: "amber", category: "OLED", source: "Opto API / literature", updatedAt: "2026-04-20", peakAbsorption: 390, peakEmission: 605, quantumYield: 18, lifetime: "3.1 ns", structureType: "spiro", density: "1.16 g/cm3", spaceGroup: "P-1", cell: "a=15.4, b=11.9, c=19.3 A", deviceMetrics: ["7.9%", "3.2 V", "12,600 cd/m2", "(0.45, 0.41)"] }
+      { seed: 0, id: "OP-009", code: "OP-009", name: "CBP", fullName: "4,4'-Bis(N-carbazolyl)-1,1'-biphenyl", formula: "C36H24N2", molecularWeight: 484.6, homo: -6.0, lumo: -2.6, bandGap: 3.4, application: "host material", applicationTone: "blue", emissionColor: "deep blue", category: "OLED", source: "Opto API / literature", updatedAt: "2026-04-22", peakAbsorption: 345, peakEmission: 410, lifetime: "5.1 ns", structureType: "carbazole", density: "1.20 g/cm3", spaceGroup: "P-1", cell: "a=12.2, b=8.9, c=18.6 A" },
+      { seed: 0, id: "OP-010", code: "OP-010", name: "TCTA", fullName: "Tris(4-carbazoyl-9-ylphenyl)amine", formula: "C44H30N4", molecularWeight: 614.7, homo: -5.7, lumo: -2.4, bandGap: 3.3, application: "hole transport", applicationTone: "orange", emissionColor: "blue-violet", category: "OLED", source: "Opto API / experimental", updatedAt: "2026-04-23", peakAbsorption: 365, peakEmission: 428, lifetime: "4.7 ns", structureType: "triarylamine", density: "1.18 g/cm3", spaceGroup: "P1", cell: "a=14.0, b=10.3, c=18.1 A" },
+      { seed: 2, id: "OP-011", code: "OP-011", name: "ITIC", fullName: "3,9-Bis(2-methylene-(3-(1,1-dicyanomethylene)-indanone))-5,5,11,11-tetrakis(4-hexylphenyl)-dithieno[2,3-d:2',3'-d']-s-indaceno[1,2-b:5,6-b']dithiophene", formula: "C82H86N4O2S2", molecularWeight: 1299.8, homo: -5.5, lumo: -3.9, bandGap: 1.6, application: "non-fullerene acceptor", applicationTone: "purple", emissionColor: "near IR", category: "OPV", source: "Opto API / literature", updatedAt: "2026-04-22", peakAbsorption: 705, peakEmission: 810, lifetime: "0.9 ns", structureType: "fused-ring acceptor", density: "1.14 g/cm3", spaceGroup: "P-1", cell: "a=17.6, b=19.2, c=22.4 A" },
+      { seed: 2, id: "OP-012", code: "OP-012", name: "Y6", fullName: "2,2'-((2Z,2'Z)-((12,13-Bis(2-butyloctyl)-3,9-diundecyl-12,13-dihydro-[1,2,5]thiadiazolo[3,4-e]thieno[2,''3'':4',5']thieno[2',3':4,5]pyrrolo[3,2-g]thieno[2',3':4,5]thieno[3,2-b]indole-2,10-diyl)bis(methanylylidene))bis(5,6-difluoro-3-oxo-2,3-dihydro-1H-indene-2,1-diylidene))dimalononitrile", formula: "C82H86F4N8O2S5", molecularWeight: 1523.0, homo: -5.7, lumo: -4.1, bandGap: 1.4, application: "non-fullerene acceptor", applicationTone: "purple", emissionColor: "deep red", category: "OPV", source: "Opto API / literature", updatedAt: "2026-04-24", peakAbsorption: 825, peakEmission: 910, lifetime: "0.7 ns", structureType: "fused-ring acceptor", density: "1.10 g/cm3", spaceGroup: "P1", cell: "a=19.2, b=21.0, c=24.6 A" },
+      { seed: 6, id: "OP-013", code: "OP-013", name: "F8BT", fullName: "Poly(9,9-dioctylfluorene-alt-benzothiadiazole)", formula: "(C26H26N2S)n", molecularWeight: 55000, homo: -5.8, lumo: -3.1, bandGap: 2.7, application: "emissive polymer", applicationTone: "green", emissionColor: "green", category: "OLED", source: "Opto API / experimental", updatedAt: "2026-04-21", peakAbsorption: 460, peakEmission: 540, lifetime: "7.6 ns", structureType: "polymer", density: "1.08 g/cm3", spaceGroup: "amorphous", cell: "film morphology dataset" },
+      { seed: 3, id: "OP-014", code: "OP-014", name: "Spiro-OMeTAD", fullName: "2,2',7,7'-Tetrakis(N,N-di-p-methoxyphenylamine)-9,9'-spirobifluorene", formula: "C81H68N4O8", molecularWeight: 1225.4, homo: -5.1, lumo: -2.2, bandGap: 2.9, application: "hole transport", applicationTone: "orange", emissionColor: "amber", category: "OLED", source: "Opto API / literature", updatedAt: "2026-04-20", peakAbsorption: 390, peakEmission: 605, lifetime: "3.1 ns", structureType: "spiro", density: "1.16 g/cm3", spaceGroup: "P-1", cell: "a=15.4, b=11.9, c=19.3 A" }
     ]));
 
     mlffMaterials.push(...createSupplementedRecords(mlffMaterials, [
@@ -24217,7 +24201,7 @@
           series: [{ name: "发射峰", color: "#21a65d", values: plValues }],
           highlight: { index: plLabels.findIndex((item) => Number(item) >= emissionPeak) || 2, label: `Emission = ${emissionPeak} nm`, color: "#21a65d" },
           caption: `${material.name} 的发射峰位于 ${emissionPeak} nm，发射颜色为 ${material.emissionColor}。`,
-          params: [["发射峰位", `${emissionPeak} nm`], ["量子产率", `${material.quantumYield}%`], ["寿命", material.lifetime], ["器件类型", material.category]],
+          params: [["发射峰位", `${emissionPeak} nm`], ["发射颜色", material.emissionColor], ["寿命", material.lifetime], ["测试状态", "分子态/薄膜态"]],
           sourceInfo: [["测量仪器", "FLS1000 荧光光谱仪"], ["测试日期", "2024-03-16"], ["数据质量", "已验证"], ...paramCommon],
           files: ["原始数据文件", "积分球报告 PDF"]
         },
@@ -24285,11 +24269,12 @@
           ]
         },
         {
-          title: "光电性能参数",
+          title: "分子光谱参数",
           tone: "green",
           items: [
-            ["量子产率", `${material.quantumYield} %`, "green"],
             ["寿命", material.lifetime, "green"],
+            ["吸收峰位", `${material.peakAbsorption} nm`, "green"],
+            ["发射峰位", `${material.peakEmission} nm`, "green"],
             ["跃迁偶极矩", `${(5.1 + Math.abs(material.lumo) * 0.8).toFixed(1)} Debye`, "green"],
             ["斯托克斯位移", `${Math.max(20, material.peakEmission - material.peakAbsorption)} nm`, "green"]
           ]
@@ -24302,16 +24287,6 @@
             ["玻璃化转变温度 (Tg)", `${Math.round(90 + Math.abs(material.homo) * 6)} °C`, ""],
             ["热分解温度 (Td)", `${Math.round(360 + material.bandGap * 24)} °C`, ""],
             ["密度", material.density, ""]
-          ]
-        },
-        {
-          title: material.category === "OLED" ? "OLED 器件性能" : "器件性能",
-          tone: "orange",
-          items: [
-            ["最大外量子效率 (EQE)", material.deviceMetrics[0], "orange"],
-            ["启亮/工作电压", material.deviceMetrics[1], ""],
-            ["最大亮度 / Jsc", material.deviceMetrics[2], ""],
-            ["CIE / FF", material.deviceMetrics[3], ""]
           ]
         }
       ];
@@ -33230,7 +33205,7 @@
       },
       property: {
         label: "性质数据检索",
-        helper: "当前模式展示有机光电材料的性质数据条件，可按电子结构、光谱和器件特征进行组合筛选。"
+        helper: "当前模式展示有机光电材料的性质数据条件，可按电子结构、分子光谱和物理化学参数进行组合筛选。"
       }
     };
     OPTO_MODE_CONFIG.name = {
@@ -33254,7 +33229,7 @@
     };
     OPTO_MODE_CONFIG.property = {
       label: "性质数据检索",
-      helper: "按物理化学参数、光电性能参数和电子结构参数进行组合筛选。"
+      helper: "按物理化学参数、分子光谱参数和电子结构参数进行组合筛选。"
     };
 
     const OPTO_COMBO_FIELDS = [
@@ -33263,8 +33238,7 @@
       { key: "lumo", label: "LUMO", unit: "eV" },
       { key: "bandGap", label: "带隙", unit: "eV" },
       { key: "peakAbsorption", label: "吸收峰位", unit: "nm" },
-      { key: "peakEmission", label: "发射峰位", unit: "nm" },
-      { key: "quantumYield", label: "量子产率", unit: "%" }
+      { key: "peakEmission", label: "发射峰位", unit: "nm" }
     ];
 
     const OPTO_VISUAL_LABELS = {
@@ -33299,8 +33273,6 @@
           peakAbsorptionMax: "",
           peakEmissionMin: "",
           peakEmissionMax: "",
-          quantumYieldMin: "",
-          quantumYieldMax: "",
           category: "",
           application: ""
         }
@@ -33370,8 +33342,7 @@
           ["lumo", "lumoMin", "lumoMax"],
           ["bandGap", "bandGapMin", "bandGapMax"],
           ["peakAbsorption", "peakAbsorptionMin", "peakAbsorptionMax"],
-          ["peakEmission", "peakEmissionMin", "peakEmissionMax"],
-          ["quantumYield", "quantumYieldMin", "quantumYieldMax"]
+          ["peakEmission", "peakEmissionMin", "peakEmissionMax"]
         ];
         const numberMatch = checks.every(([field, minKey, maxKey]) => {
           const min = parseNumberValue(filters[minKey]);
@@ -33498,11 +33469,10 @@
                   </div>
                 </article>
                 <article class="opto-property-card">
-                  <h4>光谱与器件特征</h4>
+                  <h4>电子结构与分子光谱</h4>
                   <div class="electrolyte-range-grid">
                     ${renderOptoRangeField("吸收峰位 (nm)", "peakAbsorptionMin", "peakAbsorptionMax", filters)}
                     ${renderOptoRangeField("发射峰位 (nm)", "peakEmissionMin", "peakEmissionMax", filters)}
-                    ${renderOptoRangeField("量子产率 (%)", "quantumYieldMin", "quantumYieldMax", filters)}
                   </div>
                 </article>
                 <article class="opto-property-card">
@@ -33686,7 +33656,7 @@
     };
     OPTO_MODE_CONFIG.property = {
       label: "性质数据检索",
-      helper: "按物理化学参数、光电性能参数和电子结构参数进行组合筛选。"
+      helper: "按物理化学参数、分子光谱参数和电子结构参数进行组合筛选。"
     };
 
     const optoComboFieldsOverride = [
@@ -33696,16 +33666,14 @@
       { key: "lumo", label: "LUMO", unit: "eV" },
       { key: "bandGap", label: "带隙", unit: "eV" },
       { key: "peakAbsorption", label: "吸收峰位", unit: "nm" },
-      { key: "peakEmission", label: "发射峰位", unit: "nm" },
-      { key: "quantumYield", label: "量子产率", unit: "%" }
+      { key: "peakEmission", label: "发射峰位", unit: "nm" }
     ];
     OPTO_COMBO_FIELDS.splice(0, OPTO_COMBO_FIELDS.length, ...optoComboFieldsOverride);
 
     const OPTO_PROPERTY_CATEGORY_OPTIONS = [
       { key: "electronic", label: "电子结构参数" },
-      { key: "photoelectric", label: "光电性能参数" },
-      { key: "physicochemical", label: "物理化学参数" },
-      { key: "device", label: "器件性能参数" }
+      { key: "photoelectric", label: "分子光谱参数" },
+      { key: "physicochemical", label: "物理化学参数" }
     ];
 
     const OPTO_PROPERTY_FIELD_MAP = {
@@ -33716,8 +33684,9 @@
         { key: "electrochemicalPotential", label: "电化学势", unit: "eV" }
       ],
       photoelectric: [
-        { key: "quantumYield", label: "量子产率", unit: "%" },
         { key: "lifetime", label: "寿命", unit: "ns" },
+        { key: "peakAbsorption", label: "吸收峰位", unit: "nm" },
+        { key: "peakEmission", label: "发射峰位", unit: "nm" },
         { key: "transitionDipole", label: "跃迁偶极矩", unit: "Debye" },
         { key: "stokesShift", label: "斯托克斯位移", unit: "nm" }
       ],
@@ -33726,12 +33695,6 @@
         { key: "glassTransitionTemp", label: "玻璃化转变温度 (Tg)", unit: "°C" },
         { key: "decompositionTemp", label: "热分解温度 (Td)", unit: "°C" },
         { key: "density", label: "密度", unit: "g/cm³" }
-      ],
-      device: [
-        { key: "deviceEfficiency", label: "最大外量子效率 / PCE", unit: "%" },
-        { key: "deviceVoltage", label: "启亮/工作电压", unit: "V" },
-        { key: "deviceOutput", label: "最大亮度 / Jsc", unit: "cd/m² 或 mA/cm²" },
-        { key: "deviceMetricTail", label: "CIE x / FF", unit: "" }
       ]
     };
 
@@ -33782,10 +33745,6 @@
       if (key === "meltingPoint") return Math.round(220 + Number(item.bandGap || 0) * 15);
       if (key === "glassTransitionTemp") return Math.round(90 + Math.abs(Number(item.homo || 0)) * 6);
       if (key === "decompositionTemp") return Math.round(360 + Number(item.bandGap || 0) * 24);
-      if (key === "deviceEfficiency") return parseFloat(String(item.deviceMetrics?.[0] || "").replace(/[^\d.-]/g, ""));
-      if (key === "deviceVoltage") return parseFloat(String(item.deviceMetrics?.[1] || "").replace(/[^\d.-]/g, ""));
-      if (key === "deviceOutput") return parseFloat(String(item.deviceMetrics?.[2] || "").replace(/[^\d.-]/g, ""));
-      if (key === "deviceMetricTail") return parseFloat(String(item.deviceMetrics?.[3] || "").replace(/[^\d.-]/g, ""));
       return Number(item[key]);
     }
 
@@ -50227,7 +50186,7 @@
           fileSizeText: "1.24 MB",
           sizeBytes: 1300234,
           category: "OLED",
-          sourceType: "器件发光性能数据",
+          sourceType: "分子发光寿命数据",
           sourceFormat: "XLSX",
           fileCategory: "草稿",
           reviewStatus: "",
@@ -50261,31 +50220,31 @@
           fileSizeText: "412 KB",
           sizeBytes: 421888,
           category: "OLED",
-          sourceType: "量子产率数据",
+          sourceType: "发光寿命数据",
           sourceFormat: "CSV",
           fileCategory: "数据处理更新",
           reviewStatus: "审核通过",
           materialName: "Alq3",
           materialType: "发光材料",
           dataSource: "实验测量",
-          dataDescription: "Alq3 量子产率与寿命测试数据，已完成入库。",
+          dataDescription: "Alq3 发射峰位与寿命测试数据，已完成入库。",
           visibility: "public"
         },
         {
           id: "opto-lib-04",
           uploadedAt: "2026-04-19 13:08",
-          fileName: "p3ht_device_metrics.docx",
+          fileName: "p3ht_spectra_notes.docx",
           fileSizeText: "356 KB",
           sizeBytes: 364544,
           category: "OPV",
-          sourceType: "器件性能说明",
+          sourceType: "光谱测试说明",
           sourceFormat: "DOCX",
           fileCategory: "数据处理更新",
           reviewStatus: "审核不通过",
           materialName: "P3HT",
           materialType: "聚合物给体",
           dataSource: "项目组上传",
-          dataDescription: "器件指标说明缺少原始测试条件，需补充。",
+          dataDescription: "光谱测试说明缺少原始测试条件，需补充。",
           visibility: "private"
         }
       ];
@@ -50885,7 +50844,7 @@
                 <div>
                   <div class="upload-icon">⇪</div>
                   <button class="btn-primary" type="button" data-opto-flow-browse>点击上传</button>
-                  <p>支持表征图谱、器件性能和计算结果文件上传。</p>
+                  <p>支持表征图谱、分子特征参数和计算结果文件上传。</p>
                 </div>
               </div>
               <div class="upload-asset-panel">${draft ? renderUploadAssetList([{
