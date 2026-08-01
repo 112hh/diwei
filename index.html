@@ -1,13 +1,80 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="0; url=portal.html">
-<title>低维材料主题库门户</title>
-<script>
-  window.location.replace("portal.html");
-</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0; url=portal.html">
+  <title>低维材料主题库门户</title>
+  <style id="lanhu-style">
+    :root{
+      --lanhu-bg:#dcecff;
+      --lanhu-primary:#1f63ff;
+      --lanhu-text:#1f2d3d;
+      --lanhu-muted:#6b7b91;
+      --lanhu-card:rgba(255,255,255,.88);
+      --lanhu-line:#d7e4f8;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      min-width:1280px;
+      display:grid;
+      place-items:center;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+      color:var(--lanhu-text);
+      background:linear-gradient(118deg,#cfe3ff 0%,#eaf4ff 48%,#d8e9ff 100%);
+    }
+    .shell{
+      width:420px;
+      padding:28px;
+      border:1px solid rgba(255,255,255,.92);
+      border-radius:8px;
+      background:var(--lanhu-card);
+      text-align:center;
+    }
+    .mark{
+      width:44px;
+      height:44px;
+      margin:0 auto 14px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      color:var(--lanhu-primary);
+      background:#fff;
+      border:1px solid rgba(31,99,255,.32);
+      box-shadow:0 2px 8px rgba(31,99,255,.14);
+    }
+    h1{margin:0;font-size:18px;line-height:28px;font-weight:800}
+    p{margin:8px 0 18px;color:var(--lanhu-muted);font-size:14px}
+    a{
+      min-height:40px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 22px;
+      border-radius:999px;
+      background:var(--lanhu-primary);
+      color:#fff;
+      font-weight:700;
+      text-decoration:none;
+    }
+  </style>
+  <link rel="stylesheet" href="assets/ui-design-system.css">
+  <script>
+    window.location.replace("portal.html");
+  </script>
 </head>
-<body></body>
+<body>
+  <main class="shell">
+    <div class="mark">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="8"></circle>
+        <path d="M8 12h8M12 8v8M6.5 6.5l11 11"></path>
+      </svg>
+    </div>
+    <h1>低维材料主题库</h1>
+    <p>正在进入门户，请稍候。</p>
+    <a href="portal.html">进入门户</a>
+  </main>
+</body>
 </html>

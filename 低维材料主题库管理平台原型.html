@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>低维材料主题库管理平台 - 高保真原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1A365D",
+            tech: "#2B6CB0",
+            emerald: "#00A86B",
+            amberx: "#D69E2E",
+            page: "#F0F2F5"
+          },
+          boxShadow: { panel: "0 10px 28px rgba(26,54,93,.08)" }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --primary:#1A365D; --tech:#1F63FF; --emerald:#00A86B; --bg:#DCEBFF;
+      --card:#FFFFFF; --amber:#D69E2E; --line:#D7E4F8; --muted:#71829A; --danger:#DC2626;
+      --nav:#D8E9FF; --nav-strong:#C8DFFF; --content:#EEF6FF;
+    }
+    * { box-sizing: border-box; }
+    html,body { min-width:1280px; min-height:100%; background:linear-gradient(120deg,#cfe2ff 0%,#e8f3ff 48%,#d9eaff 100%); color:#1F2937; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif; font-size:14px; }
+    button,input,select,textarea { font:inherit; }
+    button { transition: all .18s ease; }
+    .mono { font-family:Consolas,"SFMono-Regular",Menlo,monospace; }
+    .app-shell { display:grid; grid-template-columns:200px 1fr; min-height:100vh; padding-top:64px; }
+    .topbar { position:fixed; inset:0 0 auto 0; height:64px; z-index:40; display:grid; grid-template-columns:200px 1fr auto; align-items:center; gap:16px; padding:0 16px; background:rgba(207,226,255,.84); color:#21324A; backdrop-filter:blur(14px); }
+    .brand { display:flex; align-items:center; gap:10px; min-width:0; }
+    .brand-mark { width:28px; height:28px; border-radius:999px; display:grid; place-items:center; color:#1F63FF; background:#fff; border:1px solid rgba(31,99,255,.34); box-shadow:0 2px 8px rgba(31,99,255,.16); }
+    .brand-name { font-size:15px; font-weight:800; color:#111827; white-space:nowrap; }
+    .top-center { display:flex; align-items:center; justify-content:center; gap:18px; }
+    .top-search { width:330px; height:40px; border:0; border-radius:999px; background:rgba(255,255,255,.72); padding:0 18px 0 44px; color:#334155; outline:none; }
+    .top-search-wrap { position:relative; }
+    .top-search-wrap svg { position:absolute; left:16px; top:10px; color:#475569; }
+    .top-actions { display:flex; align-items:center; justify-content:flex-end; gap:14px; }
+    .top-link { min-height:40px; display:inline-flex; align-items:center; gap:6px; color:#4B5D76; border-radius:999px; padding:0 8px; }
+    .top-link:hover { color:var(--tech); background:rgba(255,255,255,.45); }
+    .portal-btn { min-height:40px; border-radius:999px; padding:0 20px; background:var(--tech); color:#fff; font-weight:700; box-shadow:0 8px 18px rgba(31,99,255,.22); }
+    .avatar-pill { min-height:40px; border-radius:999px; padding:4px 10px 4px 5px; background:rgba(255,255,255,.58); display:flex; align-items:center; gap:8px; color:#1E293B; }
+    .avatar { width:32px; height:32px; border-radius:999px; background:radial-gradient(circle at 35% 28%,#fff 0 18%,#8DB6FF 20% 46%,#2A65FF 47% 100%); box-shadow:0 0 0 4px rgba(255,255,255,.52); }
+    .sidebar { position:fixed; top:64px; left:0; bottom:0; width:clamp(300px,20vw,360px); z-index:30; background:rgba(216,233,255,.7); color:#2D4059; overflow:auto; padding:0 16px 16px; }
+    .sidebar.collapsed { width:72px; padding-inline:10px; }
+    .sidebar.collapsed .label,.sidebar.collapsed .chev,.sidebar.collapsed .child-wrap { display:none; }
+    .app-shell.collapsed { grid-template-columns:72px 1fr; }
+    .main { grid-column:2; min-height:calc(100vh - 64px); margin:0 16px 16px 0; padding:16px; border:1px solid rgba(255,255,255,.88); border-radius:6px; background:rgba(238,246,255,.58); box-shadow:inset 0 0 0 1px rgba(119,166,230,.18); }
+    .nav-btn { width:100%; min-height:42px; display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:4px; border:1px solid transparent; color:#2D4059; font-weight:650; }
+    .nav-btn:hover { background:rgba(255,255,255,.42); color:var(--tech); }
+    .nav-btn.active { background:rgba(255,255,255,.62); border-color:rgba(255,255,255,.72); color:var(--tech); }
+    .nav-icon { width:17px; height:17px; flex:0 0 auto; }
+    .label { min-width:0; overflow:visible; text-overflow:clip; white-space:normal; overflow-wrap:anywhere; line-height:20px; }
+    .child-wrap { margin:4px 0 8px 28px; display:grid; gap:2px; }
+    .child-btn { width:100%; text-align:left; padding:9px 10px 9px 16px; border-radius:4px; color:#1E293B; overflow:visible; text-overflow:clip; white-space:normal; overflow-wrap:anywhere; line-height:20px; }
+    .child-btn:hover,.child-btn.active { background:rgba(255,255,255,.7); color:var(--tech); }
+    .child-btn.active { border:1px solid rgba(255,255,255,.9); font-weight:800; }
+    .breadcrumb-bar { height:36px; display:flex; align-items:center; justify-content:space-between; padding:0 2px 0 0; color:#64748B; }
+    .breadcrumb-left { display:flex; align-items:center; gap:8px; min-width:0; }
+    .breadcrumb-home { width:18px; height:18px; color:#B8C4D3; }
+    .page-title { font-size:13px; font-weight:800; color:#34445C; letter-spacing:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .panel { background:rgba(255,255,255,.86); border:1px solid rgba(223,232,246,.9); border-radius:8px; box-shadow:none; }
+    .soft-panel { background:rgba(248,251,255,.8); border:1px solid #E1E9F6; border-radius:6px; }
+    .btn { min-height:40px; display:inline-flex; align-items:center; justify-content:center; gap:7px; border-radius:4px; padding:9px 16px; font-weight:650; border:1px solid transparent; white-space:nowrap; }
+    .btn-primary { background:var(--tech); color:#fff; }
+    .btn-primary:hover { background:#245A91; }
+    .btn-emerald { background:var(--emerald); color:#fff; }
+    .btn-outline { color:#526276; background:#EEF3FB; border-color:#EEF3FB; }
+    .btn-outline:hover { border-color:#C8DCFF; color:var(--tech); background:#E7F0FF; }
+    .btn-danger { color:#fff; background:#DC2626; }
+    .btn:disabled { opacity:.42; cursor:not-allowed; }
+    .tag { display:inline-flex; align-items:center; gap:5px; border-radius:4px; padding:4px 8px; font-size:12px; font-weight:700; }
+    .tag.green { color:#047857; background:#DFF7EA; }
+    .tag.gray { color:#475569; background:#E5E7EB; }
+    .tag.red { color:#B91C1C; background:#FEE2E2; }
+    .tag.yellow { color:#92400E; background:#FEF3C7; }
+    .tag.blue { color:#1D4ED8; background:#DBEAFE; }
+    .input { min-height:40px; width:100%; border:1px solid #D7DFEB; background:#fff; border-radius:4px; padding:9px 12px; outline:none; color:#334155; }
+    .input:focus { border-color:var(--tech); box-shadow:0 0 0 3px rgba(43,108,176,.14); }
+    .input.error { border-color:#DC2626; box-shadow:0 0 0 3px rgba(220,38,38,.12); }
+    .table-wrap { overflow:auto; border:0; border-radius:0; background:#fff; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#F7F9FC; color:#405064; font-size:13px; letter-spacing:0; text-align:left; padding:11px 16px; border-bottom:1px solid #EEF2F7; white-space:nowrap; user-select:none; font-weight:800; }
+    td { padding:14px 16px; border-bottom:1px solid #E8EDF5; vertical-align:middle; color:#34445C; }
+    tr:hover td { background:#F8FBFF; }
+    .sortable { cursor:pointer; }
+    .modal-scrim { position:fixed; inset:0; background:rgba(15,23,42,.52); z-index:90; display:none; align-items:center; justify-content:center; padding:24px; }
+    .modal-scrim.show { display:flex; }
+    .modal { background:#fff; border-radius:8px; width:min(980px,calc(100vw - 72px)); max-height:86vh; display:flex; flex-direction:column; box-shadow:0 22px 70px rgba(40,74,118,.24); }
+    .modal.lg { width:min(1180px,calc(100vw - 72px)); }
+    .modal-body { overflow:auto; padding:18px; }
+    .drawer { position:fixed; top:64px; right:-420px; width:420px; bottom:0; z-index:70; background:#fff; border-left:1px solid #D9E2EF; box-shadow:-16px 0 36px rgba(15,23,42,.16); transition:right .22s ease; }
+    .drawer.show { right:0; }
+    #toastHost { position:fixed; right:18px; top:78px; z-index:120; display:grid; gap:10px; }
+    .toast { min-width:260px; max-width:380px; color:#fff; padding:12px 14px; border-radius:8px; box-shadow:0 12px 30px rgba(15,23,42,.22); animation:slideIn .22s ease; }
+    @keyframes slideIn { from { transform:translateX(20px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+    .skeleton { position:relative; overflow:hidden; background:#E8EEF6; border-radius:6px; }
+    .skeleton:after { content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent); animation:shine 1.2s infinite; }
+    @keyframes shine { to { transform:translateX(100%); } }
+    .step { display:flex; align-items:center; gap:8px; color:#64748B; cursor:pointer; }
+    .step .bubble { width:30px; height:30px; border-radius:999px; display:grid; place-items:center; background:#E2E8F0; font-weight:800; }
+    .step.active { color:var(--tech); }
+    .step.active .bubble,.step.done .bubble { color:#fff; background:var(--tech); }
+    .periodic { display:grid; grid-template-columns:repeat(18,34px); gap:4px; align-items:center; }
+    .el { width:34px; height:34px; border:1px solid #D7DEE9; border-radius:5px; display:grid; place-items:center; font-size:11px; font-weight:800; cursor:pointer; background:#fff; }
+    .el.s { background:#E8F5FF; } .el.p { background:#EAF8F1; } .el.d { background:#FFF4DC; } .el.f { background:#F3E8FF; }
+    .el.selected { outline:2px solid var(--tech); border-color:var(--tech); transform:translateY(-1px); }
+    .tree details { margin:4px 0; }
+    .tree summary { cursor:pointer; padding:7px 8px; border-radius:6px; font-weight:650; color:#1A365D; }
+    .tree summary:hover { background:#EEF6FF; }
+    .chart { height:260px; min-height:220px; }
+    .viewer { height:260px; min-height:220px; background:#0F172A; border-radius:8px; overflow:hidden; }
+    .virtual-list { max-height:420px; overflow-y:auto; }
+    .hide { display:none !important; }
+    .kbd { font-family:Consolas,monospace; border:1px solid #CBD5E1; border-bottom-width:2px; border-radius:4px; padding:1px 5px; background:#F8FAFC; }
+  </style>
+  <style id="lanhu-style">
+    :root{
+      --lanhu-bg:#dcecff;
+      --lanhu-bg-2:#eef6ff;
+      --lanhu-sidebar:#d8e9ff;
+      --lanhu-primary:#1f63ff;
+      --lanhu-text:#1f2d3d;
+      --lanhu-muted:#6b7b91;
+      --lanhu-card:rgba(255,255,255,.88);
+      --lanhu-line:#d7e4f8;
+      --lanhu-table:#f8fafd;
+    }
+    html,body{background:linear-gradient(118deg,#cfe3ff 0%,#eaf4ff 48%,#d8e9ff 100%)!important;color:var(--lanhu-text)!important;}
+    .topbar{height:64px!important;background:rgba(207,226,255,.86)!important;color:#1f2d3d!important;box-shadow:none!important;border:0!important;backdrop-filter:blur(14px);}
+    .brand-mark{border-radius:999px!important;background:#fff!important;border:1px solid rgba(31,99,255,.32)!important;color:var(--lanhu-primary)!important;box-shadow:0 2px 8px rgba(31,99,255,.14)!important;}
+    .brand-name{font-size:15px!important;font-weight:800!important;color:#111827!important;}
+    .top-link{color:#4b5f78!important;border-radius:999px!important;}
+    .top-link:hover{background:rgba(255,255,255,.48)!important;color:var(--lanhu-primary)!important;}
+    .portal-btn,.btn-primary{background:var(--lanhu-primary)!important;color:#fff!important;border-color:var(--lanhu-primary)!important;border-radius:4px!important;box-shadow:none!important;}
+    .portal-btn{border-radius:999px!important;min-height:40px!important;padding:0 22px!important;}
+    .top-search{background:rgba(255,255,255,.72)!important;border:0!important;border-radius:999px!important;height:40px!important;}
+    .avatar-pill{background:rgba(255,255,255,.58)!important;border-radius:999px!important;}
+    .app-shell{grid-template-columns:clamp(300px,20vw,360px) 1fr!important;padding-top:64px!important;}
+    .app-shell.collapsed{grid-template-columns:72px 1fr!important;}
+    .sidebar{top:64px!important;width:clamp(300px,20vw,360px)!important;background:rgba(216,233,255,.72)!important;color:#2d4059!important;padding:0 16px 16px!important;border:0!important;box-shadow:none!important;}
+    .sidebar.collapsed{width:72px!important;padding-inline:10px!important;}
+    .main{margin:0 16px 16px 0!important;padding:16px!important;background:rgba(238,246,255,.58)!important;border:1px solid rgba(255,255,255,.92)!important;border-radius:6px!important;box-shadow:inset 0 0 0 1px rgba(119,166,230,.18)!important;}
+    .nav-btn{min-height:42px!important;height:auto!important;align-items:flex-start!important;border-radius:4px!important;color:#2d4059!important;background:transparent!important;border:1px solid transparent!important;font-weight:650!important;}
+    .label,.child-btn{overflow:visible!important;text-overflow:clip!important;white-space:normal!important;overflow-wrap:anywhere!important;}
+    .nav-btn:hover{background:rgba(255,255,255,.44)!important;color:var(--lanhu-primary)!important;}
+    .nav-btn.active{background:rgba(255,255,255,.68)!important;color:var(--lanhu-primary)!important;border-color:rgba(255,255,255,.9)!important;}
+    .child-btn{border-radius:4px!important;color:#1e293b!important;}
+    .child-btn:hover,.child-btn.active{background:rgba(255,255,255,.72)!important;color:var(--lanhu-primary)!important;}
+    .panel{background:var(--lanhu-card)!important;border:1px solid rgba(223,232,246,.92)!important;border-radius:8px!important;box-shadow:none!important;}
+    .soft-panel{background:rgba(248,251,255,.82)!important;border:1px solid #e1e9f6!important;border-radius:6px!important;}
+    .input,input[type=text],input[type=search],input[type=number],input[type=date],select,textarea{border:1px solid #d7dfeb!important;border-radius:4px!important;background:#fff!important;color:#334155!important;box-shadow:none!important;}
+    .btn{border-radius:4px!important;box-shadow:none!important;}
+    .btn-outline{background:#eef3fb!important;border-color:#eef3fb!important;color:#526276!important;}
+    .btn-outline:hover{background:#e7f0ff!important;border-color:#c8dcff!important;color:var(--lanhu-primary)!important;}
+    .tag{border-radius:4px!important;}
+    .table-wrap{border:0!important;border-radius:0!important;background:#fff!important;}
+    table{background:#fff!important;}
+    th{background:#f7f9fc!important;color:#405064!important;font-size:13px!important;font-weight:800!important;padding:11px 16px!important;border-bottom:1px solid #eef2f7!important;}
+    td{padding:14px 16px!important;border-bottom:1px solid #e8edf5!important;color:#34445c!important;}
+    tr:hover td{background:#f8fbff!important;}
+    .breadcrumb-bar{height:36px!important;color:#64748b!important;}
+    .modal{border-radius:8px!important;box-shadow:0 22px 70px rgba(40,74,118,.24)!important;}
+  </style>
+  <link rel="stylesheet" href="assets/ui-design-system.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8M6.5 6.5l11 11"/></svg>
+      </div>
+      <div class="brand-name">低维材料主题库</div>
+    </div>
+    <div class="top-center">
+      <button id="collapseBtn" class="top-link" aria-label="折叠菜单"></button>
+      <div class="top-search-wrap">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M16 16l4 4"/></svg>
+        <input class="top-search" placeholder="请输入" />
+      </div>
+      <button class="portal-btn" onclick="toast('进入门户：当前为管理端原型')">进入门户</button>
+    </div>
+    <div class="top-actions">
+      <button class="top-link" onclick="go('apps')">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        应用
+      </button>
+      <button class="top-link" onclick="toast('帮助中心已打开','info')">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.6 2.6 0 0 1 5 1c0 2-2.5 2-2.5 4M12 17h.1"/></svg>
+        帮助
+      </button>
+      <button id="netErrBtn" class="top-link">网络错误模拟</button>
+      <div class="avatar-pill">
+        <div class="avatar"></div>
+        <select id="roleSelect" class="bg-transparent outline-none pr-1">
+          <option value="admin">管理员09527</option>
+          <option value="dba">数据库管理员</option>
+          <option value="researcher">研究员</option>
+          <option value="enterprise">企业用户</option>
+          <option value="guest">访客</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="networkBanner" class="hidden fixed top-16 left-0 right-0 z-50 bg-red-600 text-white px-6 py-2 font-semibold">网络连接异常，部分功能不可用</div>
+  <div id="appShell" class="app-shell">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div id="pageHeader" class="mb-4"></div>
+      <div id="page"></div>
+    </main>
+  </div>
+  <div id="toastHost" aria-live="polite"></div>
+  <div id="modalHost" class="modal-scrim"></div>
+  <div id="drawer" class="drawer"></div>
+
+<script>
+const C = { primary:"#1A365D", tech:"#2B6CB0", emerald:"#00A86B", amber:"#D69E2E", red:"#DC2626" };
+const state = {
+  role: localStorage.getItem("ldm_role") || "admin",
+  page: localStorage.getItem("ldm_page") || "dashboard",
+  expanded: new Set(["db"]),
+  selectedElements: new Set(),
+  standardNode: "STD-2D-STRUCT",
+  ingest: { step:1, lib:null, source:null, tags:[], fields:{}, files:[], validation:null },
+  tables:{}, charts:[], timers:[], tasks:[], enterpriseUses:Number(localStorage.getItem("ldm_enterprise_uses") || 0)
+};
+const roles = {
+  admin:{ label:"管理员", sys:true, upload:true, download:true, generate:true, edit:true },
+  dba:{ label:"数据库管理员", sys:false, upload:true, download:true, generate:true, edit:true },
+  researcher:{ label:"研究员", sys:false, upload:true, download:true, generate:true, edit:false },
+  enterprise:{ label:"企业用户", sys:false, upload:true, download:true, generate:true, edit:false, limitGenerate:true },
+  guest:{ label:"访客", sys:false, upload:false, download:false, generate:false, edit:false }
+};
+const nav = [
+  {id:"dashboard", label:"工作台", icon:"home"},
+  {id:"standards", label:"低维材料标准体系", icon:"clipboard-check"},
+  {id:"ingest", label:"低维材料数据入库", icon:"upload-cloud"},
+  {id:"standardize", label:"低维数据标准化", icon:"database-gear"},
+  {id:"db", label:"低维材料数据库", icon:"server", children:[
+    {id:"db-2d", label:"二维材料数据库"},
+    {id:"db-organic", label:"有机光电材料数据库"},
+    {id:"db-electrolyte", label:"电解质材料数据库"},
+    {id:"db-ml", label:"机器学习力场数据库"},
+    {id:"db-catalyst", label:"催化材料数据库"}
+  ]},
+  {id:"apps", label:"低维材料主题应用", icon:"puzzle"},
+  {id:"analysis", label:"低维材料数据分析预测", icon:"cpu"},
+  {id:"system", label:"系统管理", icon:"shield", adminOnly:true}
+];
+const iconPaths = {
+  home:"M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z", "clipboard-check":"M8 4h8v3H8z M6 6H4v15h16V6h-2 M8 14l3 3 5-6",
+  "upload-cloud":"M12 19V9 M8 13l4-4 4 4 M6 18a4 4 0 1 1 .7-7.9A5 5 0 0 1 16 8a4 4 0 0 1 1 7.9",
+  "database-gear":"M4 6c0-2 16-2 16 0s-16 2-16 0v10c0 2 16 2 16 0V6 M16 19l2 2 3-4",
+  server:"M4 5h16v6H4z M4 13h16v6H4z M7 8h.1 M7 16h.1", puzzle:"M8 3h5v4h2a2 2 0 1 1 0 4h-2v4H8v-3H5a2 2 0 1 1 0-4h3z",
+  cpu:"M8 8h8v8H8z M4 10h4 M4 14h4 M16 10h4 M16 14h4 M10 4v4 M14 4v4 M10 16v4 M14 16v4",
+  shield:"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", menu:"M4 6h16M4 12h16M4 18h16",
+  search:"M10 18a8 8 0 1 1 5.3-14M15 15l5 5", plus:"M12 5v14M5 12h14", download:"M12 3v12M7 10l5 5 5-5M5 21h14",
+  edit:"M4 20h4L19 9l-4-4L4 16z", trash:"M5 7h14M9 7V5h6v2M8 9v10M16 9v10", eye:"M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+  close:"M6 6l12 12M18 6L6 18", check:"M5 13l4 4L19 7", warn:"M12 4l9 16H3z M12 9v5 M12 17h.1"
+};
+function icon(name, cls="nav-icon"){ return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${iconPaths[name]||iconPaths.home}"/></svg>`; }
+
+function seedData(){
+  const formula2d = [
+    ["MoS2",1.82,-0.78,128,0,"P-6m2"],["WS2",2.05,-0.71,142,0,"P-6m2"],["MoSe2",1.55,-0.63,116,0,"P-6m2"],
+    ["WSe2",1.64,-0.58,135,0,"P-6m2"],["BN",5.90,-1.20,267,0,"P6/mmm"],["Graphene",0.02,-0.92,340,0,"P6/mmm"],
+    ["FePS3",1.50,-0.49,88,4.2,"C2/m"],["CrI3",1.20,-0.36,42,3.1,"R-3"],["TiS2",0.41,-0.44,95,0,"P-3m1"],
+    ["NbSe2",0.10,-0.39,76,0,"P63/mmc"],["SnS2",2.12,-0.55,63,0,"P-3m1"],["Bi2Se3",0.31,-0.46,52,0,"R-3m"]
+  ];
+  const organic = [
+    ["苯 / Benzene","C6H6","71-43-2",78.11,-6.20,-1.10,4.80,48],["蒽 / Anthracene","C14H10","120-12-7",178.23,-5.75,-2.18,3.02,62],
+    ["并五苯 / Pentacene","C22H14","135-48-8",278.35,-5.05,-3.10,1.85,74],["Alq3","C27H18AlN3O3","2085-33-8",459.43,-5.70,-2.90,2.55,92],
+    ["F8BT","C35H30F2N2S","N/A",548.69,-5.90,-3.30,2.25,116],["P3HT","C10H14S","104934-50-1",166.28,-5.10,-3.00,2.00,96],
+    ["Ir(ppy)3","C33H24IrN3","94928-86-6",654.79,-5.40,-2.70,2.36,54],["DCM","C19H17N3O","51325-91-8",303.36,-5.35,-3.15,2.10,88],
+    ["Rubrene","C42H28","517-51-1",532.67,-5.45,-3.20,2.20,70],["MEH-PPV","C18H24O2","138184-36-8",272.38,-5.30,-2.85,2.35,130]
+  ];
+  const electrolyte = [
+    ["LiPF6","无机盐","有机电解液",151.91,10.7,0.91,92],["EC:DMC 1:1","混合溶剂","有机电解液",164.16,12.1,1.34,87],
+    ["LiTFSI","锂盐","有机电解液",287.09,7.8,1.02,90],["EMIM-BF4","离子液体","有机电解液",197.97,13.6,1.45,84],
+    ["LiFSI","锂盐","有机电解液",187.07,9.2,1.12,89],["PC:DEC 3:7","混合溶剂","有机电解液",174.22,8.9,1.62,82],
+    ["PEO-LiTFSI","聚合物","固态有机电解质",9800,1.9,0.12,78],["PAN-LiClO4","聚合物","固态有机电解质",12000,2.3,0.09,75],
+    ["PVDF-HFP","聚合物","固态有机电解质",455000,0.8,0.06,72],["PPC-LiFSI","聚合物","固态有机电解质",52000,1.4,0.08,73],
+    ["PEGDA-LiTFSI","交联聚合物","固态有机电解质",7000,1.1,0.07,76],["PVA-LiOH","凝胶聚合物","固态有机电解质",42000,0.6,0.05,71],
+    ["LLZO","氧化物","固态无机电解质",839.74,5.8,0.56,94],["LATP","磷酸盐","固态无机电解质",565.75,4.2,0.37,88],
+    ["LGPS","硫化物","固态无机电解质",383.86,12.0,0.21,91],["Li3PS4","硫化物","固态无机电解质",180.04,3.4,0.18,86],
+    ["LLTO","钙钛矿","固态无机电解质",304.52,1.0,0.44,83],["LPSCl","硫银锗矿","固态无机电解质",268.92,6.7,0.24,90]
+  ];
+  const ml = [
+    ["水","H2O",3,0,1.85,2.60],["甲烷","CH4",5,0,0.00,0.00],["氨","NH3",4,0,1.47,1.92],["甲醇","CH4O",6,0,1.70,2.31],
+    ["乙醇","C2H6O",9,0,1.69,2.28],["甲酸","CH2O2",5,0,1.41,2.04],["乙腈","C2H3N",6,0,3.92,5.10],["二氧化碳","CO2",3,0,0.00,4.30],
+    ["苯","C6H6",12,0,0.00,6.50],["乙酸乙酯","C4H8O2",14,0,1.78,3.20]
+  ];
+  const catalyst = [
+    ["Cu(111)-CO2","Cu","111","*COOH",-0.62,74,61],["Ag(100)-CO","Ag","100","*CO",-0.38,82,70],["NiFe-LDH","NiFe","001","*OOH",-1.45,66,54],
+    ["Pt(111)-H","Pt","111","*H",-0.09,92,88],["MoS2-edge","MoS2","edge","*H",-0.18,84,76],["Fe-N-C","Graphene","basal","*O2",-0.73,58,48],
+    ["Pd(110)-CHO","Pd","110","*CHO",-0.51,71,63],["Co3O4(311)","Co3O4","311","*OH",-0.88,69,57],["RuO2(110)","RuO2","110","*O",-1.12,77,64],["CuZn(211)","CuZn","211","*OCHO",-0.47,80,68]
+  ];
+  return {
+    twoD: formula2d.map((r,i)=>({id:`2D-${1001+i}`, formula:r[0], bandgap:r[1], formation:r[2], young:r[3], moment:r[4], space:r[5], ai:94-i, elements:r[0].match(/[A-Z][a-z]?/g)||["C"]})),
+    organic: organic.map((r,i)=>({id:`OP-${2001+i}`, name:r[0], formula:r[1], cas:r[2], mw:r[3], homo:r[4], lumo:r[5], excite:r[6], stokes:r[7]})),
+    electrolyte: electrolyte.map((r,i)=>({id:`EL-${3001+i}`, name:r[0], type:r[1], sub:r[2], mw:r[3], conductivity:r[4], viscosity:r[5], ai:r[6]})),
+    ml: ml.map((r,i)=>({id:`ML-${4001+i}`, name:r[0], formula:r[1], atoms:r[2], charge:r[3], dipole:r[4], quadrupole:r[5]})),
+    catalyst: catalyst.map((r,i)=>({id:`CAT-${5001+i}`, name:r[0], substrate:r[1], facet:r[2], intermediate:r[3], adsorption:r[4], selectivity:r[5], faraday:r[6]})),
+    standards: makeStandards(),
+    tasks: [
+      {id:"T-1021", name:"MoS2 能带预测", algo:"GNN-BandGap", status:"已完成", time:"2026-07-31 09:12", cost:"3m 24s"},
+      {id:"T-1022", name:"催化剂筛选批处理", algo:"AdsorbNet", status:"运行中", time:"2026-07-31 10:35", cost:"1m 08s"},
+      {id:"T-1023", name:"光谱智能清洗", algo:"SpectraClean", status:"失败", time:"2026-07-30 18:44", cost:"22s"}
+    ],
+    users: [
+      ["张岚","清华大学","研究员","启用","2026-05-12"],["王珩","材料基因组中心","数据库管理员","启用","2026-04-20"],["李若水","某新能源企业","企业用户","启用","2026-06-01"],["陈墨","访客机构","访客","禁用","2026-07-01"]
+    ].map((u,i)=>({id:`U-${i+1}`, name:u[0], org:u[1], role:u[2], status:u[3], time:u[4]})),
+    audit: Array.from({length:36},(_,i)=>({id:`LOG-${9000+i}`, time:`2026-07-${String(31-i%20).padStart(2,"0")} ${String(8+i%12).padStart(2,"0")}:15`, user:["admin","dba","researcher"][i%3], action:["下载数据","审核通过","修改阈值","创建任务"][i%4], ip:`10.0.2.${20+i}`}))
+  };
+}
+function makeStandards(){
+  const cats=["结构表征","电子性质","热力学性质","数据质量","AI-Ready 存储"];
+  return cats.flatMap((c,i)=>Array.from({length:5},(_,j)=>({id:`STD-${i+1}.${j+1}`, code:`LDM-${i+1}${String(j+1).padStart(2,"0")}`, name:`${c}标准条目 ${j+1}`, version:`v${1+i}.${j}`, status:["已发布","草稿","已废止","已发布","已发布"][j], date:`2026-0${(j%7)+1}-15`, scope:["二维材料","有机光电","电解质","ML力场","催化材料"][i], node:`STD-${["2D-STRUCT","OP-PROP","EL-SAFE","ML-FIELD","CAT-PERF"][i]}`})));
+}
+function getData(){
+  const raw = localStorage.getItem("ldm_data_v3");
+  if(raw) return JSON.parse(raw);
+  const data = seedData();
+  localStorage.setItem("ldm_data_v3", JSON.stringify(data));
+  return data;
+}
+let data = getData();
+state.tasks = data.tasks;
+function saveData(){ localStorage.setItem("ldm_data_v3", JSON.stringify(data)); }
+
+function toast(msg,type="success"){
+  const bg = {success:"#00A86B", error:"#DC2626", warning:"#D69E2E", info:"#2B6CB0"}[type] || C.tech;
+  const el = document.createElement("div");
+  el.className = "toast"; el.style.background = bg; el.textContent = msg;
+  toastHost.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transform="translateX(20px)"; setTimeout(()=>el.remove(),250); },3000);
+}
+function can(key){ return !!roles[state.role][key]; }
+function disabledIf(key){ return can(key) ? "" : "disabled title='当前角色无权限'"; }
+function openModal(title, body, size=""){
+  modalHost.innerHTML = `<div class="modal ${size}"><div class="flex items-center justify-between px-5 py-4 border-b"><h2 class="text-lg font-extrabold text-primary">${title}</h2><button class="btn btn-outline" onclick="closeModal()">${icon("close","w-4 h-4")}关闭</button></div><div class="modal-body">${body}</div></div>`;
+  modalHost.classList.add("show");
+}
+function closeModal(){ modalHost.classList.remove("show"); modalHost.innerHTML=""; }
+modalHost.addEventListener("click", e=>{ if(e.target===modalHost) closeModal(); });
+function confirmBox(title,msg,onOk){
+  openModal(title, `<p class="text-slate-700 mb-5">${msg}</p><div class="flex justify-end gap-2"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-danger" id="confirmOk">确认</button></div>`);
+  setTimeout(()=>document.getElementById("confirmOk").onclick=()=>{ closeModal(); onOk&&onOk(); },0);
+}
+function pageTitle(title, sub){ pageHeader.innerHTML = `<div class="breadcrumb-bar"><div class="breadcrumb-left">${icon("home","breadcrumb-home")}<span>/</span><h1 class="page-title">主题应用 / ${title}</h1></div><div class="text-xs text-slate-500">${sub||""}</div></div>`; }
+function renderSidebar(){
+  const role = roles[state.role];
+  const items = nav.filter(n=>!(n.adminOnly && !role.sys)).filter(n=> state.role==="guest" ? ["dashboard","db"].includes(n.id) : true);
+  sidebar.innerHTML = `<div class="p-3">${items.map(n=>{
+    const active = state.page===n.id || (n.children||[]).some(c=>c.id===state.page);
+    const child = n.children ? `<div class="child-wrap">${n.children.map(c=>`<button class="child-btn ${state.page===c.id?"active":""}" onclick="go('${c.id}')">${c.label}</button>`).join("")}</div>` : "";
+    return `<div><button class="nav-btn ${active?"active":""}" onclick="${n.children?`toggleNav('${n.id}')`:`go('${n.id}')`}">${icon(n.icon)}<span class="label">${n.label}</span><span class="chev ml-auto">${n.children?(state.expanded.has(n.id)?"−":"+"):""}</span></button>${n.children && state.expanded.has(n.id)?child:""}</div>`;
+  }).join("")}</div>`;
+}
+function toggleNav(id){ state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id); renderSidebar(); }
+function go(id){ state.page=id; localStorage.setItem("ldm_page",id); render(); }
+
+function render(){
+  cleanupCharts();
+  if(state.role==="guest" && state.page!=="dashboard" && !state.page.startsWith("db-")) state.page="dashboard";
+  if(state.page==="system" && !can("sys")) state.page="dashboard";
+  renderSidebar();
+  const map = {
+    dashboard:renderDashboard, standards:renderStandards, ingest:renderIngest, standardize:renderStandardize,
+    "db-2d":render2D, "db-organic":renderOrganic, "db-electrolyte":renderElectrolyte, "db-ml":renderML, "db-catalyst":renderCatalyst,
+    apps:renderApps, analysis:renderAnalysis, system:renderSystem
+  };
+  (map[state.page]||renderDashboard)();
+}
+function cleanupCharts(){ state.charts.forEach(ch=>{ try{ ch.dispose && ch.dispose(); }catch(e){} }); state.charts=[]; }
+function ech(id,opt){ const el=document.getElementById(id); if(!el || !window.echarts) return; const ch=echarts.init(el); ch.setOption(opt); state.charts.push(ch); return ch; }
+function sparkLine(title,color=C.tech){ return {title:{text:title,textStyle:{fontSize:12}},tooltip:{trigger:"axis"},grid:{left:42,right:18,top:42,bottom:32},xAxis:{type:"category",data:["0","1","2","3","4","5","6","7","8","9"]},yAxis:{type:"value"},series:[{type:"line",smooth:true,areaStyle:{opacity:.12},data:Array.from({length:10},()=>+(Math.random()*4+1).toFixed(2)),itemStyle:{color}}]}; }
+function initThree(id, mode="lattice"){
+  const el=document.getElementById(id); if(!el || !window.THREE) return;
+  el.innerHTML="";
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0f172a);
+  const camera=new THREE.PerspectiveCamera(45, el.clientWidth/el.clientHeight, .1, 100); camera.position.set(4,4,6);
+  const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(el.clientWidth, el.clientHeight); el.appendChild(renderer.domElement);
+  const group=new THREE.Group(); scene.add(group);
+  scene.add(new THREE.AmbientLight(0xffffff,.72)); const light=new THREE.DirectionalLight(0xffffff,.8); light.position.set(4,5,6); scene.add(light);
+  const colors={C:0x222222,H:0xffffff,O:0xef4444,N:0x3b82f6,S:0xfacc15,Mo:0x94a3b8,W:0xa78bfa,Li:0xf97316,P:0xf59e0b,Cu:0xb45309};
+  const atoms = mode==="molecule" ? [["C",0,0,0],["C",1.2,0,0],["O",2.1,.6,0],["H",-.6,.7,0],["H",-.6,-.7,0],["H",1.2,-.9,0]] :
+    [["Mo",0,0,0],["S",1.2,0,0],["S",-1.2,0,0],["S",0,1.2,0],["S",0,-1.2,0],["Mo",1.2,1.2,0],["Mo",-1.2,-1.2,0]];
+  atoms.forEach(a=>{ const g=new THREE.SphereGeometry(a[0]==="H"?.13:.22,24,16); const m=new THREE.MeshStandardMaterial({color:colors[a[0]]||0x22c55e}); const s=new THREE.Mesh(g,m); s.position.set(a[1],a[2],a[3]); group.add(s); });
+  for(let i=0;i<atoms.length-1;i++){ const a=new THREE.Vector3(atoms[i][1],atoms[i][2],atoms[i][3]), b=new THREE.Vector3(atoms[i+1][1],atoms[i+1][2],atoms[i+1][3]); const mid=a.clone().add(b).multiplyScalar(.5); const cyl=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,a.distanceTo(b),12),new THREE.MeshStandardMaterial({color:0x94a3b8})); cyl.position.copy(mid); cyl.lookAt(b); cyl.rotateX(Math.PI/2); group.add(cyl); }
+  let dragging=false,lastX=0,lastY=0; el.onmousedown=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY}; window.addEventListener("mouseup",()=>dragging=false);
+  el.onmousemove=e=>{ if(dragging){ group.rotation.y+=(e.clientX-lastX)*.01; group.rotation.x+=(e.clientY-lastY)*.01; lastX=e.clientX; lastY=e.clientY; } };
+  el.onwheel=e=>{ e.preventDefault(); camera.position.z=Math.max(2,Math.min(10,camera.position.z+e.deltaY*.005)); };
+  function animate(){ if(!document.body.contains(el)) return; group.rotation.y+=.003; renderer.render(scene,camera); requestAnimationFrame(animate); }
+  animate();
+}
+
+function renderDataTable(key, rows, columns, opts={}){
+  const tableState = state.tables[key] || (state.tables[key]={page:1, sort:null, dir:1, q:""});
+  const pageSize = opts.pageSize || 20;
+  let filtered = rows.filter(r=>!tableState.q || JSON.stringify(r).toLowerCase().includes(tableState.q.toLowerCase()));
+  if(tableState.sort){ filtered.sort((a,b)=> (a[tableState.sort]>b[tableState.sort]?1:-1)*tableState.dir); }
+  const pages = Math.max(1, Math.ceil(filtered.length/pageSize));
+  tableState.page = Math.min(tableState.page,pages);
+  const start = (tableState.page-1)*pageSize;
+  const pageRows = filtered.slice(start,start+pageSize);
+  if(!pageRows.length){
+    return `<div class="soft-panel p-8 text-center"><div class="mx-auto w-24 h-24 rounded-full bg-blue-50 border border-blue-100 grid place-items-center text-primary">${icon("search","w-10 h-10")}</div><h3 class="font-bold text-primary mt-4">暂无匹配数据</h3><p class="text-slate-500 mt-1">调整筛选条件或新增一条演示数据。</p></div>`;
+  }
+  return `<div class="flex items-center justify-between mb-2">
+    <div class="text-slate-500">共 <span class="mono text-primary font-bold">${filtered.length}</span> 条，默认每页 ${pageSize} 条</div>
+    ${opts.search!==false?`<input class="input !w-72" placeholder="表格内筛选" value="${tableState.q}" oninput="tableSearch('${key}',this.value)">`:""}
+  </div><div class="table-wrap"><table><thead><tr>${opts.check?`<th><input type="checkbox" onclick="toggleAll('${key}',this.checked)"></th>`:""}${columns.map(c=>`<th class="${c.sort!==false?"sortable":""}" onclick="sortTable('${key}','${c.k}')">${c.t}${tableState.sort===c.k?(tableState.dir>0?" ▲":" ▼"):""}</th>`).join("")}${opts.actions?`<th>操作</th>`:""}</tr></thead><tbody>${pageRows.map((r,i)=>`<tr ${opts.rowClick?`onclick="${opts.rowClick}('${r.id}')"`:""}>${opts.check?`<td onclick="event.stopPropagation()"><input type="checkbox" class="${key}-check" value="${r.id}"></td>`:""}${columns.map(c=>`<td class="${c.mono?"mono":""}" ${c.edit?`contenteditable="${can("edit")}" onblur="inlineEdit('${opts.store}','${r.id}','${c.k}',this.textContent)"`:""}>${c.render?c.render(r):r[c.k]}</td>`).join("")}${opts.actions?`<td onclick="event.stopPropagation()">${opts.actions(r)}</td>`:""}</tr>`).join("")}</tbody></table></div>
+  <div class="flex items-center justify-between mt-3"><div class="text-xs text-slate-500">第 ${tableState.page} / ${pages} 页</div><div class="flex gap-1"><button class="btn btn-outline" onclick="pageTable('${key}',-1)" ${tableState.page<=1?"disabled":""}>上一页</button><button class="btn btn-outline" onclick="pageTable('${key}',1)" ${tableState.page>=pages?"disabled":""}>下一页</button></div></div>`;
+}
+function tableSearch(k,v){ state.tables[k].q=v; state.tables[k].page=1; render(); }
+function sortTable(k,field){ const s=state.tables[k]||(state.tables[k]={page:1}); if(s.sort===field) s.dir*=-1; else {s.sort=field;s.dir=1;} render(); }
+function pageTable(k,d){ state.tables[k].page+=d; render(); }
+function toggleAll(key,checked){ document.querySelectorAll(`.${key}-check`).forEach(cb=>cb.checked=checked); }
+function getChecked(key){ return [...document.querySelectorAll(`.${key}-check:checked`)].map(x=>x.value); }
+function inlineEdit(store,id,k,v){ const r=data[store].find(x=>x.id===id); if(r){ r[k]=isNaN(Number(v))?v:Number(v); saveData(); toast("数据已内联保存"); } }
+
+function renderDashboard(){
+  pageTitle("工作台","主题库运行态势、待办、入库动态与快捷操作。");
+  const cards=[["二维材料",30600],["有机光电",1000],["电解质",10250],["ML力场",25200],["催化材料",34920],["总计",101970]];
+  page.innerHTML = `<div class="grid grid-cols-6 gap-4 mb-4">${cards.map((c,i)=>`<div class="panel p-4"><div class="text-slate-500">${c[0]}</div><div class="mono text-2xl font-extrabold text-primary mt-2 count" data-target="${c[1]}">0</div><div class="h-1.5 bg-slate-100 rounded mt-4"><div class="h-full rounded bg-${i===5?"amberx":"tech"}" style="width:${55+i*7}%"></div></div></div>`).join("")}</div>
+  <div class="grid grid-cols-12 gap-4">
+    <section class="panel p-4 col-span-4"><div class="font-bold text-primary mb-3">AI-Ready 达标率</div><div id="readyPie" class="chart"></div></section>
+    <section class="panel p-4 col-span-4"><div class="flex justify-between items-center mb-3"><b class="text-primary">待办事项</b><button class="btn btn-outline" onclick="toast('已打开审核队列','info')">批量处理</button></div><div class="space-y-2">${["待审核数据 12 条","分析任务完成 3 条","AI-Ready 预警 7 条","标准草案待发布 2 条","企业生成额度接近阈值"].map((t,i)=>`<div class="soft-panel p-3 flex items-center justify-between"><span>${t}</span><button class="btn btn-primary !min-h-8" onclick="toast('已处理：${t}')">处理</button></div>`).join("")}</div></section>
+    <section class="panel p-4 col-span-4"><b class="text-primary">快捷入口</b><div class="grid grid-cols-2 gap-3 mt-3">${[["数据检索","db-2d"],["数据入库","ingest"],["启动分析","analysis"],["工具集","apps"]].map(x=>`<button class="btn btn-outline h-20 !flex-col" onclick="go('${x[1]}')">${icon("search","w-6 h-6")}<span>${x[0]}</span></button>`).join("")}</div></section>
+    <section class="panel p-4 col-span-7"><b class="text-primary">最新入库动态</b><div class="mt-3 virtual-list">${Array.from({length:10},(_,i)=>`<div class="flex gap-3 py-3 border-b"><div class="w-2 h-2 rounded-full bg-emerald mt-2"></div><div><div class="font-semibold">${["MoS2","LiPF6","Cu(111)","P3HT","LLZO"][i%5]} 数据完成入库</div><div class="text-xs text-slate-500 mono">2026-07-${String(31-i).padStart(2,"0")} ${String(10+i%8).padStart(2,"0")}:24 · AI-Ready ${92-i}%</div></div></div>`).join("")}</div></section>
+    <section class="panel p-4 col-span-5"><b class="text-primary">近期增长趋势</b><canvas id="growthChart" height="230"></canvas></section>
+  </div>`;
+  animateCounts();
+  ech("readyPie",{tooltip:{trigger:"item"},legend:{bottom:0},series:[{type:"pie",radius:["48%","72%"],data:[{name:"缺失值<5%",value:76,itemStyle:{color:C.emerald}},{name:"缺失值5-10%",value:17,itemStyle:{color:C.amber}},{name:"缺失值>10%",value:7,itemStyle:{color:C.red}}]}]});
+  new Chart(document.getElementById("growthChart"),{type:"bar",data:{labels:["二维","光电","电解质","ML","催化"],datasets:[{label:"本周新增",data:[420,38,186,370,512],backgroundColor:[C.tech,C.emerald,C.amber,"#64748B",C.primary]}]},options:{plugins:{legend:{display:false}},responsive:true}});
+}
+function animateCounts(){
+  document.querySelectorAll(".count").forEach(el=>{ const target=Number(el.dataset.target); let n=0; const step=Math.max(1,Math.floor(target/42)); const t=setInterval(()=>{ n+=step; if(n>=target){n=target;clearInterval(t)} el.textContent=n.toLocaleString(); },18); });
+}
+
+function renderStandards(){
+  pageTitle("低维材料标准体系","分类树、标准条目、全文详情与历史版本。");
+  const nodes = [
+    ["材料基础标准",[["二维材料",["结构特征","电子结构","缺陷描述"]],["有机光电",["分子标识","物性字段","图谱编码"]]]],
+    ["计算数据标准",[["VASP",["INCAR规范","KPOINTS规范","POTCAR规范"]],["量子化学",["基组","泛函","收敛阈值"]]]],
+    ["实验数据标准",[["光谱",["IR","Raman","NMR"]],["安全",["燃点","闪点","毒性"]]]],
+    ["AI-Ready 标准",[["质量",["缺失率","异常值","单位统一"]],["存储",["HDF5","CSV","JSON"]]]],
+    ["共享交换标准",[["接口",["REST","GraphQL","批量下载"]],["授权",["引用","审计","水印"]]]]
+  ];
+  const filtered = data.standards.filter(s=>s.node===state.standardNode || !state.standardNode);
+  page.innerHTML = `<div class="grid grid-cols-12 gap-4">
+    <aside class="panel p-4 col-span-3"><div class="font-bold text-primary mb-3">标准分类树</div><div class="tree">${nodes.map((n,i)=>`<details open><summary>${n[0]}</summary><div class="ml-4">${n[1].map((m,j)=>`<details ${i<2?"open":""}><summary>${m[0]}</summary><div class="ml-4">${m[1].map((leaf,k)=>`<button class="w-full text-left px-2 py-1.5 rounded hover:bg-blue-50 ${state.standardNode===`STD-${i===0&&j===0?"2D-STRUCT":i===0?"OP-PROP":i===1?"EL-SAFE":i===2?"ML-FIELD":"CAT-PERF"}`?"bg-blue-50 text-tech font-bold":""}" onclick="state.standardNode='STD-${i===0&&j===0?"2D-STRUCT":i===0?"OP-PROP":i===1?"EL-SAFE":i===2?"ML-FIELD":"CAT-PERF"}';renderStandards()">${leaf}</button>`).join("")}</div></details>`).join("")}</div></details>`).join("")}</div></aside>
+    <section class="panel p-4 col-span-9"><div class="flex justify-between mb-3"><b class="text-primary">标准条目</b><div class="flex gap-2">${can("edit")?`<button class="btn btn-primary" onclick="stdAdd()">${icon("plus","w-4 h-4")}新增</button><button class="btn btn-outline" onclick="toast('请选择一条标准后编辑','warning')">${icon("edit","w-4 h-4")}编辑</button><button class="btn btn-outline" onclick="toast('已执行废止模拟','warning')">废止</button>`:""}</div></div>
+    ${renderDataTable("standards",filtered,[{k:"code",t:"编号",mono:true},{k:"name",t:"名称"},{k:"version",t:"版本",mono:true},{k:"status",t:"状态",render:r=>`<span class="tag ${r.status==="已发布"?"green":r.status==="草稿"?"gray":"red"}">${r.status}</span>`},{k:"date",t:"生效日期",mono:true},{k:"scope",t:"适用范围"}],{actions:r=>`<button class="btn btn-outline !min-h-8" onclick="stdDetail('${r.id}')">${icon("eye","w-4 h-4")}查看</button>`})}</section></div>`;
+}
+function stdDetail(id){ const r=data.standards.find(x=>x.id===id); openModal("标准详情",`<div class="grid grid-cols-3 gap-4"><div class="col-span-2"><h3 class="font-bold text-primary mb-2">${r.code} ${r.name}</h3><p class="leading-7 text-slate-700">本标准定义 ${r.scope} 数据采集、单位归一、字段命名、质量校验、AI-Ready 存储与共享交换的统一要求。全文包含元数据、主数据、派生性质、参考来源、审计字段等章节，要求缺失率、单位、坐标系与版本号均可机器解析。</p><div class="soft-panel p-3 mt-4 mono text-xs">required: id, formula, source, method, unit_system, ai_ready_score<br>missing_ratio <= 0.05 recommended</div></div><div><b class="text-primary">历史版本</b>${["v1.0 草案","v1.1 公开征求意见","v2.0 已发布"].map((x,i)=>`<div class="border-l-2 border-tech pl-3 py-2 mt-2"><b>${x}</b><div class="text-xs text-slate-500">2026-0${i+3}-15</div></div>`).join("")}</div></div>`); }
+function stdAdd(){ data.standards.unshift({id:`STD-${Date.now()}`,code:`LDM-NEW`,name:"新建标准草案",version:"v0.1",status:"草稿",date:"2026-08-01",scope:"全子库",node:state.standardNode}); saveData(); toast("已新增标准草案"); renderStandards(); }
+
+const libs = [
+  ["twoD","二维材料",30600,"结构、电子、缺陷与多物性数据"],["organic","有机光电",1000,"分子结构、光谱与计算数据"],["electrolyte","电解质",10250,"液态、固态有机与无机电解质"],["ml","ML力场",25200,"电荷、多极矩与相互作用能"],["catalyst","催化材料",34920,"吸附、反应路线与性能指标"]
+];
+const sourceMap = {twoD:["VASP计算","文献","开源数据库"],organic:["DFT计算","实验","文献"],electrolyte:["量子化学","分子动力学","实验"],ml:["CCSD(T)","MP2","已训练参数"],catalyst:["实验","文献","开源数据库"]};
+const fieldMap = {
+  twoD:["材料编号","化学式","空间群","带隙 eV","形成能 eV/atom","杨氏模量 N/m","磁矩 μB","来源 DOI"],
+  organic:["中文名称","英文名称","分子式","CAS","分子量","HOMO eV","LUMO eV","激发能 eV"],
+  electrolyte:["名称","分子式/组成","子类型","电导率 mS/cm","黏度 cP","燃点 °C","安全等级","来源"],
+  ml:["分子名称","分子式","原子数","总电荷","偶极矩","四极矩","方法","基组"],
+  catalyst:["材料名称","基底","晶面指数","中间产物","吸附能 eV","选择性 %","法拉第效率 %","反应路线"]
+};
+function renderIngest(){
+  pageTitle("低维材料数据入库","五步向导、动态来源、动态表单、校验与提交。");
+  const s=state.ingest;
+  page.innerHTML = `<section class="panel p-5"><div class="flex items-center justify-between mb-5">${[1,2,3,4,5].map(i=>`<div class="step ${s.step===i?"active":s.step>i?"done":""}" onclick="safelyStep(${i})"><span class="bubble">${i}</span><span>${["选择子库","数据来源","填写与上传","自动校验","预览提交"][i-1]}</span></div>`).join(`<div class="flex-1 h-px bg-slate-200 mx-3"></div>`)}</div><div id="wizardBody">${ingestStepHtml()}</div><div class="flex justify-between mt-5"><button class="btn btn-outline" onclick="prevIngest()" ${s.step===1?"disabled":""}>上一步</button><div class="flex gap-2"><button class="btn btn-outline" onclick="simulateDraft()">模拟网络中断</button><button class="btn btn-primary" onclick="nextIngest()">${s.step===5?"提交入库":"下一步"}</button></div></div></section>`;
+  initIngestStep();
+}
+function ingestStepHtml(){
+  const s=state.ingest;
+  if(s.step===1) return `<div class="grid grid-cols-5 gap-4">${libs.map(l=>`<button class="panel p-4 text-left border-2 ${s.lib===l[0]?"!border-tech":"border-transparent"}" onclick="state.ingest.lib='${l[0]}';renderIngest()"><div class="text-tech">${icon("server","w-7 h-7")}</div><h3 class="font-extrabold text-primary mt-3">${l[1]}</h3><div class="mono text-lg font-bold mt-2">${l[2].toLocaleString()}</div><p class="text-slate-500 mt-2 leading-6">${l[3]}</p></button>`).join("")}</div>`;
+  if(s.step===2){ const opts=sourceMap[s.lib]||[]; return `<div class="grid grid-cols-3 gap-4">${opts.map(o=>`<label class="soft-panel p-4 flex items-center gap-3 cursor-pointer"><input type="radio" name="src" ${s.source===o?"checked":""} onchange="state.ingest.source='${o}'"><b>${o}</b></label>`).join("")}</div><div class="mt-4"><b class="text-primary">可选标签</b><div class="flex gap-2 mt-2">${["高通量","实验复核","AI-Ready","含结构文件"].map(t=>`<label class="tag blue cursor-pointer"><input type="checkbox" onchange="toggleTag('${t}',this.checked)"> ${t}</label>`).join("")}</div></div>`; }
+  if(s.step===3){ const fields=fieldMap[s.lib]||fieldMap.twoD; const errors=validateIngest(false); return `<div id="errSummary" class="${errors.length?"":"hidden"} bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4">发现 ${errors.length} 个问题：${errors.join("、")}</div><div class="grid grid-cols-4 gap-4">${fields.map((f,i)=>`<label><span class="font-semibold">${f}${i<4?` <span class="text-red-600">*</span>`:""}</span><input id="f${i}" class="input mt-1 ${errors.includes(f)?"error":""}" value="${s.fields[f]||""}" oninput="state.ingest.fields['${f}']=this.value"></label>`).join("")}</div><div id="dropZone" class="mt-5 border-2 border-dashed border-slate-300 rounded-lg bg-slate-50 p-8 text-center"><b class="text-primary">拖拽上传数据文件</b><p class="text-slate-500 mt-1">支持 .csv / .xlsx / .cif / .pdb / .xml / .json，仅 UI 模拟</p><input type="file" id="fileInput" multiple class="mt-4" accept=".csv,.xlsx,.cif,.pdb,.xml,.json"><div id="fileList" class="mt-3 text-left max-w-xl mx-auto">${s.files.map(f=>`<div class="soft-panel p-2 mono">${f.name} · ${f.size}</div>`).join("")}</div></div>`; }
+  if(s.step===4) return `<div id="validationBox">${s.validation?validationHtml():`<div class="space-y-3"><div class="skeleton h-10"></div><div class="skeleton h-10"></div><div class="skeleton h-10"></div><div class="h-2 bg-slate-100 rounded"><div id="valProgress" class="h-full bg-tech rounded" style="width:0%"></div></div></div>`}</div>`;
+  return `<div class="grid grid-cols-12 gap-4"><div class="col-span-8">${renderDataTable("preview",Array.from({length:10},(_,i)=>Object.fromEntries((fieldMap[s.lib]||fieldMap.twoD).map((f,j)=>[f,j<4?(s.fields[f]||`${f}-${i+1}`):`${(Math.random()*10).toFixed(2)}`]))),(fieldMap[s.lib]||fieldMap.twoD).map(f=>({k:f,t:f})),{search:false,pageSize:20})}</div><div class="col-span-4 space-y-3">${[["总行数","1,248"],["字段数",(fieldMap[s.lib]||[]).length],["缺失率","4.8%"],["Warning 数","6"]].map(x=>`<div class="soft-panel p-4 flex justify-between"><span>${x[0]}</span><b class="mono text-primary">${x[1]}</b></div>`).join("")}<button class="btn btn-outline w-full" onclick="duplicateModal()">重复数据对比面板</button></div></div>`;
+}
+function initIngestStep(){
+  if(state.ingest.step===3){
+    const input=document.getElementById("fileInput"), dz=document.getElementById("dropZone");
+    const handle=files=>{ [...files].forEach(f=>{ const ok=/\.(csv|xlsx|cif|pdb|xml|json)$/i.test(f.name); if(ok) state.ingest.files.push({name:f.name,size:(f.size/1024).toFixed(1)+" KB"}); else toast(`错误格式：${f.name}`,"error"); }); renderIngest(); };
+    input.onchange=e=>handle(e.target.files); dz.ondragover=e=>{e.preventDefault();dz.classList.add("!border-tech")}; dz.ondrop=e=>{e.preventDefault();handle(e.dataTransfer.files);};
+  }
+  if(state.ingest.step===4 && !state.ingest.validation){
+    let p=0; const t=setInterval(()=>{ p+=10; const bar=document.getElementById("valProgress"); if(bar) bar.style.width=p+"%"; if(p>=100){ clearInterval(t); state.ingest.validation={complete:true,reason:true,missing:6.3,issues:["字段 单位 未完全标准化","疑似重复数据 2 条","缺失值比例超过 5%"]}; renderIngest(); } },200);
+  }
+}
+function validateIngest(show=true){ const fields=fieldMap[state.ingest.lib]||[]; const miss=fields.slice(0,4).filter(f=>!state.ingest.fields[f]); if(show&&miss.length) toast(`必填缺失：${miss.join("、")}`,"error"); return miss; }
+function nextIngest(){ const s=state.ingest; if(s.step===1&&!s.lib) return toast("请选择一个子库","warning"); if(s.step===2&&!s.source) return toast("请选择数据来源","warning"); if(s.step===3&&validateIngest().length) return renderIngest(); if(s.step===5){ toast("提交入库成功，已写入 localStorage"); state.ingest={step:1,lib:null,source:null,tags:[],fields:{},files:[],validation:null}; return renderIngest(); } s.step++; if(s.step===4) s.validation=null; renderIngest(); }
+function prevIngest(){ if(state.ingest.step>1){state.ingest.step--; renderIngest();} }
+function safelyStep(i){ if(i<state.ingest.step){ state.ingest.step=i; renderIngest(); } }
+function toggleTag(t,on){ const a=state.ingest.tags; on?a.push(t):state.ingest.tags=a.filter(x=>x!==t); }
+function validationHtml(){ const v=state.ingest.validation; return `<div class="grid grid-cols-3 gap-4">${[["完整性校验",v.complete,"字段完整"],["合理性校验",v.reason,"数值范围合理"],["AI-Ready 预检",v.missing<=5,`缺失值 ${v.missing}%`]].map(x=>`<div class="soft-panel p-5"><div class="text-3xl ${x[1]?"text-emerald":"text-amberx"}">${x[1]?"✓":"!"}</div><h3 class="font-bold text-primary mt-2">${x[0]}</h3><p class="text-slate-500">${x[2]}</p></div>`).join("")}</div><div class="mt-4 bg-yellow-50 border border-yellow-200 rounded p-4"><b class="text-amberx">问题项清单</b><ul class="list-disc ml-5 mt-2">${v.issues.map(i=>`<li>${i}</li>`).join("")}</ul></div>`; }
+function duplicateModal(){ openModal("重复数据对比",`<div class="grid grid-cols-3 gap-3">${["覆盖","跳过","合并"].map((a,i)=>`<div class="soft-panel p-4"><b>疑似重复 ${i+1}</b><p class="text-slate-500 my-2 mono">ID: ${["2D-1001","EL-3001","CAT-5001"][i]}</p><button class="btn btn-primary w-full" onclick="toast('已选择${a}策略');closeModal()">${a}</button></div>`).join("")}</div>`); }
+function simulateDraft(){ openModal("已自动保存草稿",`<p>检测到网络中断，当前向导内容已保存为本地草稿。恢复连接后可继续提交。</p><div class="mt-4 flex justify-end"><button class="btn btn-primary" onclick="closeModal()">知道了</button></div>`); }
+
+function renderStandardize(){
+  pageTitle("低维数据标准化","五大子库字段定义、覆盖数据量、Tooltip 与模板导出。");
+  const tabs=["二维材料","有机光电","电解质","ML力场","催化"];
+  const active=state.stdTab||0;
+  page.innerHTML = `<section class="panel p-4"><div class="flex gap-2 border-b mb-4">${tabs.map((t,i)=>`<button class="btn ${active===i?"btn-primary":"btn-outline"} mb-3" onclick="state.stdTab=${i};renderStandardize()">${t}</button>`).join("")}</div>${stdContent(active)}<div class="mt-5"><button class="btn btn-primary" onclick="toast('标准化模板已生成下载任务')">${icon("download","w-4 h-4")}导出标准化模板</button></div></section>`;
+}
+function stdContent(i){
+  const cats=[["结构特征","电子结构","电学","磁学","热学","力学","光学","缺陷"],["基础信息","物性","图谱","计算"],["有机电解液","固态有机","固态无机"],["单分子","双分子","多分子团簇"],["元素","结构","体系","反应","性能"]][i];
+  const fields=["formula","band_gap","formation_energy","young_modulus","magnetic_moment","source","method","ai_ready"];
+  return `<div class="grid grid-cols-12 gap-4"><div class="col-span-3 space-y-2">${cats.map((c,k)=>`<button class="soft-panel p-3 w-full text-left ${k===(state.stdCat||0)?"!border-tech bg-blue-50":""}" onclick="state.stdCat=${k};renderStandardize()"><div class="flex justify-between"><b>${c}</b><span class="tag blue mono">${(k+2)*3840}</span></div></button>`).join("")}</div><div class="col-span-9">${renderDataTable("stdFields",fields.map((f,k)=>({field:f,type:["string","float","float","float","float","string","enum","integer"][k],unit:["-","eV","eV/atom","N/m","μB","-","-","score"][k],range:["非空","0-8","-5-5","0-500","0-10","DOI/URL","枚举","0-100"][k],example:["MoS2","1.82","-0.78","128","0","10.1000/xyz","VASP","94"][k],req:k<4?"是":"否"})),[{k:"field",t:"字段名",render:r=>`<span class="text-tech underline decoration-dotted cursor-help" title="定义：${r.field}；类型：${r.type}；范围：${r.range}；示例：${r.example}">${r.field}</span>`},{k:"type",t:"类型"},{k:"unit",t:"单位"},{k:"range",t:"取值范围"},{k:"example",t:"示例",mono:true},{k:"req",t:"是否必填"}],{search:false})}</div></div>`;
+}
+
+function dbHeader(title, desc){ pageTitle(title,desc); }
+function render2D(){
+  dbHeader("二维材料数据库","结构检索、元素周期表、可展开详情、3D 晶格与格式转换。");
+  page.innerHTML = `<section class="panel p-4 mb-4"><div class="grid grid-cols-12 gap-4"><div class="col-span-7 grid grid-cols-4 gap-3"><input class="input" placeholder="化学式，如 MoS2" id="q2d"><select class="input"><option>全结构</option><option>子结构</option><option>模糊</option></select><input class="input" placeholder="元素组成，如 Mo-S"><input class="input" placeholder="材料编号"><button class="btn btn-primary col-span-1" onclick="tableSearch('twoD',document.getElementById('q2d').value)">${icon("search","w-4 h-4")}搜索</button></div><div class="col-span-5"><div class="flex justify-between mb-2"><b class="text-primary">元素周期表</b><div><button class="btn btn-outline !min-h-8" onclick="state.selectedElements.clear();render2D()">清空</button><button class="btn btn-primary !min-h-8" onclick="searchByElements()">检索</button></div></div><div class="periodic">${periodicHtml()}</div><div class="mt-2 text-xs text-slate-500">已选：<span id="elPicked">${[...state.selectedElements].join(", ")||"无"}</span></div></div></div></section>
+  <section class="panel p-4"><div class="flex justify-between mb-3"><b class="text-primary">检索结果</b><div class="flex gap-2"><button class="btn btn-outline" ${disabledIf("edit")} onclick="addDemo('twoD')">新增演示数据</button><button class="btn btn-outline" ${disabledIf("edit")} onclick="deleteSelected('twoD','twoD')">删除选中</button></div></div>${renderDataTable("twoD",data.twoD,[{k:"formula",t:"化学式",mono:true},{k:"bandgap",t:"带隙 eV",mono:true},{k:"formation",t:"形成能 eV/atom",mono:true},{k:"young",t:"杨氏模量 N/m",mono:true},{k:"moment",t:"磁矩 μB",mono:true},{k:"space",t:"空间群",mono:true}],{check:true,rowClick:"open2DRow",actions:r=>`<button class="btn btn-outline !min-h-8" onclick="open2DRow('${r.id}')">详情</button>`})}<div class="flex justify-between mt-4"><div class="flex gap-2"><select class="input !w-40"><option>CIF</option><option>POSCAR</option><option>XYZ</option><option>PDB</option></select><button class="btn btn-outline" ${disabledIf("download")} onclick="toast('格式转换完成')">转换</button><select class="input !w-56">${["带隙","形成能","杨氏模量","磁矩","空间群","热导率","介电常数","声子稳定性","缺陷形成能","AI-Ready","更新时间"].map(x=>`<option>${x}</option>`).join("")}</select></div><button class="btn btn-primary" ${disabledIf("download")} onclick="downloadSelected('twoD')">${icon("download","w-4 h-4")}选中下载</button></div></section>`;
+}
+function periodicHtml(){ const symbols="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og".split(" "); return symbols.map((s,i)=>`<button class="el ${i<4?"s":i>56&&i<89?"f":i>20&&i<48?"d":"p"} ${state.selectedElements.has(s)?"selected":""}" title="${i+1} ${s}" onclick="toggleElement('${s}')">${s}</button>`).join(""); }
+function toggleElement(s){ state.selectedElements.has(s)?state.selectedElements.delete(s):state.selectedElements.add(s); render2D(); }
+function searchByElements(){ const q=[...state.selectedElements].join(""); state.tables.twoD={page:1,q,sort:null,dir:1}; toast(`按元素检索：${q||"全部"}`,"info"); render2D(); }
+function open2DRow(id){
+  const r=data.twoD.find(x=>x.id===id);
+  openModal(`${r.formula} 详情`, `<div class="grid grid-cols-12 gap-4"><div class="col-span-5"><div id="viewer2d" class="viewer"></div></div><div class="col-span-7"><div class="flex gap-2 mb-3">${["结构","电子","电学","磁学","热学","力学","光学","缺陷"].map((t,i)=>`<button class="btn ${i===0?"btn-primary":"btn-outline"} detail-tab" onclick="swapDetailTab(this,'${t}')">${t}</button>`).join("")}</div><div id="detailTabBox">${detailTabHtml("结构",r)}</div></div></div>`, "lg");
+  setTimeout(()=>{ initThree("viewer2d","lattice"); ech("detailChart",sparkLine("模拟性质曲线",C.tech)); },50);
+}
+function detailTabHtml(t,r){ return `<div class="grid grid-cols-2 gap-4"><div class="soft-panel p-4"><table><tr><td>化学式</td><td class="mono">${r.formula}</td></tr><tr><td>带隙</td><td class="mono">${r.bandgap} eV</td></tr><tr><td>形成能</td><td class="mono">${r.formation}</td></tr><tr><td>空间群</td><td class="mono">${r.space}</td></tr></table></div><div id="detailChart" class="chart"></div></div>`; }
+function swapDetailTab(btn,t){ document.querySelectorAll(".detail-tab").forEach(b=>b.className="btn btn-outline detail-tab"); btn.className="btn btn-primary detail-tab"; document.getElementById("detailTabBox").innerHTML=detailTabHtml(t,{formula:t,bandgap:(Math.random()*3).toFixed(2),formation:(Math.random()-1).toFixed(2),space:"P-6m2"}); setTimeout(()=>ech("detailChart",sparkLine(`${t}图谱`, t==="缺陷"?C.amber:C.tech)),20); }
+function downloadSelected(k){ const ids=getChecked(k); if(!ids.length) return toast("请先勾选数据","warning"); toast(`已创建 ${ids.length} 条数据下载任务`); }
+function addDemo(store){
+  if(!can("edit")) return toast("当前角色无新增权限","error");
+  const id = `${store.toUpperCase()}-${Date.now().toString().slice(-5)}`;
+  const samples = {
+    twoD:{id,formula:"ReS2",bandgap:1.47,formation:-0.52,young:91,moment:0,space:"P-1",ai:89,elements:["Re","S"]},
+    organic:{id,name:"演示分子 / Demo Molecule",formula:"C12H10N2",cas:"N/A",mw:182.22,homo:-5.42,lumo:-2.66,excite:2.31,stokes:68},
+    electrolyte:{id,name:"Demo-LiSalt",type:"锂盐",sub:state.elSub||"有机电解液",mw:188.12,conductivity:5.6,viscosity:0.31,ai:80},
+    ml:{id,name:"演示分子",formula:"C2H4O",atoms:7,charge:0,dipole:1.23,quadrupole:2.45},
+    catalyst:{id,name:"Demo-Cu(100)",substrate:"Cu",facet:"100",intermediate:"*CO",adsorption:-0.41,selectivity:73,faraday:66}
+  };
+  data[store].unshift(samples[store]);
+  saveData();
+  toast("已新增一条演示数据");
+  render();
+}
+function deleteSelected(tableKey,store){
+  if(!can("edit")) return toast("当前角色无删除权限","error");
+  const ids=getChecked(tableKey);
+  if(!ids.length) return toast("请先勾选要删除的数据","warning");
+  confirmBox("确认删除",`确定删除选中的 ${ids.length} 条演示数据？`,()=>{ data[store]=data[store].filter(r=>!ids.includes(r.id)); saveData(); toast("已删除选中数据","warning"); render(); });
+}
+
+function renderOrganic(){
+  dbHeader("有机光电材料数据库","分子检索、图谱叠加、计算数据与外部关联。");
+  page.innerHTML = `<section class="panel p-4 mb-4 grid grid-cols-6 gap-3"><input class="input" placeholder="中英文名称"><input class="input" placeholder="分子式"><input class="input" placeholder="CAS/InChI"><input class="input" type="number" placeholder="分子量 min"><input class="input" type="number" placeholder="分子量 max"><select class="input" multiple><option>C</option><option>H</option><option>N</option><option>O</option><option>S</option></select><button class="btn btn-primary" onclick="toast('已执行有机光电检索')">搜索</button></section><section class="panel p-4"><div class="flex justify-between mb-3"><b class="text-primary">检索结果</b><div class="flex gap-2"><button class="btn btn-outline" ${disabledIf("edit")} onclick="addDemo('organic')">新增演示数据</button><button class="btn btn-outline" ${disabledIf("edit")} onclick="deleteSelected('organic','organic')">删除选中</button></div></div>${renderDataTable("organic",data.organic,[{k:"name",t:"名称"},{k:"formula",t:"分子式",mono:true},{k:"mw",t:"分子量",mono:true},{k:"homo",t:"HOMO eV",mono:true},{k:"lumo",t:"LUMO eV",mono:true},{k:"excite",t:"激发能 eV",mono:true},{k:"stokes",t:"斯托克斯位移 nm",mono:true}],{check:true,rowClick:"organicDetail",actions:r=>`<button class="btn btn-outline !min-h-8" onclick="organicDetail('${r.id}')">详情</button>`})}</section>`;
+}
+function organicDetail(id){ const r=data.organic.find(x=>x.id===id); openModal(r.name,`<div class="grid grid-cols-12 gap-4"><div class="col-span-5"><div id="molView" class="viewer"></div><div class="soft-panel p-3 mt-3"><b>基础信息</b><p class="mono">${r.formula} · CAS ${r.cas}</p><p>HOMO ${r.homo} eV，LUMO ${r.lumo} eV</p></div></div><div class="col-span-7"><div class="flex gap-2 mb-3">${["基础信息","物性","图谱","计算","简正模式"].map((t,i)=>`<button class="btn ${i===0?"btn-primary":"btn-outline"}" onclick="toast('已切换到 ${t}','info')">${t}</button>`).join("")}</div><div id="orgChart" class="chart"></div><div class="soft-panel p-3 mt-3"><b>计算数据</b><div class="mono mt-2">Ground: ${r.homo} eV / Excited: ${r.lumo} eV / Gap: ${(r.lumo-r.homo).toFixed(2)} eV</div><button class="btn btn-outline mt-3" ${disabledIf("download")} onclick="toast('ZIP 下载任务已创建')">ZIP 下载</button></div><div class="flex gap-2 mt-4"><button class="btn btn-outline" onclick="toast('跳转 PubChem（模拟）')">在 PubChem 中查看</button><button class="btn btn-outline" onclick="toast('跳转 ChemSpider（模拟）')">在 ChemSpider 中查看</button></div></div></div>`,"lg"); setTimeout(()=>{initThree("molView","molecule"); ech("orgChart",sparkLine("IR / Raman / NMR 叠加曲线",C.emerald));},50); }
+
+function renderElectrolyte(){
+  dbHeader("电解质材料数据库","有机电解液、固态有机、固态无机三大子库。");
+  const sub=state.elSub||"有机电解液"; const rows=data.electrolyte.filter(x=>x.sub===sub);
+  page.innerHTML = `<section class="panel p-4"><div class="flex gap-2 mb-4">${["有机电解液","固态有机电解质","固态无机电解质"].map(t=>`<button class="btn ${sub===t?"btn-primary":"btn-outline"}" onclick="state.elSub='${t}';renderElectrolyte()">${t}</button>`).join("")}</div><div class="grid grid-cols-5 gap-3 mb-4"><input class="input" placeholder="名称/分子式/编号"><input class="input" placeholder="关键词，如 燃点/带隙"><button class="btn btn-primary" onclick="toast('已执行电解质检索')">搜索</button></div><div class="flex justify-between mb-3"><b class="text-primary">${sub} 结果</b><div class="flex gap-2"><button class="btn btn-outline" ${disabledIf("edit")} onclick="addDemo('electrolyte')">新增演示数据</button><button class="btn btn-outline" ${disabledIf("edit")} onclick="deleteSelected('electrolyte','electrolyte')">删除选中</button></div></div>${renderDataTable("electrolyte",rows,[{k:"name",t:"名称",mono:true},{k:"type",t:"类型"},{k:"sub",t:"子库"},{k:"mw",t:"分子量",mono:true},{k:"conductivity",t:"电导率",mono:true},{k:"viscosity",t:"黏度/阻抗",mono:true},{k:"ai",t:"AI-Ready",mono:true}],{check:true,rowClick:"electrolyteDetail",actions:r=>`<button class="btn btn-outline !min-h-8" onclick="electrolyteDetail('${r.id}')">详情</button>`})}</section>`;
+}
+function electrolyteDetail(id){ const r=data.electrolyte.find(x=>x.id===id); openModal(r.name,`<div class="grid grid-cols-12 gap-4"><div class="col-span-8"><div class="flex gap-2 mb-3">${["基础","物性13项","安全","图谱","计算","参考"].map((t,i)=>`<button class="btn ${i===0?"btn-primary":"btn-outline"}">${t}</button>`).join("")}</div><div id="elChart" class="chart"></div><div class="grid grid-cols-3 gap-3 mt-3">${["燃点","闪点","离子迁移数"].map((x,i)=>`<div class="soft-panel p-3"><b>${x}</b><div class="mono text-primary text-lg">${[128,36,.42][i]}</div></div>`).join("")}</div></div><aside class="col-span-4"><b class="text-primary">相似分子推荐 Top5</b>${["LiFSI","LiTFSI","LiClO4","EMIM-TFSI","LLTO"].map((x,i)=>`<div class="soft-panel p-3 mt-2 flex justify-between"><span>${x}</span><b class="mono">${95-i*5}%</b></div>`).join("")}<button class="btn btn-outline mt-3" ${disabledIf("download")} onclick="toast('结构文件下载已准备')">结构文件下载</button></aside></div>`,"lg"); setTimeout(()=>ech("elChart",sparkLine(r.sub.includes("无机")?"XRD / XAS 模拟图谱":"物性趋势图",C.amber)),50); }
+
+function renderML(){
+  dbHeader("机器学习力场数据库","性质二级检索、分子查看、内联编辑与术语表。");
+  page.innerHTML = `<section class="panel p-4 mb-4 grid grid-cols-5 gap-3"><input class="input" placeholder="化学名称"><input class="input" placeholder="分子式"><input class="input" list="propList" placeholder="性质数据检索，如 电荷"><datalist id="propList"><option>原子电荷</option><option>偶极矩</option><option>四极矩</option><option>相互作用能</option></datalist><button class="btn btn-primary" onclick="toast('已执行 ML 力场检索')">搜索</button><button class="btn btn-outline" onclick="openGlossary()">术语表</button></section><section class="panel p-4"><div class="flex justify-between mb-3"><b class="text-primary">力场数据结果</b><div class="flex gap-2"><button class="btn btn-outline" ${disabledIf("edit")} onclick="addDemo('ml')">新增演示数据</button><button class="btn btn-outline" ${disabledIf("edit")} onclick="deleteSelected('ml','ml')">删除选中</button></div></div>${renderDataTable("ml",data.ml,[{k:"name",t:"分子名称",edit:true},{k:"formula",t:"分子式",mono:true,edit:true},{k:"atoms",t:"原子数",mono:true,edit:true},{k:"charge",t:"电荷",mono:true,edit:true},{k:"dipole",t:"偶极矩",mono:true,edit:true},{k:"quadrupole",t:"四极矩",mono:true,edit:true}],{check:true,store:"ml",rowClick:"mlDetail",actions:r=>`<button class="btn btn-outline !min-h-8" onclick="mlDetail('${r.id}')">详情</button>`})}<div class="flex gap-2 mt-4"><input type="file" class="input !w-64" accept=".xyz"><select class="input !w-36"><option>PDB</option><option>MOL2</option><option>GRO</option></select><button class="btn btn-outline" ${disabledIf("download")} onclick="toast('拓扑文件转换下载已创建')">转换下载</button><button class="btn btn-primary" ${disabledIf("download")} onclick="toast('XML 力场文件下载已创建')">力场 XML 下载</button></div></section>`;
+}
+function mlDetail(id){ const r=data.ml.find(x=>x.id===id); openModal(r.name,`<div class="grid grid-cols-12 gap-4"><div class="col-span-5"><div id="mlView" class="viewer"></div></div><div class="col-span-7"><h3 class="font-bold text-primary mb-2">原子电荷表</h3>${renderDataTable("chargeTbl",Array.from({length:r.atoms},(_,i)=>({atom:i+1,element:["C","H","O","N"][i%4],charge:(Math.random()-.5).toFixed(3)})),[{k:"atom",t:"原子"},{k:"element",t:"元素"},{k:"charge",t:"电荷",mono:true}],{search:false})}<div id="mlChart" class="chart mt-3"></div></div></div>`,"lg"); setTimeout(()=>{initThree("mlView","molecule"); ech("mlChart",{tooltip:{},xAxis:{type:"category",data:["单分子","双分子总能量","相互作用能"]},yAxis:{type:"value"},series:[{type:"bar",data:[-42.3,-85.1,-.52],itemStyle:{color:C.tech}}]});},50); }
+function openGlossary(){ drawer.innerHTML=`<div class="p-5 flex justify-between border-b"><b class="text-primary">术语表</b><button class="btn btn-outline" onclick="drawer.classList.remove('show')">关闭</button></div><div class="p-5 space-y-2">${["Atomic charge","Dipole moment","Force constant","Interaction energy","Multipole","Topology","XML force field"].sort().map(x=>`<div class="soft-panel p-3"><b>${x}</b><p class="text-slate-500">参数定义、单位、适用范围与示例值。</p></div>`).join("")}</div>`; drawer.classList.add("show"); }
+
+function renderCatalyst(){
+  dbHeader("催化材料数据库","组合检索、对比、材料生成与活性位点分析。");
+  page.innerHTML = `<section class="panel p-4 mb-4"><div class="grid grid-cols-7 gap-3"><input class="input" placeholder="关键词"><select class="input" multiple><option>金属表面</option><option>氧化物</option><option>边缘位点</option></select><select class="input" multiple><option>111</option><option>100</option><option>110</option><option>211</option></select><select class="input" multiple><option>*COOH</option><option>*CO</option><option>*H</option></select><input class="input" placeholder="元素组成"><input class="input" placeholder="反应物"><input class="input" placeholder="生成物"><button class="btn btn-primary" onclick="toast('已执行催化检索')">搜索</button></div></section><section class="panel p-4 mb-4"><div class="flex justify-between mb-3"><b class="text-primary">催化材料结果</b><div class="flex gap-2"><button class="btn btn-outline" ${disabledIf("edit")} onclick="addDemo('catalyst')">新增演示数据</button><button class="btn btn-outline" ${disabledIf("edit")} onclick="deleteSelected('catalyst','catalyst')">删除选中</button><button class="btn btn-primary" onclick="compareCatalyst()">对比选中</button></div></div>${renderDataTable("catalyst",data.catalyst,[{k:"name",t:"材料名称"},{k:"substrate",t:"基底"},{k:"facet",t:"晶面"},{k:"intermediate",t:"中间产物"},{k:"adsorption",t:"吸附能 eV",mono:true},{k:"selectivity",t:"反应选择性%",mono:true},{k:"faraday",t:"法拉第效率%",mono:true}],{check:true,rowClick:"catDetail",actions:r=>`<button class="btn btn-outline !min-h-8" onclick="catDetail('${r.id}')">详情</button>`})}</section>${catToolsHtml()}`;
+}
+function catDetail(id){ const r=data.catalyst.find(x=>x.id===id); openModal(r.name,`<div class="flex gap-2 mb-4">${["元素特征","结构特征","体系特征","催化反应","催化性能"].map((t,i)=>`<button class="btn ${i===3?"btn-primary":"btn-outline"}">${t}</button>`).join("")}</div><div class="grid grid-cols-6 gap-3">${["*COOH","*CO","*CHO","*OCHO","*H","*OH"].map((x,i)=>`<div class="soft-panel p-3"><div id="catv${i}" class="viewer !h-32"></div><b>${x}</b><div class="mono text-amberx">${(r.adsorption+i*.11).toFixed(2)} eV</div></div>`).join("")}</div>`,"lg"); setTimeout(()=>[0,1,2,3,4,5].forEach(i=>initThree(`catv${i}`,"lattice")),50); }
+function compareCatalyst(){ const ids=getChecked("catalyst"); if(ids.length<2||ids.length>5) return toast("请选择 2-5 行进行对比","warning"); openModal("催化材料对比",`<div id="compareChart" class="chart"></div>`, "lg"); setTimeout(()=>ech("compareChart",{tooltip:{},xAxis:{type:"category",data:ids},yAxis:{type:"value",name:"吸附能 eV"},series:[{type:"bar",data:ids.map(id=>data.catalyst.find(x=>x.id===id).adsorption),itemStyle:{color:C.amber}}]}),50); }
+function catToolsHtml(){ return `<section class="panel p-4"><details open><summary class="font-extrabold text-primary cursor-pointer">材料生成工具</summary><div class="grid grid-cols-12 gap-4 mt-4"><div class="col-span-3 space-y-2">${["体相晶格生成","Slab 模型生成","吸附物添加"].map((t,i)=>`<label class="soft-panel p-3 block"><input type="radio" name="gentool" ${i===0?"checked":""}> ${t}</label>`).join("")}</div><div class="col-span-5 grid grid-cols-2 gap-3">${["分子式","空间群","晶面指数","真空层宽度","厚板层数","固定层层数","原胞大小","吸附位点"].map(x=>`<input class="input" placeholder="${x}">`).join("")}<button class="btn btn-primary col-span-2" ${disabledIf("generate")} onclick="generateCatalyst()">生成</button></div><div class="col-span-4 soft-panel p-4"><b>活性位点分析</b><div class="grid grid-cols-2 gap-2 mt-3">${["金属衬底","晶面","吸附物","位点"].map(x=>`<input class="input" placeholder="${x}">`).join("")}</div><button class="btn btn-outline mt-3" ${disabledIf("generate")} onclick="activeSite()">模拟分析</button><div id="activeResult" class="mt-3 text-slate-600"></div></div></div></details></section>`; }
+function generateCatalyst(){ if(roles[state.role].limitGenerate){ if(state.enterpriseUses>=10) return openModal("额度已用完",`<p>企业用户材料生成工具单日限制 10 次，今日已达上限。</p>`); state.enterpriseUses++; localStorage.setItem("ldm_enterprise_uses",state.enterpriseUses); } openModal("生成结果",`<div class="grid grid-cols-2 gap-4"><div id="genView" class="viewer"></div><div><b class="text-primary">结构生成完成</b><p class="mono mt-2">adsorption_energy = -0.54 eV<br>file = generated_slab.cif</p><button class="btn btn-primary mt-4" ${disabledIf("download")} onclick="toast('文件下载已创建')">文件下载</button></div></div>`); setTimeout(()=>initThree("genView","lattice"),50); }
+function activeSite(){ document.getElementById("activeResult").innerHTML=`<div class="tag green">吸附能预测值 -0.47 eV</div><div class="mt-2 font-bold text-primary">活性评级：A</div>`; toast("活性位点分析完成"); }
+
+function renderApps(){
+  pageTitle("低维材料主题应用","检索筛选、分析可视化、数据处理、更新共享四步流程。");
+  const step=state.appStep||1;
+  page.innerHTML = `<section class="panel p-5"><div class="flex items-center justify-between mb-5">${["检索筛选","分析可视化","数据处理","更新共享"].map((t,i)=>`<div class="step ${step===i+1?"active":step>i+1?"done":""}" onclick="state.appStep=${i+1};renderApps()"><span class="bubble">${i+1}</span><span>${t}</span></div>`).join(`<div class="flex-1 h-px bg-slate-200 mx-3"></div>`)}</div>${appStepHtml(step)}</section>`;
+  if(step===2) setTimeout(()=>{ initThree("appView","lattice"); ech("appChart",sparkLine("内嵌分析图",C.tech)); },50);
+}
+function appStepHtml(s){
+  if(s===1) return `<input class="input mb-4" placeholder="全局检索：化学式、CAS、材料编号、关键词"><div class="grid grid-cols-3 gap-3">${[...data.twoD.slice(0,3),...data.catalyst.slice(0,3)].map(r=>`<div class="soft-panel p-4"><button class="float-right text-amberx" onclick="this.textContent=this.textContent==='☆'?'★':'☆'">☆</button><b>${r.formula||r.name}</b><p class="text-slate-500 mono">${r.id}</p><label class="mt-3 block"><input type="checkbox"> 选中</label></div>`).join("")}</div>`;
+  if(s===2) return `<div class="grid grid-cols-2 gap-4"><div class="viewer" id="appView"></div><div id="appChart" class="chart"></div></div>`;
+  if(s===3) return `<div class="grid grid-cols-3 gap-4">${["格式转换","材料生成","批量处理"].map(t=>`<button class="soft-panel p-8 text-left hover:!border-tech" onclick="toast('${t} 面板已打开')"><b class="text-primary">${t}</b><p class="text-slate-500 mt-2">上传、参数配置、任务提交与结果下载。</p></button>`).join("")}</div>`;
+  return `<div class="grid grid-cols-2 gap-4"><div class="soft-panel p-5"><b>上传面板</b><input type="file" class="input mt-3"><button class="btn btn-primary mt-3" onclick="toast('共享上传完成')">上传共享</button></div><div class="soft-panel p-5"><b>下载与外部关联</b><div class="mt-3 flex gap-2"><button class="btn btn-outline" ${disabledIf("download")}>批量下载</button><button class="btn btn-outline">外部 DOI</button></div></div></div>`;
+}
+
+function renderAnalysis(){
+  pageTitle("低维材料数据分析预测","算法中心、工具集与任务管理。");
+  const tab=state.anTab||"算法中心";
+  page.innerHTML = `<section class="panel p-4"><div class="flex gap-2 mb-4">${["算法中心","工具集","任务管理"].map(t=>`<button class="btn ${tab===t?"btn-primary":"btn-outline"}" onclick="state.anTab='${t}';renderAnalysis()">${t}</button>`).join("")}</div>${analysisHtml(tab)}</section>`;
+}
+function analysisHtml(tab){
+  if(tab==="算法中心"){ const algos=["GNN-BandGap","DOSNet","PhononAI","SpectraFit","ElectrolyteRank","ChargeEQ","AdsorbNet","SankeyFlow","ManhattanGWAS"]; return `<div class="grid grid-cols-3 gap-4">${algos.map((a,i)=>`<button class="soft-panel p-5 text-left" onclick="createTask('${a}')"><div class="flex justify-between"><b class="text-primary">${a}</b><span class="tag ${i%4===0?"gray":"green"}">${i%4===0?"维护中":"可用"}</span></div><p class="text-slate-500 mt-2">输入：结构/表格/图谱文件；输出：预测值、置信区间、可视化报告。</p><span class="tag blue mt-3">${libs[i%5][1]}</span></button>`).join("")}</div>`; }
+  if(tab==="工具集") return `<div class="grid grid-cols-5 gap-4">${["多目标逆向设计","智能清洗","模拟助手","催化剂设计","ML模型接口"].map(t=>`<button class="soft-panel p-5 text-left" onclick="openModal('${t}', '<p>参数配置、文件上传、执行日志和结果面板。</p><button class=\\'btn btn-primary mt-4\\' onclick=\\'toast(&quot;工具任务已提交&quot;);closeModal()\\'>提交</button>')"><b class="text-primary">${t}</b><p class="text-slate-500 mt-2">点击打开操作面板。</p></button>`).join("")}</div>`;
+  return renderDataTable("tasks",data.tasks,[{k:"name",t:"名称"},{k:"algo",t:"算法"},{k:"status",t:"状态",render:r=>`<span class="tag ${r.status==="已完成"?"green":r.status==="失败"?"red":r.status==="排队中"?"yellow":"blue"}">${r.status}</span>`},{k:"time",t:"提交时间",mono:true},{k:"cost",t:"耗时",mono:true}],{actions:r=>taskActions(r)});
+}
+function createTask(algo){ openModal("任务创建向导",`<div class="grid grid-cols-2 gap-4"><label>上传文件<input type="file" class="input mt-1"></label><label>学习率<input class="input mt-1" value="0.001"></label><label>批大小<input class="input mt-1" value="64"></label><label>最大轮次<input class="input mt-1" value="120"></label></div><button class="btn btn-primary mt-5" onclick="submitTask('${algo}')">提交任务</button>`); }
+function submitTask(algo){ closeModal(); const task={id:`T-${Date.now()}`,name:`${algo} 分析任务`,algo,status:"排队中",time:"2026-07-31 14:30",cost:"-"}; data.tasks.unshift(task); saveData(); toast("任务已提交，开始模拟进度","info"); state.anTab="任务管理"; renderAnalysis(); setTimeout(()=>{ task.status="运行中"; saveData(); renderAnalysis(); },1000); setTimeout(()=>{ task.status="已完成"; task.cost="3m 18s"; saveData(); renderAnalysis(); toast("分析任务已完成"); },4200); }
+function taskActions(r){ if(r.status==="已完成") return `<button class="btn btn-outline !min-h-8" onclick="openModal('任务结果','<div id=\\'taskChart\\' class=\\'chart\\'></div>');setTimeout(()=>ech('taskChart',sparkLine('预测结果',C.emerald)),50)">查看结果</button>`; if(r.status==="失败") return `<button class="btn btn-outline !min-h-8" onclick="toast('日志：输入文件字段缺失','error')">日志</button><button class="btn btn-outline !min-h-8" onclick="rtry('${r.id}')">重试</button>`; if(r.status==="排队中") return `<button class="btn btn-outline !min-h-8" onclick="cancelTask('${r.id}')">取消</button>`; return `<span class="text-slate-400">运行中</span>`; }
+function cancelTask(id){ data.tasks.find(t=>t.id===id).status="已取消"; saveData(); toast("任务已取消","warning"); renderAnalysis(); }
+function rtry(id){ data.tasks.find(t=>t.id===id).status="排队中"; saveData(); toast("任务已重新排队"); renderAnalysis(); }
+
+function renderSystem(){
+  pageTitle("系统管理","用户、审核、版本、AI-Ready、审计日志与配置。");
+  const tab=state.sysTab||"用户管理";
+  page.innerHTML = `<section class="panel p-4"><div class="flex gap-2 mb-4 overflow-x-auto">${["用户管理","审核队列","数据版本","AI-Ready","审计日志","系统配置"].map(t=>`<button class="btn ${tab===t?"btn-primary":"btn-outline"}" onclick="state.sysTab='${t}';renderSystem()">${t}</button>`).join("")}</div>${systemHtml(tab)}</section>`;
+}
+function systemHtml(tab){
+  if(tab==="用户管理") return `<div class="grid grid-cols-5 gap-3 mb-4"><input class="input" placeholder="搜索姓名/组织"><select class="input"><option>全部角色</option><option>管理员</option><option>研究员</option></select></div>${renderDataTable("users",data.users,[{k:"name",t:"姓名"},{k:"org",t:"组织"},{k:"role",t:"角色"},{k:"status",t:"状态",render:r=>`<span class="tag ${r.status==="启用"?"green":"red"}">${r.status}</span>`},{k:"time",t:"注册时间",mono:true}],{actions:r=>`<button class="btn btn-outline !min-h-8">编辑</button><button class="btn btn-outline !min-h-8" onclick="confirmBox('确认禁用','确定禁用 ${r.name}？',()=>toast('用户已禁用','warning'))">禁用</button><button class="btn btn-outline !min-h-8">重置密码</button>`})}`;
+  if(tab==="审核队列") return renderDataTable("auditQueue",Array.from({length:12},(_,i)=>({id:`REV-${700+i}`,lib:libs[i%5][1],user:["张岚","王珩","李若水"][i%3],time:`2026-07-${20+i} 09:00`,status:["待审核","待复核","已驳回"][i%3]})),[{k:"id",t:"数据ID"},{k:"lib",t:"子库"},{k:"user",t:"提交人"},{k:"time",t:"提交时间",mono:true},{k:"status",t:"状态",render:r=>`<span class="tag ${r.status==="已驳回"?"red":"yellow"}">${r.status}</span>`}],{actions:r=>`<button class="btn btn-primary !min-h-8" onclick="toast('审核通过')">通过</button><button class="btn btn-outline !min-h-8" onclick="rejectModal('${r.id}')">驳回</button>`});
+  if(tab==="数据版本") return `<div class="grid grid-cols-3 gap-4"><div>${["v1 创建","v2 补充图谱","v3 AI-Ready 修订"].map((x,i)=>`<button class="soft-panel p-4 w-full text-left mb-2" onclick="document.getElementById('diffBox').innerHTML=diffHtml(${i})"><b>${x}</b><div class="text-xs text-slate-500">2026-0${5+i}-12</div></button>`).join("")}</div><div id="diffBox" class="col-span-2">${diffHtml(0)}</div></div>`;
+  if(tab==="AI-Ready") return `<div class="grid grid-cols-3 gap-4"><label>缺失值阈值 <span id="thrVal" class="mono">5%</span><input type="range" min="1" max="20" value="5" class="w-full mt-2" oninput="thrVal.textContent=this.value+'%'"></label><label class="col-span-2">存储格式<div class="flex gap-2 mt-2">${["HDF5","CSV","SQLite","JSON"].map(x=>`<label class="tag blue"><input type="checkbox" checked> ${x}</label>`).join("")}</div></label><label>单表最低记录数<input class="input mt-1" value="1000"></label><button class="btn btn-primary" onclick="toast('AI-Ready 配置已保存')">保存配置</button></div>`;
+  if(tab==="审计日志") return `<div class="grid grid-cols-5 gap-3 mb-4"><input type="date" class="input"><input type="date" class="input"><button class="btn btn-outline" onclick="toast('审计日志导出完成')">导出</button></div>${renderDataTable("logs",data.audit,[{k:"time",t:"时间",mono:true},{k:"user",t:"用户"},{k:"action",t:"操作"},{k:"ip",t:"IP",mono:true}],{})}`;
+  return `<div class="grid grid-cols-3 gap-4">${["注册审核开关","批量下载限制数值","任务队列并发数"].map((x,i)=>`<label class="soft-panel p-4"><b>${x}</b>${i===0?`<select class="input mt-3"><option>开启</option><option>关闭</option></select>`:`<input class="input mt-3" value="${i===1?5000:6}">`}</label>`).join("")}<button class="btn btn-primary" onclick="toast('系统配置已保存')">保存</button></div>`;
+}
+function rejectModal(id){ openModal("驳回原因",`<select class="input"><option>字段缺失</option><option>单位不一致</option><option>来源不可追溯</option></select><textarea class="input mt-3 h-28" placeholder="自由文本原因"></textarea><div class="mt-4 flex justify-end gap-2"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-danger" onclick="closeModal();toast('已驳回 ${id}','warning')">确认驳回</button></div>`); }
+function diffHtml(i){ return `<div class="table-wrap"><table><thead><tr><th>字段</th><th>旧值</th><th>新值</th></tr></thead><tbody>${["band_gap","ai_ready","source","updated_by"].map((f,k)=>`<tr><td>${f}</td><td class="mono">${k+i}</td><td class="mono">${k+i+1}</td></tr>`).join("")}</tbody></table></div>`; }
+
+function initGlobal(){
+  roleSelect.value=state.role;
+  roleSelect.onchange=e=>{ state.role=e.target.value; localStorage.setItem("ldm_role",state.role); toast(`已切换为${roles[state.role].label}`,"info"); if((state.page==="system"&&!can("sys")) || (state.role==="guest" && state.page!=="dashboard" && !state.page.startsWith("db-"))) state.page="dashboard"; render(); };
+  collapseBtn.innerHTML=icon("menu","w-5 h-5");
+  collapseBtn.onclick=()=>{ sidebar.classList.toggle("collapsed"); appShell.classList.toggle("collapsed"); };
+  netErrBtn.onclick=()=>{ networkBanner.classList.remove("hidden"); toast("网络连接异常，部分功能不可用","error"); setTimeout(()=>networkBanner.classList.add("hidden"),5000); };
+  render();
+  setTimeout(()=>{ if(state.page==="apps" && state.appStep===2){ initThree("appView","lattice"); ech("appChart",sparkLine("内嵌分析图",C.tech)); } },50);
+}
+document.addEventListener("DOMContentLoaded", initGlobal);
+</script>
+</body>
+</html>
