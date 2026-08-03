@@ -18770,16 +18770,90 @@
       <section class="page" id="page-standard-mlff"></section>
       <section class="page" id="page-standard-catalyst"></section>
       <section class="page" id="page-lowdim-ingest-twod"></section>
+      <div class="overlay" id="twodIngestResourceObjectModal">
+        <div class="modal modal-lg twod-ingest-resource-modal">
+          <div class="modal-header">
+            <h3 id="twodIngestResourceObjectModalTitle">新增资源对象</h3>
+            <button class="modal-close" type="button" data-close-modal="twodIngestResourceObjectModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodIngestResourceObjectModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodIngestResourceObjectModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-ingest-resource-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodIngestGenericRowModal">
+        <div class="modal modal-lg twod-ingest-resource-modal">
+          <div class="modal-header">
+            <h3 id="twodIngestGenericRowModalTitle">新增配置</h3>
+            <button class="modal-close" type="button" data-close-modal="twodIngestGenericRowModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodIngestGenericRowModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodIngestGenericRowModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-ingest-generic-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodIngestSecurityModal">
+        <div class="modal modal-lg twod-ingest-security-modal">
+          <div class="modal-header">
+            <h3 id="twodIngestSecurityModalTitle">安全等级操作</h3>
+            <button class="modal-close" type="button" data-close-modal="twodIngestSecurityModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodIngestSecurityModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodIngestSecurityModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-ingest-security-modal-save>保存</button>
+          </div>
+        </div>
+      </div>
       <section class="page" id="page-lowdim-ingest-opto"></section>
       <section class="page" id="page-lowdim-ingest-electrolyte"></section>
       <section class="page" id="page-lowdim-ingest-mlff"></section>
       <section class="page" id="page-lowdim-ingest-catalyst"></section>
       <section class="page" id="page-lowdim-standardization-twod"></section>
+      <div class="overlay" id="twodStandardizationRuleModal">
+        <div class="modal modal-lg twod-standardization-rule-modal">
+          <div class="modal-header">
+            <h3 id="twodStandardizationRuleModalTitle">新增标准规则</h3>
+            <button class="modal-close" type="button" data-close-modal="twodStandardizationRuleModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodStandardizationRuleModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodStandardizationRuleModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-std-rule-save>保存</button>
+          </div>
+        </div>
+      </div>
       <section class="page" id="page-lowdim-standardization-opto"></section>
       <section class="page" id="page-lowdim-standardization-electrolyte"></section>
       <section class="page" id="page-lowdim-standardization-mlff"></section>
       <section class="page" id="page-lowdim-standardization-catalyst"></section>
       <section class="page" id="page-lowdim-database-twod"></section>
+      <div class="overlay" id="twodDatabaseDatasetModal">
+        <div class="modal modal-lg twod-database-dataset-modal">
+          <div class="modal-header">
+            <h3 id="twodDatabaseDatasetModalTitle">新增数据集</h3>
+            <button class="modal-close" type="button" data-close-modal="twodDatabaseDatasetModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodDatabaseDatasetModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodDatabaseDatasetModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-db-dataset-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodDatabaseStructurePreviewModal">
+        <div class="modal modal-lg twod-database-preview-modal">
+          <div class="modal-header">
+            <h3 id="twodDatabaseStructurePreviewTitle">原子结构图</h3>
+            <button class="modal-close" type="button" data-close-modal="twodDatabaseStructurePreviewModal">×</button>
+          </div>
+          <div class="modal-body" id="twodDatabaseStructurePreviewBody"></div>
+        </div>
+      </div>
       <section class="page" id="page-lowdim-database-opto"></section>
       <section class="page" id="page-lowdim-database-electrolyte"></section>
       <section class="page" id="page-lowdim-database-mlff"></section>
@@ -22991,7 +23065,7 @@
         || (typeof value === "number" && !Number.isFinite(value));
     }
 
-    const LOW_DIM_NO_PROPERTY_TEXT = "该材料暂未此性质";
+    const LOW_DIM_NO_PROPERTY_TEXT = "该材料暂无此性质";
 
     function isLowDimNoPropertyValue(value) {
       if (isLowDimMissing(value)) return true;
@@ -27252,7 +27326,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const fastCalcKeyMap = { volume: ["volume_ang3", 3], density: ["density_g_cm3", 4] };
       const isRealTwodRecord = isLowDimRealCase("twod", material);
       const emptyMark = LOW_DIM_NO_PROPERTY_TEXT;
-      // 详情页保留全部字段，缺省值统一提示该材料暂未此性质。
+      // 详情页保留全部字段，缺省值统一提示该材料暂无此性质。
       const items = (materialDetailTabs[tab] || []).map((item) => {
         const fast = fastCalcKeyMap[item.key];
         if (fast) {
@@ -48975,11 +49049,61 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const rows = getTwodStandardRowsStore()[tabKey] || [];
       const keyword = String(state.twodStandardKeyword || "").trim().toLowerCase();
       if (!keyword) return rows;
-      return rows.filter((row) => Object.values(row).some((value) => String(value || "").toLowerCase().includes(keyword)));
+      return rows.filter((row) => Object.values(row).some((value) => {
+        const text = value && typeof value === "object" ? Object.values(value).join(" ") : value;
+        return String(text || "").toLowerCase().includes(keyword);
+      }));
     }
 
     function renderTwodStandardCell(value) {
       return escapeLowDimHtml(value == null || value === "" ? "-" : value);
+    }
+
+    function getTwodStandardColumnClass(column) {
+      return `twod-standard-col-${column.key}`;
+    }
+
+    function renderTwodStandardCellContent(tabKey, column, value) {
+      const content = renderTwodStandardCell(value);
+      if (tabKey === "calculation" && column.key === "description") {
+        return `<div class="twod-standard-description-note" title="${content}">${content}</div>`;
+      }
+      return `<span class="twod-standard-cell-text" title="${content}">${content}</span>`;
+    }
+
+    function buildTwodStandardAttachmentFromFile(file) {
+      if (!file) return null;
+      const ext = String(file.name || "").includes(".") ? file.name.split(".").pop().toUpperCase() : "";
+      return {
+        name: file.name || "未命名附件",
+        sizeText: typeof formatFileSize === "function" ? formatFileSize(file.size || 0) : `${file.size || 0} B`,
+        type: file.type || ext || "未知类型",
+        uploadedAt: new Date().toLocaleString("zh-CN", { hour12: false })
+      };
+    }
+
+    function renderTwodStandardAttachmentSummary(attachment) {
+      if (!attachment?.name) {
+        return `
+          <strong>未选择附件</strong>
+          <small>支持 PDF、表格、图片、结构文件、压缩包等常见材料标准文档。</small>
+        `;
+      }
+      return `
+        <strong>${escapeLowDimHtml(attachment.name)}</strong>
+        <small>${escapeLowDimHtml(attachment.sizeText || "大小未知")} · ${escapeLowDimHtml(attachment.type || "文件")} ${attachment.uploadedAt ? `· ${escapeLowDimHtml(attachment.uploadedAt)}` : ""}</small>
+      `;
+    }
+
+    function renderTwodStandardAttachmentCell(record) {
+      const attachment = record?.attachment;
+      if (!attachment?.name) return `<span class="twod-standard-attachment-empty">未上传</span>`;
+      return `
+        <span class="twod-standard-attachment-pill" title="${escapeLowDimHtml(attachment.name)}">
+          <span>${escapeLowDimHtml(attachment.name)}</span>
+          <small>${escapeLowDimHtml(attachment.sizeText || "大小未知")}</small>
+        </span>
+      `;
     }
 
     function renderTwodStandardRows(tabKey, rows) {
@@ -48987,11 +49111,12 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const groupKey = config.groupKey;
       let lastGroup = "";
       return `
-        <div class="twod-standard-table-wrap">
-          <table class="twod-standard-table">
+        <div class="twod-standard-table-wrap twod-standard-table-wrap-${tabKey}">
+          <table class="twod-standard-table twod-standard-table-${tabKey}">
             <thead>
               <tr>
-                ${config.columns.map((column) => `<th style="${column.width ? `width:${column.width};` : ""}">${column.label}</th>`).join("")}
+                ${config.columns.map((column) => `<th class="${getTwodStandardColumnClass(column)}" style="${column.width ? `width:${column.width};` : ""}">${column.label}</th>`).join("")}
+                <th style="width:170px;">附件</th>
                 <th style="width:180px;">操作</th>
               </tr>
             </thead>
@@ -48999,13 +49124,14 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               ${rows.length ? rows.map((row) => {
                 const group = row[groupKey] || "未分类";
                 const groupCount = rows.filter((item) => item[groupKey] === group).length;
-                const groupRow = group !== lastGroup ? `<tr class="twod-standard-group-row"><td colspan="${config.columns.length + 1}">▼ ${renderTwodStandardCell(group)}（${groupCount} 条）</td></tr>` : "";
+                const groupRow = group !== lastGroup ? `<tr class="twod-standard-group-row"><td colspan="${config.columns.length + 2}">▼ ${renderTwodStandardCell(group)}（${groupCount} 条）</td></tr>` : "";
                 lastGroup = group;
                 return `
                   ${groupRow}
                   <tr>
-                    ${config.columns.map((column) => `<td>${renderTwodStandardCell(row[column.key])}</td>`).join("")}
-                    <td>
+                    ${config.columns.map((column) => `<td class="${getTwodStandardColumnClass(column)}" data-label="${column.label}">${renderTwodStandardCellContent(tabKey, column, row[column.key])}</td>`).join("")}
+                    <td data-label="附件">${renderTwodStandardAttachmentCell(row)}</td>
+                    <td data-label="操作">
                       <div class="twod-standard-row-actions">
                         <button class="btn btn-sm" type="button" data-twod-standard-edit="${row.id}">编辑</button>
                         <button class="btn btn-sm btn-danger-outline" type="button" data-twod-standard-delete="${row.id}">删除</button>
@@ -49013,7 +49139,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                     </td>
                   </tr>
                 `;
-              }).join("") : `<tr><td colspan="${config.columns.length + 1}"><div class="sys-empty">暂无符合条件的标准字段</div></td></tr>`}
+              }).join("") : `<tr><td colspan="${config.columns.length + 2}"><div class="sys-empty">暂无符合条件的标准字段</div></td></tr>`}
             </tbody>
           </table>
         </div>
@@ -49165,6 +49291,66 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             word-break: break-word;
             overflow-wrap: anywhere;
           }
+          #page-standard-twod .twod-standard-table td {
+            overflow: hidden;
+          }
+          #page-standard-twod .twod-standard-cell-text {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: help;
+          }
+          #page-standard-twod .twod-standard-table-calculation {
+            min-width: 1180px;
+          }
+          #page-standard-twod .twod-standard-table-calculation .twod-standard-col-description {
+            width: auto;
+            min-width: 280px;
+          }
+          #page-standard-twod .twod-standard-table-calculation td.twod-standard-col-description {
+            padding: 10px 12px;
+          }
+          #page-standard-twod .twod-standard-description-note {
+            display: block;
+            max-width: 100%;
+            width: 100%;
+            min-width: 0;
+            color: #334155;
+            line-height: 22px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: help;
+          }
+          #page-standard-twod .twod-standard-attachment-empty {
+            color: #94a3b8;
+            font-size: 13px;
+          }
+          #page-standard-twod .twod-standard-attachment-pill {
+            display: flex;
+            width: 100%;
+            min-width: 0;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 10px;
+            border: 1px solid #dbe4f0;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #14208a;
+          }
+          #page-standard-twod .twod-standard-attachment-pill span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 700;
+          }
+          #page-standard-twod .twod-standard-attachment-pill small {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 18px;
+          }
           #page-standard-twod .twod-standard-table tbody tr:nth-child(odd):not(.twod-standard-group-row) {
             background: #f5f7fb;
           }
@@ -49205,6 +49391,62 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           .twod-standard-field-modal .field textarea {
             width: 100%;
           }
+          .twod-standard-field-modal .twod-standard-attachment-field {
+            padding-top: 2px;
+          }
+          .twod-standard-field-modal .twod-standard-upload-row {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+            flex-wrap: wrap;
+          }
+          .twod-standard-field-modal .twod-standard-upload-control {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border: 1px solid #12248f;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #001a7a;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+          .twod-standard-field-modal .twod-standard-upload-control input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+          }
+          .twod-standard-field-modal .twod-standard-upload-summary {
+            flex: 1 1 280px;
+            min-height: 44px;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+            padding: 8px 12px;
+            border: 1px solid #d8dce5;
+            border-radius: 5px;
+            background: #f8fafc;
+          }
+          .twod-standard-field-modal .twod-standard-upload-summary strong {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #111827;
+            font-size: 14px;
+          }
+          .twod-standard-field-modal .twod-standard-upload-summary small {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 18px;
+          }
           #page-standard-twod .twod-standard-search svg {
             width: 18px;
             height: 18px;
@@ -49239,6 +49481,56 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             #page-standard-twod .twod-standard-row-actions .btn {
               min-width: 58px;
               padding: 4px 8px;
+            }
+            #page-standard-twod .twod-standard-table-calculation {
+              min-width: 0;
+              border-collapse: separate;
+              border-spacing: 0 10px;
+            }
+            #page-standard-twod .twod-standard-table-calculation thead {
+              display: none;
+            }
+            #page-standard-twod .twod-standard-table-calculation tbody,
+            #page-standard-twod .twod-standard-table-calculation tr,
+            #page-standard-twod .twod-standard-table-calculation td {
+              display: block;
+              width: 100%;
+            }
+            #page-standard-twod .twod-standard-table-calculation tbody tr:not(.twod-standard-group-row) {
+              padding: 12px;
+              border: 1px solid #e2e8f0;
+              border-radius: 6px;
+              background: #ffffff;
+            }
+            #page-standard-twod .twod-standard-table-calculation td {
+              display: grid;
+              grid-template-columns: 92px minmax(0, 1fr);
+              gap: 10px;
+              align-items: start;
+              padding: 6px 0;
+              border-bottom: 0;
+            }
+            #page-standard-twod .twod-standard-table-calculation td::before {
+              content: attr(data-label);
+              color: #64748b;
+              font-size: 13px;
+              font-weight: 700;
+            }
+            #page-standard-twod .twod-standard-table-calculation .twod-standard-group-row td {
+              display: block;
+              padding: 10px 12px;
+              border-radius: 6px;
+            }
+            #page-standard-twod .twod-standard-table-calculation .twod-standard-group-row td::before {
+              content: none;
+            }
+            #page-standard-twod .twod-standard-table-calculation td.twod-standard-col-description {
+              display: block;
+              padding: 8px 0 0;
+            }
+            #page-standard-twod .twod-standard-table-calculation td.twod-standard-col-description::before {
+              display: block;
+              margin-bottom: 6px;
             }
           }
         </style>
@@ -49279,6 +49571,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const body = document.getElementById("twodStandardFieldModalBody");
       if (title) title.textContent = `${mode === "edit" ? "编辑" : "新增"}${config.actionTitle}`;
       if (body) {
+        const attachment = record?.attachment || null;
         body.innerHTML = `
           <div class="standard-form-grid">
             ${config.fields.map((field) => {
@@ -49292,6 +49585,18 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 </label>
               `;
             }).join("")}
+            <div class="field twod-standard-attachment-field">
+              <span>上传附件</span>
+              <div class="twod-standard-upload-row">
+                <label class="twod-standard-upload-control">
+                  <input type="file" data-twod-standard-attachment-input>
+                  <span>选择附件</span>
+                </label>
+                <div class="twod-standard-upload-summary" data-twod-standard-attachment-summary>
+                  ${renderTwodStandardAttachmentSummary(attachment)}
+                </div>
+              </div>
+            </div>
           </div>
         `;
       }
@@ -49314,6 +49619,10 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         return;
       }
       const rows = getTwodStandardRowsStore()[tabKey] || [];
+      const existing = editing.mode === "edit" ? rows.find((item) => item.id === editing.recordId) : null;
+      const attachmentInput = body?.querySelector("[data-twod-standard-attachment-input]");
+      const attachmentFile = attachmentInput?.files?.[0] || null;
+      draft.attachment = attachmentFile ? buildTwodStandardAttachmentFromFile(attachmentFile) : (existing?.attachment || null);
       if (editing.mode === "edit") {
         const index = rows.findIndex((item) => item.id === editing.recordId);
         if (index >= 0) rows[index] = Object.assign({}, rows[index], draft);
@@ -49365,6 +49674,14 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           saveTwodStandardField();
         }
       });
+      document.body.addEventListener("change", (event) => {
+        const attachmentInput = event.target.closest("[data-twod-standard-attachment-input]");
+        if (!attachmentInput) return;
+        const file = attachmentInput.files?.[0];
+        if (!file) return;
+        const summary = document.querySelector("[data-twod-standard-attachment-summary]");
+        if (summary) summary.innerHTML = renderTwodStandardAttachmentSummary(buildTwodStandardAttachmentFromFile(file));
+      });
       document.body.addEventListener("input", (event) => {
         const search = event.target.closest("[data-twod-standard-search]");
         if (!search) return;
@@ -49393,6 +49710,65 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       { key: "entry", label: "数据资源录入" },
       { key: "processing", label: "数据资源加工" },
       { key: "security", label: "数据安全等级" }
+    ];
+
+    const TWOD_INGEST_RESOURCE_OBJECT_DEFAULTS = [
+      {
+        id: "twod-resource-structure",
+        resource: "结构特征",
+        basicFields: "化学式、晶系和空间群、晶胞原子结构、晶格常数、原子坐标、键长键角、层间厚度",
+        storageDisplay: "化学式、晶系和空间群、晶胞原子结构、晶格常数以字符数据存储和展示；晶胞原子结构可通过软件进行三维结构可视化；原子坐标、键长键角、层间厚度以数字形式展示。",
+        descriptionHtml: "记录二维材料最基础的结构信息，用于描述材料组成、晶体对称性、晶胞结构、原子排布、键合关系以及层状结构厚度。"
+      },
+      {
+        id: "twod-resource-electronic",
+        resource: "电子结构",
+        basicFields: "能带结构、态密度、电子有效质量",
+        storageDisplay: "能带结构、态密度以字符数据形式存储，并可通过软件绘制成图表展示；电子有效质量以数字形式展示。",
+        descriptionHtml: "记录二维材料电子能级分布、态密度分布和载流子有效质量等电子结构信息，支撑带隙、输运和器件性能分析。"
+      },
+      {
+        id: "twod-resource-electric",
+        resource: "电学性质",
+        basicFields: "铁电性、压电性",
+        storageDisplay: "铁电性、压电性以字符数据形式存储和展示。",
+        descriptionHtml: "记录二维材料中广泛关注的铁电响应、压电响应等电学性质，用于电功能材料筛选与器件适配分析。"
+      },
+      {
+        id: "twod-resource-magnetic",
+        resource: "磁学性质",
+        basicFields: "磁基态构型、磁转变温度",
+        storageDisplay: "磁基态构型以二进制图片存储和展示；磁转变温度以数字形式存储和展示。",
+        descriptionHtml: "记录二维材料关键磁学信息，包括磁基态构型及磁有序转变温度，用于磁性二维材料识别和对比。"
+      },
+      {
+        id: "twod-resource-thermal",
+        resource: "热学性质",
+        basicFields: "材料形成能、声子谱、声子态密度",
+        storageDisplay: "材料形成能以数字形式存储和展示；声子谱和声子态密度以字符数据形式存储，并可通过软件进行可视化展示。",
+        descriptionHtml: "记录二维材料热学性质与稳定性相关数据，用于判断材料形成稳定性、动力学稳定性和声子振动特征。"
+      },
+      {
+        id: "twod-resource-mechanical",
+        resource: "力学性质",
+        basicFields: "弹性常数、杨氏模量、泊松比",
+        storageDisplay: "弹性常数、杨氏模量、泊松比均以数字形式存储和展示。",
+        descriptionHtml: "记录二维材料基本力学性质，用于描述材料在弹性形变、拉伸响应和横纵向应变关系下的力学表现。"
+      },
+      {
+        id: "twod-resource-optical",
+        resource: "光学性质",
+        basicFields: "介电函数、光吸收系数、反射率、折射率、消光系数",
+        storageDisplay: "介电函数、光吸收系数、反射率、折射率、消光系数均以字符数据形式存储，并可通过软件转换成图表形式展示。",
+        descriptionHtml: "记录二维材料基础光学响应信息，用于分析材料在不同能量或波长下的吸收、反射、折射和光传播衰减特征。"
+      },
+      {
+        id: "twod-resource-defect",
+        resource: "缺陷性质",
+        basicFields: "空位缺陷、反位缺陷、缺陷构型、缺陷形成能",
+        storageDisplay: "缺陷构型以字符数据形式存储，并可通过软件进行三维结构可视化展示；缺陷形成能以数字形式存储和展示。",
+        descriptionHtml: "记录二维材料常见缺陷类型及其构型和形成能信息，用于分析缺陷对结构稳定性和电子结构的影响。"
+      }
     ];
 
     function getLowdimMaterialKey(page) {
@@ -49517,7 +49893,11 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             font-size: 14px;
             line-height: 22px;
             text-align: left;
-            overflow-wrap: anywhere;
+          }
+          .lowdim-workflow-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
           .lowdim-workflow-table th {
             background: #e8ebf8;
@@ -49526,6 +49906,157 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           }
           .lowdim-workflow-table tbody tr:nth-child(even) {
             background: #f8fafc;
+          }
+          .twod-ingest-resource-table {
+            min-width: 1080px;
+          }
+          .twod-ingest-resource-table th:last-child,
+          .twod-ingest-resource-table td:last-child {
+            width: 150px;
+          }
+          .twod-ingest-file-pill,
+          .twod-ingest-file-empty {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .twod-ingest-file-pill {
+            color: #14208a;
+            font-weight: 700;
+          }
+          .twod-ingest-file-empty {
+            color: #94a3b8;
+            font-size: 13px;
+          }
+          .twod-ingest-resource-description {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #475569;
+          }
+          .twod-ingest-resource-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+          }
+          .twod-ingest-resource-actions .btn {
+            min-height: 32px;
+            padding: 4px 12px;
+            border-radius: 5px;
+            color: #001a7a;
+            border-color: #12248f;
+            background: #ffffff;
+          }
+          .twod-ingest-resource-actions .btn-danger-outline {
+            color: #ff1f1f;
+            border-color: #ff1f1f;
+          }
+          .twod-ingest-resource-modal .twod-resource-form-grid {
+            display: grid;
+            gap: 18px;
+          }
+          .twod-ingest-resource-modal .field > span {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 700;
+          }
+          .twod-ingest-resource-modal .field input,
+          .twod-ingest-resource-modal .field textarea {
+            width: 100%;
+          }
+          .twod-ingest-rich-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+          }
+          .twod-ingest-rich-toolbar button {
+            min-width: 38px;
+            min-height: 34px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 700;
+          }
+          .twod-ingest-rich-editor {
+            min-height: 150px;
+            padding: 12px;
+            border: 1px solid #d8dce5;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #111827;
+            line-height: 24px;
+            outline: none;
+            overflow: auto;
+          }
+          .twod-ingest-rich-editor:focus {
+            border-color: #12248f;
+            box-shadow: 0 0 0 3px rgba(18, 36, 143, 0.12);
+          }
+          .twod-ingest-rich-count {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+          }
+          .twod-ingest-upload-row {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+            flex-wrap: wrap;
+          }
+          .twod-ingest-upload-control {
+            position: relative;
+            display: inline-flex;
+            min-height: 44px;
+            align-items: center;
+            justify-content: center;
+            padding: 0 18px;
+            border: 1px solid #12248f;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #001a7a;
+            font-weight: 700;
+            cursor: pointer;
+          }
+          .twod-ingest-upload-control input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+          }
+          .twod-ingest-upload-summary {
+            flex: 1 1 280px;
+            min-width: 0;
+            min-height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+            padding: 8px 12px;
+            border: 1px solid #d8dce5;
+            border-radius: 5px;
+            background: #f8fafc;
+          }
+          .twod-ingest-upload-summary strong {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #111827;
+            font-size: 14px;
+          }
+          .twod-ingest-upload-summary small {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 18px;
           }
           @media (max-width: 768px) {
             .lowdim-workflow-page {
@@ -49558,7 +50089,106 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <table class="lowdim-workflow-table">
             <thead><tr>${columns.map((column) => `<th>${escapeLowDimHtml(column)}</th>`).join("")}</tr></thead>
             <tbody>
-              ${rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeLowDimHtml(cell)}</td>`).join("")}</tr>`).join("")}
+              ${rows.map((row) => `<tr>${row.map((cell) => `<td title="${escapeLowDimHtml(cell)}">${escapeLowDimHtml(cell)}</td>`).join("")}</tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function getTwodIngestGenericAddLabel(tabKey) {
+      const labels = {
+        collection: "新增采集配置",
+        entry: "新增录入配置",
+        processing: "新增加工配置",
+        security: "新增安全等级"
+      };
+      return labels[tabKey] || "新增配置";
+    }
+
+    function getTwodIngestGenericRowsStore(pageId, tabKey) {
+      if (!state.twodIngestGenericRows) state.twodIngestGenericRows = {};
+      if (!state.twodIngestGenericRows[pageId]) state.twodIngestGenericRows[pageId] = {};
+      if (!state.twodIngestGenericRows[pageId][tabKey]) state.twodIngestGenericRows[pageId][tabKey] = [];
+      return state.twodIngestGenericRows[pageId][tabKey];
+    }
+
+    function getLowdimIngestTableWithCustomRows(pageId, tabKey, material) {
+      const table = getLowdimIngestRows(tabKey, material);
+      if (getLowdimMaterialKey(pageId) !== "twod" || tabKey === "objects") return table;
+      return {
+        columns: table.columns,
+        rows: table.rows.concat(getTwodIngestGenericRowsStore(pageId, tabKey))
+      };
+    }
+
+    function getTwodIngestResourceObjects() {
+      if (!state.twodIngestResourceObjects) {
+        state.twodIngestResourceObjects = TWOD_INGEST_RESOURCE_OBJECT_DEFAULTS.map((item) => Object.assign({}, item));
+      }
+      return state.twodIngestResourceObjects;
+    }
+
+    function getTwodIngestResourceDescriptionText(record) {
+      const container = document.createElement("div");
+      container.innerHTML = record?.descriptionHtml || "";
+      return (container.textContent || "").trim();
+    }
+
+    function buildTwodIngestResourceFileFromInput(file) {
+      if (!file) return null;
+      const ext = String(file.name || "").includes(".") ? file.name.split(".").pop().toUpperCase() : "";
+      return {
+        name: file.name || "未命名文件",
+        sizeText: typeof formatFileSize === "function" ? formatFileSize(file.size || 0) : `${file.size || 0} B`,
+        type: file.type || ext || "未知类型",
+        uploadedAt: new Date().toLocaleString("zh-CN", { hour12: false })
+      };
+    }
+
+    function renderTwodIngestResourceFileSummary(fileMeta) {
+      if (!fileMeta?.name) {
+        return `<strong>未选择文件</strong><small>支持结构文件、表格、图谱、文档、压缩包等资源附件。</small>`;
+      }
+      return `<strong>${escapeLowDimHtml(fileMeta.name)}</strong><small>${escapeLowDimHtml(fileMeta.sizeText || "大小未知")} · ${escapeLowDimHtml(fileMeta.type || "文件")} ${fileMeta.uploadedAt ? `· ${escapeLowDimHtml(fileMeta.uploadedAt)}` : ""}</small>`;
+    }
+
+    function renderTwodIngestResourceFileCell(fileMeta) {
+      if (!fileMeta?.name) return `<span class="twod-ingest-file-empty">未上传</span>`;
+      return `<span class="twod-ingest-file-pill" title="${escapeLowDimHtml(fileMeta.name)}">${escapeLowDimHtml(fileMeta.name)}</span>`;
+    }
+
+    function renderTwodIngestResourceObjectTable() {
+      const rows = getTwodIngestResourceObjects();
+      return `
+        <div class="lowdim-workflow-table-wrap">
+          <table class="lowdim-workflow-table twod-ingest-resource-table">
+            <thead>
+              <tr>
+                <th style="width:160px;">数据资源</th>
+                <th>基本字段</th>
+                <th>存储展示方式</th>
+                <th>说明</th>
+                <th style="width:180px;">上传文件</th>
+                <th style="width:150px;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((row) => `
+                <tr>
+                  <td title="${escapeLowDimHtml(row.resource)}"><strong>${escapeLowDimHtml(row.resource)}</strong></td>
+                  <td title="${escapeLowDimHtml(row.basicFields)}">${escapeLowDimHtml(row.basicFields)}</td>
+                  <td title="${escapeLowDimHtml(row.storageDisplay)}">${escapeLowDimHtml(row.storageDisplay)}</td>
+                  <td><span class="twod-ingest-resource-description" title="${escapeLowDimHtml(getTwodIngestResourceDescriptionText(row))}">${row.descriptionHtml || "-"}</span></td>
+                  <td>${renderTwodIngestResourceFileCell(row.fileMeta)}</td>
+                  <td>
+                    <div class="twod-ingest-resource-actions">
+                      <button class="btn btn-sm" type="button" data-twod-ingest-resource-edit="${row.id}">编辑</button>
+                      <button class="btn btn-sm btn-danger-outline" type="button" data-twod-ingest-resource-delete="${row.id}">删除</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("")}
             </tbody>
           </table>
         </div>
@@ -49618,13 +50248,1013 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       return LOWDIM_INGEST_TABS.some((item) => item.key === key) ? key : "objects";
     }
 
+    function sanitizeTwodIngestRichText(html) {
+      const template = document.createElement("template");
+      template.innerHTML = html || "";
+      const allowedTags = new Set(["B", "STRONG", "I", "EM", "U", "UL", "OL", "LI", "BR", "P", "DIV"]);
+      const clean = (node) => {
+        Array.from(node.childNodes).forEach((child) => {
+          if (child.nodeType === Node.TEXT_NODE) return;
+          if (child.nodeType !== Node.ELEMENT_NODE) {
+            child.remove();
+            return;
+          }
+          clean(child);
+          if (!allowedTags.has(child.tagName)) {
+            child.replaceWith(...Array.from(child.childNodes));
+            return;
+          }
+          Array.from(child.attributes).forEach((attr) => child.removeAttribute(attr.name));
+        });
+      };
+      clean(template.content);
+      return template.innerHTML.trim();
+    }
+
+    function getTwodIngestRichTextLength(html) {
+      const box = document.createElement("div");
+      box.innerHTML = html || "";
+      return (box.textContent || "").trim().length;
+    }
+
+    function updateTwodIngestRichCount() {
+      const editor = document.querySelector("[data-twod-ingest-resource-description]");
+      const counter = document.getElementById("twodIngestResourceDescCount");
+      if (!editor || !counter) return;
+      const length = (editor.textContent || "").trim().length;
+      counter.textContent = `${length} / 500`;
+      counter.style.color = length > 500 ? "#ef4444" : "#64748b";
+    }
+
+    function openTwodIngestResourceObjectModal(mode, recordId = "") {
+      const rows = getTwodIngestResourceObjects();
+      const record = mode === "edit" ? rows.find((item) => item.id === recordId) : null;
+      state.twodIngestResourceEditing = { mode, recordId };
+      const title = document.getElementById("twodIngestResourceObjectModalTitle");
+      const body = document.getElementById("twodIngestResourceObjectModalBody");
+      if (title) title.textContent = mode === "edit" ? "编辑资源对象" : "新增资源对象";
+      if (body) {
+        body.innerHTML = `
+          <div class="twod-resource-form-grid">
+            <label class="field">
+              <span>数据资源 <small>30字以内</small></span>
+              <input id="twodIngestResourceName" type="text" maxlength="30" value="${escapeLowDimHtml(record?.resource || "")}" placeholder="请输入数据资源">
+            </label>
+            <label class="field">
+              <span>基本字段</span>
+              <input id="twodIngestResourceBasicFields" type="text" value="${escapeLowDimHtml(record?.basicFields || "")}" placeholder="请输入基本字段">
+            </label>
+            <label class="field">
+              <span>存储展示方式</span>
+              <textarea id="twodIngestResourceStorage" rows="3" placeholder="请输入存储展示方式">${escapeLowDimHtml(record?.storageDisplay || "")}</textarea>
+            </label>
+            <div class="field">
+              <span>说明 <small id="twodIngestResourceDescCount" class="twod-ingest-rich-count">0 / 500</small></span>
+              <div class="twod-ingest-rich-toolbar" aria-label="说明富文本工具">
+                <button type="button" data-twod-ingest-rich-command="bold">B</button>
+                <button type="button" data-twod-ingest-rich-command="italic">I</button>
+                <button type="button" data-twod-ingest-rich-command="underline">U</button>
+                <button type="button" data-twod-ingest-rich-command="insertUnorderedList">列表</button>
+              </div>
+              <div class="twod-ingest-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-twod-ingest-resource-description>${sanitizeTwodIngestRichText(record?.descriptionHtml || "")}</div>
+            </div>
+            <div class="field">
+              <span>上传文件</span>
+              <div class="twod-ingest-upload-row">
+                <label class="twod-ingest-upload-control">
+                  <input type="file" data-twod-ingest-resource-file-input>
+                  <span>选择文件</span>
+                </label>
+                <div class="twod-ingest-upload-summary" data-twod-ingest-resource-file-summary>
+                  ${renderTwodIngestResourceFileSummary(record?.fileMeta || null)}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      openModal("twodIngestResourceObjectModal");
+      updateTwodIngestRichCount();
+    }
+
+    function saveTwodIngestResourceObject() {
+      const editing = state.twodIngestResourceEditing || { mode: "add" };
+      const resource = (document.getElementById("twodIngestResourceName")?.value || "").trim();
+      const basicFields = (document.getElementById("twodIngestResourceBasicFields")?.value || "").trim();
+      const storageDisplay = (document.getElementById("twodIngestResourceStorage")?.value || "").trim();
+      const editor = document.querySelector("[data-twod-ingest-resource-description]");
+      const descriptionHtml = sanitizeTwodIngestRichText(editor?.innerHTML || "");
+      const descriptionLength = getTwodIngestRichTextLength(descriptionHtml);
+      if (!resource || !basicFields || !storageDisplay) {
+        showToast("资源对象校验", "请填写数据资源、基本字段和存储展示方式。");
+        return;
+      }
+      if (resource.length > 30) {
+        showToast("资源对象校验", "数据资源需控制在 30 字以内。");
+        return;
+      }
+      if (descriptionLength > 500) {
+        showToast("资源对象校验", "说明需控制在 500 字以内。");
+        return;
+      }
+      const rows = getTwodIngestResourceObjects();
+      const existing = editing.mode === "edit" ? rows.find((item) => item.id === editing.recordId) : null;
+      const fileInput = document.querySelector("[data-twod-ingest-resource-file-input]");
+      const fileMeta = fileInput?.files?.[0] ? buildTwodIngestResourceFileFromInput(fileInput.files[0]) : (existing?.fileMeta || null);
+      const draft = { resource, basicFields, storageDisplay, descriptionHtml, fileMeta };
+      if (editing.mode === "edit") {
+        const index = rows.findIndex((item) => item.id === editing.recordId);
+        if (index >= 0) rows[index] = Object.assign({}, rows[index], draft);
+      } else {
+        rows.push(Object.assign({ id: `twod-resource-${Date.now()}` }, draft));
+      }
+      closeModal("twodIngestResourceObjectModal");
+      renderLowdimIngestPage("lowdim-ingest-twod");
+      showToast("资源对象", editing.mode === "edit" ? "资源对象已更新。" : "资源对象已新增。");
+    }
+
+    function deleteTwodIngestResourceObject(recordId) {
+      const rows = getTwodIngestResourceObjects();
+      const record = rows.find((item) => item.id === recordId);
+      if (!record) return;
+      if (!window.confirm(`确认删除「${record.resource}」吗？`)) return;
+      state.twodIngestResourceObjects = rows.filter((item) => item.id !== recordId);
+      renderLowdimIngestPage("lowdim-ingest-twod");
+      showToast("资源对象", "资源对象已删除。");
+    }
+
+    function openTwodIngestGenericRowModal(pageId, tabKey) {
+      const material = getLowdimMaterialConfig(pageId);
+      const table = getLowdimIngestRows(tabKey, material);
+      const tabMeta = LOWDIM_INGEST_TABS.find((item) => item.key === tabKey) || LOWDIM_INGEST_TABS[0];
+      state.twodIngestGenericEditing = { pageId, tabKey };
+      const title = document.getElementById("twodIngestGenericRowModalTitle");
+      const body = document.getElementById("twodIngestGenericRowModalBody");
+      if (title) title.textContent = `${getTwodIngestGenericAddLabel(tabKey)} - ${tabMeta.label}`;
+      if (body) {
+        body.innerHTML = `
+          <div class="twod-resource-form-grid">
+            ${table.columns.map((column, index) => `
+              <label class="field">
+                <span>${escapeLowDimHtml(column)}</span>
+                ${index >= 2
+                  ? `<textarea rows="3" data-twod-ingest-generic-field="${index}" placeholder="请输入${escapeLowDimHtml(column)}"></textarea>`
+                  : `<input type="text" data-twod-ingest-generic-field="${index}" placeholder="请输入${escapeLowDimHtml(column)}">`}
+              </label>
+            `).join("")}
+          </div>
+        `;
+      }
+      openModal("twodIngestGenericRowModal");
+    }
+
+    function saveTwodIngestGenericRow() {
+      const editing = state.twodIngestGenericEditing || {};
+      const pageId = editing.pageId || "lowdim-ingest-twod";
+      const tabKey = editing.tabKey || getLowdimIngestActiveTab(pageId);
+      const material = getLowdimMaterialConfig(pageId);
+      const table = getLowdimIngestRows(tabKey, material);
+      const row = table.columns.map((_, index) => (document.querySelector(`[data-twod-ingest-generic-field="${index}"]`)?.value || "").trim());
+      const missingIndex = row.findIndex((value) => !value);
+      if (missingIndex >= 0) {
+        showToast("新增配置校验", `请填写${table.columns[missingIndex]}。`);
+        return;
+      }
+      getTwodIngestGenericRowsStore(pageId, tabKey).push(row);
+      closeModal("twodIngestGenericRowModal");
+      renderLowdimIngestPage(pageId);
+      showToast("新增配置", `${getTwodIngestGenericAddLabel(tabKey)}已保存。`);
+    }
+
+    const TWOD_SECURITY_TODAY = "2026-08-03";
+    const TWOD_SECURITY_LEVELS = [
+      { code: "SEC-01", label: "第1级（完全公开）", shortLabel: "第1级", color: "#2563eb", description: "外源数据，以及超过时限的计算数据。" },
+      { code: "SEC-02", label: "第2级（半公开）", shortLabel: "第2级", color: "#f59e0b", description: "短期新增计算数据，需管理员许可。" }
+    ];
+    const TWOD_SECURITY_DEFAULT_RULES = {
+      thresholdMonths: 6,
+      externalMapping: "外源数据 → SEC-01",
+      calculationMapping: "计算数据：6个月内 → SEC-02；6个月后 → SEC-01"
+    };
+    const TWOD_SECURITY_DATA_DEFAULTS = [
+      { id: "sec-data-001", dataName: "二维材料结构主表", source_type: "外源", production_date: "2025-11-20", sec_level: "SEC-01", status: "自动判定" },
+      { id: "sec-data-002", dataName: "MoS2 高通量计算集", source_type: "计算", production_date: "2026-07-15", sec_level: "SEC-02", status: "自动判定" },
+      { id: "sec-data-003", dataName: "Graphene 电子结构数据", source_type: "计算", production_date: "2025-10-12", sec_level: "SEC-01", status: "自动判定" },
+      { id: "sec-data-004", dataName: "二维材料文献性质汇总", source_type: "外源", production_date: "2026-06-02", sec_level: "SEC-01", status: "自动判定" },
+      { id: "sec-data-005", dataName: "WSe2 缺陷计算结果", source_type: "计算", production_date: "2026-05-28", sec_level: "SEC-02", status: "自动判定" }
+    ];
+    const TWOD_SECURITY_USER_DEFAULTS = [
+      { id: "sec-user-001", username: "zhangsan", role: "普通用户", permissionRange: "SEC-01", expiresAt: "-", status: "正常", email: "zhangsan@example.org" },
+      { id: "sec-user-002", username: "lisi", role: "专业用户", permissionRange: "SEC-01 / SEC-02", expiresAt: "2026-12-31", status: "正常", email: "lisi@example.org" },
+      { id: "sec-user-003", username: "wangwu", role: "专业用户", permissionRange: "SEC-01 / SEC-02", expiresAt: "2026-07-20", status: "待自动降级", email: "wangwu@example.org" },
+      { id: "sec-user-004", username: "zhaoliu", role: "普通用户", permissionRange: "SEC-01", expiresAt: "-", status: "正常", email: "zhaoliu@example.org" }
+    ];
+    const TWOD_SECURITY_APPLICATION_DEFAULTS = [
+      { id: "sec-apply-001", username: "chenqi", type: "专业用户申请", requestedRange: "SEC-01 / SEC-02", requestedUntil: "2026-12-31", appliedAt: "2026-07-28", reason: "开展二维材料电子结构计算复核", status: "待审核" },
+      { id: "sec-apply-002", username: "sunqi", type: "续期申请", requestedRange: "SEC-01 / SEC-02", requestedUntil: "2027-03-31", appliedAt: "2026-07-30", reason: "延续缺陷性质数据加工任务", status: "待审核", userId: "sec-user-002" }
+    ];
+    const TWOD_SECURITY_LOG_DEFAULTS = [
+      { id: "sec-log-001", time: "2026-08-01 09:20", action: "安全等级判定", target: "MoS2 高通量计算集", detail: "计算数据在6个月内，SEC-01 → SEC-02", operator: "系统自动" },
+      { id: "sec-log-002", time: "2026-07-28 14:10", action: "专业用户申请", target: "chenqi", detail: "提交 SEC-02 访问权限申请", operator: "chenqi" },
+      { id: "sec-log-003", time: "2026-07-20 08:00", action: "权限到期提醒", target: "wangwu", detail: "专业用户权限到期，待自动降级", operator: "系统自动" }
+    ];
+
+    function getTwodSecurityState() {
+      if (!state.twodSecurity) {
+        state.twodSecurity = {
+          expandedLevel: "",
+          rules: Object.assign({}, TWOD_SECURITY_DEFAULT_RULES),
+          data: TWOD_SECURITY_DATA_DEFAULTS.map((item) => Object.assign({}, item)),
+          users: TWOD_SECURITY_USER_DEFAULTS.map((item) => Object.assign({}, item)),
+          applications: TWOD_SECURITY_APPLICATION_DEFAULTS.map((item) => Object.assign({}, item)),
+          logs: TWOD_SECURITY_LOG_DEFAULTS.map((item) => Object.assign({}, item)),
+          userSearch: "",
+          userRoleFilter: "全部",
+          userStatusFilter: "全部",
+          impactedUsers: [],
+          notificationsSent: false,
+          autoDowngradeProcessed: false
+        };
+      }
+      const security = state.twodSecurity;
+      if (!security.autoDowngradeProcessed) {
+        security.users.forEach((user) => {
+          if (user.role !== "专业用户" || !user.expiresAt || user.expiresAt === "-" || user.expiresAt >= TWOD_SECURITY_TODAY || user.status === "已自动降级") return;
+          user.role = "普通用户";
+          user.permissionRange = "SEC-01";
+          user.status = "已自动降级";
+          security.logs.unshift({
+            id: `sec-log-${Date.now()}-${user.id}`,
+            time: `${TWOD_SECURITY_TODAY} 08:00`,
+            action: "权限自动降级",
+            target: user.username,
+            detail: "专业用户权限过期，系统自动降级为普通用户并发送通知邮件",
+            operator: "系统自动"
+          });
+        });
+        security.autoDowngradeProcessed = true;
+      }
+      return security;
+    }
+
+    function twodSecurityDaysBetween(startDate, endDate) {
+      const start = new Date(`${startDate}T00:00:00`);
+      const end = new Date(`${endDate}T00:00:00`);
+      return Math.floor((end - start) / 86400000);
+    }
+
+    function twodSecurityMonthsSince(dateString) {
+      return twodSecurityDaysBetween(dateString, TWOD_SECURITY_TODAY) / 30;
+    }
+
+    function calculateTwodSecurityLevel(record, rules) {
+      if (record.source_type === "外源") return "SEC-01";
+      return twodSecurityMonthsSince(record.production_date) < Number(rules.thresholdMonths || 6) ? "SEC-02" : "SEC-01";
+    }
+
+    function twodSecurityLevelMeta(code) {
+      return TWOD_SECURITY_LEVELS.find((item) => item.code === code) || TWOD_SECURITY_LEVELS[0];
+    }
+
+    function renderTwodSecurityStyle() {
+      return `
+        <style>
+          #page-lowdim-ingest-twod .twod-security-page {
+            display: grid;
+            gap: 16px;
+          }
+          #page-lowdim-ingest-twod .twod-security-overview {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) 240px;
+            gap: 14px;
+          }
+          #page-lowdim-ingest-twod .twod-security-card,
+          #page-lowdim-ingest-twod .twod-security-panel {
+            border: 1px solid #d7dce8;
+            background: #ffffff;
+          }
+          #page-lowdim-ingest-twod .twod-security-card {
+            min-height: 132px;
+            padding: 16px;
+            text-align: left;
+            cursor: pointer;
+          }
+          #page-lowdim-ingest-twod .twod-security-card.active {
+            border-color: #14208a;
+            box-shadow: 0 0 0 3px rgba(20, 32, 138, 0.1);
+          }
+          #page-lowdim-ingest-twod .twod-security-card-top,
+          #page-lowdim-ingest-twod .twod-security-panel-head,
+          #page-lowdim-ingest-twod .twod-security-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+          }
+          #page-lowdim-ingest-twod .twod-security-level-title {
+            color: #334155;
+            font-size: 14px;
+            font-weight: 800;
+          }
+          #page-lowdim-ingest-twod .twod-security-number {
+            margin-top: 12px;
+            color: #111827;
+            font-size: 30px;
+            line-height: 1;
+            font-weight: 800;
+          }
+          #page-lowdim-ingest-twod .twod-security-description,
+          #page-lowdim-ingest-twod .twod-security-muted {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 20px;
+          }
+          #page-lowdim-ingest-twod .twod-security-pie-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px;
+          }
+          #page-lowdim-ingest-twod .twod-security-pie {
+            width: 116px;
+            height: 116px;
+            border-radius: 50%;
+            background: conic-gradient(#2563eb 0deg 180deg, #f59e0b 180deg 360deg);
+            position: relative;
+          }
+          #page-lowdim-ingest-twod .twod-security-pie::after {
+            content: "";
+            position: absolute;
+            inset: 25px;
+            border-radius: 50%;
+            background: #ffffff;
+          }
+          #page-lowdim-ingest-twod .twod-security-legend {
+            display: grid;
+            gap: 8px;
+            min-width: 90px;
+          }
+          #page-lowdim-ingest-twod .twod-security-legend span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #334155;
+            font-size: 12px;
+          }
+          #page-lowdim-ingest-twod .twod-security-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+          }
+          #page-lowdim-ingest-twod .twod-security-main-grid {
+            display: grid;
+            grid-template-columns: 330px minmax(0, 1fr);
+            gap: 16px;
+          }
+          #page-lowdim-ingest-twod .twod-security-panel-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e5eaf3;
+          }
+          #page-lowdim-ingest-twod .twod-security-panel-head h3 {
+            margin: 0;
+            color: #111827;
+            font-size: 17px;
+          }
+          #page-lowdim-ingest-twod .twod-security-panel-body {
+            padding: 14px 16px;
+          }
+          #page-lowdim-ingest-twod .twod-security-rule {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 12px;
+            border: 1px solid #e5eaf3;
+            background: #f8fafc;
+          }
+          #page-lowdim-ingest-twod .twod-security-rule:last-child {
+            margin-bottom: 0;
+          }
+          #page-lowdim-ingest-twod .twod-security-rule h4 {
+            margin: 0;
+            color: #001a7a;
+            font-size: 14px;
+          }
+          #page-lowdim-ingest-twod .twod-security-rule label {
+            display: grid;
+            gap: 5px;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+          }
+          #page-lowdim-ingest-twod .twod-security-table-wrap {
+            overflow: auto;
+          }
+          #page-lowdim-ingest-twod .twod-security-table {
+            width: 100%;
+            min-width: 860px;
+            border-collapse: collapse;
+            table-layout: fixed;
+          }
+          #page-lowdim-ingest-twod .twod-security-table th,
+          #page-lowdim-ingest-twod .twod-security-table td {
+            padding: 11px 12px;
+            border-bottom: 1px solid #edf1f7;
+            color: #111827;
+            font-size: 13px;
+            line-height: 20px;
+            text-align: left;
+            vertical-align: top;
+          }
+          #page-lowdim-ingest-twod .twod-security-table th {
+            background: #e8ebf8;
+            color: #001a7a;
+            font-weight: 800;
+          }
+          #page-lowdim-ingest-twod .twod-security-cell {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          #page-lowdim-ingest-twod .twod-security-expired {
+            background: #fff1f2 !important;
+          }
+          #page-lowdim-ingest-twod .twod-security-level-badge,
+          #page-lowdim-ingest-twod .twod-security-status {
+            display: inline-flex;
+            min-height: 24px;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+          }
+          #page-lowdim-ingest-twod .twod-security-level-badge.level-1 {
+            background: #dbeafe;
+            color: #1d4ed8;
+          }
+          #page-lowdim-ingest-twod .twod-security-level-badge.level-2 {
+            background: #fef3c7;
+            color: #b45309;
+          }
+          #page-lowdim-ingest-twod .twod-security-status.normal {
+            background: #dcfce7;
+            color: #166534;
+          }
+          #page-lowdim-ingest-twod .twod-security-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+          }
+          #page-lowdim-ingest-twod .twod-security-status.expired {
+            background: #fee2e2;
+            color: #b91c1c;
+          }
+          #page-lowdim-ingest-twod .twod-security-alert {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 12px 14px;
+            border: 1px solid #f6c15d;
+            background: #fffbeb;
+            color: #92400e;
+            font-size: 13px;
+            font-weight: 700;
+          }
+          #page-lowdim-ingest-twod .twod-security-search-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+          }
+          #page-lowdim-ingest-twod .twod-security-search-row input {
+            flex: 1 1 220px;
+          }
+          #page-lowdim-ingest-twod .twod-security-search-row select {
+            flex: 0 0 145px;
+          }
+          .twod-ingest-security-modal .twod-security-form-grid {
+            display: grid;
+            gap: 14px;
+          }
+          .twod-ingest-security-modal .field > span {
+            display: block;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 700;
+          }
+          .twod-ingest-security-modal .field input,
+          .twod-ingest-security-modal .field select,
+          .twod-ingest-security-modal .field textarea {
+            width: 100%;
+          }
+          @media (max-width: 1100px) {
+            #page-lowdim-ingest-twod .twod-security-overview,
+            #page-lowdim-ingest-twod .twod-security-main-grid {
+              grid-template-columns: 1fr 1fr;
+            }
+            #page-lowdim-ingest-twod .twod-security-pie-wrap {
+              grid-column: 1 / -1;
+              justify-content: flex-start;
+            }
+          }
+          @media (max-width: 760px) {
+            #page-lowdim-ingest-twod .twod-security-overview,
+            #page-lowdim-ingest-twod .twod-security-main-grid {
+              grid-template-columns: 1fr;
+            }
+            #page-lowdim-ingest-twod .twod-security-pie-wrap {
+              grid-column: auto;
+            }
+          }
+        </style>
+      `;
+    }
+
+    function renderTwodSecurityCell(value) {
+      const text = escapeLowDimHtml(value || "-");
+      return `<span class="twod-security-cell" title="${text}">${text}</span>`;
+    }
+
+    function renderTwodSecurityLevelBadge(levelCode) {
+      const meta = twodSecurityLevelMeta(levelCode);
+      return `<span class="twod-security-level-badge ${levelCode === "SEC-02" ? "level-2" : "level-1"}">${levelCode} ${meta.shortLabel}</span>`;
+    }
+
+    function renderTwodSecurityOverview(security) {
+      const counts = TWOD_SECURITY_LEVELS.map((level) => ({ level, count: security.data.filter((item) => item.sec_level === level.code).length }));
+      const total = Math.max(1, security.data.length);
+      const levelOneDegree = (counts[0].count / total) * 360;
+      const ratioOne = Math.round((counts[0].count / total) * 100);
+      const ratioTwo = 100 - ratioOne;
+      return `
+        <div class="twod-security-overview">
+          ${counts.map(({ level, count }) => `
+            <button class="twod-security-card ${security.expandedLevel === level.code ? "active" : ""}" type="button" data-twod-security-level-card="${level.code}">
+              <div class="twod-security-card-top">
+                <span class="twod-security-level-title">${level.label}</span>
+                ${renderTwodSecurityLevelBadge(level.code)}
+              </div>
+              <div class="twod-security-number">${count}</div>
+              <div class="twod-security-description">${level.description}</div>
+            </button>
+          `).join("")}
+          <div class="twod-security-panel twod-security-pie-wrap" aria-label="各等级数据占比">
+            <div class="twod-security-pie" style="background:conic-gradient(#2563eb 0deg ${levelOneDegree}deg, #f59e0b ${levelOneDegree}deg 360deg);"></div>
+            <div class="twod-security-legend">
+              <span><i class="twod-security-dot" style="background:#2563eb;"></i>第1级 ${ratioOne}%</span>
+              <span><i class="twod-security-dot" style="background:#f59e0b;"></i>第2级 ${ratioTwo}%</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTwodSecurityLevelData(security) {
+      if (!security.expandedLevel) return "";
+      const level = twodSecurityLevelMeta(security.expandedLevel);
+      const rows = security.data.filter((item) => item.sec_level === security.expandedLevel);
+      return `
+        <div class="twod-security-panel">
+          <div class="twod-security-panel-head">
+            <h3>${level.label}数据列表</h3>
+            <span class="twod-security-muted">${rows.length} 条</span>
+          </div>
+          <div class="twod-security-table-wrap">
+            <table class="twod-security-table" style="min-width:900px;">
+              <thead>
+                <tr>
+                  <th style="width:210px;">数据集</th>
+                  <th style="width:110px;">source_type</th>
+                  <th style="width:130px;">production_date</th>
+                  <th style="width:110px;">sec_level</th>
+                  <th>判定说明</th>
+                  <th style="width:150px;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.length ? rows.map((item) => `
+                  <tr>
+                    <td>${renderTwodSecurityCell(item.dataName)}</td>
+                    <td>${renderTwodSecurityCell(item.source_type)}</td>
+                    <td>${renderTwodSecurityCell(item.production_date)}</td>
+                    <td>${renderTwodSecurityLevelBadge(item.sec_level)}</td>
+                    <td>${renderTwodSecurityCell(item.source_type === "外源" ? "外源数据自动归入第1级" : `${twodSecurityMonthsSince(item.production_date).toFixed(1)}个月，按时效规则判定`)}</td>
+                    <td>
+                      <div class="twod-security-actions">
+                        <button class="btn btn-sm" type="button" data-twod-security-data-edit="${item.id}">编辑</button>
+                        <button class="btn btn-sm btn-danger-outline" type="button" data-twod-security-data-delete="${item.id}">删除</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join("") : `<tr><td colspan="6"><div class="sys-empty">暂无该等级数据</div></td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTwodSecurityRules(security) {
+      return `
+        <div class="twod-security-panel">
+          <div class="twod-security-panel-head">
+            <h3>安全级别判定规则</h3>
+            <button class="btn-primary" type="button" data-twod-security-rule-save>保存规则</button>
+          </div>
+          <div class="twod-security-panel-body">
+            <div class="twod-security-rule">
+              <h4>第1级（完全公开）</h4>
+              <label>数据来源映射<input type="text" id="twodSecurityExternalRule" value="${escapeLowDimHtml(security.rules.externalMapping)}"></label>
+              <div class="twod-security-muted">外源数据 + 超过时限的计算数据可完全公开。</div>
+            </div>
+            <div class="twod-security-rule">
+              <h4>第2级（半公开）</h4>
+              <label>计算数据映射<input type="text" id="twodSecurityCalculationRule" value="${escapeLowDimHtml(security.rules.calculationMapping)}"></label>
+              <label>计算数据时效阈值（月）<input type="number" min="1" max="60" id="twodSecurityThreshold" value="${security.rules.thresholdMonths}"></label>
+              <div class="twod-security-muted">短期新增计算数据需管理员许可，默认阈值为6个月。</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getTwodSecurityFilteredUsers(security) {
+      const keyword = String(security.userSearch || "").trim().toLowerCase();
+      return security.users.filter((user) => {
+        const matchesKeyword = !keyword || [user.username, user.role, user.permissionRange, user.email].some((value) => String(value || "").toLowerCase().includes(keyword));
+        const matchesRole = security.userRoleFilter === "全部" || user.role === security.userRoleFilter;
+        const matchesStatus = security.userStatusFilter === "全部" || (security.userStatusFilter === "已过期" ? user.status === "已自动降级" : user.status === security.userStatusFilter);
+        return matchesKeyword && matchesRole && matchesStatus;
+      });
+    }
+
+    function renderTwodSecurityUsers(security) {
+      const users = getTwodSecurityFilteredUsers(security);
+      return `
+        <div class="twod-security-panel">
+          <div class="twod-security-panel-head">
+            <h3>用户身份管理</h3>
+            <span class="twod-security-muted">${users.length} / ${security.users.length} 人</span>
+          </div>
+          <div class="twod-security-panel-body">
+            <div class="twod-security-search-row">
+              <input type="search" placeholder="搜索用户名、角色或权限范围" value="${escapeLowDimHtml(security.userSearch)}" data-twod-security-user-search>
+              <select data-twod-security-role-filter>
+                ${["全部", "普通用户", "专业用户"].map((value) => `<option value="${value}" ${security.userRoleFilter === value ? "selected" : ""}>${value}</option>`).join("")}
+              </select>
+              <select data-twod-security-status-filter>
+                ${["全部", "正常", "已过期"].map((value) => `<option value="${value}" ${security.userStatusFilter === value ? "selected" : ""}>${value}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="twod-security-table-wrap">
+            <table class="twod-security-table">
+              <thead>
+                <tr>
+                  <th style="width:130px;">用户名</th>
+                  <th style="width:110px;">角色</th>
+                  <th style="width:170px;">权限范围</th>
+                  <th style="width:130px;">使用期限</th>
+                  <th style="width:110px;">状态</th>
+                  <th style="width:180px;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${users.length ? users.map((user) => `
+                  <tr class="${user.status === "已自动降级" ? "twod-security-expired" : ""}">
+                    <td>${renderTwodSecurityCell(user.username)}</td>
+                    <td>${renderTwodSecurityCell(user.role)}</td>
+                    <td>${renderTwodSecurityCell(user.permissionRange)}</td>
+                    <td>${renderTwodSecurityCell(user.expiresAt)}</td>
+                    <td><span class="twod-security-status ${user.status === "已自动降级" ? "expired" : "normal"}">${user.status}</span></td>
+                    <td>
+                      <div class="twod-security-actions">
+                        <button class="btn btn-sm" type="button" data-twod-security-user-edit="${user.id}">编辑</button>
+                        ${user.role === "专业用户" ? `<button class="btn btn-sm" type="button" data-twod-security-renew="${user.id}">发起续期</button>` : ""}
+                        <button class="btn btn-sm btn-danger-outline" type="button" data-twod-security-user-delete="${user.id}">删除</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join("") : `<tr><td colspan="6"><div class="sys-empty">暂无匹配用户</div></td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTwodSecurityApplications(security) {
+      return `
+        <div class="twod-security-panel">
+          <div class="twod-security-panel-head">
+            <h3>专业用户申请审核</h3>
+            <span class="twod-security-muted">${security.applications.filter((item) => item.status === "待审核").length} 条待审核</span>
+          </div>
+          <div class="twod-security-table-wrap">
+            <table class="twod-security-table">
+              <thead>
+                <tr>
+                  <th style="width:120px;">用户名</th>
+                  <th style="width:130px;">申请类型</th>
+                  <th style="width:170px;">申请权限</th>
+                  <th style="width:130px;">申请期限</th>
+                  <th>申请理由</th>
+                  <th style="width:110px;">状态</th>
+                  <th style="width:110px;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${security.applications.length ? security.applications.map((item) => `
+                  <tr>
+                    <td>${renderTwodSecurityCell(item.username)}</td>
+                    <td>${renderTwodSecurityCell(item.type)}</td>
+                    <td>${renderTwodSecurityCell(item.requestedRange)}</td>
+                    <td>${renderTwodSecurityCell(item.requestedUntil)}</td>
+                    <td>${renderTwodSecurityCell(item.reason)}</td>
+                    <td><span class="twod-security-status ${item.status === "待审核" ? "pending" : "normal"}">${item.status}</span></td>
+                    <td>${item.status === "待审核" ? `<button class="btn btn-sm" type="button" data-twod-security-application-review="${item.id}">审核</button>` : "-"}</td>
+                  </tr>
+                `).join("") : `<tr><td colspan="7"><div class="sys-empty">暂无申请记录</div></td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTwodSecurityLogs(security) {
+      return `
+        <div class="twod-security-panel">
+          <div class="twod-security-panel-head">
+            <h3>数据等级变更日志</h3>
+            <span class="twod-security-muted">${security.logs.length} 条</span>
+          </div>
+          <div class="twod-security-table-wrap">
+            <table class="twod-security-table">
+              <thead><tr><th style="width:150px;">时间</th><th style="width:140px;">操作</th><th style="width:180px;">对象</th><th>变更说明</th><th style="width:110px;">操作人</th></tr></thead>
+              <tbody>
+                ${security.logs.map((item) => `<tr><td>${renderTwodSecurityCell(item.time)}</td><td>${renderTwodSecurityCell(item.action)}</td><td>${renderTwodSecurityCell(item.target)}</td><td>${renderTwodSecurityCell(item.detail)}</td><td>${renderTwodSecurityCell(item.operator)}</td></tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTwodSecurityPage(pageId) {
+      const page = document.getElementById(`page-${pageId}`);
+      if (!page) return;
+      const material = getLowdimMaterialConfig(pageId);
+      const security = getTwodSecurityState();
+      page.innerHTML = `
+        ${getLowdimWorkflowStyle()}
+        ${renderTwodSecurityStyle()}
+        <div class="lowdim-workflow-page">
+          <div class="lowdim-workflow-head">
+            <div>
+              <h2>${material.ingestTitle}</h2>
+              <p>依据数据来源与生产时效自动判定安全等级，管理用户授权、专业用户申请和权限到期处理。</p>
+            </div>
+            <button class="btn-primary" type="button" data-twod-security-data-add>新增安全等级</button>
+          </div>
+          <div class="lowdim-workflow-tabs" role="tablist" aria-label="${material.ingestTitle}">
+            ${LOWDIM_INGEST_TABS.map((tab) => `<button class="lowdim-workflow-tab${tab.key === "security" ? " active" : ""}" type="button" role="tab" aria-selected="${tab.key === "security" ? "true" : "false"}" data-lowdim-ingest-page="${pageId}" data-lowdim-ingest-tab="${tab.key}">${tab.label}</button>`).join("")}
+          </div>
+          ${security.impactedUsers.length ? `
+            <div class="twod-security-alert">
+              <span>安全等级变更影响已授权用户：${security.impactedUsers.join("、")}。</span>
+              <button class="btn-primary" type="button" data-twod-security-notify ${security.notificationsSent ? "disabled" : ""}>${security.notificationsSent ? "已发送通知" : "批量发送通知"}</button>
+            </div>
+          ` : ""}
+          <div class="twod-security-page">
+            ${renderTwodSecurityOverview(security)}
+            ${renderTwodSecurityLevelData(security)}
+            <div class="twod-security-main-grid">
+              ${renderTwodSecurityRules(security)}
+              ${renderTwodSecurityUsers(security)}
+            </div>
+            ${renderTwodSecurityApplications(security)}
+            ${renderTwodSecurityLogs(security)}
+          </div>
+        </div>
+      `;
+    }
+
+    function openTwodSecurityModal(mode, recordId = "") {
+      const security = getTwodSecurityState();
+      const title = document.getElementById("twodIngestSecurityModalTitle");
+      const body = document.getElementById("twodIngestSecurityModalBody");
+      state.twodSecurityEditing = { mode, recordId };
+      if (mode === "data-add" || mode === "data-edit") {
+        const record = mode === "data-edit" ? security.data.find((item) => item.id === recordId) : null;
+        if (title) title.textContent = mode === "data-edit" ? "编辑安全数据" : "新增安全等级数据";
+        if (body) {
+          body.innerHTML = `
+            <div class="twod-security-form-grid">
+              <label class="field"><span>数据名称</span><input id="twodSecurityDataName" type="text" value="${escapeLowDimHtml(record?.dataName || "")}" placeholder="请输入数据名称"></label>
+              <label class="field"><span>source_type</span><select id="twodSecuritySourceType"><option value="外源" ${record?.source_type === "外源" ? "selected" : ""}>外源</option><option value="计算" ${record?.source_type === "计算" ? "selected" : ""}>计算</option></select></label>
+              <label class="field"><span>production_date</span><input id="twodSecurityProductionDate" type="date" value="${escapeLowDimHtml(record?.production_date || TWOD_SECURITY_TODAY)}"></label>
+              <div class="twod-security-muted">保存后将依据当前来源映射和时效阈值自动计算 sec_level。</div>
+            </div>
+          `;
+        }
+      } else if (mode === "review") {
+        const application = security.applications.find((item) => item.id === recordId);
+        if (title) title.textContent = "专业用户申请审核";
+        if (body) {
+          body.innerHTML = `
+            <div class="twod-security-form-grid">
+              <div><strong>${escapeLowDimHtml(application?.username || "-")}</strong> · ${escapeLowDimHtml(application?.type || "-")}</div>
+              <div class="twod-security-muted">申请权限：${escapeLowDimHtml(application?.requestedRange || "-")}；申请期限：${escapeLowDimHtml(application?.requestedUntil || "-")}</div>
+              <div class="twod-security-muted">申请理由：${escapeLowDimHtml(application?.reason || "-")}</div>
+              <label class="field"><span>审核结果</span><select id="twodSecurityReviewDecision"><option value="approve">批准</option><option value="reject">驳回</option></select></label>
+              <label class="field"><span>审核意见</span><textarea id="twodSecurityReviewComment" rows="3" placeholder="请输入审核意见"></textarea></label>
+            </div>
+          `;
+        }
+      } else if (mode === "renew") {
+        const user = security.users.find((item) => item.id === recordId);
+        if (title) title.textContent = "发起专业用户续期申请";
+        if (body) {
+          body.innerHTML = `
+            <div class="twod-security-form-grid">
+              <div><strong>${escapeLowDimHtml(user?.username || "-")}</strong> · 当前期限 ${escapeLowDimHtml(user?.expiresAt || "-")}</div>
+              <label class="field"><span>申请续期至</span><input id="twodSecurityRenewUntil" type="date" value="2027-03-31"></label>
+              <label class="field"><span>申请理由</span><textarea id="twodSecurityRenewReason" rows="3" placeholder="请输入续期理由">延续二维材料数据采集加工任务</textarea></label>
+            </div>
+          `;
+        }
+      } else if (mode === "user-edit") {
+        const user = security.users.find((item) => item.id === recordId);
+        if (title) title.textContent = "编辑用户身份";
+        if (body) {
+          body.innerHTML = `
+            <div class="twod-security-form-grid">
+              <label class="field"><span>用户名</span><input id="twodSecurityUserName" type="text" value="${escapeLowDimHtml(user?.username || "")}" placeholder="请输入用户名"></label>
+              <label class="field"><span>角色</span><select id="twodSecurityUserRole"><option value="普通用户" ${user?.role === "普通用户" ? "selected" : ""}>普通用户</option><option value="专业用户" ${user?.role === "专业用户" ? "selected" : ""}>专业用户</option></select></label>
+              <label class="field"><span>权限范围</span><input id="twodSecurityPermissionRange" type="text" value="${escapeLowDimHtml(user?.permissionRange || "SEC-01")}" placeholder="请输入权限范围"></label>
+              <label class="field"><span>使用期限</span><input id="twodSecurityUserExpiresAt" type="date" value="${user?.expiresAt && user.expiresAt !== "-" ? escapeLowDimHtml(user.expiresAt) : ""}"></label>
+            </div>
+          `;
+        }
+      }
+      openModal("twodIngestSecurityModal");
+    }
+
+    function saveTwodSecurityModal() {
+      const editing = state.twodSecurityEditing || {};
+      const security = getTwodSecurityState();
+      if (editing.mode === "data-add" || editing.mode === "data-edit") {
+        const dataName = (document.getElementById("twodSecurityDataName")?.value || "").trim();
+        const source_type = (document.getElementById("twodSecuritySourceType")?.value || "").trim();
+        const production_date = (document.getElementById("twodSecurityProductionDate")?.value || "").trim();
+        if (!dataName || !source_type || !production_date) {
+          showToast("安全数据校验", "请填写数据名称、来源类型和生产日期。");
+          return;
+        }
+        const draft = { dataName, source_type, production_date, sec_level: calculateTwodSecurityLevel({ source_type, production_date }, security.rules), status: "自动判定" };
+        if (editing.mode === "data-edit") {
+          const index = security.data.findIndex((item) => item.id === editing.recordId);
+          if (index >= 0) security.data[index] = Object.assign({}, security.data[index], draft);
+        } else {
+          security.data.push(Object.assign({ id: `sec-data-${Date.now()}` }, draft));
+        }
+        security.logs.unshift({ id: `sec-log-${Date.now()}`, time: `${TWOD_SECURITY_TODAY} 10:00`, action: editing.mode === "data-edit" ? "安全数据编辑" : "安全数据新增", target: dataName, detail: `自动判定为${twodSecurityLevelMeta(draft.sec_level).label}`, operator: "管理员" });
+        closeModal("twodIngestSecurityModal");
+        renderTwodSecurityPage("lowdim-ingest-twod");
+        showToast("安全数据", editing.mode === "data-edit" ? "安全数据已更新。" : "安全数据已新增。");
+        return;
+      }
+      if (editing.mode === "review") {
+        const application = security.applications.find((item) => item.id === editing.recordId);
+        if (!application) return;
+        const decision = document.getElementById("twodSecurityReviewDecision")?.value || "reject";
+        const comment = (document.getElementById("twodSecurityReviewComment")?.value || "").trim() || (decision === "approve" ? "审核通过" : "审核驳回");
+        application.status = decision === "approve" ? "已批准" : "已驳回";
+        application.reviewComment = comment;
+        if (decision === "approve") {
+          let user = security.users.find((item) => item.username === application.username || item.id === application.userId);
+          if (!user) {
+            user = { id: `sec-user-${Date.now()}`, username: application.username, role: "专业用户", permissionRange: application.requestedRange, expiresAt: application.requestedUntil, status: "正常", email: `${application.username}@example.org` };
+            security.users.push(user);
+          } else {
+            user.role = "专业用户";
+            user.permissionRange = application.requestedRange;
+            user.expiresAt = application.requestedUntil;
+            user.status = "正常";
+          }
+        }
+        security.logs.unshift({ id: `sec-log-${Date.now()}`, time: `${TWOD_SECURITY_TODAY} 10:10`, action: application.type, target: application.username, detail: `${application.status}：${comment}`, operator: "管理员" });
+        closeModal("twodIngestSecurityModal");
+        renderTwodSecurityPage("lowdim-ingest-twod");
+        showToast("申请审核", `${application.username}的申请${application.status}。`);
+        return;
+      }
+      if (editing.mode === "renew") {
+        const user = security.users.find((item) => item.id === editing.recordId);
+        const requestedUntil = document.getElementById("twodSecurityRenewUntil")?.value || "";
+        const reason = (document.getElementById("twodSecurityRenewReason")?.value || "").trim();
+        if (!user || !requestedUntil || !reason) {
+          showToast("续期申请校验", "请填写续期期限和申请理由。");
+          return;
+        }
+        security.applications.push({ id: `sec-apply-${Date.now()}`, username: user.username, type: "续期申请", requestedRange: user.permissionRange, requestedUntil, appliedAt: TWOD_SECURITY_TODAY, reason, status: "待审核", userId: user.id });
+        security.logs.unshift({ id: `sec-log-${Date.now()}`, time: `${TWOD_SECURITY_TODAY} 10:20`, action: "续期申请", target: user.username, detail: `申请续期至${requestedUntil}`, operator: user.username });
+        closeModal("twodIngestSecurityModal");
+        renderTwodSecurityPage("lowdim-ingest-twod");
+        showToast("续期申请", "续期申请已提交，等待管理员审核。");
+        return;
+      }
+      if (editing.mode === "user-edit") {
+        const user = security.users.find((item) => item.id === editing.recordId);
+        const username = (document.getElementById("twodSecurityUserName")?.value || "").trim();
+        const role = document.getElementById("twodSecurityUserRole")?.value || "普通用户";
+        const permissionRange = (document.getElementById("twodSecurityPermissionRange")?.value || "").trim();
+        const expiresAt = document.getElementById("twodSecurityUserExpiresAt")?.value || "-";
+        if (!user || !username || !permissionRange) {
+          showToast("用户信息校验", "请填写用户名和权限范围。");
+          return;
+        }
+        Object.assign(user, { username, role, permissionRange, expiresAt: role === "专业用户" ? expiresAt : "-", status: "正常" });
+        security.logs.unshift({ id: `sec-log-${Date.now()}`, time: `${TWOD_SECURITY_TODAY} 10:25`, action: "用户身份编辑", target: username, detail: `角色更新为${role}，权限范围${permissionRange}`, operator: "管理员" });
+        closeModal("twodIngestSecurityModal");
+        renderTwodSecurityPage("lowdim-ingest-twod");
+        showToast("用户管理", "用户身份已更新。");
+      }
+    }
+
+    function deleteTwodSecurityData(recordId) {
+      const security = getTwodSecurityState();
+      const record = security.data.find((item) => item.id === recordId);
+      if (!record) return;
+      if (!window.confirm(`确认删除「${record.dataName}」吗？`)) return;
+      security.data = security.data.filter((item) => item.id !== recordId);
+      security.logs.unshift({ id: `sec-log-${Date.now()}`, time: `${TWOD_SECURITY_TODAY} 10:30`, action: "安全数据删除", target: record.dataName, detail: "删除安全等级数据记录", operator: "管理员" });
+      renderTwodSecurityPage("lowdim-ingest-twod");
+      showToast("安全数据", "安全数据已删除。");
+    }
+
+    function deleteTwodSecurityUser(recordId) {
+      const security = getTwodSecurityState();
+      const user = security.users.find((item) => item.id === recordId);
+      if (!user) return;
+      if (!window.confirm(`确认删除用户「${user.username}」吗？`)) return;
+      security.users = security.users.filter((item) => item.id !== recordId);
+      security.logs.unshift({ id: `sec-log-${Date.now()}`, time: `${TWOD_SECURITY_TODAY} 10:35`, action: "用户删除", target: user.username, detail: "删除用户身份记录", operator: "管理员" });
+      renderTwodSecurityPage("lowdim-ingest-twod");
+      showToast("用户管理", "用户已删除。");
+    }
+
+    function saveTwodSecurityRules() {
+      const security = getTwodSecurityState();
+      const threshold = Number(document.getElementById("twodSecurityThreshold")?.value || 6);
+      const externalMapping = (document.getElementById("twodSecurityExternalRule")?.value || "").trim();
+      const calculationMapping = (document.getElementById("twodSecurityCalculationRule")?.value || "").trim();
+      if (!Number.isFinite(threshold) || threshold < 1 || !externalMapping || !calculationMapping) {
+        showToast("安全规则校验", "请填写有效的时效阈值和来源映射。");
+        return;
+      }
+      const before = new Map(security.data.map((item) => [item.id, item.sec_level]));
+      security.rules = { thresholdMonths: threshold, externalMapping, calculationMapping };
+      security.data = security.data.map((item) => Object.assign({}, item, { sec_level: calculateTwodSecurityLevel(item, security.rules), status: "自动判定" }));
+      const changed = security.data.filter((item) => before.get(item.id) !== item.sec_level);
+      if (changed.length) {
+        security.impactedUsers = security.users.filter((user) => user.role === "专业用户" && user.permissionRange.includes("SEC-02")).map((user) => user.username);
+        security.notificationsSent = false;
+        changed.forEach((item) => security.logs.unshift({ id: `sec-log-${Date.now()}-${item.id}`, time: `${TWOD_SECURITY_TODAY} 10:40`, action: "安全等级变更", target: item.dataName, detail: `${before.get(item.id)} → ${item.sec_level}`, operator: "管理员" }));
+      }
+      renderTwodSecurityPage("lowdim-ingest-twod");
+      showToast("安全规则", changed.length ? `规则已保存，${changed.length} 条数据等级发生变化。` : "安全规则已保存。");
+    }
+
+    function sendTwodSecurityNotifications() {
+      const security = getTwodSecurityState();
+      if (!security.impactedUsers.length) return;
+      security.notificationsSent = true;
+      security.logs.unshift({ id: `sec-log-${Date.now()}`, time: `${TWOD_SECURITY_TODAY} 10:45`, action: "授权用户通知", target: security.impactedUsers.join("、"), detail: "批量发送安全等级变更通知", operator: "管理员" });
+      renderTwodSecurityPage("lowdim-ingest-twod");
+      showToast("用户通知", "已向受影响的授权用户发送通知。");
+    }
+
     function renderLowdimIngestPage(pageId) {
       const page = document.getElementById(`page-${pageId}`);
       if (!page) return;
       const material = getLowdimMaterialConfig(pageId);
+      const materialKey = getLowdimMaterialKey(pageId);
       const activeTab = getLowdimIngestActiveTab(pageId);
+      if (materialKey === "twod" && activeTab === "security") {
+        renderTwodSecurityPage(pageId);
+        return;
+      }
       const tabMeta = LOWDIM_INGEST_TABS.find((item) => item.key === activeTab) || LOWDIM_INGEST_TABS[0];
-      const table = getLowdimIngestRows(activeTab, material);
+      const table = getLowdimIngestTableWithCustomRows(pageId, activeTab, material);
+      const isTwodResourceObjects = materialKey === "twod" && activeTab === "objects";
+      const isTwodIngestEditableTab = materialKey === "twod";
       page.innerHTML = `
         ${getLowdimWorkflowStyle()}
         <div class="lowdim-workflow-page">
@@ -49633,27 +51263,931 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <h2>${material.ingestTitle}</h2>
               <p>围绕${material.short}入库前的数据对象定义、采集、录入、加工和安全分级进行统一管理，支撑后续标准化和数据库发布。</p>
             </div>
-            <div class="lowdim-workflow-badges">
-              <span class="lowdim-workflow-badge">材料库 ${material.code}</span>
-              <span class="lowdim-workflow-badge">记录 ${material.records}</span>
-              <span class="lowdim-workflow-badge">更新 ${material.updated}</span>
-            </div>
           </div>
           <div class="lowdim-workflow-tabs" role="tablist" aria-label="${material.ingestTitle}">
             ${LOWDIM_INGEST_TABS.map((tab) => `<button class="lowdim-workflow-tab${tab.key === activeTab ? " active" : ""}" type="button" role="tab" aria-selected="${tab.key === activeTab ? "true" : "false"}" data-lowdim-ingest-page="${pageId}" data-lowdim-ingest-tab="${tab.key}">${tab.label}</button>`).join("")}
           </div>
           <div class="lowdim-workflow-panel">
             <div class="lowdim-workflow-panel-head">
-              <h3>${tabMeta.label}</h3>
-              <span>${material.short}数据采集加工处理配置</span>
+              <div>
+                <h3>${tabMeta.label}</h3>
+                <span>${material.short}数据采集加工处理配置</span>
+              </div>
+              ${isTwodResourceObjects
+                ? `<button class="btn-primary" type="button" data-twod-ingest-resource-add>新增资源对象</button>`
+                : (isTwodIngestEditableTab ? `<button class="btn-primary" type="button" data-twod-ingest-generic-add="${activeTab}">${getTwodIngestGenericAddLabel(activeTab)}</button>` : "")}
             </div>
-            ${renderLowdimWorkflowTable(table.columns, table.rows)}
+            ${isTwodResourceObjects ? renderTwodIngestResourceObjectTable() : renderLowdimWorkflowTable(table.columns, table.rows)}
           </div>
         </div>
       `;
     }
 
+    const TWOD_STANDARDIZATION_CATEGORIES = [
+      { key: "calc", label: "计算方法标准化" },
+      { key: "format", label: "数据格式标准化" },
+      { key: "table", label: "数据表格标准化" },
+      { key: "image", label: "数据图片标准化" },
+      { key: "unit", label: "数据单位标准化" }
+    ];
+
+    const TWOD_STANDARDIZATION_DEFAULT_RULES = {
+      calc: [
+        { id: "calc-method", item: "calc_method", value: "VASP方法", type: "字符", example: "calc_method=VASP", note: "统一二维材料第一性原理计算方法字段。" },
+        { id: "calc-version", item: "calc_software_version", value: "VASP 6.x", type: "字符", example: "calc_software_version=VASP 6.4", note: "记录计算软件版本，便于复核与重算。" },
+        { id: "calc-functional", item: "functional", value: "GGA-PBE泛函", type: "字符", example: "functional=GGA-PBE", note: "交换关联泛函统一采用 GGA-PBE。" },
+        { id: "calc-encut", item: "encut", value: "500 eV", type: "数字+单位", example: "encut=500", note: "平面波截断能标准值。" },
+        { id: "calc-kpoint", item: "kpoint_grid", value: "15 x 15 x 1", type: "字符", example: "kpoint_grid=15x15x1", note: "二维材料默认 K 点网格。" },
+        { id: "calc-convergence", item: "convergence_criteria", value: "1e-6 eV；0.01 eV/A", type: "字符", example: "energy=1e-6, force=0.01", note: "能量和力收敛标准。" },
+        { id: "calc-vdw", item: "vdw_correction", value: "DFT-D3范德华修正", type: "字符", example: "vdw_correction=DFT-D3", note: "层状体系范德华相互作用修正。" },
+        { id: "calc-u", item: "DFT+U", value: "按元素体系配置 U 值", type: "字符", example: "U(Co)=3.3 eV", note: "过渡金属体系启用 DFT+U。" },
+        { id: "calc-quality", item: "quality_grade", value: "A / B / C", type: "枚举", example: "quality_grade=A", note: "按计算完整性和复核结果分级。" }
+      ],
+      format: [
+        { id: "fmt-vasp", item: "VASP输出格式标准", value: "OUTCAR / CONTCAR / vasprun.xml / DOSCAR / EIGENVAL", type: "文件集合", example: "OUTCAR + CONTCAR + vasprun.xml", note: "VASP输出文件需保留核心计算结果和结构文件。" },
+        { id: "fmt-dat", item: ".dat文件格式标准", value: "UTF-8；首行为字段名；空格或制表符分隔", type: "文本", example: "energy(eV) density(states/eV)", note: "曲线和谱图源数据统一为可解析文本格式。" },
+        { id: "fmt-source", item: "源文件格式标准", value: "CIF / POSCAR / JSON / PNG / DAT", type: "枚举", example: "MoS2_band.dat", note: "源文件需保留原始文件名、格式和来源。" }
+      ],
+      table: [
+        { id: "tab-col", item: "统一列名", value: "material_id, formula, property_name, value, unit, source", type: "字符", example: "material_id, band_gap, value, unit", note: "表格列名使用英文小写和下划线。" },
+        { id: "tab-type", item: "数据类型", value: "string / number / array / file_ref", type: "枚举", example: "band_gap:number", note: "字段类型需与数据库字段定义一致。" },
+        { id: "tab-precision", item: "数值精度", value: "能量 1e-4；长度 1e-3；温度 0.1", type: "数字", example: "formation_energy=-1.2345", note: "统一数值有效位数和入库精度。" },
+        { id: "tab-unit-list", item: "标准单位列表", value: "A、度、N/m2、eV、uB/atom", type: "单位", example: "bond_length=A", note: "表格单位必须匹配标准单位定义。" }
+      ],
+      image: [
+        { id: "img-png", item: "图片格式", value: "PNG格式", type: "文件", example: "band_structure.png", note: "标准图谱统一使用 PNG。" },
+        { id: "img-dpi", item: "图片分辨率", value: "300 dpi", type: "数字+单位", example: "dpi=300", note: "用于归档和页面展示的最低分辨率。" },
+        { id: "img-size", item: "文件大小", value: "200 KB - 1 MB", type: "数字+单位", example: "512 KB", note: "图片文件大小需处于标准范围。" },
+        { id: "img-3d", item: "3D模型格式", value: "DAE格式", type: "文件", example: "structure.dae", note: "三维模型统一使用 DAE 格式。" }
+      ],
+      unit: [
+        { id: "unit-bond-length", item: "键长", value: "A", type: "单位", example: "2.410 A", note: "原子间键长标准单位。" },
+        { id: "unit-bond-angle", item: "键角", value: "度", type: "单位", example: "120 度", note: "键角标准单位。" },
+        { id: "unit-young", item: "杨氏模量", value: "N/m2", type: "单位", example: "2.7e11 N/m2", note: "杨氏模量标准单位。" },
+        { id: "unit-formation", item: "形成能", value: "eV", type: "单位", example: "-1.24 eV", note: "材料形成能标准单位。" },
+        { id: "unit-bandgap", item: "带隙", value: "eV", type: "单位", example: "1.82 eV", note: "电子带隙标准单位。" },
+        { id: "unit-moment", item: "磁矩", value: "uB/atom", type: "单位", example: "0.43 uB/atom", note: "原子磁矩标准单位。" }
+      ]
+    };
+
+    const TWOD_STANDARDIZATION_NONSTANDARD_DEFAULTS = [
+      { id: "ns-001", material: "MoS2-2H", field: "encut", current: "420 eV", target: "500 eV", reason: "截断能低于标准值", status: "待处理" },
+      { id: "ns-002", material: "Graphene-001", field: "functional", current: "LDA", target: "GGA-PBE", reason: "泛函不符合当前标准", status: "待处理" },
+      { id: "ns-003", material: "h-BN-003", field: "image_dpi", current: "180 dpi", target: "300 dpi", reason: "图片分辨率低于标准", status: "待处理" },
+      { id: "ns-004", material: "WSe2-006", field: "bond_length_unit", current: "nm", target: "A", reason: "键长单位需转换", status: "待处理" }
+    ];
+
+    function getTwodStandardizationState() {
+      if (!state.twodStandardization) {
+        state.twodStandardization = {
+          activeCategory: "calc",
+          rules: Object.fromEntries(Object.entries(TWOD_STANDARDIZATION_DEFAULT_RULES).map(([key, rows]) => [key, rows.map((item) => Object.assign({}, item))])),
+          dirty: {},
+          selected: [],
+          scan: { running: false, progress: 0, complete: false, results: [] }
+        };
+      }
+      return state.twodStandardization;
+    }
+
+    function getTwodStandardizationStyle() {
+      return `
+        <style>
+          #page-lowdim-standardization-twod .twod-std-shell {
+            display: grid;
+            grid-template-columns: 240px minmax(0, 1fr);
+            gap: 18px;
+            margin-top: 20px;
+          }
+          #page-lowdim-standardization-twod .twod-std-nav,
+          #page-lowdim-standardization-twod .twod-std-card {
+            border: 1px solid #d7dce8;
+            background: #ffffff;
+          }
+          #page-lowdim-standardization-twod .twod-std-nav {
+            padding: 10px;
+          }
+          #page-lowdim-standardization-twod .twod-std-nav button {
+            width: 100%;
+            min-height: 44px;
+            margin-bottom: 6px;
+            padding: 0 12px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: #334155;
+            text-align: left;
+            font-weight: 700;
+          }
+          #page-lowdim-standardization-twod .twod-std-nav button.active {
+            background: #e8ebf8;
+            color: #001a7a;
+          }
+          #page-lowdim-standardization-twod .twod-std-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 16px 18px;
+            border-bottom: 1px solid #e5eaf3;
+          }
+          #page-lowdim-standardization-twod .twod-std-card-head h3 {
+            margin: 0;
+            color: #111827;
+            font-size: 18px;
+          }
+          #page-lowdim-standardization-twod .twod-std-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            color: #047857;
+            font-size: 13px;
+            font-weight: 800;
+          }
+          #page-lowdim-standardization-twod .twod-std-status.dirty {
+            background: #fff7ed;
+            color: #c2410c;
+          }
+          #page-lowdim-standardization-twod .twod-std-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+          }
+          #page-lowdim-standardization-twod .twod-std-table-wrap {
+            overflow: auto;
+          }
+          #page-lowdim-standardization-twod .twod-std-table {
+            width: 100%;
+            min-width: 980px;
+            border-collapse: collapse;
+            table-layout: fixed;
+          }
+          #page-lowdim-standardization-twod .twod-std-table th,
+          #page-lowdim-standardization-twod .twod-std-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #edf1f7;
+            color: #111827;
+            font-size: 14px;
+            line-height: 22px;
+            text-align: left;
+          }
+          #page-lowdim-standardization-twod .twod-std-table th {
+            background: #e8ebf8;
+            color: #001a7a;
+            font-weight: 800;
+          }
+          #page-lowdim-standardization-twod .twod-std-cell {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          #page-lowdim-standardization-twod .twod-std-row-actions {
+            display: flex;
+            gap: 8px;
+          }
+          #page-lowdim-standardization-twod .twod-std-detect {
+            margin-top: 18px;
+          }
+          #page-lowdim-standardization-twod .twod-std-progress {
+            height: 8px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+          }
+          #page-lowdim-standardization-twod .twod-std-progress span {
+            display: block;
+            height: 100%;
+            background: #14208a;
+            transition: width 180ms ease;
+          }
+          .twod-standardization-rule-modal .twod-std-form-grid {
+            display: grid;
+            gap: 16px;
+          }
+          .twod-standardization-rule-modal .field > span {
+            display: block;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 700;
+          }
+          .twod-standardization-rule-modal .field input,
+          .twod-standardization-rule-modal .field textarea {
+            width: 100%;
+          }
+          @media (max-width: 900px) {
+            #page-lowdim-standardization-twod .twod-std-shell {
+              grid-template-columns: 1fr;
+            }
+          }
+        </style>
+      `;
+    }
+
+    function renderTwodStdCell(value) {
+      const text = escapeLowDimHtml(value || "-");
+      return `<span class="twod-std-cell" title="${text}">${text}</span>`;
+    }
+
+    function renderTwodStandardizationRules(activeKey) {
+      const std = getTwodStandardizationState();
+      const rows = std.rules[activeKey] || [];
+      return `
+        <div class="twod-std-table-wrap">
+          <table class="twod-std-table">
+            <thead>
+              <tr>
+                <th style="width:190px;">标准规则</th>
+                <th style="width:170px;">数据字段</th>
+                <th style="width:220px;">标准值</th>
+                <th style="width:130px;">类型</th>
+                <th>示例/说明</th>
+                <th style="width:150px;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((row) => `
+                <tr>
+                  <td>${renderTwodStdCell(row.item)}</td>
+                  <td>${renderTwodStdCell(row.field || row.item)}</td>
+                  <td>${renderTwodStdCell(row.value)}</td>
+                  <td>${renderTwodStdCell(row.type)}</td>
+                  <td>${renderTwodStdCell(`${row.example || ""}${row.note ? `；${row.note}` : ""}`)}</td>
+                  <td>
+                    <div class="twod-std-row-actions">
+                      <button class="btn btn-sm" type="button" data-twod-std-rule-edit="${row.id}">编辑</button>
+                      <button class="btn btn-sm btn-danger-outline" type="button" data-twod-std-rule-delete="${row.id}">删除</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderTwodNonstandardPanel() {
+      const std = getTwodStandardizationState();
+      const scan = std.scan;
+      const selected = new Set(std.selected || []);
+      const pendingCount = (scan.results || []).filter((item) => item.status !== "已标准化").length;
+      return `
+        <div class="twod-std-card twod-std-detect">
+          <div class="twod-std-card-head">
+            <div>
+              <h3>非标数据检测</h3>
+              <span>自动扫描并列出不符合当前标准的数据</span>
+            </div>
+            <div class="twod-std-actions">
+              <button class="btn" type="button" data-twod-std-scan ${scan.running ? "disabled" : ""}>非标数据检测</button>
+              <button class="btn-primary" type="button" data-twod-std-batch ${selected.size ? "" : "disabled"}>批量标准化</button>
+            </div>
+          </div>
+          <div style="padding:16px 18px;">
+            <div class="twod-std-progress" aria-label="扫描进度"><span style="width:${scan.progress || 0}%;"></span></div>
+            <p style="margin:10px 0 0;color:#64748b;font-size:13px;">${scan.running ? `正在扫描数据库：${scan.progress}%` : (scan.complete ? `扫描完成，发现 ${pendingCount} 条待处理非标数据。` : "点击检测后扫描当前数据库中的非标数据。")}</p>
+          </div>
+          ${scan.results?.length ? `
+            <div class="twod-std-table-wrap">
+              <table class="twod-std-table">
+                <thead>
+                  <tr>
+                    <th style="width:56px;">选择</th>
+                    <th>材料</th>
+                    <th>字段</th>
+                    <th>当前值</th>
+                    <th>标准值</th>
+                    <th>问题说明</th>
+                    <th style="width:110px;">状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${scan.results.map((item) => `
+                    <tr>
+                      <td><input type="checkbox" data-twod-std-nonstandard-check="${item.id}" ${selected.has(item.id) ? "checked" : ""} ${item.status === "已标准化" ? "disabled" : ""}></td>
+                      <td>${renderTwodStdCell(item.material)}</td>
+                      <td>${renderTwodStdCell(item.field)}</td>
+                      <td>${renderTwodStdCell(item.current)}</td>
+                      <td>${renderTwodStdCell(item.target)}</td>
+                      <td>${renderTwodStdCell(item.reason)}</td>
+                      <td>${renderTwodStdCell(item.status)}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          ` : ""}
+        </div>
+      `;
+    }
+
+    function renderTwodStandardizationPage(pageId) {
+      const page = document.getElementById(`page-${pageId}`);
+      if (!page) return;
+      const std = getTwodStandardizationState();
+      const active = TWOD_STANDARDIZATION_CATEGORIES.find((item) => item.key === std.activeCategory) || TWOD_STANDARDIZATION_CATEGORIES[0];
+      const dirty = Boolean(std.dirty?.[active.key]);
+      const affected = Number(std.affectedCount || 0);
+      page.innerHTML = `
+        ${getLowdimWorkflowStyle()}
+        ${getTwodStandardizationStyle()}
+        <div class="lowdim-workflow-page">
+          <div class="lowdim-workflow-head">
+            <div>
+              <h2>二维材料数据库标准化</h2>
+              <p>围绕计算方法、数据格式、表格、图片和单位规则进行统一配置，并对存量非标数据执行检测和批量标准化。</p>
+            </div>
+          </div>
+          ${affected ? `
+            <div class="twod-std-card" style="margin-top:16px;padding:14px 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+              <span style="color:#92400e;font-weight:800;">标准更新影响存量数据：预计 ${affected} 条需要重新标准化。</span>
+              <button class="btn-primary" type="button" data-twod-std-restandardize>批量重新标准化</button>
+            </div>
+          ` : ""}
+          <div class="twod-std-shell">
+            <nav class="twod-std-nav" aria-label="标准化类别导航">
+              ${TWOD_STANDARDIZATION_CATEGORIES.map((item) => `<button type="button" class="${item.key === active.key ? "active" : ""}" data-twod-std-category="${item.key}">${item.label}</button>`).join("")}
+            </nav>
+            <section>
+              <div class="twod-std-card">
+                <div class="twod-std-card-head">
+                  <div>
+                    <h3>${active.label}</h3>
+                    <span>当前类别标准规则列表</span>
+                  </div>
+                  <div class="twod-std-actions">
+                    <span class="twod-std-status ${dirty ? "dirty" : ""}">${dirty ? "未保存" : "已保存"}</span>
+                    <button class="btn" type="button" data-twod-std-rule-add>新增</button>
+                    <button class="btn-primary" type="button" data-twod-std-save-standard ${dirty ? "" : "disabled"}>保存标准</button>
+                  </div>
+                </div>
+                ${renderTwodStandardizationRules(active.key)}
+              </div>
+              ${renderTwodNonstandardPanel()}
+            </section>
+          </div>
+        </div>
+      `;
+    }
+
+    function openTwodStandardizationRuleModal(mode, ruleId = "") {
+      const std = getTwodStandardizationState();
+      const category = std.activeCategory || "calc";
+      const rows = std.rules[category] || [];
+      const record = mode === "edit" ? rows.find((item) => item.id === ruleId) : null;
+      state.twodStandardizationEditing = { mode, category, ruleId };
+      const title = document.getElementById("twodStandardizationRuleModalTitle");
+      const body = document.getElementById("twodStandardizationRuleModalBody");
+      if (title) title.textContent = mode === "edit" ? "编辑标准规则" : "新增标准规则";
+      if (body) {
+        body.innerHTML = `
+          <div class="twod-std-form-grid">
+            <label class="field"><span>标准规则</span><input id="twodStdRuleItem" type="text" value="${escapeLowDimHtml(record?.item || "")}" placeholder="请输入标准规则"></label>
+            <label class="field"><span>数据字段</span><input id="twodStdRuleField" type="text" value="${escapeLowDimHtml(record?.field || record?.item || "")}" placeholder="请输入数据字段"></label>
+            <label class="field"><span>标准值</span><input id="twodStdRuleValue" type="text" value="${escapeLowDimHtml(record?.value || "")}" placeholder="请输入标准值"></label>
+            <label class="field"><span>数据类型</span><input id="twodStdRuleType" type="text" value="${escapeLowDimHtml(record?.type || "")}" placeholder="请输入数据类型"></label>
+            <label class="field"><span>格式示例</span><textarea id="twodStdRuleExample" rows="3" placeholder="请输入格式示例">${escapeLowDimHtml(record?.example || "")}</textarea></label>
+            <label class="field"><span>说明</span><textarea id="twodStdRuleNote" rows="3" placeholder="请输入说明">${escapeLowDimHtml(record?.note || "")}</textarea></label>
+          </div>
+        `;
+      }
+      openModal("twodStandardizationRuleModal");
+    }
+
+    function saveTwodStandardizationRule() {
+      const editing = state.twodStandardizationEditing || {};
+      const category = editing.category || getTwodStandardizationState().activeCategory || "calc";
+      const item = (document.getElementById("twodStdRuleItem")?.value || "").trim();
+      const field = (document.getElementById("twodStdRuleField")?.value || "").trim();
+      const value = (document.getElementById("twodStdRuleValue")?.value || "").trim();
+      const type = (document.getElementById("twodStdRuleType")?.value || "").trim();
+      const example = (document.getElementById("twodStdRuleExample")?.value || "").trim();
+      const note = (document.getElementById("twodStdRuleNote")?.value || "").trim();
+      if (!item || !value || !type) {
+        showToast("标准规则校验", "请填写标准规则、标准值和数据类型。");
+        return;
+      }
+      const std = getTwodStandardizationState();
+      const rows = std.rules[category] || [];
+      const draft = { item, field: field || item, value, type, example, note };
+      if (editing.mode === "edit") {
+        const index = rows.findIndex((row) => row.id === editing.ruleId);
+        if (index >= 0) rows[index] = Object.assign({}, rows[index], draft);
+      } else {
+        rows.push(Object.assign({ id: `${category}-${Date.now()}` }, draft));
+      }
+      std.dirty[category] = true;
+      closeModal("twodStandardizationRuleModal");
+      renderTwodStandardizationPage("lowdim-standardization-twod");
+      showToast("标准规则", editing.mode === "edit" ? "规则已编辑，当前未保存。" : "规则已新增，当前未保存。");
+    }
+
+    function deleteTwodStandardizationRule(ruleId) {
+      const std = getTwodStandardizationState();
+      const category = std.activeCategory || "calc";
+      const rows = std.rules[category] || [];
+      const record = rows.find((row) => row.id === ruleId);
+      if (!record) return;
+      if (!window.confirm(`确认删除「${record.item}」吗？`)) return;
+      std.rules[category] = rows.filter((row) => row.id !== ruleId);
+      std.dirty[category] = true;
+      renderTwodStandardizationPage("lowdim-standardization-twod");
+      showToast("标准规则", "规则已删除，当前未保存。");
+    }
+
+    function saveTwodStandardizationStandard() {
+      const std = getTwodStandardizationState();
+      const category = std.activeCategory || "calc";
+      std.dirty[category] = false;
+      std.affectedCount = 128;
+      renderTwodStandardizationPage("lowdim-standardization-twod");
+      showToast("标准保存", "标准已保存，存量数据影响已计算。");
+    }
+
+    function runTwodStandardizationScan() {
+      const std = getTwodStandardizationState();
+      if (std.scan.running) return;
+      std.scan = { running: true, progress: 0, complete: false, results: [] };
+      std.selected = [];
+      renderTwodStandardizationPage("lowdim-standardization-twod");
+      clearInterval(runTwodStandardizationScan.timer);
+      runTwodStandardizationScan.timer = setInterval(() => {
+        const current = getTwodStandardizationState();
+        current.scan.progress = Math.min(100, current.scan.progress + 20);
+        if (current.scan.progress >= 100) {
+          clearInterval(runTwodStandardizationScan.timer);
+          current.scan.running = false;
+          current.scan.complete = true;
+          current.scan.results = TWOD_STANDARDIZATION_NONSTANDARD_DEFAULTS.map((item) => Object.assign({}, item));
+        }
+        renderTwodStandardizationPage("lowdim-standardization-twod");
+      }, 220);
+    }
+
+    function batchTwodStandardization() {
+      const std = getTwodStandardizationState();
+      const selected = new Set(std.selected || []);
+      if (!selected.size) {
+        showToast("批量标准化", "请先勾选非标数据。");
+        return;
+      }
+      std.scan.results = (std.scan.results || []).map((item) => selected.has(item.id) ? Object.assign({}, item, { current: item.target, status: "已标准化" }) : item);
+      std.selected = [];
+      renderTwodStandardizationPage("lowdim-standardization-twod");
+      showToast("批量标准化", `${selected.size} 条非标数据已完成标准化。`);
+    }
+
+    function restandardizeTwodAffectedData() {
+      const std = getTwodStandardizationState();
+      std.affectedCount = 0;
+      std.scan.results = (std.scan.results || []).map((item) => Object.assign({}, item, { current: item.target, status: "已标准化" }));
+      std.selected = [];
+      renderTwodStandardizationPage("lowdim-standardization-twod");
+      showToast("批量重新标准化", "受影响的存量数据已完成重新标准化。");
+    }
+
+    const TWOD_DATABASE_DATASET_TABS = [
+      {
+        key: "structure",
+        label: "结构特征数据集",
+        fields: [
+          { key: "structureImage", label: "原子结构图", kind: "image", width: "110px" },
+          { key: "formula", label: "化学式", width: "120px" },
+          { key: "cellParams", label: "晶胞参数", width: "180px" },
+          { key: "layerThickness", label: "层厚", width: "110px" },
+          { key: "atomicCoords", label: "原子坐标", width: "210px" },
+          { key: "bondInfo", label: "键长键角", width: "190px" },
+          { key: "crystalSystem", label: "晶系", width: "110px" },
+          { key: "spaceGroup", label: "空间群", width: "120px" }
+        ]
+      },
+      {
+        key: "electronic",
+        label: "电子结构数据集",
+        fields: [
+          { key: "bandStructure", label: "能带结构" },
+          { key: "densityOfStates", label: "态密度" },
+          { key: "effectiveMass", label: "有效质量" }
+        ]
+      },
+      {
+        key: "electrical",
+        label: "电学性质数据集",
+        fields: [
+          { key: "ferroelectric", label: "铁电性质" },
+          { key: "piezoelectric", label: "压电性质" }
+        ]
+      },
+      {
+        key: "magnetic",
+        label: "磁学性质数据集",
+        fields: [
+          { key: "magneticGroundState", label: "磁基态构型" },
+          { key: "magneticTransitionTemperature", label: "磁转变温度" }
+        ]
+      },
+      {
+        key: "thermal",
+        label: "热学性质数据集",
+        fields: [
+          { key: "formationEnergy", label: "形成能" },
+          { key: "phononSpectrum", label: "声子谱" },
+          { key: "phononDos", label: "声子态密度" }
+        ]
+      },
+      {
+        key: "mechanical",
+        label: "力学性质数据集",
+        fields: [
+          { key: "elasticConstant", label: "弹性常数" },
+          { key: "youngModulus", label: "杨氏模量" },
+          { key: "poissonRatio", label: "泊松比" }
+        ]
+      },
+      {
+        key: "optical",
+        label: "光学性质数据集",
+        fields: [
+          { key: "dielectricFunction", label: "介电函数" },
+          { key: "absorptionCoefficient", label: "光吸收系数" },
+          { key: "reflectivity", label: "反射率" },
+          { key: "refractiveIndex", label: "折射率" },
+          { key: "extinctionCoefficient", label: "消光系数" }
+        ]
+      },
+      {
+        key: "defect",
+        label: "缺陷性质数据集",
+        fields: [
+          { key: "vacancyDefect", label: "空位缺陷" },
+          { key: "antisiteDefect", label: "反位缺陷" }
+        ]
+      }
+    ];
+
+    const TWOD_DATABASE_DATASET_DEFAULTS = {
+      structure: [
+        { id: "db-structure-001", structureImage: "MoS2-2H", formula: "MoS2", cellParams: "a=3.18 A, b=3.18 A, c=20.00 A", layerThickness: "3.13 A", atomicCoords: "Mo(0,0,0.50); S(0.33,0.67,0.58)", bondInfo: "Mo-S 2.41 A; S-Mo-S 82.1 度", crystalSystem: "六方晶系", spaceGroup: "P-6m2" },
+        { id: "db-structure-002", structureImage: "Graphene", formula: "C", cellParams: "a=2.46 A, b=2.46 A, c=18.00 A", layerThickness: "单层", atomicCoords: "C(0,0,0.50); C(0.33,0.67,0.50)", bondInfo: "C-C 1.42 A; C-C-C 120 度", crystalSystem: "六方晶系", spaceGroup: "P6/mmm" }
+      ],
+      electronic: [
+        { id: "db-electronic-001", bandStructure: "MoS2_band.dat；K 点直接带隙 1.82 eV", densityOfStates: "MoS2_dos.dat；费米能级附近 DOS 已归一", effectiveMass: "me*=0.48m0, mh*=0.59m0" },
+        { id: "db-electronic-002", bandStructure: "Graphene_band.dat；Dirac 点位于 K", densityOfStates: "Graphene_dos.dat；Dirac 点 DOS 接近 0", effectiveMass: "Dirac 线性色散" }
+      ],
+      electrical: [
+        { id: "db-electrical-001", ferroelectric: "In2Se3 面外极化 0.11 C/m2", piezoelectric: "d11=5.8 pm/V" },
+        { id: "db-electrical-002", ferroelectric: "CuInP2S6 层间铁电翻转", piezoelectric: "e11=3.2e-10 C/m" }
+      ],
+      magnetic: [
+        { id: "db-magnetic-001", magneticGroundState: "CrI3 单层铁磁基态构型图", magneticTransitionTemperature: "45 K" },
+        { id: "db-magnetic-002", magneticGroundState: "Fe3GeTe2 铁磁基态", magneticTransitionTemperature: "130 K" }
+      ],
+      thermal: [
+        { id: "db-thermal-001", formationEnergy: "-1.24 eV/atom", phononSpectrum: "MoS2_phonon.dat；无虚频", phononDos: "MoS2_phonon_dos.dat" },
+        { id: "db-thermal-002", formationEnergy: "-0.98 eV/atom", phononSpectrum: "hBN_phonon.dat；声学支稳定", phononDos: "hBN_phonon_dos.dat" }
+      ],
+      mechanical: [
+        { id: "db-mechanical-001", elasticConstant: "C11=123 N/m, C12=31 N/m", youngModulus: "180 N/m2", poissonRatio: "0.25" },
+        { id: "db-mechanical-002", elasticConstant: "C11=340 N/m, C12=61 N/m", youngModulus: "1.0e12 N/m2", poissonRatio: "0.17" }
+      ],
+      optical: [
+        { id: "db-optical-001", dielectricFunction: "epsilon_real/imag.dat", absorptionCoefficient: "峰值 8.2e5 cm-1", reflectivity: "Rmax=0.31", refractiveIndex: "n=2.6", extinctionCoefficient: "k=0.42" },
+        { id: "db-optical-002", dielectricFunction: "hBN_epsilon.dat", absorptionCoefficient: "紫外区吸收增强", reflectivity: "Rmax=0.18", refractiveIndex: "n=1.9", extinctionCoefficient: "k=0.21" }
+      ],
+      defect: [
+        { id: "db-defect-001", vacancyDefect: "S 空位；形成能 1.72 eV", antisiteDefect: "Mo_S 反位缺陷；形成能 3.41 eV" },
+        { id: "db-defect-002", vacancyDefect: "B 空位；形成能 2.18 eV", antisiteDefect: "B_N 反位缺陷；形成能 4.03 eV" }
+      ]
+    };
+
+    function getTwodDatabaseState() {
+      if (!state.twodDatabase) {
+        state.twodDatabase = {
+          activeTab: "structure",
+          datasets: Object.fromEntries(Object.entries(TWOD_DATABASE_DATASET_DEFAULTS).map(([key, rows]) => [key, rows.map((item) => Object.assign({}, item))]))
+        };
+      }
+      return state.twodDatabase;
+    }
+
+    function getTwodDatabaseTabConfig(tabKey) {
+      return TWOD_DATABASE_DATASET_TABS.find((item) => item.key === tabKey) || TWOD_DATABASE_DATASET_TABS[0];
+    }
+
+    function getTwodDatabaseStyle() {
+      return `
+        <style>
+          #page-lowdim-database-twod .twod-db-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+          }
+          #page-lowdim-database-twod .twod-db-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+          }
+          #page-lowdim-database-twod .twod-db-tabs button {
+            min-height: 42px;
+            flex: 0 0 auto;
+            padding: 0 14px;
+            border: 1px solid #cfd8ea;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #334155;
+            font-weight: 800;
+            cursor: pointer;
+          }
+          #page-lowdim-database-twod .twod-db-tabs button.active {
+            border-color: #14208a;
+            background: #e8ebf8;
+            color: #001a7a;
+          }
+          #page-lowdim-database-twod .twod-db-table-wrap {
+            overflow: auto;
+          }
+          #page-lowdim-database-twod .twod-db-table {
+            width: 100%;
+            min-width: 1080px;
+            border-collapse: collapse;
+            table-layout: fixed;
+          }
+          #page-lowdim-database-twod .twod-db-table th,
+          #page-lowdim-database-twod .twod-db-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #edf1f7;
+            color: #111827;
+            font-size: 14px;
+            line-height: 22px;
+            text-align: left;
+            overflow: hidden;
+          }
+          #page-lowdim-database-twod .twod-db-table th {
+            background: #e8ebf8;
+            color: #001a7a;
+            font-weight: 800;
+          }
+          #page-lowdim-database-twod .twod-db-cell {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: help;
+          }
+          #page-lowdim-database-twod .twod-db-structure-thumb {
+            display: inline-flex;
+            width: 70px;
+            height: 48px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d7dce8;
+            border-radius: 5px;
+            background: #f8fafc;
+            cursor: zoom-in;
+          }
+          #page-lowdim-database-twod .twod-db-structure-thumb svg {
+            width: 58px;
+            height: 40px;
+          }
+          #page-lowdim-database-twod .twod-db-row-actions {
+            display: flex;
+            gap: 8px;
+          }
+          .twod-database-dataset-modal .twod-db-form-grid {
+            display: grid;
+            gap: 14px;
+          }
+          .twod-database-dataset-modal .field > span {
+            display: block;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 700;
+          }
+          .twod-database-dataset-modal .field input,
+          .twod-database-dataset-modal .field textarea {
+            width: 100%;
+          }
+          .twod-database-preview-modal .twod-db-preview {
+            display: flex;
+            min-height: 360px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d7dce8;
+            background: #f8fafc;
+          }
+          .twod-database-preview-modal .twod-db-preview svg {
+            width: min(520px, 90vw);
+            height: min(360px, 62vw);
+          }
+          @media (max-width: 900px) {
+            #page-lowdim-database-twod .twod-db-toolbar {
+              align-items: stretch;
+            }
+            #page-lowdim-database-twod .twod-db-toolbar .btn-primary {
+              width: 100%;
+            }
+          }
+        </style>
+      `;
+    }
+
+    function renderTwodDbCell(value) {
+      const text = escapeLowDimHtml(value || "-");
+      return `<span class="twod-db-cell" title="${text}">${text}</span>`;
+    }
+
+    function renderTwodAtomicStructureSvg(label = "MoS2", large = false) {
+      const safeLabel = escapeLowDimHtml(label || "二维结构");
+      const radius = large ? 14 : 9;
+      return `
+        <svg viewBox="0 0 180 120" role="img" aria-label="${safeLabel} 原子结构图">
+          <line x1="42" y1="36" x2="90" y2="60" stroke="#64748b" stroke-width="3"/>
+          <line x1="90" y1="60" x2="138" y2="36" stroke="#64748b" stroke-width="3"/>
+          <line x1="42" y1="84" x2="90" y2="60" stroke="#64748b" stroke-width="3"/>
+          <line x1="90" y1="60" x2="138" y2="84" stroke="#64748b" stroke-width="3"/>
+          <line x1="42" y1="36" x2="42" y2="84" stroke="#cbd5e1" stroke-width="2"/>
+          <line x1="138" y1="36" x2="138" y2="84" stroke="#cbd5e1" stroke-width="2"/>
+          <circle cx="90" cy="60" r="${radius + 2}" fill="#2563eb"/>
+          <circle cx="42" cy="36" r="${radius}" fill="#f59e0b"/>
+          <circle cx="138" cy="36" r="${radius}" fill="#f59e0b"/>
+          <circle cx="42" cy="84" r="${radius}" fill="#10b981"/>
+          <circle cx="138" cy="84" r="${radius}" fill="#10b981"/>
+          ${large ? `<text x="90" y="112" text-anchor="middle" fill="#334155" font-size="14" font-weight="700">${safeLabel}</text>` : ""}
+        </svg>
+      `;
+    }
+
+    function renderTwodDbDatasetValue(row, field) {
+      if (field.kind === "image") {
+        const label = row[field.key] || row.formula || "二维结构";
+        return `<button class="twod-db-structure-thumb" type="button" title="点击放大 ${escapeLowDimHtml(label)}" data-twod-db-structure-preview="${row.id}">${renderTwodAtomicStructureSvg(label)}</button>`;
+      }
+      return renderTwodDbCell(row[field.key]);
+    }
+
+    function renderTwodDbDatasetTable(activeKey) {
+      const db = getTwodDatabaseState();
+      const config = getTwodDatabaseTabConfig(activeKey);
+      const rows = db.datasets[activeKey] || [];
+      const minWidth = activeKey === "structure" ? 1320 : Math.max(760, config.fields.length * 240 + 180);
+      return `
+        <div class="twod-db-table-wrap">
+          <table class="twod-db-table" style="min-width:${minWidth}px;">
+            <thead>
+              <tr>
+                ${config.fields.map((field) => `<th style="${field.width ? `width:${field.width};` : ""}">${field.label}</th>`).join("")}
+                <th style="width:150px;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.length ? rows.map((row) => `
+                <tr>
+                  ${config.fields.map((field) => `<td>${renderTwodDbDatasetValue(row, field)}</td>`).join("")}
+                  <td>
+                    <div class="twod-db-row-actions">
+                      <button class="btn btn-sm" type="button" data-twod-db-dataset-edit="${row.id}">编辑</button>
+                      <button class="btn btn-sm btn-danger-outline" type="button" data-twod-db-dataset-delete="${row.id}">删除</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("") : `<tr><td colspan="${config.fields.length + 1}"><div class="sys-empty">暂无数据集</div></td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderTwodDatabasePage(pageId) {
+      const page = document.getElementById(`page-${pageId}`);
+      if (!page) return;
+      const db = getTwodDatabaseState();
+      const active = getTwodDatabaseTabConfig(db.activeTab);
+      const rows = db.datasets[active.key] || [];
+      page.innerHTML = `
+        ${getLowdimWorkflowStyle()}
+        ${getTwodDatabaseStyle()}
+        <div class="lowdim-workflow-page">
+          <div class="lowdim-workflow-head">
+            <div>
+              <h2>二维材料数据库</h2>
+              <p>按二维材料八类数据资源对象维护数据集，支持新增、编辑和删除。</p>
+            </div>
+          </div>
+          <div class="twod-db-toolbar">
+            <div class="twod-db-tabs" role="tablist" aria-label="二维材料数据集页签">
+              ${TWOD_DATABASE_DATASET_TABS.map((tab) => `<button type="button" role="tab" class="${tab.key === active.key ? "active" : ""}" data-twod-db-dataset-tab="${tab.key}">${tab.label}</button>`).join("")}
+            </div>
+            <button class="btn-primary" type="button" data-twod-db-dataset-add>新增数据集</button>
+          </div>
+          <div class="lowdim-workflow-panel" style="margin-top:14px;">
+            <div class="lowdim-workflow-panel-head">
+              <h3>${active.label}</h3>
+              <span>共 ${rows.length} 条</span>
+            </div>
+            ${renderTwodDbDatasetTable(active.key)}
+          </div>
+        </div>
+      `;
+    }
+
+    function openTwodDatabaseDatasetModal(mode, recordId = "") {
+      const db = getTwodDatabaseState();
+      const activeKey = db.activeTab || "structure";
+      const config = getTwodDatabaseTabConfig(activeKey);
+      const rows = db.datasets[activeKey] || [];
+      const record = mode === "edit" ? rows.find((item) => item.id === recordId) : null;
+      state.twodDatabaseEditing = { mode, tabKey: activeKey, recordId };
+      const title = document.getElementById("twodDatabaseDatasetModalTitle");
+      const body = document.getElementById("twodDatabaseDatasetModalBody");
+      if (title) title.textContent = `${mode === "edit" ? "编辑" : "新增"}${config.label}`;
+      if (body) {
+        body.innerHTML = `
+          <div class="twod-db-form-grid">
+            ${config.fields.map((field) => `
+              <label class="field">
+                <span>${field.label}</span>
+                ${field.kind === "image"
+                  ? `<input id="twodDbField_${field.key}" type="text" value="${escapeLowDimHtml(record?.[field.key] || record?.formula || "")}" placeholder="请输入结构图标识">`
+                  : `<textarea id="twodDbField_${field.key}" rows="2" placeholder="请输入${field.label}">${escapeLowDimHtml(record?.[field.key] || "")}</textarea>`}
+              </label>
+            `).join("")}
+          </div>
+        `;
+      }
+      openModal("twodDatabaseDatasetModal");
+    }
+
+    function saveTwodDatabaseDataset() {
+      const editing = state.twodDatabaseEditing || {};
+      const tabKey = editing.tabKey || getTwodDatabaseState().activeTab || "structure";
+      const config = getTwodDatabaseTabConfig(tabKey);
+      const draft = {};
+      config.fields.forEach((field) => {
+        draft[field.key] = (document.getElementById(`twodDbField_${field.key}`)?.value || "").trim();
+      });
+      const hasValue = config.fields.some((field) => draft[field.key]);
+      if (!hasValue) {
+        showToast("数据集校验", "请至少填写一个数据集字段。");
+        return;
+      }
+      const db = getTwodDatabaseState();
+      const rows = db.datasets[tabKey] || [];
+      if (editing.mode === "edit") {
+        const index = rows.findIndex((row) => row.id === editing.recordId);
+        if (index >= 0) rows[index] = Object.assign({}, rows[index], draft);
+      } else {
+        rows.push(Object.assign({ id: `db-${tabKey}-${Date.now()}` }, draft));
+      }
+      db.datasets[tabKey] = rows;
+      closeModal("twodDatabaseDatasetModal");
+      renderTwodDatabasePage("lowdim-database-twod");
+      showToast("数据集", editing.mode === "edit" ? "数据集已编辑。" : "数据集已新增。");
+    }
+
+    function deleteTwodDatabaseDataset(recordId) {
+      const db = getTwodDatabaseState();
+      const tabKey = db.activeTab || "structure";
+      const rows = db.datasets[tabKey] || [];
+      const record = rows.find((row) => row.id === recordId);
+      if (!record) return;
+      if (!window.confirm("确认删除该数据集吗？")) return;
+      db.datasets[tabKey] = rows.filter((row) => row.id !== recordId);
+      renderTwodDatabasePage("lowdim-database-twod");
+      showToast("数据集", "数据集已删除。");
+    }
+
+    function openTwodStructurePreview(recordId) {
+      const db = getTwodDatabaseState();
+      const rows = db.datasets.structure || [];
+      const record = rows.find((row) => row.id === recordId);
+      if (!record) return;
+      const title = document.getElementById("twodDatabaseStructurePreviewTitle");
+      const body = document.getElementById("twodDatabaseStructurePreviewBody");
+      const label = record.structureImage || record.formula || "原子结构图";
+      if (title) title.textContent = `${label} 原子结构图`;
+      if (body) {
+        body.innerHTML = `<div class="twod-db-preview">${renderTwodAtomicStructureSvg(label, true)}</div>`;
+      }
+      openModal("twodDatabaseStructurePreviewModal");
+    }
+
     function renderLowdimStandardizationPage(pageId) {
+      if (pageId === "lowdim-standardization-twod") {
+        renderTwodStandardizationPage(pageId);
+        return;
+      }
       const page = document.getElementById(`page-${pageId}`);
       if (!page) return;
       const material = getLowdimMaterialConfig(pageId);
@@ -49691,6 +52225,10 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function renderLowdimDatabasePage(pageId) {
+      if (pageId === "lowdim-database-twod") {
+        renderTwodDatabasePage(pageId);
+        return;
+      }
       const page = document.getElementById(`page-${pageId}`);
       if (!page) return;
       const material = getLowdimMaterialConfig(pageId);
@@ -49701,6 +52239,13 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         ["加工数据区", "清洗、标准化、质量评分和版本记录", "JSON / LOG", "按任务动态统计", "二级受限", "已同步"],
         ["归档数据区", "原始文件、审核记录和下载留痕", "ZIP / PDF / LOG", "按批次动态统计", "三级敏感", "受控访问"]
       ];
+      const databaseBadges = pageId === "lowdim-database-twod" ? "" : `
+            <div class="lowdim-workflow-badges">
+              <span class="lowdim-workflow-badge">记录 ${material.records}</span>
+              <span class="lowdim-workflow-badge">格式 ${material.format}</span>
+              <span class="lowdim-workflow-badge">更新 ${material.updated}</span>
+            </div>
+      `;
       page.innerHTML = `
         ${getLowdimWorkflowStyle()}
         <div class="lowdim-workflow-page">
@@ -49709,11 +52254,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <h2>${material.databaseTitle}</h2>
               <p>集中展示${material.short}数据库的数据分区、资源内容、格式、数据量、开放等级和更新状态。</p>
             </div>
-            <div class="lowdim-workflow-badges">
-              <span class="lowdim-workflow-badge">记录 ${material.records}</span>
-              <span class="lowdim-workflow-badge">格式 ${material.format}</span>
-              <span class="lowdim-workflow-badge">更新 ${material.updated}</span>
-            </div>
+            ${databaseBadges}
           </div>
           <div class="lowdim-workflow-panel" style="margin-top:20px;">
             <div class="lowdim-workflow-panel-head">
@@ -49745,11 +52286,219 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       document.body.dataset.lowdimWorkflowBound = "true";
       document.body.addEventListener("click", (event) => {
         const tab = event.target.closest("[data-lowdim-ingest-tab]");
-        if (!tab) return;
-        const pageId = tab.dataset.lowdimIngestPage || state.page;
-        if (!state.lowdimIngestTabs) state.lowdimIngestTabs = {};
-        state.lowdimIngestTabs[pageId] = tab.dataset.lowdimIngestTab || "objects";
-        renderLowdimIngestPage(pageId);
+        if (tab) {
+          const pageId = tab.dataset.lowdimIngestPage || state.page;
+          if (!state.lowdimIngestTabs) state.lowdimIngestTabs = {};
+          state.lowdimIngestTabs[pageId] = tab.dataset.lowdimIngestTab || "objects";
+          renderLowdimIngestPage(pageId);
+          return;
+        }
+        if (event.target.closest("[data-twod-ingest-resource-add]")) {
+          openTwodIngestResourceObjectModal("add");
+          return;
+        }
+        const editButton = event.target.closest("[data-twod-ingest-resource-edit]");
+        if (editButton) {
+          openTwodIngestResourceObjectModal("edit", editButton.dataset.twodIngestResourceEdit);
+          return;
+        }
+        const deleteButton = event.target.closest("[data-twod-ingest-resource-delete]");
+        if (deleteButton) {
+          deleteTwodIngestResourceObject(deleteButton.dataset.twodIngestResourceDelete);
+          return;
+        }
+        if (event.target.closest("[data-twod-ingest-resource-save]")) {
+          saveTwodIngestResourceObject();
+          return;
+        }
+        const genericAddButton = event.target.closest("[data-twod-ingest-generic-add]");
+        if (genericAddButton) {
+          openTwodIngestGenericRowModal("lowdim-ingest-twod", genericAddButton.dataset.twodIngestGenericAdd);
+          return;
+        }
+        if (event.target.closest("[data-twod-ingest-generic-save]")) {
+          saveTwodIngestGenericRow();
+          return;
+        }
+        const securityLevelCard = event.target.closest("[data-twod-security-level-card]");
+        if (securityLevelCard) {
+          const security = getTwodSecurityState();
+          const level = securityLevelCard.dataset.twodSecurityLevelCard || "";
+          security.expandedLevel = security.expandedLevel === level ? "" : level;
+          renderTwodSecurityPage("lowdim-ingest-twod");
+          return;
+        }
+        if (event.target.closest("[data-twod-security-data-add]")) {
+          openTwodSecurityModal("data-add");
+          return;
+        }
+        const securityDataEdit = event.target.closest("[data-twod-security-data-edit]");
+        if (securityDataEdit) {
+          openTwodSecurityModal("data-edit", securityDataEdit.dataset.twodSecurityDataEdit);
+          return;
+        }
+        const securityDataDelete = event.target.closest("[data-twod-security-data-delete]");
+        if (securityDataDelete) {
+          deleteTwodSecurityData(securityDataDelete.dataset.twodSecurityDataDelete);
+          return;
+        }
+        if (event.target.closest("[data-twod-security-rule-save]")) {
+          saveTwodSecurityRules();
+          return;
+        }
+        const securityReview = event.target.closest("[data-twod-security-application-review]");
+        if (securityReview) {
+          openTwodSecurityModal("review", securityReview.dataset.twodSecurityApplicationReview);
+          return;
+        }
+        const securityRenew = event.target.closest("[data-twod-security-renew]");
+        if (securityRenew) {
+          openTwodSecurityModal("renew", securityRenew.dataset.twodSecurityRenew);
+          return;
+        }
+        const securityUserEdit = event.target.closest("[data-twod-security-user-edit]");
+        if (securityUserEdit) {
+          openTwodSecurityModal("user-edit", securityUserEdit.dataset.twodSecurityUserEdit);
+          return;
+        }
+        const securityUserDelete = event.target.closest("[data-twod-security-user-delete]");
+        if (securityUserDelete) {
+          deleteTwodSecurityUser(securityUserDelete.dataset.twodSecurityUserDelete);
+          return;
+        }
+        if (event.target.closest("[data-twod-security-notify]")) {
+          sendTwodSecurityNotifications();
+          return;
+        }
+        if (event.target.closest("[data-twod-ingest-security-modal-save]")) {
+          saveTwodSecurityModal();
+          return;
+        }
+        const stdCategoryButton = event.target.closest("[data-twod-std-category]");
+        if (stdCategoryButton) {
+          getTwodStandardizationState().activeCategory = stdCategoryButton.dataset.twodStdCategory || "calc";
+          renderTwodStandardizationPage("lowdim-standardization-twod");
+          return;
+        }
+        if (event.target.closest("[data-twod-std-rule-add]")) {
+          openTwodStandardizationRuleModal("add");
+          return;
+        }
+        const stdRuleEditButton = event.target.closest("[data-twod-std-rule-edit]");
+        if (stdRuleEditButton) {
+          openTwodStandardizationRuleModal("edit", stdRuleEditButton.dataset.twodStdRuleEdit);
+          return;
+        }
+        const stdRuleDeleteButton = event.target.closest("[data-twod-std-rule-delete]");
+        if (stdRuleDeleteButton) {
+          deleteTwodStandardizationRule(stdRuleDeleteButton.dataset.twodStdRuleDelete);
+          return;
+        }
+        if (event.target.closest("[data-twod-std-rule-save]")) {
+          saveTwodStandardizationRule();
+          return;
+        }
+        if (event.target.closest("[data-twod-std-save-standard]")) {
+          saveTwodStandardizationStandard();
+          return;
+        }
+        if (event.target.closest("[data-twod-std-scan]")) {
+          runTwodStandardizationScan();
+          return;
+        }
+        if (event.target.closest("[data-twod-std-batch]")) {
+          batchTwodStandardization();
+          return;
+        }
+        if (event.target.closest("[data-twod-std-restandardize]")) {
+          restandardizeTwodAffectedData();
+          return;
+        }
+        const dbTabButton = event.target.closest("[data-twod-db-dataset-tab]");
+        if (dbTabButton) {
+          getTwodDatabaseState().activeTab = dbTabButton.dataset.twodDbDatasetTab || "structure";
+          renderTwodDatabasePage("lowdim-database-twod");
+          return;
+        }
+        if (event.target.closest("[data-twod-db-dataset-add]")) {
+          openTwodDatabaseDatasetModal("add");
+          return;
+        }
+        const dbEditButton = event.target.closest("[data-twod-db-dataset-edit]");
+        if (dbEditButton) {
+          openTwodDatabaseDatasetModal("edit", dbEditButton.dataset.twodDbDatasetEdit);
+          return;
+        }
+        const dbDeleteButton = event.target.closest("[data-twod-db-dataset-delete]");
+        if (dbDeleteButton) {
+          deleteTwodDatabaseDataset(dbDeleteButton.dataset.twodDbDatasetDelete);
+          return;
+        }
+        if (event.target.closest("[data-twod-db-dataset-save]")) {
+          saveTwodDatabaseDataset();
+          return;
+        }
+        const dbPreviewButton = event.target.closest("[data-twod-db-structure-preview]");
+        if (dbPreviewButton) {
+          openTwodStructurePreview(dbPreviewButton.dataset.twodDbStructurePreview);
+          return;
+        }
+        const richCommand = event.target.closest("[data-twod-ingest-rich-command]");
+        if (richCommand) {
+          const editor = document.querySelector("[data-twod-ingest-resource-description]");
+          editor?.focus();
+          document.execCommand(richCommand.dataset.twodIngestRichCommand, false, null);
+          updateTwodIngestRichCount();
+        }
+      });
+      document.body.addEventListener("input", (event) => {
+        if (event.target.closest("[data-twod-ingest-resource-description]")) {
+          updateTwodIngestRichCount();
+        }
+        const securitySearch = event.target.closest("[data-twod-security-user-search]");
+        if (securitySearch) {
+          const security = getTwodSecurityState();
+          security.userSearch = securitySearch.value || "";
+          renderTwodSecurityPage("lowdim-ingest-twod");
+          const input = document.querySelector("[data-twod-security-user-search]");
+          if (input) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+          }
+        }
+      });
+      document.body.addEventListener("change", (event) => {
+        const standardCheck = event.target.closest("[data-twod-std-nonstandard-check]");
+        if (standardCheck) {
+          const std = getTwodStandardizationState();
+          const selected = new Set(std.selected || []);
+          if (standardCheck.checked) {
+            selected.add(standardCheck.dataset.twodStdNonstandardCheck);
+          } else {
+            selected.delete(standardCheck.dataset.twodStdNonstandardCheck);
+          }
+          std.selected = Array.from(selected);
+          renderTwodStandardizationPage("lowdim-standardization-twod");
+          return;
+        }
+        const roleFilter = event.target.closest("[data-twod-security-role-filter]");
+        if (roleFilter) {
+          getTwodSecurityState().userRoleFilter = roleFilter.value || "全部";
+          renderTwodSecurityPage("lowdim-ingest-twod");
+          return;
+        }
+        const statusFilter = event.target.closest("[data-twod-security-status-filter]");
+        if (statusFilter) {
+          getTwodSecurityState().userStatusFilter = statusFilter.value || "全部";
+          renderTwodSecurityPage("lowdim-ingest-twod");
+          return;
+        }
+        const fileInput = event.target.closest("[data-twod-ingest-resource-file-input]");
+        if (!fileInput) return;
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        const summary = document.querySelector("[data-twod-ingest-resource-file-summary]");
+        if (summary) summary.innerHTML = renderTwodIngestResourceFileSummary(buildTwodIngestResourceFileFromInput(file));
       });
     }
     bindLowdimWorkflowEvents();
