@@ -9001,6 +9001,184 @@
       flex-wrap: wrap;
     }
 
+    #page-twod .twod-result-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border: 1px solid #e4eaf5;
+      border-radius: 6px;
+      background: #f8fbff;
+    }
+
+    #page-twod .twod-toolbar-count {
+      color: #223657;
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    #page-twod .twod-toolbar-count strong {
+      color: #2451c6;
+      font-size: 16px;
+      margin: 0 2px;
+    }
+
+    #page-twod .twod-toolbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #page-twod .twod-toolbar-menu {
+      position: relative;
+    }
+
+    #page-twod .twod-toolbar-menu > summary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 82px;
+      height: 34px;
+      padding: 0 14px;
+      border: 1px solid #d5e1fb;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #2451c6;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    #page-twod .twod-toolbar-menu > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    #page-twod .twod-toolbar-menu[open] > summary,
+    #page-twod .twod-toolbar-menu > summary:hover {
+      border-color: #2451c6;
+      background: #edf3ff;
+    }
+
+    #page-twod .twod-toolbar-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 40;
+      width: 320px;
+      max-height: 420px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid #d9e2ef;
+      border-radius: 6px;
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(28, 51, 84, 0.16);
+    }
+
+    #page-twod .twod-toolbar-section + .twod-toolbar-section {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #d9e2ef;
+    }
+
+    #page-twod .twod-toolbar-section-title {
+      margin: 0 0 8px;
+      color: #223657;
+      font-size: 13px;
+      line-height: 20px;
+      font-weight: 700;
+    }
+
+    #page-twod .twod-toolbar-option,
+    #page-twod .twod-column-option {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 30px;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: #44576f;
+      font-size: 13px;
+      line-height: 18px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #page-twod .twod-toolbar-option:hover,
+    #page-twod .twod-column-option:hover {
+      background: #f5f7fa;
+      color: #2451c6;
+    }
+
+    #page-twod .twod-toolbar-option.active {
+      border-color: #d5e1fb;
+      background: #edf3ff;
+      color: #2451c6;
+      font-weight: 700;
+    }
+
+    #page-twod .twod-column-option input {
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      accent-color: #2451c6;
+      flex: 0 0 auto;
+    }
+
+    #page-twod .twod-column-option span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #page-twod .twod-toolbar-reset {
+      width: 100%;
+      height: 32px;
+      margin-top: 8px;
+      border-radius: 4px;
+    }
+
+    #page-twod .twod-result-table.is-wide {
+      min-width: 1480px;
+      table-layout: auto;
+    }
+
+    #page-twod .twod-result-extra-cell {
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 900px) {
+      #page-twod .twod-result-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      #page-twod .twod-toolbar-actions {
+        justify-content: flex-start;
+      }
+
+      #page-twod .twod-toolbar-panel {
+        left: 0;
+        right: auto;
+        width: min(320px, calc(100vw - 48px));
+      }
+    }
+
     .twod-sort-filter {
       display: flex;
       align-items: center;
@@ -17819,7 +17997,7 @@
           <div class="twod-detail-toolbar">
             <div class="twod-detail-toolbar-main">
               <h2 id="twodDetailPageTitle">二维材料详情</h2>
-              <p id="twodDetailPageSubtitle">查看二维材料的基础信息、材料性质详情与物理性质可视化内容。</p>
+              <p id="twodDetailPageSubtitle">查看二维材料的结构特征、电子结构、电学性质、磁学性质、热学性质、力学性质、光学性质、缺陷性质与物理性质可视化内容。</p>
             </div>
             <div class="twod-detail-toolbar-actions">
               <button class="btn" type="button" id="twodDetailBackBtn">返回</button>
@@ -17828,7 +18006,7 @@
           <div class="twod-tree-shell">
           <aside class="twod-tree-panel">
             <div class="twod-tree-panel-head">
-              <strong>详情菜单</strong>
+              <strong>详情信息</strong>
             </div>
             <div class="twod-tree-list" id="twodDetailTree"></div>
           </aside>
@@ -19362,9 +19540,9 @@
         <section class="twod-detail-workbench" id="twodDetailWorkbench">
           <aside class="twod-detail-sidebar">
             <div class="twod-detail-sidebar-group">
-              <h5 class="twod-detail-sidebar-title">详情菜单</h5>
-              <button class="twod-detail-menu-btn active" type="button" data-twod-detail-section="basic">基础信息</button>
-              <button class="twod-detail-menu-btn" type="button" data-twod-detail-section="properties">材料性质详情</button>
+              <h5 class="twod-detail-sidebar-title">详情信息</h5>
+              <button class="twod-detail-menu-btn active" type="button" data-twod-detail-section="basic">结构特征</button>
+              <button class="twod-detail-menu-btn" type="button" data-twod-detail-section="properties">电子结构</button>
               <div class="twod-detail-submenu" id="twodDetailPropertyMenu"></div>
               <button class="twod-detail-menu-btn" type="button" data-twod-detail-section="visualization">物理性质可视化</button>
               <div class="twod-detail-submenu" id="twodDetailVisualMenu"></div>
@@ -21476,6 +21654,296 @@
         defectCharge: -1
       }
     ];
+
+    const twodSampleMaterialsFromWorkbook = [
+      {
+        id: "mp-1018134",
+        trueMaterialId: "mp-1018134",
+        sampleImported: true,
+        sampleSourceFile: "低维材料-样例数据.xlsx",
+        name: "MoS2",
+        formula: "MoS2",
+        elements: ["Mo", "S"],
+        bandGap: 1.68,
+        formation: -1.23,
+        spaceGroup: "P6₃/mmc",
+        crystalSystem: "六方晶系",
+        type: "半导体",
+        source: "公开数据集",
+        dataSource: "公开数据集",
+        updatedAt: "2026-08-11",
+        quality: "样例数据",
+        layerThicknessNm: 0.65,
+        latticeA: 3.16,
+        latticeB: 3.16,
+        latticeC: 12.3,
+        interlayer: 6.5,
+        bondLength: 2.41,
+        bondAngle: 120,
+        young: 267,
+        poisson: 0.27,
+        thermalConductivity: 86,
+        ferroelectric: 0,
+        piezo: 3.8,
+        conductivity: 0.012,
+        magneticOrder: "非磁性",
+        defectType: "硫空位",
+        defectEnergy: 1.82,
+        refractive: 4.18,
+        extinction: 0.21,
+        absorption: 120000,
+        reflectance: 18,
+        dielectric: 15.6,
+        density: null,
+        volume: null,
+        atomicCoordinates: []
+      },
+      {
+        id: "mp-1044134",
+        trueMaterialId: "mp-1044134",
+        sampleImported: true,
+        sampleSourceFile: "低维材料-样例数据.xlsx",
+        name: "WS2",
+        formula: "WS2",
+        elements: ["W", "S"],
+        bandGap: 1.91,
+        formation: -1.11,
+        spaceGroup: "P6₃/mmc",
+        crystalSystem: "六方晶系",
+        type: "半导体",
+        source: "公开数据集",
+        dataSource: "公开数据集",
+        updatedAt: "2026-08-11",
+        quality: "样例数据",
+        layerThicknessNm: 0.67,
+        latticeA: 3.15,
+        latticeB: 3.15,
+        latticeC: 12.1,
+        interlayer: 6.48,
+        bondLength: 2.42,
+        bondAngle: 119,
+        young: 249,
+        poisson: 0.25,
+        thermalConductivity: 72,
+        ferroelectric: 0,
+        piezo: 2.9,
+        conductivity: 0.01,
+        magneticOrder: "非磁性",
+        defectType: "硫空位",
+        defectEnergy: 1.64,
+        refractive: 4.62,
+        extinction: 0.29,
+        absorption: 138000,
+        reflectance: 21.4,
+        dielectric: 17.3,
+        density: null,
+        volume: null,
+        atomicCoordinates: []
+      },
+      {
+        id: "mp-1018135",
+        trueMaterialId: "mp-1018135",
+        sampleImported: true,
+        sampleSourceFile: "低维材料-样例数据.xlsx",
+        name: "WSe2",
+        formula: "WSe2",
+        elements: ["W", "Se"],
+        bandGap: 1.58,
+        formation: -0.98,
+        spaceGroup: "P6₃/mmc",
+        crystalSystem: "六方晶系",
+        type: "半导体",
+        source: "公开数据集",
+        dataSource: "公开数据集",
+        updatedAt: "2026-08-11",
+        quality: "样例数据",
+        layerThicknessNm: 0.69,
+        latticeA: 3.28,
+        latticeB: 3.28,
+        latticeC: 12.96,
+        interlayer: 6.52,
+        bondLength: 2.53,
+        bondAngle: 118,
+        young: 206,
+        poisson: 0.24,
+        thermalConductivity: 54,
+        ferroelectric: 0,
+        piezo: 2.6,
+        conductivity: 0.009,
+        magneticOrder: "弱铁磁",
+        defectType: "硒空位",
+        defectEnergy: 1.57,
+        refractive: 4.01,
+        extinction: 0.31,
+        absorption: 115000,
+        reflectance: 17.3,
+        dielectric: 14.2,
+        density: null,
+        volume: null,
+        atomicCoordinates: []
+      },
+      {
+        id: "mp-1018136",
+        trueMaterialId: "mp-1018136",
+        sampleImported: true,
+        sampleSourceFile: "低维材料-样例数据.xlsx",
+        name: "MoSe2",
+        formula: "MoSe2",
+        elements: ["Mo", "Se"],
+        bandGap: 1.47,
+        formation: -1.16,
+        spaceGroup: "P6₃/mmc",
+        crystalSystem: "六方晶系",
+        type: "半导体",
+        source: "公开数据集",
+        dataSource: "公开数据集",
+        updatedAt: "2026-08-11",
+        quality: "样例数据",
+        layerThicknessNm: 0.69,
+        latticeA: 3.29,
+        latticeB: 3.29,
+        latticeC: 12.95,
+        interlayer: 6.58,
+        bondLength: 2.53,
+        bondAngle: 118,
+        young: 184,
+        poisson: 0.24,
+        thermalConductivity: 54,
+        ferroelectric: 0,
+        piezo: 2.4,
+        conductivity: 0.008,
+        magneticOrder: "非磁性",
+        defectType: "硒空位",
+        defectEnergy: 1.57,
+        refractive: 3.85,
+        extinction: 0.28,
+        absorption: 108000,
+        reflectance: 16.5,
+        dielectric: 13.8,
+        density: null,
+        volume: null,
+        atomicCoordinates: []
+      },
+      {
+        id: "mp-1018137",
+        trueMaterialId: "mp-1018137",
+        sampleImported: true,
+        sampleSourceFile: "低维材料-样例数据.xlsx",
+        name: "MoTe2",
+        formula: "MoTe2",
+        elements: ["Mo", "Te"],
+        bandGap: 1.03,
+        formation: -0.86,
+        spaceGroup: "P6₃/mmc",
+        crystalSystem: "六方晶系",
+        type: "半导体",
+        source: "公开数据集",
+        dataSource: "公开数据集",
+        updatedAt: "2026-08-11",
+        quality: "样例数据",
+        layerThicknessNm: 0.72,
+        latticeA: 3.52,
+        latticeB: 3.52,
+        latticeC: 13.74,
+        interlayer: 6.91,
+        bondLength: 2.73,
+        bondAngle: 115,
+        young: 174,
+        poisson: 0.23,
+        thermalConductivity: 48,
+        ferroelectric: 0,
+        piezo: 2.1,
+        conductivity: 0.016,
+        magneticOrder: "非磁性",
+        defectType: "碲空位",
+        defectEnergy: 1.34,
+        refractive: 4.84,
+        extinction: 0.31,
+        absorption: 145000,
+        reflectance: 23.8,
+        dielectric: 18.9,
+        density: null,
+        volume: null,
+        atomicCoordinates: []
+      },
+      {
+        id: "mp-1018138",
+        trueMaterialId: "mp-1018138",
+        sampleImported: true,
+        sampleSourceFile: "低维材料-样例数据.xlsx",
+        name: "WTe2",
+        formula: "WTe2",
+        elements: ["W", "Te"],
+        bandGap: 0.95,
+        formation: -0.79,
+        spaceGroup: "P6₃/mmc",
+        crystalSystem: "六方晶系",
+        type: "半导体",
+        source: "公开数据集",
+        dataSource: "公开数据集",
+        updatedAt: "2026-08-11",
+        quality: "样例数据",
+        layerThicknessNm: 0.74,
+        latticeA: 3.55,
+        latticeB: 3.55,
+        latticeC: 13.82,
+        interlayer: 6.95,
+        bondLength: 2.75,
+        bondAngle: 114,
+        young: 168,
+        poisson: 0.22,
+        thermalConductivity: 42,
+        ferroelectric: 0,
+        piezo: 1.8,
+        conductivity: 0.02,
+        magneticOrder: "非磁性",
+        defectType: "碲空位",
+        defectEnergy: 1.28,
+        refractive: 5.12,
+        extinction: 0.34,
+        absorption: 152000,
+        reflectance: 25.1,
+        dielectric: 20.2,
+        density: null,
+        volume: null,
+        atomicCoordinates: []
+      }
+    ];
+
+    function normalizeTwodSampleFormula(value) {
+      return String(value || "")
+        .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, (char) => ({
+          "₀": "0",
+          "₁": "1",
+          "₂": "2",
+          "₃": "3",
+          "₄": "4",
+          "₅": "5",
+          "₆": "6",
+          "₇": "7",
+          "₈": "8",
+          "₉": "9"
+        }[char] || char))
+        .replace(/\s+/g, "")
+        .toLowerCase();
+    }
+
+    function applyTwodWorkbookSampleData() {
+      twodSampleMaterialsFromWorkbook.forEach((sample) => {
+        const existing = twodMaterials.find((item) => normalizeTwodSampleFormula(item.formula) === normalizeTwodSampleFormula(sample.formula));
+        if (existing) {
+          const internalId = existing.id;
+          Object.keys(existing).forEach((key) => {
+            if (key !== "id") delete existing[key];
+          });
+          Object.assign(existing, sample, { id: internalId, trueMaterialId: sample.trueMaterialId || sample.id });
+          return;
+        }
+        twodMaterials.push(Object.assign({}, sample));
+      });
+    }
+
+    applyTwodWorkbookSampleData();
 
     const electrolyteCategoryConfigs = {
       organicLiquid: {
@@ -26417,7 +26885,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function findTwodMaterial(materialId) {
-      return twodMaterials.find((item) => item.id === materialId) || twodMaterials[0];
+      return twodMaterials.find((item) => item.id === materialId || item.trueMaterialId === materialId) || twodMaterials[0];
     }
 
     function sortTwodMaterials(list, sortKey) {
@@ -35051,6 +35519,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (typeof state.twodAppliedPropertySortCategory !== "string") state.twodAppliedPropertySortCategory = "";
       if (typeof state.twodAppliedPropertySortField !== "string") state.twodAppliedPropertySortField = "";
       if (typeof state.twodAppliedPropertySortDirection !== "string") state.twodAppliedPropertySortDirection = "";
+      if (typeof state.twodResultSortKey !== "string") state.twodResultSortKey = "";
+      if (typeof state.twodResultFilterKey !== "string") state.twodResultFilterKey = "";
+      if (!Array.isArray(state.twodVisibleExtraColumns)) state.twodVisibleExtraColumns = [];
     }
 
     function sanitizeLegacyTwodDom() {
@@ -35335,12 +35806,16 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
       if (resetPage) state.twodCurrentPage = 1;
       state.twodPageSize = getTwodPageSize();
-      const total = list.length;
+      const processedList = getTwodProcessedResults(list);
+      const columns = getTwodVisibleResultColumns();
+      const total = processedList.length;
       const totalPages = Math.max(1, Math.ceil(total / state.twodPageSize));
       state.twodCurrentPage = Math.min(state.twodCurrentPage, totalPages);
       const startIndex = total ? (state.twodCurrentPage - 1) * state.twodPageSize : 0;
-      const pageItems = list.slice(startIndex, startIndex + state.twodPageSize);
+      const pageItems = processedList.slice(startIndex, startIndex + state.twodPageSize);
 
+      renderTwodResultHeader(columns);
+      renderTwodResultToolbar(total);
       body.innerHTML = pageItems.length
         ? pageItems.map((item) => `
           <tr>
@@ -36876,18 +37351,387 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       return formatLowDimValue(item?.[fallbackKey], { numeric: true, digits, suffix });
     }
 
+    function getTwodResultEmptyText() {
+      return typeof LOW_DIM_NO_PROPERTY_TEXT !== "undefined" ? LOW_DIM_NO_PROPERTY_TEXT : "该材料暂无此性质";
+    }
+
+    function normalizeTwodResultCrystalSystem(value) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      const pairs = [
+        [/四方|tetragonal/i, "四方晶系"],
+        [/立方|cubic/i, "立方晶系"],
+        [/六方|hexagonal/i, "六方晶系"],
+        [/三方|trigonal|rhombohedral/i, "三方晶系"],
+        [/正交|orthorhombic/i, "正交晶系"],
+        [/单斜|monoclinic/i, "单斜晶系"],
+        [/三斜|triclinic/i, "三斜晶系"]
+      ];
+      const found = pairs.find(([pattern]) => pattern.test(text));
+      return found ? found[1] : text.replace(/\s*\([^)]*\)\s*/g, "");
+    }
+
+    function formatTwodResultMaybe(value, options = {}) {
+      if (isLowDimMissing(value)) return getTwodResultEmptyText();
+      if (options.numeric) return formatLowDimValue(value, { numeric: true, digits: options.digits, suffix: options.suffix || "" });
+      return escapeTwodHtml(value);
+    }
+
+    function formatTwodResultJoined(parts, separator = "；") {
+      const values = parts.filter((item) => !isLowDimMissing(item));
+      return values.length ? escapeTwodHtml(values.join(separator)) : getTwodResultEmptyText();
+    }
+
+    function getTwodResultRealCase(material) {
+      return typeof getLowDimRealCase === "function" ? getLowDimRealCase("twod", material?.id) : null;
+    }
+
+    function getTwodResultAtomCoordinateSummary(material) {
+      if (Array.isArray(material?.atomCoordinates) && material.atomCoordinates.length) return `${material.atomCoordinates.length} 个原子坐标`;
+      const realCase = getTwodResultRealCase(material);
+      const atomCount = realCase?.structure?.atomCount || realCase?.fields?.n_atoms || material?.sites;
+      return atomCount ? `${atomCount} 个原子坐标` : getTwodResultEmptyText();
+    }
+
+    function getTwodResultBandType(material) {
+      const gap = toLowDimFiniteNumber(material?.bandGap);
+      if (gap == null) return "";
+      if (gap <= 0.05) return "金属";
+      if (gap < 3) return "半导体";
+      return "绝缘体";
+    }
+
+    function getTwodResultBooleanLabel(value, yesText, noText) {
+      if (isLowDimMissing(value)) return getTwodResultEmptyText();
+      const numeric = toLowDimFiniteNumber(value);
+      if (numeric != null) return numeric > 0 ? yesText : noText;
+      const text = String(value).toLowerCase();
+      if (["true", "yes", "有", "具有"].some((item) => text.includes(item))) return yesText;
+      if (["false", "no", "无", "不具有"].some((item) => text.includes(item))) return noText;
+      return escapeTwodHtml(value);
+    }
+
+    function getTwodResultMagneticOrder(material) {
+      const raw = String(material?.magneticOrder || "").trim();
+      if (!raw) return getTwodResultEmptyText();
+      if (/anti|反铁磁/i.test(raw)) return "反铁磁";
+      if (/ferro|FM|铁磁|弱铁磁/i.test(raw)) return raw.includes("弱铁磁") ? "弱铁磁" : "铁磁";
+      if (/non|非磁/i.test(raw)) return "非磁性";
+      return escapeTwodHtml(raw);
+    }
+
+    function getTwodResultColumnValue(material, key) {
+      const realCase = getTwodResultRealCase(material);
+      const fast = realCase?.fields?.fast_calc || {};
+      const elastic = realCase?.fields?.elastic_calc || {};
+      const empty = getTwodResultEmptyText();
+      const latticeParts = [
+        `a=${formatTwodResultMaybe(material?.latticeA ?? fast.lattice_a_ang, { numeric: true, digits: 3, suffix: " Å" })}`,
+        `b=${formatTwodResultMaybe(material?.latticeB ?? fast.lattice_b_ang, { numeric: true, digits: 3, suffix: " Å" })}`,
+        `c=${formatTwodResultMaybe(material?.latticeC ?? fast.lattice_c_ang, { numeric: true, digits: 3, suffix: " Å" })}`
+      ].filter((item) => !item.includes(empty));
+      const angleParts = [
+        `α=${formatTwodResultMaybe(material?.latticeAlpha ?? fast.lattice_alpha_deg, { numeric: true, digits: 2, suffix: "°" })}`,
+        `β=${formatTwodResultMaybe(material?.latticeBeta ?? fast.lattice_beta_deg, { numeric: true, digits: 2, suffix: "°" })}`,
+        `γ=${formatTwodResultMaybe(material?.latticeGamma ?? fast.lattice_gamma_deg, { numeric: true, digits: 2, suffix: "°" })}`
+      ].filter((item) => !item.includes(empty));
+      const values = {
+        latticeConstants: latticeParts.length ? latticeParts.join("，") : empty,
+        cellAngles: angleParts.length ? angleParts.join("，") : empty,
+        layerThickness: formatTwodResultMaybe(material?.layerThickness ?? material?.interlayer ?? elastic.layer_thickness_ang, { numeric: true, digits: 3, suffix: " Å" }),
+        atomicCoordinates: getTwodResultAtomCoordinateSummary(material),
+        bondLengthAngle: formatTwodResultJoined([
+          isLowDimMissing(material?.bondLength) ? "" : `键长 ${formatLowDimValue(material.bondLength, { numeric: true, digits: 3, suffix: " Å" })}`,
+          isLowDimMissing(material?.bondAngle) ? "" : `键角 ${formatLowDimValue(material.bondAngle, { numeric: true, digits: 2, suffix: "°" })}`
+        ]),
+        crystalSystem: normalizeTwodResultCrystalSystem(material?.crystalSystem) || empty,
+        spaceGroup: formatTwodResultMaybe(material?.spaceGroupSymbol || material?.spaceGroup || getTwodSpaceGroupSymbol(material)),
+        bandType: getTwodResultBandType(material) || empty,
+        bandGapValue: formatTwodResultMaybe(material?.bandGap, { numeric: true, digits: 2, suffix: " eV" }),
+        bandChart: isLowDimMissing(material?.bandGap) ? empty : "能带图可查看",
+        dosSummary: isLowDimMissing(material?.bandGap) ? empty : "态密度图可查看",
+        effectiveMass: formatTwodResultMaybe(material?.effectiveMass ?? material?.mobility, { numeric: true, digits: 2, suffix: material?.effectiveMass == null ? " cm²·V⁻¹·s⁻¹" : " m₀" }),
+        ferroelectric: getTwodResultBooleanLabel(material?.ferroelectric, "具有铁电性", "不具有铁电性"),
+        piezoelectric: formatTwodResultMaybe(material?.piezo, { numeric: true, digits: 2, suffix: " pm/V" }),
+        magneticGroundState: getTwodResultMagneticOrder(material),
+        magneticMoment: formatTwodResultMaybe(material?.magnetization, { numeric: true, digits: 2, suffix: " μB" }),
+        magneticTransitionTemperature: formatTwodResultMaybe(material?.transitionTemp, { numeric: true, digits: 0, suffix: " K" }),
+        formationEnergy: formatTwodResultMaybe(material?.formation, { numeric: true, digits: 2, suffix: " eV/atom" }),
+        phononSpectrum: isLowDimMissing(material?.phononVirtualFrequency) ? empty : (material.phononVirtualFrequency ? "有虚频" : "无虚频"),
+        phononDensityOfStates: isLowDimMissing(material?.phononDos) ? empty : "声子态密度图可查看",
+        elasticConstants: formatTwodResultJoined([
+          material?.elasticConstants,
+          elastic.C11_N_per_m != null ? `C11=${elastic.C11_N_per_m} N/m` : "",
+          elastic.C12_N_per_m != null ? `C12=${elastic.C12_N_per_m} N/m` : "",
+          elastic.C66_N_per_m != null ? `C66=${elastic.C66_N_per_m} N/m` : ""
+        ]),
+        youngModulus: formatTwodResultMaybe(material?.young ?? elastic.youngs_2d_N_per_m, { numeric: true, digits: 1, suffix: " N/m" }),
+        poissonRatio: formatTwodResultMaybe(material?.poisson ?? elastic.poisson_ratio, { numeric: true, digits: 3 }),
+        dielectricFunction: formatTwodResultMaybe(material?.dielectric, { numeric: true, digits: 2 }),
+        opticalAbsorption: formatTwodResultMaybe(material?.absorption, { numeric: true, digits: 0, suffix: " cm⁻¹" }),
+        reflectance: formatTwodResultMaybe(material?.reflectance, { numeric: true, digits: 1, suffix: "%" }),
+        refractiveIndex: formatTwodResultMaybe(material?.refractive, { numeric: true, digits: 2 }),
+        extinctionCoefficient: formatTwodResultMaybe(material?.extinction, { numeric: true, digits: 2 }),
+        vacancyDefect: formatTwodResultMaybe(material?.defectType),
+        antisiteDefect: formatTwodResultMaybe(material?.antisiteDefect),
+        defectFormationEnergy: formatTwodResultMaybe(material?.defectEnergy, { numeric: true, digits: 2, suffix: " eV" })
+      };
+      return values[key] || empty;
+    }
+
+    const TWOD_RESULT_DEFAULT_COLUMNS = [
+      { key: "index", label: "序号", width: "72px" },
+      { key: "id", label: "材料编号", width: "150px" },
+      { key: "name", label: "材料名称", width: "140px" },
+      { key: "formula", label: "化学式", width: "110px" },
+      { key: "bandGap", label: "带隙", width: "110px" },
+      { key: "formation", label: "形成能", width: "120px" },
+      { key: "density", label: "密度", width: "120px" },
+      { key: "volume", label: "晶胞体积", width: "120px" },
+      { key: "elements", label: "元素组成", width: "130px" },
+      { key: "source", label: "数据来源", width: "150px" },
+      { key: "actions", label: "操作", width: "210px" }
+    ];
+
+    const TWOD_RESULT_EXTRA_COLUMN_GROUPS = [
+      { group: "结构特征", columns: [{ key: "latticeConstants", label: "晶格常数" }, { key: "cellAngles", label: "晶格夹角" }, { key: "layerThickness", label: "层厚" }, { key: "atomicCoordinates", label: "原子坐标" }, { key: "bondLengthAngle", label: "键长键角" }, { key: "crystalSystem", label: "晶系" }, { key: "spaceGroup", label: "空间群" }] },
+      { group: "电子结构", columns: [{ key: "bandType", label: "能带结构类型" }, { key: "bandGapValue", label: "带隙数据" }, { key: "bandChart", label: "能带图" }, { key: "dosSummary", label: "态密度图" }, { key: "effectiveMass", label: "有效质量" }] },
+      { group: "电学性质", columns: [{ key: "ferroelectric", label: "铁电性质" }, { key: "piezoelectric", label: "压电性质" }] },
+      { group: "磁学性质", columns: [{ key: "magneticGroundState", label: "磁基态构型" }, { key: "magneticMoment", label: "磁矩" }, { key: "magneticTransitionTemperature", label: "磁转变温度" }] },
+      { group: "热学性质", columns: [{ key: "formationEnergy", label: "形成能" }, { key: "phononSpectrum", label: "声子谱" }, { key: "phononDensityOfStates", label: "声子态密度" }] },
+      { group: "力学性质", columns: [{ key: "elasticConstants", label: "弹性常数" }, { key: "youngModulus", label: "杨氏模量" }, { key: "poissonRatio", label: "泊松比" }] },
+      { group: "光学性质", columns: [{ key: "dielectricFunction", label: "介电函数" }, { key: "opticalAbsorption", label: "光吸收系数" }, { key: "reflectance", label: "反射率" }, { key: "refractiveIndex", label: "折射率" }, { key: "extinctionCoefficient", label: "消光系数" }] },
+      { group: "缺陷性质", columns: [{ key: "vacancyDefect", label: "空位缺陷" }, { key: "antisiteDefect", label: "反位缺陷" }, { key: "defectFormationEnergy", label: "缺陷形成能" }] }
+    ];
+
+    const TWOD_RESULT_SORT_GROUPS = [
+      { group: "电子结构排序", options: [{ key: "bandGapAsc", label: "带隙从小到大" }, { key: "bandGapDesc", label: "带隙从大到小" }, { key: "bandType", label: "能带结构类型" }] },
+      { group: "电学性质排序", options: [{ key: "ferroelectricDesc", label: "铁电性质优先" }, { key: "piezoDesc", label: "压电性质从高到低" }] },
+      { group: "磁学性质排序", options: [{ key: "magneticMomentDesc", label: "磁矩从高到低" }, { key: "magneticOrder", label: "磁基态构型" }] },
+      { group: "热学性质排序", options: [{ key: "formationAsc", label: "形成能从低到高" }, { key: "formationDesc", label: "形成能从高到低" }, { key: "phononStable", label: "无虚频优先" }] },
+      { group: "力学性质排序", options: [{ key: "youngDesc", label: "杨氏模量从高到低" }, { key: "poissonAsc", label: "泊松比从低到高" }] },
+      { group: "光学性质排序", options: [{ key: "absorptionDesc", label: "光吸收系数从高到低" }, { key: "reflectanceDesc", label: "反射率从高到低" }, { key: "refractiveDesc", label: "折射率从高到低" }, { key: "extinctionDesc", label: "消光系数从高到低" }] },
+      { group: "缺陷性质排序", options: [{ key: "defectEnergyAsc", label: "缺陷形成能从低到高" }, { key: "defectEnergyDesc", label: "缺陷形成能从高到低" }] }
+    ];
+
+    const TWOD_RESULT_FILTER_GROUPS = [
+      { group: "电子结构筛选", options: [{ key: "bandMetal", label: "金属" }, { key: "bandSemiconductor", label: "半导体" }, { key: "bandInsulator", label: "绝缘体" }] },
+      { group: "电学性质筛选", options: [{ key: "ferroelectricYes", label: "具有铁电性" }, { key: "piezoYes", label: "具有压电性质" }] },
+      { group: "磁学性质筛选", options: [{ key: "magneticYes", label: "磁性材料" }, { key: "ferromagnetic", label: "铁磁" }, { key: "antiferromagnetic", label: "反铁磁" }, { key: "nonmagnetic", label: "非磁性" }] },
+      { group: "热学性质筛选", options: [{ key: "formationNegative", label: "形成能小于0" }, { key: "phononNoVirtual", label: "声子谱无虚频" }] },
+      { group: "力学性质筛选", options: [{ key: "youngHigh", label: "杨氏模量≥100 N/m" }] },
+      { group: "光学性质筛选", options: [{ key: "absorptionHigh", label: "光吸收系数≥100000 cm⁻¹" }] },
+      { group: "缺陷性质筛选", options: [{ key: "vacancyDefect", label: "包含空位缺陷" }, { key: "defectEnergyLow", label: "缺陷形成能≤2 eV" }] }
+    ];
+
+    function getTwodResultExtraColumnMap() {
+      const map = {};
+      TWOD_RESULT_EXTRA_COLUMN_GROUPS.forEach((group) => group.columns.forEach((column) => { map[column.key] = { ...column, group: group.group }; }));
+      return map;
+    }
+
+    function getTwodVisibleResultColumns() {
+      const extraMap = getTwodResultExtraColumnMap();
+      const selected = (state.twodVisibleExtraColumns || []).filter((key) => extraMap[key]).map((key) => extraMap[key]);
+      const actionColumn = TWOD_RESULT_DEFAULT_COLUMNS.find((column) => column.key === "actions");
+      const baseColumns = TWOD_RESULT_DEFAULT_COLUMNS.filter((column) => column.key !== "actions");
+      return actionColumn ? baseColumns.concat(selected, actionColumn) : baseColumns.concat(selected);
+    }
+
+    function getTwodResultSortNumericValue(material, key) {
+      const fieldMap = { bandGapAsc: "bandGap", bandGapDesc: "bandGap", ferroelectricDesc: "ferroelectric", piezoDesc: "piezo", magneticMomentDesc: "magnetization", formationAsc: "formation", formationDesc: "formation", youngDesc: "young", poissonAsc: "poisson", absorptionDesc: "absorption", reflectanceDesc: "reflectance", refractiveDesc: "refractive", extinctionDesc: "extinction", defectEnergyAsc: "defectEnergy", defectEnergyDesc: "defectEnergy" };
+      return toLowDimFiniteNumber(material?.[fieldMap[key]]);
+    }
+
+    function sortTwodResultList(list) {
+      const key = state.twodResultSortKey || "";
+      if (!key) return list;
+      const sorted = list.slice();
+      if (key === "bandType") {
+        const rank = { "金属": 1, "半导体": 2, "绝缘体": 3 };
+        return sorted.sort((a, b) => (rank[getTwodResultBandType(a)] || 99) - (rank[getTwodResultBandType(b)] || 99));
+      }
+      if (key === "magneticOrder") return sorted.sort((a, b) => getTwodResultMagneticOrder(a).localeCompare(getTwodResultMagneticOrder(b), "zh-Hans-CN"));
+      if (key === "phononStable") return sorted.sort((a, b) => Number(b?.phononVirtualFrequency === false) - Number(a?.phononVirtualFrequency === false));
+      const descKeys = new Set(["bandGapDesc", "ferroelectricDesc", "piezoDesc", "magneticMomentDesc", "formationDesc", "youngDesc", "absorptionDesc", "reflectanceDesc", "refractiveDesc", "extinctionDesc", "defectEnergyDesc"]);
+      return sorted.sort((a, b) => {
+        const left = getTwodResultSortNumericValue(a, key);
+        const right = getTwodResultSortNumericValue(b, key);
+        if (left == null && right == null) return 0;
+        if (left == null) return 1;
+        if (right == null) return -1;
+        return descKeys.has(key) ? right - left : left - right;
+      });
+    }
+
+    function filterTwodResultList(list) {
+      const key = state.twodResultFilterKey || "";
+      if (!key) return list;
+      return list.filter((item) => {
+        const bandType = getTwodResultBandType(item);
+        const magOrder = getTwodResultMagneticOrder(item);
+        const num = (field) => toLowDimFiniteNumber(item?.[field]);
+        const predicates = {
+          bandMetal: () => bandType === "金属",
+          bandSemiconductor: () => bandType === "半导体",
+          bandInsulator: () => bandType === "绝缘体",
+          ferroelectricYes: () => (num("ferroelectric") || 0) > 0,
+          piezoYes: () => (num("piezo") || 0) > 0,
+          magneticYes: () => !/非磁|暂无/.test(magOrder),
+          ferromagnetic: () => /铁磁|弱铁磁/.test(magOrder),
+          antiferromagnetic: () => /反铁磁/.test(magOrder),
+          nonmagnetic: () => /非磁/.test(magOrder),
+          formationNegative: () => num("formation") != null && num("formation") < 0,
+          phononNoVirtual: () => item?.phononVirtualFrequency === false,
+          youngHigh: () => num("young") != null && num("young") >= 100,
+          absorptionHigh: () => num("absorption") != null && num("absorption") >= 100000,
+          vacancyDefect: () => /空位|vacancy/i.test(String(item?.defectType || "")),
+          defectEnergyLow: () => num("defectEnergy") != null && num("defectEnergy") <= 2
+        };
+        return predicates[key] ? predicates[key]() : true;
+      });
+    }
+
+    function getTwodProcessedResults(list) {
+      return sortTwodResultList(filterTwodResultList(list.slice()));
+    }
+
+    function renderTwodToolbarOptions(groups, activeKey, attr) {
+      return groups.map((group) => `
+        <div class="twod-toolbar-section">
+          <p class="twod-toolbar-section-title">${group.group}</p>
+          ${group.options.map((option) => `<button class="twod-toolbar-option${activeKey === option.key ? " active" : ""}" type="button" ${attr}="${option.key}">${option.label}</button>`).join("")}
+        </div>
+      `).join("");
+    }
+
+    function renderTwodColumnSettings() {
+      const selected = new Set(state.twodVisibleExtraColumns || []);
+      return TWOD_RESULT_EXTRA_COLUMN_GROUPS.map((group) => `
+        <div class="twod-toolbar-section">
+          <p class="twod-toolbar-section-title">${group.group}</p>
+          ${group.columns.map((column) => `
+            <label class="twod-column-option" title="${column.label}">
+              <input type="checkbox" data-twod-column-toggle="${column.key}" ${selected.has(column.key) ? "checked" : ""}>
+              <span>${column.label}</span>
+            </label>
+          `).join("")}
+        </div>
+      `).join("");
+    }
+
+    function renderTwodResultToolbar(total) {
+      const resultCard = document.querySelector("#page-twod .twod-search-results");
+      const head = document.querySelector("#page-twod .twod-results-head");
+      if (!resultCard || !head) return;
+      let toolbar = document.getElementById("twodResultToolbar");
+      if (!toolbar) {
+        toolbar = document.createElement("div");
+        toolbar.id = "twodResultToolbar";
+        toolbar.className = "twod-result-toolbar";
+        head.insertAdjacentElement("afterend", toolbar);
+      }
+      const sortActive = state.twodResultSortKey || "";
+      const filterActive = state.twodResultFilterKey || "";
+      toolbar.innerHTML = `
+        <div class="twod-toolbar-count">共 <strong>${total}</strong> 条</div>
+        <div class="twod-toolbar-actions">
+          <details class="twod-toolbar-menu">
+            <summary>排序▾</summary>
+            <div class="twod-toolbar-panel">
+              <button class="twod-toolbar-option${sortActive ? "" : " active"}" type="button" data-twod-result-sort="">默认排序</button>
+              ${renderTwodToolbarOptions(TWOD_RESULT_SORT_GROUPS, sortActive, "data-twod-result-sort")}
+            </div>
+          </details>
+          <details class="twod-toolbar-menu">
+            <summary>筛选▾</summary>
+            <div class="twod-toolbar-panel">
+              <button class="twod-toolbar-option${filterActive ? "" : " active"}" type="button" data-twod-result-filter="">全部结果</button>
+              ${renderTwodToolbarOptions(TWOD_RESULT_FILTER_GROUPS, filterActive, "data-twod-result-filter")}
+            </div>
+          </details>
+          <details class="twod-toolbar-menu">
+            <summary>列设置▾</summary>
+            <div class="twod-toolbar-panel">
+              ${renderTwodColumnSettings()}
+              <button class="btn twod-toolbar-reset" type="button" data-twod-column-clear>恢复默认列</button>
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+    function renderTwodResultHeader(columns) {
+      const headerRow = document.querySelector("#twodBaseTableWrap .twod-result-table thead tr");
+      if (!headerRow) return;
+      headerRow.innerHTML = columns.map((column) => `<th style="width:${column.width || "160px"}">${column.label}</th>`).join("");
+      const table = document.querySelector("#twodBaseTableWrap .twod-result-table");
+      if (table) {
+        const totalWidth = columns.reduce((sum, column) => sum + (parseInt(column.width, 10) || 160), 0);
+        table.style.setProperty("--twod-result-table-width", `${Math.max(1320, totalWidth)}px`);
+        table.classList.toggle("is-wide", columns.length > TWOD_RESULT_DEFAULT_COLUMNS.length);
+      }
+    }
+
+    function renderTwodResultCell(item, column, absoluteIndex) {
+      const key = column.key;
+      if (key === "index") return `<td class="twod-index-cell">${absoluteIndex}</td>`;
+      if (key === "id") {
+        const value = escapeTwodHtml(getTwodMaterialDisplayId(item));
+        return `<td title="${value}">${value}</td>`;
+      }
+      if (key === "name") {
+        const value = getTwodMaterialDisplayName(item);
+        return `<td title="${escapeTwodHtml(value)}"><button class="twod-material-link" type="button" title="${escapeTwodHtml(value)}" data-open-material="twod:${item.id}">${value}</button></td>`;
+      }
+      if (key === "formula") {
+        const value = getTwodFormulaDisplay(item);
+        return `<td title="${escapeTwodHtml(value)}"><em>${value}</em></td>`;
+      }
+      if (key === "bandGap") {
+        const value = formatLowDimValue(item.bandGap, { numeric: true, digits: 2, suffix: " eV" });
+        return `<td title="${escapeTwodHtml(value)}">${value}</td>`;
+      }
+      if (key === "formation") {
+        const value = formatLowDimValue(item.formation, { numeric: true, digits: 2, suffix: " eV/atom" });
+        return `<td title="${escapeTwodHtml(value)}">${value}</td>`;
+      }
+      if (key === "density") {
+        const value = getTwodTableValue(item, "density_g_cm3", 4, " g/cm³");
+        return `<td title="${escapeTwodHtml(value)}">${value}</td>`;
+      }
+      if (key === "volume") {
+        const value = getTwodTableValue(item, "volume_ang3", 2, " Å³");
+        return `<td title="${escapeTwodHtml(value)}">${value}</td>`;
+      }
+      if (key === "elements") {
+        const value = (Array.isArray(item.elements) ? item.elements : []).join(", ") || "-";
+        return `<td title="${escapeTwodHtml(value)}">${escapeTwodHtml(value)}</td>`;
+      }
+      if (key === "source") return `<td title="${escapeTwodHtml(item?.source || "")}">${renderTwodRecordSource(item)}</td>`;
+      if (key === "actions") {
+        return `<td><div class="twod-record-inline-actions"><button class="twod-action-view" type="button" data-open-material="twod:${item.id}" data-material-view="basic">查看详情</button><button class="twod-record-link" type="button" data-open-material="twod:${item.id}" data-material-view="prediction">发起预测</button></div></td>`;
+      }
+      const value = getTwodResultColumnValue(item, key);
+      return `<td class="twod-result-extra-cell" title="${escapeTwodHtml(value)}">${value}</td>`;
+    }
+
     function renderTwodSearchResults(list, resetPage = false) {
       const body = document.getElementById("twodBaseTableBody");
       if (!body) return;
 
       if (resetPage) state.twodCurrentPage = 1;
       state.twodPageSize = getTwodPageSize();
-      const total = list.length;
+      const processedList = getTwodProcessedResults(list);
+      const columns = getTwodVisibleResultColumns();
+      const total = processedList.length;
       const totalPages = Math.max(1, Math.ceil(total / state.twodPageSize));
       state.twodCurrentPage = Math.min(state.twodCurrentPage, totalPages);
       const startIndex = total ? (state.twodCurrentPage - 1) * state.twodPageSize : 0;
-      const pageItems = list.slice(startIndex, startIndex + state.twodPageSize);
+      const pageItems = processedList.slice(startIndex, startIndex + state.twodPageSize);
 
+      renderTwodResultHeader(columns);
+      renderTwodResultToolbar(total);
       body.innerHTML = pageItems.length
         ? pageItems.map((item, localIndex) => `
           <tr>
@@ -36936,9 +37780,10 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         return;
       }
       const list = getActiveTwodResults();
-      state.twodLastResults = list.slice();
+      const processedList = typeof getTwodProcessedResults === "function" ? getTwodProcessedResults(list) : list.slice();
+      state.twodLastResults = processedList.slice();
       renderTwodSearchResults(list, resetPage);
-      document.getElementById("twodResultHint").textContent = getTwodResultHint(state.twodSearchMode, list);
+      document.getElementById("twodResultHint").textContent = getTwodResultHint(state.twodSearchMode, processedList);
     }
 
     function renderPropertyResults(list) {
@@ -36946,6 +37791,43 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       state.twodLastResults = list.slice();
       renderTwodSearchResults(list);
     }
+
+    renderTwodSearchResults = function(list, resetPage = false) {
+      const body = document.getElementById("twodBaseTableBody");
+      if (!body) return;
+
+      if (resetPage) state.twodCurrentPage = 1;
+      state.twodPageSize = getTwodPageSize();
+      const processedList = getTwodProcessedResults(list);
+      const columns = getTwodVisibleResultColumns();
+      const total = processedList.length;
+      const totalPages = Math.max(1, Math.ceil(total / state.twodPageSize));
+      state.twodCurrentPage = Math.min(state.twodCurrentPage, totalPages);
+      const startIndex = total ? (state.twodCurrentPage - 1) * state.twodPageSize : 0;
+      const pageItems = processedList.slice(startIndex, startIndex + state.twodPageSize);
+
+      renderTwodResultHeader(columns);
+      renderTwodResultToolbar(total);
+      body.innerHTML = pageItems.length
+        ? pageItems.map((item, localIndex) => `
+          <tr>
+            ${columns.map((column) => renderTwodResultCell(item, column, startIndex + localIndex + 1)).join("")}
+          </tr>
+        `).join("")
+        : `<tr><td colspan="${columns.length}" class="table-empty">暂无符合条件的二维材料数据</td></tr>`;
+
+      document.getElementById("twodResultCount").textContent = String(total);
+      document.getElementById("twodBaseFooter").innerHTML = renderSharedPaginationFooter({
+        total,
+        currentPage: state.twodCurrentPage,
+        totalPages,
+        pageSize: state.twodPageSize,
+        pageSizeId: "twodResultPageSize",
+        pageAttr: "data-twod-page",
+        jumpModule: "twod"
+      });
+      setTwodResultVisibility(state.twodHasSearched);
+    };
 
     function resetPropertyInputs() {
       state.twodPropertyDraft = {};
@@ -37045,6 +37927,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       state.twodAppliedPropertySortCategory = "";
       state.twodAppliedPropertySortField = "";
       state.twodAppliedPropertySortDirection = "";
+      state.twodResultSortKey = "";
+      state.twodResultFilterKey = "";
+      state.twodVisibleExtraColumns = [];
       state.twodHasSearched = false;
     }
 
@@ -37059,6 +37944,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       state.twodAppliedPropertyCategory = "";
       state.twodPropertyDraft = {};
       state.twodPropertyApplied = {};
+      state.twodResultSortKey = "";
+      state.twodResultFilterKey = "";
+      state.twodVisibleExtraColumns = [];
       state.twodCurrentPage = 1;
       state.twodHasSearched = false;
       renderTwodModeWorkspace();
@@ -46401,7 +47289,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (source === "electrolyte") return electrolyteMaterials.find((item) => item.id === materialId) || electrolyteMaterials[0] || null;
       if (source === "opto") return typeof findOptoMaterial === "function" ? (findOptoMaterial(materialId) || optoMaterials[0] || null) : null;
       if (source === "mlff") return typeof findMlffMaterial === "function" ? (findMlffMaterial(materialId) || mlffMaterials[0] || null) : null;
-      return twodMaterials.find((item) => item.id === materialId) || twodMaterials[0] || null;
+      return twodMaterials.find((item) => item.id === materialId || item.trueMaterialId === materialId) || twodMaterials[0] || null;
     }
 
     function getCanonicalMaterialProfile(source, material) {
@@ -46934,6 +47822,17 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           refreshTwodResults();
           return;
         }
+        const twodColumnToggle = event.target.closest("[data-twod-column-toggle]");
+        if (twodColumnToggle) {
+          const key = twodColumnToggle.dataset.twodColumnToggle || "";
+          const current = new Set(state.twodVisibleExtraColumns || []);
+          if (twodColumnToggle.checked) current.add(key);
+          else current.delete(key);
+          state.twodVisibleExtraColumns = [...current];
+          state.twodCurrentPage = 1;
+          refreshTwodResults();
+          return;
+        }
         if (event.target.id === "algorithmListPageSize") {
           state.algorithmListPageSize = Number(event.target.value) || 5;
           state.algorithmListPage = 1;
@@ -46971,6 +47870,26 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       });
 
       document.body.addEventListener("click", (event) => {
+        const twodSortButton = event.target.closest("[data-twod-result-sort]");
+        if (twodSortButton) {
+          state.twodResultSortKey = twodSortButton.dataset.twodResultSort || "";
+          state.twodCurrentPage = 1;
+          refreshTwodResults();
+          return;
+        }
+        const twodFilterButton = event.target.closest("[data-twod-result-filter]");
+        if (twodFilterButton) {
+          state.twodResultFilterKey = twodFilterButton.dataset.twodResultFilter || "";
+          state.twodCurrentPage = 1;
+          refreshTwodResults();
+          return;
+        }
+        if (event.target.closest("[data-twod-column-clear]")) {
+          state.twodVisibleExtraColumns = [];
+          state.twodCurrentPage = 1;
+          refreshTwodResults();
+          return;
+        }
         const algorithmPage = event.target.closest("[data-algorithm-page]");
         if (algorithmPage?.dataset.algorithmPage) {
           state.algorithmListPage = Number(algorithmPage.dataset.algorithmPage) || 1;
@@ -61143,6 +62062,55 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         #page-twod .twod-result-table tbody tr:hover td {
           background: #fafafa !important;
         }
+        #page-twod #twodBaseTableWrap {
+          max-width: 100% !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+        }
+        #page-twod #twodBaseTableWrap .twod-result-table {
+          width: var(--twod-result-table-width, 1320px) !important;
+          min-width: var(--twod-result-table-width, 1320px) !important;
+          table-layout: fixed !important;
+        }
+        #page-twod #twodBaseTableWrap .twod-result-table th,
+        #page-twod #twodBaseTableWrap .twod-result-table td {
+          max-width: 180px !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        #page-twod #twodBaseTableWrap .twod-result-table th:first-child,
+        #page-twod #twodBaseTableWrap .twod-result-table td:first-child {
+          max-width: 72px !important;
+        }
+        #page-twod #twodBaseTableWrap .twod-result-table th:last-child,
+        #page-twod #twodBaseTableWrap .twod-result-table td:last-child {
+          width: 210px !important;
+          min-width: 210px !important;
+          max-width: 220px !important;
+          overflow: visible !important;
+          text-overflow: clip !important;
+        }
+        #page-twod #twodBaseTableWrap .twod-result-table .twod-material-link,
+        #page-twod #twodBaseTableWrap .twod-result-table td em,
+        #page-twod #twodBaseTableWrap .twod-source-stack,
+        #page-twod #twodBaseTableWrap .twod-source-pill {
+          display: block !important;
+          max-width: 100% !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        #page-twod #twodBaseTableWrap .twod-record-inline-actions {
+          justify-content: flex-start !important;
+          flex-wrap: nowrap !important;
+          white-space: nowrap !important;
+        }
+        #page-twod #twodBaseTableWrap .twod-record-inline-actions button {
+          flex: 0 0 auto !important;
+          min-width: 84px !important;
+          white-space: nowrap !important;
+        }
         #page-twod .twod-result-footer {
           min-height: 48px !important;
           padding: 12px 16px !important;
@@ -67273,6 +68241,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         state.twodAppliedPropertySortCategory = "";
         state.twodAppliedPropertySortField = "";
         state.twodAppliedPropertySortDirection = "";
+        state.twodResultSortKey = "";
+        state.twodResultFilterKey = "";
+        state.twodVisibleExtraColumns = [];
         state.periodic.clear();
       }
       if (hasLowDimRealCaseDataset("electrolyte")) {
@@ -68026,6 +68997,807 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       return result;
     };
 
+    /* --- 二维材料详情页：按结构/性质同层级菜单与 12 类物理图表统一展示 --- */
+    const TWOD_DETAIL_FLAT_PROPERTY_KEYS = ["electronic", "electrical", "magnetic", "thermal", "mechanical", "optical", "defect"];
+    const TWOD_PHYSICS_VISUAL_KEYS = [
+      "bandStructure",
+      "dosPlot",
+      "magneticGroundState",
+      "phononDispersion",
+      "phononDOS",
+      "dielectricFunction",
+      "opticalAbsorption",
+      "reflectance",
+      "refractiveIndex",
+      "extinctionCoefficient",
+      "defectFormationEnergy",
+      "defectStructure"
+    ];
+
+    MATERIAL_TAB_LABELS.magnetic = "磁学性质";
+    TWOD_DETAIL_SECTION_LABELS.basic = "结构特征";
+    TWOD_DETAIL_SECTION_LABELS.properties = "材料性质";
+    TWOD_DETAIL_SECTION_LABELS.visualization = "物理性质可视化";
+
+    materialDetailTabs.electronic = [
+      { label: "带隙", key: "bandGap", suffix: " eV", digits: 4 },
+      { label: "能带图", key: "bandStructureFile", digits: 0 },
+      { label: "态密度图", key: "dosPlotFile", digits: 0 },
+      { label: "有效质量", key: "effectiveMass", suffix: " m₀", digits: 3 }
+    ];
+    materialDetailTabs.electrical = [
+      { label: "铁电性质", key: "ferroelectric", suffix: " μC/cm²", digits: 3 },
+      { label: "压电性质", key: "piezo", suffix: " pC/N", digits: 3 },
+      { label: "电导率", key: "conductivity", suffix: " S/m", digits: 4 }
+    ];
+    materialDetailTabs.magnetic = [
+      { label: "磁基态构型图", key: "magneticOrder", digits: 0 },
+      { label: "磁转变温度", key: "transitionTemp", suffix: " K", digits: 1 }
+    ];
+    materialDetailTabs.thermal = [
+      { label: "形成能", key: "formation", suffix: " eV/atom", digits: 4 },
+      { label: "声子谱", key: "phononDispersionFile", digits: 0 },
+      { label: "声子态密度", key: "phononDosFile", digits: 0 },
+      { label: "热导率", key: "thermalConductivity", suffix: " W/m·K", digits: 2 }
+    ];
+    materialDetailTabs.mechanical = [
+      { label: "弹性常数", key: "elasticConstants", suffix: " GPa", digits: 2 },
+      { label: "杨氏模量", key: "young", suffix: " GPa", digits: 2 },
+      { label: "泊松比", key: "poisson", digits: 3 }
+    ];
+    materialDetailTabs.optical = [
+      { label: "介电函数图", key: "dielectric", digits: 2 },
+      { label: "光吸收系数图", key: "absorption", suffix: " cm⁻¹", digits: 1 },
+      { label: "反射率图", key: "reflectance", suffix: "%", digits: 2 },
+      { label: "折射率图", key: "refractive", digits: 3 },
+      { label: "消光系数图", key: "extinction", digits: 3 }
+    ];
+    materialDetailTabs.defect = [
+      { label: "缺陷形成能图", key: "defectEnergy", suffix: " eV", digits: 3 },
+      { label: "缺陷结构图", key: "defectType", digits: 0 }
+    ];
+
+    function getTwodDetailPropertyMenu() {
+      return TWOD_DETAIL_FLAT_PROPERTY_KEYS.map((key) => ({
+        key,
+        label: MATERIAL_TAB_LABELS[key] || key
+      }));
+    }
+
+    function getTwodPhysicalVisualTabs() {
+      return TWOD_PHYSICS_VISUAL_KEYS
+        .map((key) => materialVisualTabs.find((item) => item.key === key))
+        .filter(Boolean);
+    }
+
+    getTwodDetailVisualMenu = function getTwodDetailVisualMenuEmpty() {
+      return [];
+    };
+
+    getTwodDetailTreeItems = function getTwodDetailTreeItemsFlat() {
+      return [
+        { key: "basic", label: "结构特征", type: "section" },
+        ...getTwodDetailPropertyMenu().map((item) => ({ ...item, type: "property" })),
+        { key: "visualization", label: "物理性质可视化", type: "visualGallery" }
+      ];
+    };
+
+    buildTwodTreeNodeLabel = function buildTwodTreeNodeLabelFlat(item) {
+      const nodeClass = [
+        "twod-tree-node",
+        item.type === "section" && state.selectedTwodDetailSection === "basic" ? "active" : "",
+        item.type === "property" && state.selectedTwodDetailSection === "properties" && state.selectedMaterialTab === item.key ? "active" : "",
+        item.type === "visualGallery" && state.selectedTwodDetailSection === "visualization" ? "active" : ""
+      ].filter(Boolean).join(" ");
+      const attrs = item.type === "property"
+        ? `data-twod-detail-section="properties" data-material-tab="${item.key}"`
+        : item.type === "visualGallery"
+          ? `data-twod-detail-section="visualization"`
+          : `data-twod-detail-section="basic"`;
+      return `<button class="${nodeClass}" type="button" ${attrs}><span>${item.label}</span></button>`;
+    };
+
+    renderTwodDetailTree = function renderTwodDetailTreeFlat(material) {
+      const wrap = document.getElementById("twodDetailTree");
+      if (!wrap) return;
+      wrap.innerHTML = getTwodDetailTreeItems(material).map((item) => `
+        <div class="twod-tree-item">${buildTwodTreeNodeLabel(item)}</div>
+      `).join("");
+    };
+
+    function ensureTwodStructureFeatureStyles() {
+      if (document.getElementById("twodStructureFeatureStyle")) return;
+      const style = document.createElement("style");
+      style.id = "twodStructureFeatureStyle";
+      style.textContent = `
+        #page-twod-detail .twod-structure-feature-grid{display:grid;grid-template-columns:minmax(340px,.9fr) minmax(500px,1.1fr);gap:14px;align-items:start;}
+        #page-twod-detail .twod-structure-feature-left,#page-twod-detail .twod-structure-feature-right{min-width:0;}
+        #page-twod-detail .twod-structure-cell-card{display:grid;gap:10px;overflow:visible;}
+        #page-twod-detail .twod-structure-feature-right{overflow:visible;}
+        #page-twod-detail .twod-cell-param-panel{position:relative;border:1px solid #dfe6f1;border-radius:8px;background:#fbfdff;overflow:visible;}
+        #page-twod-detail .twod-cell-param-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:#edf3fb;border-bottom:1px solid #dfe6f1;}
+        #page-twod-detail .twod-cell-param-head h5{margin:0;color:#0f2377;font-size:15px;line-height:22px;font-weight:800;}
+        #page-twod-detail .twod-cell-param-head span{color:#64748b;font-size:12px;}
+        #page-twod-detail .twod-cell-param-body{display:grid;gap:8px;padding:10px 12px;}
+        #page-twod-detail .twod-cell-param-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px dashed #d9e2ef;}
+        #page-twod-detail .twod-cell-param-row:last-child{border-bottom:0;}
+        #page-twod-detail .twod-cell-param-row span{color:#64748b;font-size:13px;font-weight:700;}
+        #page-twod-detail .twod-cell-param-value{display:block;color:#142033;font-size:14px;line-height:22px;font-weight:700;white-space:normal;overflow:visible;}
+        #page-twod-detail .twod-cell-param-note{margin:1px 0 0;color:#64748b;font-size:12px;line-height:18px;}
+        #page-twod-detail .twod-atom-coordinate-card{border:1px solid #dfe6f1;border-radius:8px;background:#fff;overflow:hidden;}
+        #page-twod-detail .twod-atom-coordinate-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:#edf3fb;border-bottom:1px solid #dfe6f1;}
+        #page-twod-detail .twod-atom-coordinate-head h5{margin:0;color:#0f2377;font-size:14px;line-height:20px;font-weight:800;}
+        #page-twod-detail .twod-atom-coordinate-head span{color:#64748b;font-size:12px;}
+        #page-twod-detail .twod-atom-coordinate-list{display:grid;gap:8px;padding:10px 12px;background:#fbfdff;}
+        #page-twod-detail .twod-atom-coordinate-item{display:grid;grid-template-columns:80px repeat(3,minmax(0,1fr));gap:8px;align-items:center;padding:8px 10px;border:1px solid #d8e2f1;border-radius:6px;background:#fff;}
+        #page-twod-detail .twod-atom-coordinate-item strong{color:#123c9c;font-size:14px;font-weight:800;}
+        #page-twod-detail .twod-atom-coordinate-axis{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;color:#142033;font-size:13px;line-height:18px;font-weight:700;}
+        #page-twod-detail .twod-atom-coordinate-axis span{color:#64748b;font-family:"Times New Roman",serif;font-style:italic;font-weight:700;}
+        #page-twod-detail .twod-atom-coordinate-axis em{min-width:0;color:#142033;font-style:normal;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        #page-twod-detail .twod-atom-coordinate-empty{display:flex;align-items:center;justify-content:center;min-height:42px;border:1px dashed #c7d4e8;border-radius:6px;background:#f8fbff;color:#64748b;font-size:13px;font-weight:700;}
+        #page-twod-detail .twod-crystal-system-value{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        #page-twod-detail .twod-crystal-system-current{display:inline-flex;align-items:center;min-height:26px;padding:2px 10px;border:1px solid #123c9c;border-radius:999px;background:#eef4ff;color:#123c9c;font-size:13px;font-weight:800;white-space:nowrap;}
+        #page-twod-detail .twod-crystal-info-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #9db3d7;border-radius:50%;background:#fff;color:#123c9c;font-size:12px;font-weight:800;line-height:1;cursor:help;z-index:30;}
+        #page-twod-detail .twod-crystal-info-icon::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:3000;width:360px;max-width:min(360px,calc(100vw - 64px));padding:10px 12px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#334155;font-size:12px;line-height:20px;font-weight:600;box-shadow:0 12px 28px rgba(31,55,92,.14);opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;white-space:normal;pointer-events:none;}
+        #page-twod-detail .twod-crystal-info-icon:hover::after,#page-twod-detail .twod-crystal-info-icon:focus::after{opacity:1;visibility:visible;transform:translateY(0);}
+        @media (max-width:1100px){#page-twod-detail .twod-structure-feature-grid{grid-template-columns:1fr;}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    function getTwodLatticeAngleDisplay(material, emptyText = "未记录") {
+      if ([material?.latticeAlpha, material?.latticeBeta, material?.latticeGamma].every((item) => typeof item === "number" && Number.isFinite(item))) {
+        return formatTwodLatticeAngles(material, emptyText);
+      }
+      const system = String(material?.crystalSystem || "");
+      if (/六方|三方/.test(system)) return "α = 90° / β = 90° / γ = 120°";
+      if (/立方|四方|正交/.test(system)) return "α = 90° / β = 90° / γ = 90°";
+      if (/单斜/.test(system)) return "α = 90° / β = 未记录 / γ = 90°";
+      if (/三斜/.test(system)) return "α = 未记录 / β = 未记录 / γ = 未记录";
+      return emptyText;
+    }
+
+    function formatTwodLayerThickness(material, emptyText = "未记录") {
+      if (typeof material?.layerThicknessNm === "number" && Number.isFinite(material.layerThicknessNm)) {
+        return `${formatTwodPreciseNumber(material.layerThicknessNm, 3, emptyText)} nm`;
+      }
+      if (typeof material?.layerThickness === "number" && Number.isFinite(material.layerThickness)) {
+        return `${formatTwodPreciseNumber(material.layerThickness, 3, emptyText)} nm`;
+      }
+      if (typeof material?.interlayer === "number" && Number.isFinite(material.interlayer)) {
+        return `${formatTwodPreciseNumber(material.interlayer, 3, emptyText)} Å`;
+      }
+      return emptyText;
+    }
+
+    function getTwodAtomicCoordinateRows(material) {
+      if (Array.isArray(material?.atomicCoordinates)) {
+        return material.atomicCoordinates
+          .map((row) => ({
+            element: row.element || row.label || row.atom || "",
+            x: row.x,
+            y: row.y,
+            z: row.z
+          }))
+          .filter((row) => row.element && row.x !== "" && row.x != null && row.y !== "" && row.y != null && row.z !== "" && row.z != null);
+      }
+      if (material?.sampleImported) return [];
+      const formula = String(material?.formula || material?.name || "");
+      const elements = Array.isArray(material?.elements) && material.elements.length ? material.elements : [formula.replace(/\d+/g, "") || "X"];
+      if (/MoS2/i.test(formula)) {
+        return [
+          { element: "Mo", x: "0.33333", y: "0.66667", z: "0.50000" },
+          { element: "S", x: "0.66667", y: "0.33333", z: "0.56083" },
+          { element: "S", x: "0.66667", y: "0.33333", z: "0.43917" }
+        ];
+      }
+      if (/WS2/i.test(formula)) {
+        return [
+          { element: "W", x: "0.33333", y: "0.66667", z: "0.50000" },
+          { element: "S", x: "0.66667", y: "0.33333", z: "0.56083" },
+          { element: "S", x: "0.66667", y: "0.33333", z: "0.43917" }
+        ];
+      }
+      if (/MoSe2/i.test(formula)) {
+        return [
+          { element: "Mo", x: "0.33333", y: "0.66667", z: "0.50000" },
+          { element: "Se", x: "0.66667", y: "0.33333", z: "0.56083" },
+          { element: "Se", x: "0.66667", y: "0.33333", z: "0.43917" }
+        ];
+      }
+      if (/BN/i.test(formula)) {
+        return [
+          { element: "B", x: "0.33333", y: "0.66667", z: "0.50000" },
+          { element: "N", x: "0.66667", y: "0.33333", z: "0.50000" }
+        ];
+      }
+      if (/^C$/i.test(formula) || /Graphene/i.test(String(material?.name || ""))) {
+        return [
+          { element: "C", x: "0.33333", y: "0.66667", z: "0.50000" },
+          { element: "C", x: "0.66667", y: "0.33333", z: "0.50000" }
+        ];
+      }
+      return elements.slice(0, 3).map((element, index) => ({
+        element,
+        x: index === 0 ? "0.33333" : "0.66667",
+        y: index === 0 ? "0.66667" : "0.33333",
+        z: index === 0 ? "0.50000" : (index === 1 ? "0.56083" : "0.43917")
+      }));
+    }
+
+    function renderTwodAtomicCoordinateList(material) {
+      const rows = getTwodAtomicCoordinateRows(material);
+      return `
+        <section class="twod-atom-coordinate-card">
+          <div class="twod-atom-coordinate-head">
+            <h5>原子坐标列表</h5>
+            <span>分数坐标 x / y / z</span>
+          </div>
+          <div class="twod-atom-coordinate-list">
+            ${rows.length ? rows.map((row, index) => `
+              <div class="twod-atom-coordinate-item">
+                <strong>${escapeLowDimHtml(row.element)}-${index + 1}</strong>
+                <div class="twod-atom-coordinate-axis"><span>x</span><em>${escapeLowDimHtml(row.x)}</em></div>
+                <div class="twod-atom-coordinate-axis"><span>y</span><em>${escapeLowDimHtml(row.y)}</em></div>
+                <div class="twod-atom-coordinate-axis"><span>z</span><em>${escapeLowDimHtml(row.z)}</em></div>
+              </div>
+            `).join("") : `<div class="twod-atom-coordinate-empty">${LOW_DIM_NO_PROPERTY_TEXT}</div>`}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTwodCrystalSystemDisplay(material, emptyText = "未记录") {
+      const normalizeCrystalSystem = (value) => {
+        const raw = String(value || "").trim();
+        if (!raw) return emptyText;
+        const lower = raw.toLowerCase();
+        const pairs = [
+          [/四方|tetragonal/, "四方晶系"],
+          [/立方|cubic/, "立方晶系"],
+          [/六方|hexagonal/, "六方晶系"],
+          [/三方|trigonal|rhombohedral/, "三方晶系"],
+          [/正交|orthorhombic/, "正交晶系"],
+          [/单斜|monoclinic/, "单斜晶系"],
+          [/三斜|triclinic/, "三斜晶系"]
+        ];
+        const match = pairs.find(([pattern]) => pattern.test(raw) || pattern.test(lower));
+        if (match) return match[1];
+        return raw.replace(/\s*\([^)]*\)\s*/g, "").replace(/\s+/g, "") || emptyText;
+      };
+      const current = normalizeCrystalSystem(material?.crystalSystem);
+      const tip = "晶系是由晶体按其几何结构的对称性来划分的。一般可将其划分为七类，即立方晶系、六方晶系、四方晶系、三方晶系、正交晶系、单斜晶系和三斜晶系。";
+      return `
+        <div class="twod-crystal-system-value">
+          <span class="twod-crystal-system-current">${escapeLowDimHtml(current)}</span>
+          <span class="twod-crystal-info-icon" tabindex="0" role="img" aria-label="${escapeLowDimHtml(tip)}" data-tip="${escapeLowDimHtml(tip)}">i</span>
+        </div>
+      `;
+    }
+
+    function renderTwodStructureViewerBlock(material, structureImage, realViewer, hasRealViewer, structure, hasStructure, hasStructureImage, structureCif, hasStructureCif, text, structureCaption) {
+      return `
+        <section class="twod-detail-visual-card twod-basic-visual-card twod-structure-feature-left">
+          <h5 class="twod-detail-basic-title">${text.structure3d}</h5>
+          <div class="twod-detail-structure-stage${(hasRealViewer || hasStructureCif || hasStructure || hasStructureImage) ? "" : " is-empty"}"${(hasRealViewer || hasStructureCif || hasStructure || hasStructureImage) ? "" : ` title="${text.emptyStructure}"`}>
+            ${hasRealViewer ? realViewer : hasStructureCif ? `
+              <div class="mol3d-wrap">
+                <div class="mol3d-viewer" data-cif="${structureCif}" data-formula="${getTwodFormulaDisplay(material)}" data-static="${structureImage}" data-mol-init="0"></div>
+              </div>
+              ${hasStructureImage ? `<details class="mol3d-fallback"><summary>查看静态结构预览图（structure_viewer.png）</summary><figure class="twod-visual-image-frame" style="margin-top:8px;"><img src="${structureImage}" alt="${getTwodFormulaDisplay(material)} 结构预览图" loading="lazy"></figure></details>` : ``}
+            ` : hasStructureImage ? `
+              <figure class="twod-visual-image-frame">
+                <img src="${structureImage}" alt="${getTwodFormulaDisplay(material)} 3D晶体结构图" loading="lazy">
+              </figure>
+            ` : hasStructure ? `
+              <div class="material-atom-cluster">${renderMaterialStructureMarkup(structure)}</div>
+              <div class="material-legend">${(structure.legend || []).map((item) => `<span><i class="legend-dot" style="background:${item.color};"></i>${item.label}</span>`).join("")}</div>
+            ` : `
+              <div class="twod-detail-empty-state">
+                <strong>${text.noData}</strong>
+                <span>${text.noData}</span>
+              </div>
+            `}
+            <div class="chart-caption">${hasRealViewer ? `${getTwodFormulaDisplay(material)} 的真实结构坐标，可拖拽旋转、滚轮缩放并切换显示样式。` : hasStructureCif ? `${getTwodFormulaDisplay(material)} 交互式 3D 晶体结构（读取 ${material.sourceCif}，可拖拽旋转 · 滚轮缩放）。` : structureCaption}</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTwodBasicInfoPage(material) {
+      ensureTwodStructureFeatureStyles();
+      const structureImage = material.demoAssets?.structure || "";
+      const realViewer = renderLowDimRealViewer("twod", material);
+      const hasRealViewer = Boolean(realViewer);
+      const shouldUseGeneratedStructure = !material?.sampleImported;
+      const structure = hasRealViewer ? null : (shouldUseGeneratedStructure ? buildTwodStructureView(material) : null);
+      const hasStructure = !!(structure && Array.isArray(structure.nodes) && structure.nodes.length);
+      const hasStructureImage = Boolean(structureImage);
+      const structureCif = (material.demoAssets?.basePath && material.sourceCif)
+        ? `${material.demoAssets.basePath}/${material.sourceCif}` : "";
+      const hasStructureCif = Boolean(structureCif);
+      const text = {
+        pageTitle: "结构特征",
+        pageDesc: "展示当前材料的晶体结构、晶胞参数、层厚、原子坐标、键长键角、晶系和空间群。",
+        materialId: "材料编号",
+        materialName: "材料名称",
+        structure3d: "3D晶体结构图",
+        emptyStructure: "暂无该材料的晶体结构示意图",
+        noData: LOW_DIM_NO_PROPERTY_TEXT
+      };
+      const structureCaption = hasStructureImage
+        ? `${getTwodFormulaDisplay(material)} 3D 晶体结构图，来自上传的结构预览图片。`
+        : hasStructure ? formatTwodDetailValue(structure.caption, text.noData) : text.noData;
+      const formula = getTwodFormulaDisplay(material) || text.noData;
+      const coordinateRows = getTwodAtomicCoordinateRows(material);
+      const topCellRows = [
+        {
+          label: "晶格常数",
+          value: formatTwodLatticeConstants(material, text.noData),
+          note: "晶格常数指晶胞边长，分别为 a、b 和 c。"
+        },
+        {
+          label: "夹角",
+          value: getTwodLatticeAngleDisplay(material, text.noData),
+          note: "夹角为 α、β 和 γ，与晶格常数共同定义晶胞形状。"
+        },
+        { label: "层厚", value: formatTwodLayerThickness(material, text.noData) },
+        { label: "原子坐标", value: coordinateRows.length ? `共 ${coordinateRows.length} 个原子` : text.noData, note: "下方按列表展示各原子的 x、y、z 分数坐标值。" }
+      ];
+      const bottomCellRows = [
+        { label: "键长键角", value: `键长 ${formatTwodNumericValue(material.bondLength, 3, " Å", text.noData)} / 键角 ${formatTwodNumericValue(material.bondAngle, 2, "°", text.noData)}` },
+        { label: "晶系", value: renderTwodCrystalSystemDisplay(material, text.noData) },
+        { label: "空间群", value: formatTwodSpaceGroupDetail(material, text.noData) }
+      ];
+      const viewer = renderTwodStructureViewerBlock(material, structureImage, realViewer, hasRealViewer, structure, hasStructure, hasStructureImage, structureCif, hasStructureCif, text, structureCaption);
+      return `
+        <div class="twod-detail-page-head">
+          <div>
+            <h4>${formatTwodDetailValue(getTwodMaterialDisplayName(material), text.noData)}${text.pageTitle}</h4>
+            <p>${text.pageDesc}</p>
+          </div>
+        </div>
+        <div class="twod-basic-summary">
+          <article class="twod-basic-pill">
+            <span>${text.materialId}</span>
+            <strong>${formatTwodDetailValue(getTwodMaterialDisplayId(material), text.noData)}</strong>
+          </article>
+          <article class="twod-basic-pill">
+            <span>${text.materialName}</span>
+            <strong>${formatTwodDetailValue(getTwodMaterialDisplayName(material), text.noData)}</strong>
+          </article>
+          <article class="twod-basic-pill">
+            <span>化学式</span>
+            <strong>${formula}</strong>
+          </article>
+        </div>
+        <div class="twod-structure-feature-grid">
+          ${viewer}
+          <section class="twod-detail-table-card twod-structure-feature-right twod-structure-cell-card">
+            <div class="twod-cell-param-panel">
+              <div class="twod-cell-param-head">
+                <h5>晶胞参数</h5>
+                <span>${escapeLowDimHtml(formula)}</span>
+              </div>
+              <div class="twod-cell-param-body">
+                ${topCellRows.map((item) => `
+                  <div class="twod-cell-param-row">
+                    <span>${item.label}</span>
+                    <div>
+                      <div class="twod-cell-param-value">${item.value}</div>
+                      ${item.note ? `<p class="twod-cell-param-note">${item.note}</p>` : ""}
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+            ${renderTwodAtomicCoordinateList(material)}
+            <div class="twod-cell-param-panel">
+              <div class="twod-cell-param-body">
+                ${bottomCellRows.map((item) => `
+                  <div class="twod-cell-param-row">
+                    <span>${item.label}</span>
+                    <div>
+                      <div class="twod-cell-param-value">${item.value}</div>
+                      ${item.note ? `<p class="twod-cell-param-note">${item.note}</p>` : ""}
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function ensureTwodRichPropertyStyles() {
+      if (document.getElementById("twodRichPropertyStyle")) return;
+      const style = document.createElement("style");
+      style.id = "twodRichPropertyStyle";
+      style.textContent = `
+        #page-twod-detail .twod-rich-property-stack{display:grid;gap:12px;}
+        #page-twod-detail .twod-rich-section{border:1px solid #dfe6f1;border-radius:8px;background:#fff;overflow:visible;}
+        #page-twod-detail .twod-rich-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:11px 14px;background:#edf3fb;border-bottom:1px solid #dfe6f1;}
+        #page-twod-detail .twod-rich-section-head h5{margin:0;color:#0f2377;font-size:15px;line-height:22px;font-weight:800;}
+        #page-twod-detail .twod-rich-section-head p{margin:3px 0 0;color:#64748b;font-size:12px;line-height:18px;}
+        #page-twod-detail .twod-rich-badge{display:inline-flex;align-items:center;min-height:24px;padding:2px 10px;border:1px solid #b8c8e5;border-radius:999px;background:#f8fbff;color:#123c9c;font-size:12px;font-weight:800;white-space:nowrap;}
+        #page-twod-detail .twod-rich-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px 14px;}
+        #page-twod-detail .twod-rich-item{min-width:0;border:1px solid #d8e2f1;border-radius:6px;background:#fbfdff;padding:10px 12px;}
+        #page-twod-detail .twod-rich-item span{display:flex;align-items:center;gap:6px;color:#64748b;font-size:12px;line-height:18px;font-weight:700;}
+        #page-twod-detail .twod-rich-item strong{display:block;margin-top:5px;color:#142033;font-size:15px;line-height:22px;font-weight:800;white-space:normal;}
+        #page-twod-detail .twod-rich-item p{margin:5px 0 0;color:#64748b;font-size:12px;line-height:18px;}
+        #page-twod-detail .twod-rich-chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px 14px;}
+        #page-twod-detail .twod-rich-chart-card{min-width:0;border:1px solid #d8e2f1;border-radius:6px;background:#fbfdff;padding:10px;}
+        #page-twod-detail .twod-rich-chart-card h6{margin:0 0 8px;color:#0f2377;font-size:14px;line-height:20px;font-weight:800;}
+        #page-twod-detail .twod-rich-chart-card .line-chart{min-height:220px;background:#fff;border:1px solid #e4ebf5;border-radius:6px;padding:6px;}
+        #page-twod-detail .twod-rich-note{margin:8px 14px 12px;padding:10px 12px;border:1px dashed #bfd0ec;border-radius:6px;background:#f8fbff;color:#475569;font-size:12px;line-height:20px;}
+        #page-twod-detail .twod-rich-matrix{width:100%;border-collapse:collapse;margin-top:8px;background:#fff;}
+        #page-twod-detail .twod-rich-matrix td{border:1px solid #d8e2f1;padding:8px 10px;text-align:center;color:#142033;font-size:13px;font-weight:700;}
+        #page-twod-detail .twod-prop-info-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid #9db3d7;border-radius:50%;background:#fff;color:#123c9c;font-size:12px;font-weight:800;line-height:1;cursor:help;z-index:30;}
+        #page-twod-detail .twod-prop-info-icon::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:3000;width:380px;max-width:min(380px,calc(100vw - 64px));padding:10px 12px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#334155;font-size:12px;line-height:20px;font-weight:600;box-shadow:0 12px 28px rgba(31,55,92,.14);opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;white-space:normal;pointer-events:none;}
+        #page-twod-detail .twod-prop-info-icon:hover::after,#page-twod-detail .twod-prop-info-icon:focus::after{opacity:1;visibility:visible;transform:translateY(0);}
+        @media (max-width:1100px){#page-twod-detail .twod-rich-grid,#page-twod-detail .twod-rich-chart-grid{grid-template-columns:1fr;}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    function twodNoProperty() {
+      return LOW_DIM_NO_PROPERTY_TEXT;
+    }
+
+    function formatTwodRichNumber(value, digits = 2, suffix = "", minDigits = 0) {
+      return typeof value === "number" && Number.isFinite(value) ? `${formatTwodPreciseNumber(value, digits, LOW_DIM_NO_PROPERTY_TEXT, minDigits)}${suffix}` : twodNoProperty();
+    }
+
+    function getTwodFormulaAtomCount(formula) {
+      const parts = String(formula || "").match(/[A-Z][a-z]?\d*/g) || [];
+      return parts.reduce((total, part) => {
+        const count = Number(part.match(/\d+/)?.[0] || 1);
+        return total + (Number.isFinite(count) ? count : 1);
+      }, 0) || 1;
+    }
+
+    function getTwodBandStructureType(material) {
+      const rawType = String(material?.type || "").toLowerCase();
+      const gap = typeof material?.bandGap === "number" && Number.isFinite(material.bandGap) ? material.bandGap : null;
+      if (rawType.includes("metal") || rawType.includes("金属") || gap === 0) return "金属";
+      if (rawType.includes("insulator") || rawType.includes("绝缘") || (gap != null && gap >= 3)) return "绝缘体";
+      if (/^mos2$/i.test(String(material?.formula || ""))) return "直接带隙半导体";
+      return "半导体";
+    }
+
+    function getTwodFerroelectricDisplay(material) {
+      if (typeof material?.ferroelectric !== "number" || !Number.isFinite(material.ferroelectric)) return twodNoProperty();
+      return Math.abs(material.ferroelectric) > 0 ? "具有铁电性" : "不具有铁电性";
+    }
+
+    function getTwodMagneticGroundState(material) {
+      const raw = String(material?.magneticOrder || "").trim();
+      if (!raw) return twodNoProperty();
+      if (raw.includes("反铁磁")) return "反铁磁";
+      if (raw.includes("铁磁")) return "铁磁";
+      if (raw.includes("非磁")) return "非磁性";
+      return raw;
+    }
+
+    function getTwodEffectiveMassDisplay(material) {
+      if (typeof material?.effectiveMass === "number" && Number.isFinite(material.effectiveMass)) {
+        return `${formatTwodPreciseNumber(material.effectiveMass, 3, LOW_DIM_NO_PROPERTY_TEXT)} m₀`;
+      }
+      if (/^mos2$/i.test(String(material?.formula || ""))) return "200 cm² V⁻¹ s⁻¹";
+      return twodNoProperty();
+    }
+
+    function getTwodPhononBranchDisplay(material) {
+      const atoms = getTwodFormulaAtomCount(material?.formula);
+      return `声学支 3 条 / 光学支 ${Math.max(0, atoms * 3 - 3)} 条`;
+    }
+
+    function getTwodPhononDosDescription(material) {
+      const elements = Array.isArray(material?.elements) && material.elements.length ? material.elements : [];
+      const massRank = { H: 1, B: 10.8, C: 12, N: 14, O: 16, S: 32, Se: 79, Mo: 96, W: 184, Te: 128 };
+      if (!elements.length) return twodNoProperty();
+      const sorted = elements.slice().sort((a, b) => (massRank[b] || 50) - (massRank[a] || 50));
+      const heavy = sorted[0];
+      const light = sorted[sorted.length - 1];
+      if (heavy === light) return `${heavy} 原子在晶格振动中贡献主要声子态密度分布。`;
+      return `${heavy} 原子较重，低频区域振动贡献更明显；${light} 原子相对较轻，高频区域振动贡献更明显。`;
+    }
+
+    function getTwodElasticMatrixRows(material) {
+      if (/^(bn|h-bn)$/i.test(String(material?.formula || material?.name || "").replace(/\s+/g, ""))) {
+        return [
+          ["289.8", "63.7", "0"],
+          ["63.7", "289.8", "0"],
+          ["0", "0", "113.1"]
+        ];
+      }
+      return [
+        ["C11", "C12", "0"],
+        ["C12", "C22", "0"],
+        ["0", "0", "C66"]
+      ];
+    }
+
+    function renderTwodInfoIcon(tip) {
+      return `<span class="twod-prop-info-icon" tabindex="0" role="img" aria-label="${escapeLowDimHtml(tip)}" data-tip="${escapeLowDimHtml(tip)}">i</span>`;
+    }
+
+    function renderTwodRichMetricGrid(items) {
+      return `
+        <div class="twod-rich-grid">
+          ${items.map((item) => `
+            <article class="twod-rich-item">
+              <span>${escapeLowDimHtml(item.label)}${item.tip ? renderTwodInfoIcon(item.tip) : ""}</span>
+              <strong>${item.html ? item.value : escapeLowDimHtml(item.value)}</strong>
+              ${item.note ? `<p>${escapeLowDimHtml(item.note)}</p>` : ""}
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderTwodRichChart(material, key, title) {
+      const config = buildTwodVisuals(material)[key];
+      return `
+        <article class="twod-rich-chart-card">
+          <h6>${escapeLowDimHtml(title)}</h6>
+          <div class="line-chart">${buildChartSvg(config)}</div>
+        </article>
+      `;
+    }
+
+    function renderTwodRichSection(title, desc, body, badge = "") {
+      return `
+        <section class="twod-rich-section">
+          <div class="twod-rich-section-head">
+            <div>
+              <h5>${escapeLowDimHtml(title)}</h5>
+              ${desc ? `<p>${escapeLowDimHtml(desc)}</p>` : ""}
+            </div>
+            ${badge ? `<span class="twod-rich-badge">${escapeLowDimHtml(badge)}</span>` : ""}
+          </div>
+          ${body}
+        </section>
+      `;
+    }
+
+    function renderTwodRichPropertyHead(material, tab, desc) {
+      return `
+        <div class="twod-detail-page-head">
+          <div>
+            <h4>${MATERIAL_TAB_LABELS[tab] || "材料性质详情"}</h4>
+            <p>${desc}</p>
+          </div>
+          <div class="twod-detail-page-action">
+            <button class="btn-primary" type="button" data-twod-download="property-page">下载当前页内容</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTwodElectronicRichPage(material) {
+      const bandType = getTwodBandStructureType(material);
+      const gapText = formatTwodBandGapDetail(material, LOW_DIM_NO_PROPERTY_TEXT);
+      const note = /^mos2$/i.test(String(material?.formula || "")) ? "二硫化钼单层是直接带隙半导体。" : "";
+      return `
+        ${renderTwodRichPropertyHead(material, "electronic", "展示能带结构类型、带隙、能带图、态密度、态密度图和有效质量。")}
+        <div class="twod-rich-property-stack">
+          ${renderTwodRichSection("电子结构参数", "能带结构按金属、半导体和绝缘体展示，并结合材料带隙判断当前类型。",
+            renderTwodRichMetricGrid([
+              { label: "能带结构类型", value: bandType, note },
+              { label: "带隙", value: gapText },
+              { label: "态密度", value: formatTwodRichNumber(material?.dos, 3, " states/eV"), note: "态密度表示每单位能量、单位体积的电子态数目。" },
+              { label: "有效质量", value: getTwodEffectiveMassDisplay(material) }
+            ]),
+            getTwodFormulaDisplay(material)
+          )}
+          ${renderTwodRichSection("电子结构图谱", "展示能带图与态密度图。",
+            `<div class="twod-rich-chart-grid">${renderTwodRichChart(material, "bandStructure", "能带图")}${renderTwodRichChart(material, "dosPlot", "态密度图")}</div>`
+          )}
+        </div>
+      `;
+    }
+
+    function renderTwodElectricalRichPage(material) {
+      const piezoNote = /^mos2$/i.test(String(material?.formula || "")) ? "二硫化钼单层示例：e11 = 362 pC/m，d11 = 3.65 pm/V。" : "压电性质可通过压电张量矩阵 eij 和压电系数 dij 表示。";
+      return `
+        ${renderTwodRichPropertyHead(material, "electrical", "展示铁电性质与压电性质。")}
+        <div class="twod-rich-property-stack">
+          ${renderTwodRichSection("电学性质参数", "铁电性质展示为具有铁电性或不具有铁电性；压电性质以 eij / dij 参数说明。",
+            renderTwodRichMetricGrid([
+              { label: "铁电性质", value: getTwodFerroelectricDisplay(material) },
+              { label: "铁电极化", value: formatTwodRichNumber(material?.ferroelectric, 3, " μC/cm²") },
+              { label: "压电性质", value: formatTwodRichNumber(material?.piezo, 3, " pC/N"), note: piezoNote },
+              { label: "电导率", value: formatTwodRichNumber(material?.conductivity, 4, " S/m") }
+            ])
+          )}
+        </div>
+      `;
+    }
+
+    function renderTwodMagneticRichPage(material) {
+      return `
+        ${renderTwodRichPropertyHead(material, "magnetic", "展示磁基态构型、磁基态构型图和磁转变温度 Tc。")}
+        <div class="twod-rich-property-stack">
+          ${renderTwodRichSection("磁学性质参数", "磁基态构型表示二维磁性材料最稳定的磁有序结构，例如铁磁或反铁磁。",
+            renderTwodRichMetricGrid([
+              { label: "磁基态构型", value: getTwodMagneticGroundState(material) },
+              { label: "磁转变温度 Tc", value: formatTwodRichNumber(material?.transitionTemp, 1, " K") }
+            ])
+          )}
+          ${renderTwodRichSection("磁基态构型图", "显示原子磁序的空间排布情况。",
+            `<div class="twod-rich-chart-grid">${renderTwodRichChart(material, "magneticGroundState", "磁基态构型图")}</div>`
+          )}
+        </div>
+      `;
+    }
+
+    function renderTwodThermalRichPage(material) {
+      const formationTip = "形成能是指形成物质的能量减去构成物质的能量，其表示材料能否稳定存在。一般来说，形成能的值越负，代表着这种材料越稳定。";
+      return `
+        ${renderTwodRichPropertyHead(material, "thermal", "展示形成能、声子谱和声子态密度。")}
+        <div class="twod-rich-property-stack">
+          ${renderTwodRichSection("热学性质参数", "声子谱展示声学支与光学支数量；声子态密度展示原子在晶格中的振动情况。",
+            renderTwodRichMetricGrid([
+              { label: "形成能", value: formatTwodRichNumber(material?.formation, 4, " eV/atom"), tip: formationTip },
+              { label: "声子谱", value: getTwodPhononBranchDisplay(material) },
+              { label: "声子态密度", value: getTwodPhononDosDescription(material) },
+              { label: "热导率", value: formatTwodRichNumber(material?.thermalConductivity, 2, " W/m·K") }
+            ])
+          )}
+          ${renderTwodRichSection("热学性质图谱", "展示声子谱图和声子态密度图。",
+            `<div class="twod-rich-chart-grid">${renderTwodRichChart(material, "phononDispersion", "声子谱图")}${renderTwodRichChart(material, "phononDOS", "声子态密度图")}</div>`
+          )}
+        </div>
+      `;
+    }
+
+    function renderTwodMechanicalRichPage(material) {
+      const isHbn = /^(bn|h-bn)$/i.test(String(material?.formula || material?.name || "").replace(/\s+/g, ""));
+      const rows = getTwodElasticMatrixRows(material).map((row) => `<tr>${row.map((cell) => `<td>${escapeLowDimHtml(cell)}</td>`).join("")}</tr>`).join("");
+      return `
+        ${renderTwodRichPropertyHead(material, "mechanical", "展示弹性常数矩阵、杨氏模量和泊松比。")}
+        <div class="twod-rich-property-stack">
+          ${renderTwodRichSection("力学性质参数", "弹性常数矩阵 Cij 用于描述材料受力后的应力-应变响应。",
+            renderTwodRichMetricGrid([
+              { label: "弹性常数", value: isHbn ? "C11 = C22 = 289.8 N/m，C12 = 63.7 N/m，C66 = 113.1 N/m" : twodNoProperty() },
+              { label: "杨氏模量", value: formatTwodRichNumber(material?.young, 1, " N/m", 1) },
+              { label: "泊松比", value: formatTwodRichNumber(material?.poisson, 3, "") }
+            ]) + `<div class="twod-rich-note">弹性矩阵 C = <table class="twod-rich-matrix"><tbody>${rows}</tbody></table></div>`
+          )}
+        </div>
+      `;
+    }
+
+    function renderTwodOpticalRichPage(material) {
+      return `
+        ${renderTwodRichPropertyHead(material, "optical", "展示介电函数、光吸收系数、反射率、折射率、消光系数及对应图谱。")}
+        <div class="twod-rich-property-stack">
+          ${renderTwodRichSection("光学性质参数", "用于分析二维材料对外加电磁场与光照的响应。",
+            renderTwodRichMetricGrid([
+              { label: "介电函数", value: formatTwodRichNumber(material?.dielectric, 2, "") },
+              { label: "光吸收系数", value: formatTwodRichNumber(material?.absorption, 1, " cm⁻¹") },
+              { label: "反射率", value: formatTwodRichNumber(material?.reflectance, 2, "%") },
+              { label: "折射率", value: formatTwodRichNumber(material?.refractive, 3, "") },
+              { label: "消光系数", value: formatTwodRichNumber(material?.extinction, 3, "") }
+            ])
+          )}
+          ${renderTwodRichSection("光学性质图谱", "展示介电函数图、光吸收系数图、反射率图、折射率图和消光系数图。",
+            `<div class="twod-rich-chart-grid">${renderTwodRichChart(material, "dielectricFunction", "介电函数图")}${renderTwodRichChart(material, "opticalAbsorption", "光吸收系数图")}${renderTwodRichChart(material, "reflectance", "反射率图")}${renderTwodRichChart(material, "refractiveIndex", "折射率图")}${renderTwodRichChart(material, "extinctionCoefficient", "消光系数图")}</div>`
+          )}
+        </div>
+      `;
+    }
+
+    function renderTwodDefectRichPage(material) {
+      const isMos2 = /^mos2$/i.test(String(material?.formula || ""));
+      return `
+        ${renderTwodRichPropertyHead(material, "defect", "展示空位缺陷、反位缺陷、缺陷形成能图和缺陷结构图。")}
+        <div class="twod-rich-property-stack">
+          ${renderTwodRichSection("缺陷性质参数", "空位缺陷包括空位缺陷形成能和空位缺陷构型；反位缺陷包括反位缺陷形成能和反位缺陷构型。",
+            renderTwodRichMetricGrid([
+              { label: "空位缺陷", value: material?.defectType ? `${material.defectType} / 形成能 ${formatTwodRichNumber(material?.defectEnergy, 3, " eV")}` : twodNoProperty(), note: isMos2 ? "二硫化钼单层具有两种空位缺陷。" : "" },
+              { label: "空位缺陷构型", value: material?.defectType || twodNoProperty() },
+              { label: "反位缺陷", value: isMos2 ? "MoS 与 SMo 两种反位缺陷" : twodNoProperty(), note: isMos2 ? "在二硫化钼单层中有两种反位缺陷。" : "" },
+              { label: "反位缺陷形成能", value: twodNoProperty() }
+            ])
+          )}
+          ${renderTwodRichSection("缺陷性质图谱", "展示缺陷形成能图和缺陷结构图。",
+            `<div class="twod-rich-chart-grid">${renderTwodRichChart(material, "defectFormationEnergy", "缺陷形成能图")}${renderTwodRichChart(material, "defectStructure", "缺陷结构图")}</div>`
+          )}
+        </div>
+      `;
+    }
+
+    const lowDimFixedRenderTwodPropertyPage = renderTwodPropertyPage;
+    renderTwodPropertyPage = function renderTwodPropertyPageFixedRich(material) {
+      ensureTwodRichPropertyStyles();
+      const tab = state.selectedMaterialTab && materialDetailTabs[state.selectedMaterialTab] ? state.selectedMaterialTab : Object.keys(materialDetailTabs)[0];
+      state.selectedMaterialTab = tab;
+      if (tab === "electronic") return renderTwodElectronicRichPage(material);
+      if (tab === "electrical") return renderTwodElectricalRichPage(material);
+      if (tab === "magnetic") return renderTwodMagneticRichPage(material);
+      if (tab === "thermal") return renderTwodThermalRichPage(material);
+      if (tab === "mechanical") return renderTwodMechanicalRichPage(material);
+      if (tab === "optical") return renderTwodOpticalRichPage(material);
+      if (tab === "defect") return renderTwodDefectRichPage(material);
+      return lowDimFixedRenderTwodPropertyPage(material);
+    };
+
+    getTwodVisualProfile = function getTwodVisualProfilePhysicalOnly(material, visualKey) {
+      const { visuals } = getTwodVisualGalleryProfile(material);
+      const visualTabs = getTwodPhysicalVisualTabs();
+      const fallbackKey = visualTabs.find((item) => visuals[item.key])?.key || visualTabs[0]?.key || "";
+      const currentKey = visualTabs.some((item) => item.key === visualKey) ? visualKey : fallbackKey;
+      const currentVisual = currentKey ? visuals[currentKey] : null;
+      const currentLabel = visualTabs.find((item) => item.key === currentKey)?.label || "当前图谱";
+      return {
+        visualTabs,
+        visuals,
+        currentKey,
+        currentVisual,
+        currentLabel
+      };
+    };
+
+    renderTwodVisualizationPage = function renderTwodVisualizationPageWithChartButtons(material) {
+      const { visualTabs, visuals, currentKey, currentVisual, currentLabel } = getTwodVisualProfile(material, state.selectedMaterialVisual);
+      state.selectedMaterialVisual = currentKey;
+      const hasCurrentVisual = Boolean(currentVisual);
+      return `
+        <div class="twod-detail-page-head">
+          <div>
+            <h4>物理性质可视化</h4>
+            <p>选择上方图表按钮查看当前材料对应的物理性质图谱。</p>
+          </div>
+          <div class="twod-detail-page-action">
+            <button class="btn-primary" type="button" data-twod-download="visual-page"${hasCurrentVisual ? "" : " disabled"}>下载当前图表</button>
+          </div>
+        </div>
+        <section class="twod-detail-section-card">
+          <div class="material-visual-chip-row twod-visual-chart-switcher">
+            ${visualTabs.map((item) => `
+              <button class="material-visual-chip${item.key === currentKey ? " active" : ""}" type="button" data-material-visual="${item.key}" title="${item.label}">${item.label}</button>
+            `).join("")}
+          </div>
+        </section>
+        ${hasCurrentVisual ? `
+          <section class="twod-detail-chart-card">
+            <div class="twod-detail-page-head twod-visual-current-head">
+              <div>
+                <h5>${currentLabel}</h5>
+                <p>${getTwodVisualDescription(currentKey, currentLabel)}</p>
+              </div>
+            </div>
+            <div class="line-chart">${buildChartSvg(currentVisual)}</div>
+            <div class="chart-caption">${currentVisual.caption || getTwodVisualDescription(currentKey, currentLabel)}</div>
+          </section>
+        ` : `
+          <div class="twod-visual-empty">
+            <h5>${LOW_DIM_NO_PROPERTY_TEXT}</h5>
+          </div>
+        `}
+      `;
+    };
+
+    const lowDimFlatDetailRenderTwodDetailPage = renderTwodDetailPage;
+    renderTwodDetailPage = function renderTwodDetailPageFlatMenu(material) {
+      const result = lowDimFlatDetailRenderTwodDetailPage(material);
+      const title = document.getElementById("twodDetailPageTitle");
+      const subtitle = document.getElementById("twodDetailPageSubtitle");
+      if (title && material) title.textContent = `${getTwodMaterialDisplayName(material)} 材料详情`;
+      if (subtitle && material) {
+        subtitle.textContent = `材料编号 ${getTwodMaterialDisplayId(material)} · 查看结构特征、电子结构、电学性质、磁学性质、热学性质、力学性质、光学性质、缺陷性质与物理性质可视化。`;
+      }
+      document.querySelectorAll("#twodDetailTree, #twodDetailWorkbench").forEach((node) => {
+        node.querySelectorAll("#twodDetailPropertyMenu, #twodDetailVisualMenu").forEach((menu) => { menu.innerHTML = ""; });
+      });
+      const head = document.querySelector("#page-twod-detail .twod-tree-panel-head strong");
+      if (head) head.textContent = "详情信息";
+      return result;
+    };
+
     /* --- 路由：所有库的"发起预测"改走独立预测页 --- */
     const predictionOverrideHandleMaterialDetailOpen = handleMaterialDetailOpen;
     handleMaterialDetailOpen = function (materialToken, targetView = "detail") {
@@ -68214,7 +69986,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         twod: {
           title: "二维材料文件转换",
           eyebrow: "二维材料数据应用",
-          desc: "从系统内已有二维材料结构文件、计算数据和可视化文件记录中选择源文件进行格式转换，转换完成后形成可检索、可维护、可下载的业务记录。",
+          desc: "支持二维材料结构文件、计算结果和图谱源数据的格式统一化转换，转换结果可继续下载或作为更新记录维护。",
           materialLabel: "二维材料",
           materialOptions: () => twodMaterials.map((item) => ({ id: item.id, label: `${item.name} / ${item.formula}` })),
           defaultMaterialId: () => state.selectedMaterialId || twodMaterials[0]?.id || ""
@@ -68254,9 +70026,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       };
 
       const materialConversionTypeDescriptions = {
-        "结构文件": "选择系统内已有结构文件进行格式转换，如将 CIF 文件转换为 POSCAR。",
-        "计算数据": "选择系统内已有材料计算结果数据，完成统一化格式转换。",
-        "可视化文件": "选择系统内已有可视化源数据，转换为统一格式的可视化图像或图谱数据。"
+        "结构文件": "用户可上传已有二维材料的结构文件进行格式转换，如将 CIF 文件转换为 POSCAR。",
+        "计算数据": "用户可上传已有的二维材料计算结果数据，完成格式统一化转换。",
+        "可视化文件": "用户可上传已有可视化文件的源数据，将其转换为统一格式的可视化图像。"
       };
 
       const materialConversionTargetFormats = {
@@ -68496,6 +70268,13 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             justify-content: center;
             gap: 12px;
           }
+          .material-convert-drop.is-upload {
+            align-items: center;
+            text-align: center;
+            background: #fff;
+            border-color: #9fbcff;
+            border-radius: 6px;
+          }
           .material-convert-drop strong {
             color: #18325d;
             font-size: 17px;
@@ -68506,6 +70285,245 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             color: #607492;
             font-size: 13px;
             line-height: 22px;
+          }
+          .material-convert-upload-btn {
+            min-width: 206px;
+            height: 40px;
+            border: 1px solid #b8cdf8;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #dce9ff 0%, #bcd3ff 100%);
+            color: #145cf5;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+          }
+          .material-convert-workbench {
+            border: 1px solid #c8dcff;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+            padding: 24px 20px 20px;
+          }
+          .material-convert-workbench .material-convert-head {
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #e0e7f4;
+          }
+          .material-convert-workbench .material-convert-head h3 {
+            margin: 0;
+            color: #0b1020;
+            font-size: 20px;
+            line-height: 30px;
+          }
+          .material-convert-workbench .material-convert-head p {
+            font-size: 13px;
+            line-height: 22px;
+          }
+          .material-convert-workbench .material-convert-type-row {
+            border-bottom: 1px solid #dfe7f3;
+            gap: 24px;
+            margin-bottom: 10px;
+          }
+          .material-convert-workbench .material-convert-type {
+            min-height: 34px;
+            padding: 0 0 8px;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            color: #606f85;
+            font-weight: 700;
+          }
+          .material-convert-workbench .material-convert-type.active {
+            color: #145cf5;
+            background: transparent;
+            box-shadow: inset 0 -2px 0 #145cf5;
+          }
+          .material-convert-record-title {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            margin-bottom: 12px;
+          }
+          .material-convert-record-title h3 {
+            margin: 0;
+            color: #0b1020;
+            font-size: 20px;
+            line-height: 28px;
+          }
+          .material-convert-record-title p {
+            margin: 0;
+            color: #607492;
+            font-size: 13px;
+            line-height: 22px;
+          }
+          .material-convert-record-card {
+            box-shadow: none;
+            border: 0;
+            background: transparent;
+            padding: 0;
+          }
+          .material-convert-record-card .table-wrap {
+            border: 0;
+            border-radius: 0;
+            background: #fff;
+            overflow: hidden;
+          }
+          .material-convert-record-card .twod-result-table {
+            border-collapse: collapse;
+            table-layout: auto;
+          }
+          .material-convert-record-card .twod-result-table th {
+            height: 40px;
+            padding: 10px 16px;
+            border-bottom: 0;
+            background: #f4f6fa;
+            color: #4f5f76;
+            font-size: 13px;
+            line-height: 20px;
+            font-weight: 800;
+          }
+          .material-convert-record-card .twod-result-table td {
+            height: 52px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #edf1f7;
+            color: #27364f;
+            font-size: 13px;
+            line-height: 20px;
+            background: #fff;
+          }
+          .material-convert-record-card .twod-result-table th:first-child,
+          .material-convert-record-card .twod-result-table td:first-child {
+            width: 154px;
+            min-width: 154px;
+            white-space: nowrap;
+          }
+          .material-convert-record-card .twod-result-table tbody tr:hover td {
+            background: #f8fbff;
+          }
+          .material-convert-record-card .status-badge {
+            border: 0;
+            background: transparent;
+            color: #4d5f7a;
+            padding: 0;
+            font-weight: 700;
+          }
+          .material-convert-record-card .table-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+          }
+          .material-convert-record-card .table-actions .btn,
+          .material-convert-record-card .table-actions .btn-sm {
+            min-height: auto;
+            height: auto;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #145cf5;
+            box-shadow: none;
+            font-size: 13px;
+            line-height: 20px;
+            font-weight: 700;
+          }
+          .material-convert-record-card .table-actions .btn:hover,
+          .material-convert-record-card .table-actions .btn-sm:hover {
+            color: #0f43c8;
+            text-decoration: underline;
+          }
+          .material-convert-record-toolbar {
+            display: grid;
+            grid-template-columns: minmax(280px, 1fr) 250px 250px auto;
+            gap: 14px;
+            align-items: center;
+            margin: 12px 0 14px;
+          }
+          .material-convert-record-search,
+          .material-convert-filter-field {
+            height: 34px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+          }
+          .material-convert-record-search input,
+          .material-convert-filter-field select {
+            width: 100%;
+            height: 34px;
+            border: 1px solid #d7dfeb;
+            border-radius: 4px;
+            background: #fff;
+            color: #27364f;
+            font-size: 13px;
+            line-height: 20px;
+          }
+          .material-convert-record-search input {
+            padding: 0 12px;
+          }
+          .material-convert-filter-field span {
+            flex: none;
+            color: #27364f;
+            font-size: 13px;
+            font-weight: 700;
+          }
+          .material-convert-filter-field select {
+            padding: 0 30px 0 12px;
+          }
+          .material-convert-record-actions {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end;
+          }
+          .material-convert-record-actions .btn-primary,
+          .material-convert-record-actions .btn {
+            height: 34px;
+            min-height: 34px;
+            padding: 0 18px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+          }
+          .material-convert-record-actions .btn {
+            border-color: #eef1f6;
+            background: #f4f6f9;
+            color: #607086;
+          }
+          .material-convert-record-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 16px;
+            padding: 12px 0 0;
+            color: #2f3f58;
+            font-size: 13px;
+            line-height: 22px;
+          }
+          .material-convert-record-pager {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .material-convert-record-pager button,
+          .material-convert-record-page-size {
+            min-width: 32px;
+            height: 32px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: #2f3f58;
+            font-size: 13px;
+          }
+          .material-convert-record-pager button.active {
+            background: #e8f1ff;
+            color: #145cf5;
+            font-weight: 800;
+          }
+          .material-convert-record-pager button:disabled {
+            color: #b7c1d1;
+          }
+          .material-convert-record-page-size {
+            min-width: 82px;
+            padding: 0 8px;
+            background: #f8fafc;
           }
           .material-convert-type-row {
             display: flex;
@@ -68580,6 +70598,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             .material-convert-form,
             .material-convert-summary,
             .material-convert-record-tools,
+            .material-convert-record-toolbar,
             .material-convert-detail-grid {
               grid-template-columns: 1fr;
             }
@@ -68752,6 +70771,17 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
       function getMaterialConversionDefaultDraft(moduleKey) {
         const config = getMaterialConversionModule(moduleKey);
+        if (moduleKey === "twod") {
+          return {
+            module: moduleKey,
+            fileName: "",
+            fileSizeText: "",
+            fileType: "结构文件",
+            sourceFormat: "",
+            targetFormat: "POSCAR",
+            materialId: config.defaultMaterialId()
+          };
+        }
         const source = materialConversionRecords.find((record) => record.module === moduleKey);
         if (!source) {
           return {
@@ -68794,11 +70824,28 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       }
 
       function inferMaterialConvertFileType(fileName) {
-        const format = String(typeof detectFileFormat === "function" ? detectFileFormat(fileName) : (fileName.split(".").pop() || "")).toUpperCase();
+        const upperName = String(fileName || "").toUpperCase();
+        const format = upperName === "POSCAR" || upperName === "CONTCAR"
+          ? upperName
+          : String(typeof detectFileFormat === "function" ? detectFileFormat(fileName) : (fileName.split(".").pop() || "")).toUpperCase();
         if (["CIF", "POSCAR", "VASP", "XYZ", "PDB", "CONTCAR"].includes(format)) return "结构文件";
         if (["PNG", "JPG", "JPEG", "SVG", "TIFF", "TIF"].includes(format)) return "可视化文件";
         if (["BAND", "DOS"].includes(format)) return "可视化文件";
         return "计算数据";
+      }
+
+      function getMaterialConvertSourceFormat(fileName) {
+        const upperName = String(fileName || "").toUpperCase();
+        if (upperName === "POSCAR" || upperName === "CONTCAR") return upperName;
+        return String(typeof detectFileFormat === "function" ? detectFileFormat(fileName) : (String(fileName || "").split(".").pop() || "FILE")).toUpperCase();
+      }
+
+      function formatMaterialConvertFileSize(size) {
+        const bytes = Number(size || 0);
+        if (!Number.isFinite(bytes) || bytes <= 0) return "本地上传文件";
+        if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+        if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${bytes} B`;
       }
 
       function getMaterialConvertFilters(moduleKey) {
@@ -68851,20 +70898,109 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const records = getMaterialConversionRecords(moduleKey);
         const targetFormats = getMaterialConvertTargetFormats(draft.fileType, draft.sourceFormat);
         const options = config.materialOptions();
+        const isTwodConvert = moduleKey === "twod";
+        const sourceText = draft.fileName
+          ? `源格式：${draft.sourceFormat || "自动识别"} · ${draft.fileSizeText || "本地上传文件"}`
+          : "支持结构文件、计算数据、可视化文件三类转换业务";
+        const recordHead = isTwodConvert ? `
+          <div class="material-convert-record-title">
+            <h3>转换记录</h3>
+            <p>支持按文件名、材料名、转换类型和状态查询历史记录，并可查看详情或下载结果文件。</p>
+          </div>
+        ` : `
+          <div class="material-convert-head" style="margin-bottom:0;">
+            <div>
+              <h3>转换记录维护</h3>
+              <p>支持按文件名、材料名、转换类型和状态查询历史记录，并可查看详情或下载结果文件。</p>
+            </div>
+          </div>
+        `;
+        const recordTools = isTwodConvert ? `
+          <div class="material-convert-record-toolbar">
+            <div class="material-convert-record-search">
+              <input type="text" value="${escapeHtml(filters.keyword || "")}" placeholder="材料名 / 源文件 / 结果文件" data-material-convert-filter="keyword" data-module="${moduleKey}">
+            </div>
+            <label class="material-convert-filter-field">
+              <span>转换类型</span>
+              <select data-material-convert-filter="type" data-module="${moduleKey}">
+                <option value="">全部</option>
+                ${["结构文件", "计算数据", "可视化文件"].map((item) => `<option value="${item}"${filters.type === item ? " selected" : ""}>${item}</option>`).join("")}
+              </select>
+            </label>
+            <label class="material-convert-filter-field">
+              <span>转换状态</span>
+              <select data-material-convert-filter="status" data-module="${moduleKey}">
+                <option value="">全部</option>
+                ${["已完成", "转换中"].map((item) => `<option value="${item}"${filters.status === item ? " selected" : ""}>${item}</option>`).join("")}
+              </select>
+            </label>
+            <div class="material-convert-record-actions">
+              <button class="btn-primary" type="button" data-material-convert-search="${moduleKey}">查询</button>
+              <button class="btn" type="button" data-material-convert-reset="${moduleKey}">重置</button>
+            </div>
+          </div>
+        ` : `
+          <div class="material-convert-record-tools">
+            <div class="field">
+              <label>关键词</label>
+              <input type="text" value="${escapeHtml(filters.keyword || "")}" placeholder="材料名 / 源文件 / 结果文件" data-material-convert-filter="keyword" data-module="${moduleKey}">
+            </div>
+            <div class="field">
+              <label>转换类型</label>
+              <select data-material-convert-filter="type" data-module="${moduleKey}">
+                <option value="">全部</option>
+                ${["结构文件", "计算数据", "可视化文件"].map((item) => `<option value="${item}"${filters.type === item ? " selected" : ""}>${item}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label>转换状态</label>
+              <select data-material-convert-filter="status" data-module="${moduleKey}">
+                <option value="">全部</option>
+                ${["已完成", "转换中"].map((item) => `<option value="${item}"${filters.status === item ? " selected" : ""}>${item}</option>`).join("")}
+              </select>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn-primary" type="button" data-material-convert-search="${moduleKey}">查询</button>
+              <button class="btn" type="button" data-material-convert-reset="${moduleKey}">重置</button>
+            </div>
+          </div>
+        `;
+        const recordFooter = isTwodConvert ? `
+          <div class="material-convert-record-footer">
+            <span>共计 ${records.length} 条</span>
+            <div class="material-convert-record-pager" aria-label="转换记录分页">
+              <button type="button" disabled aria-label="上一页">‹</button>
+              <button type="button" class="active">1</button>
+              <button type="button" ${records.length <= 10 ? "disabled" : ""}>2</button>
+              <button type="button" disabled aria-label="下一页">›</button>
+              <select class="material-convert-record-page-size" aria-label="每页条数">
+                <option>10条/页</option>
+              </select>
+            </div>
+          </div>
+        ` : `
+          <div class="result-footer twod-result-footer">
+            <span>共 ${records.length} 条转换记录，可继续维护、查询和下载。</span>
+          </div>
+        `;
         return `
           <div class="material-convert-shell" data-material-convert-module="${moduleKey}">
-            <section class="card pad">
+            <section class="card pad ${isTwodConvert ? "material-convert-workbench" : ""}">
               <div class="material-convert-head">
                 <div>
-                  <span class="twod-search-eyebrow">${config.eyebrow}</span>
+                  ${isTwodConvert ? "" : `<span class="twod-search-eyebrow">${config.eyebrow}</span>`}
                   <h3>${config.title}</h3>
                   <p>${config.desc}</p>
                 </div>
               </div>
               <div class="material-convert-grid">
-                <div class="material-convert-drop">
-                  <strong>${draft.fileName || "当前模块暂无可转换文件"}</strong>
-                  <span>${draft.fileName ? `源格式：${draft.sourceFormat || "-"} · 来源：${draft.fileSizeText || "系统内文件"}` : "请先在系统中维护对应文件记录后再进行格式转换。"}</span>
+                <div class="material-convert-drop ${isTwodConvert ? "is-upload" : ""}">
+                  <strong>${draft.fileName || (isTwodConvert ? "请先上传结构文件、计算数据或可视化源数据" : "当前模块暂无可转换文件")}</strong>
+                  <span>${sourceText}</span>
+                  ${isTwodConvert ? `
+                    <button class="material-convert-upload-btn" type="button" data-material-convert-upload="${moduleKey}">选择文件</button>
+                    <input type="file" hidden data-material-convert-file="${moduleKey}" accept=".cif,.vasp,.poscar,.contcar,.xyz,.pdb,.csv,.json,.yaml,.yml,.hdf5,.h5,.npz,.xlsx,.xls,.dat,.txt,.png,.jpg,.jpeg,.svg,.tif,.tiff">
+                  ` : ""}
                 </div>
                 <div>
                   <div class="material-convert-type-row">
@@ -68889,49 +71025,21 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                   </div>
                   ${buildMaterialConvertSummary([
                     { label: "转换类型", value: draft.fileType },
-                    { label: "源文件", value: draft.fileName || "待选择" },
+                    { label: "源文件", value: draft.fileName || "待上传" },
                     { label: "源格式", value: draft.sourceFormat || "自动识别" },
                     { label: "目标格式", value: draft.targetFormat || "-" }
                   ])}
                   <div class="twod-convert-actions" style="margin-top:16px;">
                     <button class="btn-primary" type="button" data-material-convert-start="${moduleKey}" ${draft.fileName ? "" : "disabled"}>开始转换</button>
-                    <button class="btn" type="button" data-material-convert-clear="${moduleKey}">清空</button>
+                    <button class="btn" type="button" data-material-convert-clear="${moduleKey}">${isTwodConvert ? "清空文件" : "清空"}</button>
                   </div>
                 </div>
               </div>
             </section>
 
-            <section class="card pad">
-              <div class="material-convert-head" style="margin-bottom:0;">
-                <div>
-                  <h3>转换记录维护</h3>
-                  <p>支持按文件名、材料名、转换类型和状态查询历史记录，并可查看详情或下载结果文件。</p>
-                </div>
-              </div>
-              <div class="material-convert-record-tools">
-                <div class="field">
-                  <label>关键词</label>
-                  <input type="text" value="${escapeHtml(filters.keyword || "")}" placeholder="材料名 / 源文件 / 结果文件" data-material-convert-filter="keyword" data-module="${moduleKey}">
-                </div>
-                <div class="field">
-                  <label>转换类型</label>
-                  <select data-material-convert-filter="type" data-module="${moduleKey}">
-                    <option value="">全部</option>
-                    ${["结构文件", "计算数据", "可视化文件"].map((item) => `<option value="${item}"${filters.type === item ? " selected" : ""}>${item}</option>`).join("")}
-                  </select>
-                </div>
-                <div class="field">
-                  <label>转换状态</label>
-                  <select data-material-convert-filter="status" data-module="${moduleKey}">
-                    <option value="">全部</option>
-                    ${["已完成", "转换中"].map((item) => `<option value="${item}"${filters.status === item ? " selected" : ""}>${item}</option>`).join("")}
-                  </select>
-                </div>
-                <div style="display:flex;gap:10px;">
-                  <button class="btn-primary" type="button" data-material-convert-search="${moduleKey}">查询</button>
-                  <button class="btn" type="button" data-material-convert-reset="${moduleKey}">重置</button>
-                </div>
-              </div>
+            <section class="card pad ${isTwodConvert ? "material-convert-record-card" : ""}">
+              ${recordHead}
+              ${recordTools}
               <div class="table-wrap twod-result-table-wrap">
                 <table class="twod-result-table">
                   <thead>
@@ -68959,7 +71067,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                         <td>
                           <div class="table-actions">
                             <button class="btn btn-sm" type="button" data-material-convert-detail="${record.id}">查看</button>
-                            <button class="btn btn-sm" type="button" data-material-convert-download="${record.id}">下载</button>
+                            <button class="btn btn-sm" type="button" data-material-convert-download="${record.id}">${isTwodConvert ? "下载文件" : "下载"}</button>
                           </div>
                         </td>
                       </tr>
@@ -68967,9 +71075,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                   </tbody>
                 </table>
               </div>
-              <div class="result-footer twod-result-footer">
-                <span>共 ${records.length} 条转换记录，可继续维护、查询和下载。</span>
-              </div>
+              ${recordFooter}
             </section>
           </div>
         `;
@@ -69993,6 +72099,12 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         document.body.dataset.unifiedOptoMlffFlowBound = "true";
 
       document.body.addEventListener("click", (event) => {
+        const convertUpload = event.target.closest("[data-material-convert-upload]");
+        if (convertUpload) {
+          const moduleKey = convertUpload.dataset.materialConvertUpload || "twod";
+          document.querySelector(`[data-material-convert-file="${moduleKey}"]`)?.click();
+          return;
+        }
         const convertType = event.target.closest("[data-material-convert-type]");
         if (convertType) {
           const moduleKey = convertType.dataset.module || state.materialConvertActiveModule || "twod";
@@ -70285,6 +72397,21 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         });
 
         document.body.addEventListener("change", (event) => {
+          if (event.target.dataset.materialConvertFile) {
+            const moduleKey = event.target.dataset.materialConvertFile || "twod";
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const sourceFormat = getMaterialConvertSourceFormat(file.name);
+            const fileType = inferMaterialConvertFileType(file.name);
+            const draft = getMaterialConversionDraft(moduleKey);
+            draft.fileName = file.name;
+            draft.fileSizeText = formatMaterialConvertFileSize(file.size || 0);
+            draft.sourceFormat = sourceFormat;
+            draft.fileType = fileType;
+            draft.targetFormat = getMaterialConvertTargetFormats(fileType, sourceFormat)[0] || "";
+            refreshMaterialConversionModule(moduleKey);
+            return;
+          }
           if (event.target.dataset.materialConvertField) {
             const moduleKey = event.target.dataset.module || "twod";
             const draft = getMaterialConversionDraft(moduleKey);
