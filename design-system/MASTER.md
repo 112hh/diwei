@@ -1,49 +1,149 @@
 # UI Design System Master
 
-Source: `UI设计规范文档.docx`
+This file is the source of truth for every page in this project.
 
-This project now uses `assets/ui-design-system.css` as the shared UI preset. Future page edits and new content should reuse these tokens and component rules first, then add only page-specific overrides when truly needed.
+Sources:
 
-## Product Style
+- Lanhu project: `设计规范（官方）`
+- Local reference: `UI设计规范文档.docx`
+- Reference screen: `codex-clipboard-2a9f0168-b656-452d-8cc6-9ea7c54c8b53.png`
 
-- Product type: B-end admin management system for low-dimensional materials.
-- Visual language: reference-image style, ice-blue workspace, translucent topbar/sidebar, white glass-like content panels, bright blue primary actions.
-- Primary color: `#1F63FF`; hover `#2F73FF`; active `#1856E6`; selected background `#EAF2FF`.
-- Page background: `linear-gradient(118deg, #CFE3FF 0%, #EAF4FF 48%, #D8E9FF 100%)`.
-- Shell surfaces: topbar `rgba(207,226,255,.86)`, sidebar `rgba(216,233,255,.72)`, content work area `rgba(238,246,255,.58)`.
-- Component surfaces: cards/panels/tables use `rgba(255,255,255,.90-.92)` with light blue borders.
+When adding or editing a page, reuse the tokens and component rules in
+`assets/ui-design-system.css`. Page-specific CSS must stay narrow and must not
+redefine the shared brand, spacing, typography, radius, shadow, or component
+states.
 
-## Core Tokens
+## Product Language
 
-- Font family: `-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif`.
-- Text: title `#1F2D3D`, primary `#25364D`, body `#34445C`, secondary `#526276`, muted `#7D8DA6`, disabled `#BFBFBF`.
-- Borders: standard `#D7E4F8`, light `rgba(223,232,246,.92)`, divider `#E8EEF7`.
-- Spacing: 8px grid; use `4, 8, 12, 16, 24, 32, 48px`.
-- Radius: buttons/inputs `4px`, popovers/cards `6px`, larger cards/drawers `8-12px`, badges/pills `9999px`.
-- Shadows: main cards are mostly shadowless; dropdowns/modals may use soft blue-gray elevation only when layering needs it.
+- Product: B-end scientific data and low-dimensional materials workspace.
+- Layout: fixed header + left sider + dense content work area.
+- Tone: quiet, precise, light, and work-focused.
+- Surfaces: white component surfaces on a neutral light-gray page background.
+- Emphasis: blue is reserved for the current route and primary actions.
+- Avoid decorative gradients, oversized rounded cards, glass blobs, emoji icons,
+  and marketing-style hero composition in application pages.
 
-## Layout Rules
+## Color Tokens
 
-- Header height: `64px`.
-- Sider width: `clamp(300px, 20vw, 360px)`, collapsed `72px`.
-- Content padding: `16px` for the reference-image compact admin layout.
-- Use T-layout for admin pages: Header + Sider + Content.
-- Keep content surfaces white/translucent on the ice-blue workspace background.
+Brand:
 
-## Component Rules
+- Primary: `#1677FF`
+- Hover: `#4096FF`
+- Active: `#0958D9`
+- Light/selected: `#E6F4FF`
 
-- Buttons: primary is `#1F63FF` with white text; default is translucent white with `#D7E4F8` border; selected tabs/chips use `#EAF2FF`.
-- Inputs: height `32-36px`, radius `4px`, translucent white background, focus ring `0 0 0 2px rgba(31,99,255,0.16)`.
-- Tables: header background `rgba(245,249,255,.88)`, row hover `#F8FBFF`, selected row `#EAF2FF`.
-- Forms: labels `13-14px`, field gaps `20-24px`, section gaps `32-40px`, multi-column gap `24-32px`.
-- Modals: width around `520px`, radius `6px`, mask `rgba(0,0,0,0.45)`, header/body/footer spacing from the spec.
-- Tabs: 32px height, selected text `#1F63FF`, underline or `#EAF2FF` selected background.
-- Empty states: neutral gray or blue brand 3D-style visual, text uses `#999999` or `#595959`.
+Semantic:
+
+- Success: `#52C41A`
+- Warning: `#FAAD14`
+- Warning icon: `#FA8C16`
+- Danger: `#FF4D4F`
+
+Text:
+
+- Title: `#1A1A2E`
+- Primary: `#262626`
+- Secondary: `#595959`
+- Tertiary: `#666666`
+- Muted and placeholder: `#8C8C8C`
+- Disabled: `#BFBFBF`
+
+Surfaces:
+
+- Page: `#F5F7FA`
+- Component: `#FFFFFF`
+- Hover: `#F5F5F5`
+- Table header: `#F5F5F5`
+- Border: `#D9D9D9`
+- Light border: `#E8E8E8`
+- Divider: `#F0F0F0`
+
+## Layout And Spacing
+
+- Header: `56-64px`; project default is `64px`.
+- Sider: `200-256px`; project default is `256px`.
+- Collapsed sider: `64px`.
+- Secondary header: `48px`.
+- Content padding: `16-24px`; use `24px` for the main work area.
+- Spacing scale: `4 / 8 / 12 / 16 / 24 / 32 / 48px`.
+- Keep a clear 8px rhythm between controls and content blocks.
+
+## Typography
+
+- Font stack: system UI, PingFang SC, Microsoft YaHei, Segoe UI, Arial.
+- Body: `14px`, line-height `1.5`.
+- Caption: `12px`.
+- H3: `14px`, weight `500-600`.
+- H2: `16px`, weight `600`.
+- H1: `18px`, weight `600-700`.
+- Display: `20-24px`, weight `600`.
+- Letter spacing is `0`; do not use compressed tracking.
+
+## Components
+
+Buttons:
+
+- Large/medium/small heights: `40 / 32 / 24px`.
+- Primary: blue background with white text.
+- Default: white background with `#D9D9D9` border.
+- Link and text actions remain visually subordinate.
+- Radius: `4px`.
+
+Inputs:
+
+- Height: `32-36px`.
+- Radius: `4px`.
+- Focus ring: `0 0 0 2px rgba(22,119,255,0.2)`.
+- Every field has a visible label; placeholders are not labels.
+
+Tables:
+
+- Header height: `40-48px`.
+- Row height: `40-44px`.
+- Header background: `#F5F5F5`.
+- Hover background: `#FAFAFA`.
+- Selected background: `#E6F4FF`.
+- Pagination is right aligned and includes total, page controls, and page size.
+
+Tabs:
+
+- Default height: `32px`.
+- Active text: `#1677FF`.
+- Active state uses an underline or `#E6F4FF` background.
+
+Navigation:
+
+- Level 1 item height: `44-48px`.
+- Level 2 item height: `36-40px`.
+- Icons sit on the left and use the Lanhu asset set.
+- Active state uses blue text plus a light blue background.
+
+Cards, drawers, and modals:
+
+- Cards/drawers: `8-12px` radius.
+- Modal/popover: `4-6px` radius.
+- Modal width: `520-560px`.
+- Mask: `rgba(0,0,0,0.45)`.
+- Use the shared shadow scale only when the layer needs elevation.
+
+## Icon Policy
+
+Icons must come from exported/cut assets in the Lanhu UI design. Do not use
+emoji, text abbreviations such as `DB` or `EL`, guessed logo paths, or a second
+icon family. Store imported assets under `assets/lanhu-icons/` and register
+each asset in `assets/lanhu-icons/manifest.json` with its source board and
+intended usage.
+
+Until a Lanhu asset is available, leave the icon slot empty or use an existing
+project asset already mapped in the manifest. Do not create a replacement icon
+just to fill the space.
 
 ## Implementation Rules
 
-- New styles should use variables from `assets/ui-design-system.css`.
-- Do not introduce one-off raw colors when a token exists.
-- The only broad decorative treatment should be the shared ice-blue page gradient; do not add extra gradient orbs/blobs.
-- New cards, panels, tables, buttons, inputs, tags, modals, drawers, and navigation states should inherit the shared CSS classes before adding page-specific rules.
-- Page-specific overrides should stay narrow and documented near the affected feature.
+- Use semantic CSS variables from `assets/ui-design-system.css`.
+- Do not hardcode a token value inside a component when a shared token exists.
+- Keep page overrides close to the page feature and avoid global `!important`
+  rules in new code.
+- Respect keyboard focus, visible labels, reduced motion, and minimum 44px
+  interactive hit areas for icon-only controls.
+- Validate desktop and narrow layouts before delivery.

@@ -1,0 +1,27 @@
+{
+  "source": {
+    "project": "设计规范（官方）",
+    "url": "https://lanhuapp.com/web/#/item/project/stage?tid=fb7454cb-4fe0-4a62-a4bb-9ae4d0d3b902&pid=aca47f14-5f92-417d-8ab3-5da553541b01&corpId=null",
+    "status": "waiting-for-lanhu-authenticated-export"
+  },
+  "assets": [
+    {
+      "id": "brand-seal",
+      "file": "../brand-icon.png",
+      "source": "existing-approved-project-asset",
+      "usage": ["brand-mark", "topbar-logo"],
+      "width": 64,
+      "height": 64
+    }
+  ],
+  "pending": [
+    "nav-monitor",
+    "nav-topic-app",
+    "nav-data-management",
+    "nav-system-management",
+    "action-search",
+    "action-help",
+    "action-user",
+    "action-logout"
+  ]
+}
