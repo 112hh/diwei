@@ -1799,10 +1799,10 @@
     .algorithm-overview-shell,
     .algorithm-detail-shell-v2 {
       border: 1px solid #dbe6f7;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-      box-shadow: 0 10px 24px rgba(25, 65, 141, 0.05);
-      padding: 24px;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: none;
+      padding: 16px;
     }
 
     .algorithm-overview-head {
@@ -1887,26 +1887,28 @@
     .algorithm-tab-strip {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin: 0 0 18px;
-      border-bottom: 1px solid #dfe8f6;
+      gap: 12px;
+      margin: 0 0 14px;
     }
 
     .algorithm-tab-button {
-      min-height: 44px;
-      padding: 0 16px;
-      border: 0;
-      border-bottom: 3px solid transparent;
-      background: transparent;
-      color: #526784;
+      min-height: 40px;
+      padding: 0 22px;
+      border: 1px solid #e8eef8;
+      border-radius: 4px;
+      background: #f3f7fd;
+      color: #53667f;
       font-size: 14px;
-      font-weight: 800;
+      font-weight: 500;
       cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
     }
 
     .algorithm-tab-button.active {
-      color: #2453d4;
-      border-bottom-color: #2453d4;
+      color: #ffffff;
+      border-color: #1f63ff;
+      background: #1f63ff;
+      box-shadow: 0 6px 14px rgba(31, 99, 255, 0.18);
     }
 
     .algorithm-tab-summary {
@@ -1943,58 +1945,166 @@
     }
 
     .algorithm-list-panel {
-      border: 1px solid #dbe6f7;
-      border-radius: 12px;
+      border: 0;
+      border-radius: 4px;
       overflow: hidden;
       background: #ffffff;
     }
 
+    .algorithm-context-note {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border: 1px solid #dbe8ff;
+      border-radius: 4px;
+      background: #f4f8ff;
+      color: #49617f;
+      font-size: 13px;
+      line-height: 20px;
+    }
+
     .algorithm-list-row {
       display: grid;
-      grid-template-columns: minmax(260px, 1.15fr) minmax(300px, 1.35fr) minmax(180px, 0.75fr) 280px;
-      gap: 16px;
+      grid-template-columns: minmax(0, 1fr) 326px;
+      gap: 24px;
       align-items: center;
-      padding: 16px 18px;
-      border-top: 1px solid #edf2fb;
+      min-height: 110px;
+      padding: 18px 30px 18px 16px;
+      border-top: 1px solid #edf2f7;
     }
 
     .algorithm-list-row:first-child {
       border-top: 0;
     }
 
-    .algorithm-list-main h4 {
-      margin: 0 0 4px;
-      color: #16294d;
-      font-size: 16px;
-      line-height: 24px;
+    .algorithm-list-content {
+      min-width: 0;
     }
 
-    .algorithm-list-main span,
-    .algorithm-list-meta span {
-      color: #7085a6;
-      font-size: 12px;
-      line-height: 18px;
+    .algorithm-list-main h4 {
+      margin: 0 0 8px;
+      color: #1f2b3d;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 22px;
+    }
+
+    .algorithm-list-main span {
+      display: none;
     }
 
     .algorithm-list-desc {
-      margin: 0;
-      color: #526784;
+      margin: 0 0 10px;
+      color: #41536d;
       font-size: 13px;
-      line-height: 22px;
+      line-height: 20px;
+    }
+
+    .algorithm-list-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .algorithm-list-meta span {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      min-height: 24px;
+      padding: 2px 9px;
+      border-radius: 4px;
+      background: #eef2f7;
+      color: #71849f;
+      font-size: 12px;
+      line-height: 18px;
+      white-space: nowrap;
+    }
+
+    .algorithm-list-meta .algorithm-status-pill {
+      background: #eefdf4;
     }
 
     .algorithm-list-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 10px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
     }
 
     .algorithm-list-actions .btn,
     .algorithm-list-actions .btn-primary {
-      min-height: 36px;
-      padding: 0 12px;
+      min-width: 90px;
+      min-height: 32px;
+      padding: 0 14px;
+      border-radius: 4px;
       font-size: 13px;
+      font-weight: 500;
+    }
+
+    .algorithm-list-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 18px;
+      padding: 16px 0 0;
+      color: #3f4f68;
+      font-size: 14px;
+    }
+
+    .algorithm-list-pagination .pagination-summary {
+      color: #3f4f68;
+      white-space: nowrap;
+    }
+
+    .algorithm-list-pagination .pagination-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+    }
+
+    .algorithm-list-pagination .pager {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .algorithm-list-pagination .twod-pagination-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 0;
+      border-radius: 3px;
+      background: transparent;
+      color: #35445c;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .algorithm-list-pagination .twod-pagination-btn.active {
+      background: #e9f2ff;
+      color: #1f63ff;
+      font-weight: 700;
+    }
+
+    .algorithm-list-pagination .twod-pagination-btn:disabled {
+      color: #b9c4d2;
+      cursor: not-allowed;
+    }
+
+    .algorithm-list-pagination .page-select {
+      height: 32px;
+      padding: 0 28px 0 12px;
+      border: 0;
+      border-radius: 4px;
+      background-color: #f8fafc;
+      color: #2f3d52;
+      font-size: 14px;
+    }
+
+    .algorithm-list-pagination .page-jump {
+      display: none;
     }
 
     .algorithm-detail-topbar {
@@ -3809,6 +3919,202 @@
       display: grid;
       gap: 14px;
       margin-top: 18px;
+    }
+
+    .algorithm-doc-rich {
+      padding: 2px 0 4px;
+      color: #24364f;
+    }
+
+    .algorithm-doc-mount {
+      margin-top: 0;
+    }
+
+    .algorithm-doc-rich .algorithm-doc-title {
+      margin: 0 0 14px;
+      color: #14243d;
+      font-size: 20px;
+      line-height: 30px;
+      font-weight: 800;
+    }
+
+    .algorithm-doc-section {
+      margin-top: 24px;
+    }
+
+    .algorithm-doc-section:first-child {
+      margin-top: 0;
+    }
+
+    .algorithm-doc-section h4 {
+      margin: 0 0 12px;
+      color: #14243d;
+      font-size: 17px;
+      line-height: 26px;
+      font-weight: 800;
+    }
+
+    .algorithm-doc-section p {
+      margin: 0 0 10px;
+      color: #465a76;
+      font-size: 14px;
+      line-height: 24px;
+    }
+
+    .algorithm-doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-top: 1px solid #e7edf6;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .algorithm-doc-table th,
+    .algorithm-doc-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #e7edf6;
+      color: #2a3c55;
+      line-height: 22px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .algorithm-doc-table th {
+      width: 132px;
+      color: #536780;
+      font-weight: 700;
+      background: #f8fbff;
+      white-space: nowrap;
+    }
+
+    .algorithm-doc-table code,
+    .algorithm-doc-code-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #eef3f8;
+      color: #3f5876;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    .algorithm-doc-code {
+      position: relative;
+      margin: 10px 0 0;
+      padding: 34px 16px 16px;
+      border: 1px solid #e4ebf5;
+      border-radius: 8px;
+      background: #f5f7fb;
+      color: #41516a;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 22px;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+
+    .algorithm-doc-code::before {
+      content: "JSON";
+      position: absolute;
+      left: 16px;
+      top: 10px;
+      color: #8493a8;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .algorithm-doc-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #465a76;
+      font-size: 14px;
+      line-height: 24px;
+    }
+
+    #algorithmDocModal .modal-lg {
+      width: min(calc(100vw - 48px), 1060px);
+      max-width: calc(100vw - 48px);
+    }
+
+    #algorithmDocModal .modal-body {
+      min-width: 0;
+      overflow: auto;
+    }
+
+    #algorithmDocModal .algorithm-detail-card,
+    #algorithmDocModal .algorithm-doc-mount,
+    #algorithmDocModal .algorithm-doc-rich,
+    #algorithmDocModal .algorithm-doc-section {
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    #algorithmDocModal .algorithm-detail-card {
+      overflow: hidden;
+    }
+
+    #algorithmDocModal .algorithm-doc-rich {
+      overflow-x: hidden;
+    }
+
+    #algorithmDocModal .algorithm-doc-table {
+      table-layout: fixed;
+      max-width: 100%;
+    }
+
+    #algorithmDocModal .algorithm-doc-table th {
+      width: 128px;
+    }
+
+    #algorithmDocModal .algorithm-doc-table td {
+      min-width: 0;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    #algorithmDocModal .algorithm-doc-table code {
+      max-width: 100%;
+      white-space: normal;
+      word-break: break-all;
+    }
+
+    #algorithmDocModal .algorithm-doc-code {
+      max-width: 100%;
+      box-sizing: border-box;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 760px) {
+      #algorithmDocModal .modal-lg {
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+      }
+
+      #algorithmDocModal .modal-header,
+      #algorithmDocModal .modal-body,
+      #algorithmDocModal .modal-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      #algorithmDocModal .algorithm-detail-card {
+        padding: 14px;
+      }
+
+      #algorithmDocModal .algorithm-doc-table th,
+      #algorithmDocModal .algorithm-doc-table td {
+        padding: 9px 8px;
+      }
+
+      #algorithmDocModal .algorithm-doc-table th {
+        width: 92px;
+      }
     }
 
     .algorithm-request-form {
@@ -17893,6 +18199,15 @@
           <button class="nav-btn" data-group="workflow" data-page="twod-review" data-label="入库审核"><span class="nav-icon">RV</span><span>入库审核 <span class="admin-badge">管理</span></span></button>
         </div>
       </div>
+      <div class="sidebar-group" data-group="algorithm-tools">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">算法/工具管理</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="algorithm-tools" data-page="sys-algorithm" data-label="算法/接口管理"><span class="nav-icon">AI</span><span>算法/接口管理</span></button>
+        </div>
+      </div>
       <div class="sidebar-group admin-group" data-group="system">
         <button class="sidebar-group-toggle" type="button" data-group-toggle>
           <span class="sidebar-group-title">系统管理 <span class="admin-badge">管理</span></span>
@@ -17904,7 +18219,6 @@
           <button class="nav-btn" data-group="system" data-page="sys-role" data-label="角色管理"><span class="nav-icon">RM</span><span>角色管理</span></button>
           <button class="nav-btn" data-group="system" data-page="sys-menu" data-label="菜单管理"><span class="nav-icon">MM</span><span>菜单管理</span></button>
           <button class="nav-btn" data-group="system" data-page="sys-dict" data-label="字典管理"><span class="nav-icon">DM</span><span>字典管理</span></button>
-          <button class="nav-btn" data-group="system" data-page="sys-algorithm" data-label="算法/接口管理"><span class="nav-icon">AI</span><span>算法/接口管理</span></button>
           <button class="nav-btn" data-group="system" data-page="system-config" data-label="平台配置"><span class="nav-icon">PC</span><span>平台配置</span></button>
           <button class="nav-btn" data-group="system" data-page="sys-log" data-label="操作日志"><span class="nav-icon">LG</span><span>操作日志</span></button>
         </div>
@@ -20881,7 +21195,7 @@
       twodPropertyView: "table",
       twodPageSize: 5,
       algorithmListPage: 1,
-      algorithmListPageSize: 5,
+      algorithmListPageSize: 10,
       selectedPropertyCategory: "",
       selectedMaterialSource: "twod",
       selectedMaterialId: "2D-MoS2-001",
@@ -21012,7 +21326,7 @@
       selectedToolCategory: "二维材料多目标逆向设计工具",
       selectedToolItem: "inverse-visualizer",
       toolListPage: 1,
-      toolListPageSize: 5,
+      toolListPageSize: 10,
       sidebarCollapsed: false,
       twodUploadStep: 1,
       uploadDraft: {
@@ -21132,8 +21446,8 @@
       "sys-role": { group: "system", portal: "system", title: "角色管理", breadcrumbParent: "系统管理" },
       "sys-menu": { group: "system", portal: "system", title: "菜单管理", breadcrumbParent: "系统管理" },
       "sys-dict": { group: "system", portal: "system", title: "字典管理", breadcrumbParent: "系统管理" },
-      "sys-algorithm": { group: "system", portal: "system", title: "算法/接口管理", breadcrumbParent: "系统管理" },
-      "sys-api": { group: "system", portal: "system", title: "算法/接口管理", breadcrumbParent: "系统管理" },
+      "sys-algorithm": { group: "algorithm-tools", portal: "system", title: "算法/接口管理", breadcrumbParent: "算法/工具管理" },
+      "sys-api": { group: "algorithm-tools", portal: "system", title: "算法/接口管理", breadcrumbParent: "算法/工具管理" },
       "system-config": { group: "system", portal: "system", title: "平台配置", breadcrumbParent: "系统管理" },
       "sys-log": { group: "system", portal: "system", title: "操作日志", breadcrumbParent: "系统管理" },
       prediction: { group: "applications", portal: "applications", navPage: "twod", title: "算法预测结果", breadcrumbParent: "低维材料主题应用" },
@@ -21183,8 +21497,8 @@
       "sys-role": { group: "system", portal: "system", title: "角色管理", breadcrumbParent: "系统管理" },
       "sys-menu": { group: "system", portal: "system", title: "菜单管理", breadcrumbParent: "系统管理" },
       "sys-dict": { group: "system", portal: "system", title: "字典管理", breadcrumbParent: "系统管理" },
-      "sys-algorithm": { group: "system", portal: "system", title: "算法/接口管理", breadcrumbParent: "系统管理" },
-      "sys-api": { group: "system", portal: "system", title: "算法/接口管理", breadcrumbParent: "系统管理" },
+      "sys-algorithm": { group: "algorithm-tools", portal: "system", title: "算法/接口管理", breadcrumbParent: "算法/工具管理" },
+      "sys-api": { group: "algorithm-tools", portal: "system", title: "算法/接口管理", breadcrumbParent: "算法/工具管理" },
       "system-config": { group: "system", portal: "system", title: "平台配置", breadcrumbParent: "系统管理" },
       "sys-log": { group: "system", portal: "system", title: "操作日志", breadcrumbParent: "系统管理" }
     };
@@ -21247,7 +21561,9 @@
         { id: 16, menuName: "入库审核", level: 1, type: "菜单", parent: "数据管理", path: "/workflow/review", perms: "workflow:review:list", icon: "review", orderNum: 3, status: "启用" },
         { id: 17, menuName: "低维材料数据库分析预测", level: 0, type: "目录", parent: "-", path: "/analysis", perms: "", icon: "analysis", orderNum: 5, status: "启用" },
         { id: 18, menuName: "数据应用算法", level: 1, type: "菜单", parent: "低维材料数据库分析预测", path: "/analysis/algorithms", perms: "analysis:algorithms:list", icon: "algorithm", orderNum: 1, status: "启用" },
-        { id: 19, menuName: "数据工具开发", level: 1, type: "菜单", parent: "低维材料数据库分析预测", path: "/analysis/tools", perms: "analysis:tools:list", icon: "tool", orderNum: 2, status: "启用" }
+        { id: 19, menuName: "数据工具开发", level: 1, type: "菜单", parent: "低维材料数据库分析预测", path: "/analysis/tools", perms: "analysis:tools:list", icon: "tool", orderNum: 2, status: "启用" },
+        { id: 120, menuName: "算法/工具管理", level: 0, type: "目录", parent: "-", path: "/algorithm-tools", perms: "", icon: "algorithm-tool", orderNum: 8, status: "启用" },
+        { id: 121, menuName: "算法/接口管理", level: 1, type: "菜单", parent: "算法/工具管理", path: "/algorithm-tools/algorithm-interface", perms: "algorithm-tools:interface:list", icon: "algorithm", orderNum: 1, status: "启用" }
       ],
       dicts: [
         { id: 1, dictName: "用户状态", dictType: "sys_user_status", status: "启用", remark: "启用/停用", updatedAt: "2026-04-12 10:00" },
@@ -26600,7 +26916,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
     const algorithms = {
       twod: {
-        title: "二维材料数据应用算法",
+        title: "二维材料数据库应用算法",
         subtitle: "晶体结构驰豫、材料性质计算",
         icon: "▦",
         tone: "blue",
@@ -26609,7 +26925,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             title: "晶体结构驰豫算法",
             countLabel: "4个算法",
             algorithms: [
-              { id: "twod-relax-nonmagnetic", slug: "relax_nonmagnetic", title: "非磁单层材料结构驰豫算法", enTitle: "Non-magnetic Monolayer Relaxation", desc: "针对非磁性二维单层材料的结构优化算法，通过 API 调用返回优化后的晶格参数与原子位置信息。", tags: ["DFT", "结构优化", "单层材料"], status: "available", endpoint: "POST /api/v1/algorithms/twod/relax/nonmagnetic", input: "结构文件索引、晶格约束、收敛阈值", output: "优化后结构、摘要报告、结果文件索引", updatedAt: "2026-04-08", version: "v1.0", packageSize: "14.7 MB" },
+              { id: "twod-relax-nonmagnetic", slug: "relax_nonmagnetic", title: "非磁单层材料结构驰豫算法", enTitle: "Non-magnetic Monolayer Relaxation", desc: "针对非磁性二维单层材料的结构优化算法，通过 API 调用返回优化后的晶格参数与原子位置信息。", type: "晶体结构驰豫算法", tags: ["DFT", "结构优化", "单层材料"], status: "available", endpoint: "/api/v1/algorithms/2d-materials/nonmagnetic-monolayer-relaxation", input: "结构文件索引、晶格约束、收敛阈值", output: "优化后结构、摘要报告、结果文件索引", updatedAt: "2026-08-12", version: "v1.0", packageSize: "14.7 MB" },
               { id: "twod-relax-magnetic", slug: "relax_magnetic", title: "磁性单层材料结构驰豫算法", enTitle: "Magnetic Monolayer Relaxation", desc: "针对磁性二维单层材料的结构优化算法，考虑自旋极化效应并返回稳定晶体结构结果。", tags: ["DFT", "磁性", "自旋极化"], status: "maintenance", endpoint: "POST /api/v1/algorithms/twod/relax/magnetic", input: "结构文件索引、自旋设置、收敛阈值", output: "驰豫结构、磁矩摘要、任务状态", updatedAt: "2026-04-06", version: "v1.1", packageSize: "15.1 MB" },
               { id: "twod-relax-defect", slug: "relax_defective", title: "缺陷单层材料结构驰豫算法", enTitle: "Defective Monolayer Relaxation", desc: "针对含空位、间隙和替位缺陷的二维材料进行结构优化，返回缺陷构型与几何参数。", tags: ["缺陷", "结构优化", "空位"], status: "available", endpoint: "POST /api/v1/algorithms/twod/relax/defect", input: "缺陷类型、超胞索引、结构文件索引", output: "缺陷结构、形成能摘要、结果索引", updatedAt: "2026-04-08", version: "v1.0", packageSize: "13.9 MB" },
               { id: "twod-relax-multilayer", slug: "relax_multilayer", title: "多层材料结构驰豫算法", enTitle: "Multilayer Structure Relaxation", desc: "针对二维多层材料的结构优化算法，优化层间距离和堆垛方式，并通过 API 返回结果。", tags: ["多层", "范德华", "堆垛"], status: "available", endpoint: "POST /api/v1/algorithms/twod/relax/multilayer", input: "层数、堆垛方式、结构文件索引", output: "层间距、最优堆垛、结果文件索引", updatedAt: "2026-04-07", version: "v1.0", packageSize: "14.3 MB" }
@@ -26627,7 +26943,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
       },
       lowdim: {
-        title: "低维材料数据应用算法",
+        title: "低维材料数据库应用算法",
         subtitle: "数据爬取、数据分类",
         icon: "◫",
         tone: "purple",
@@ -26651,7 +26967,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
       },
       mlff: {
-        title: "机器学习力场数据应用算法",
+        title: "机器学习力场数据库应用算法",
         subtitle: "经典力场、图神经网络",
         icon: "⬢",
         tone: "green",
@@ -26684,7 +27000,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
       },
       catalyst: {
-        title: "催化材料数据应用算法",
+        title: "催化材料数据库应用算法",
         subtitle: "催化性能预测、结构预测",
         icon: "♨",
         tone: "orange",
@@ -34008,19 +34324,17 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (!mount) return;
       if (!algorithms[state.selectedAlgorithmCategory]) state.selectedAlgorithmCategory = "twod";
       const activeKey = state.selectedAlgorithmCategory;
-      const activeCategory = algorithms[activeKey];
       const rows = getAlgorithmRowsByCategory(activeKey);
+      const pageSize = Math.max(1, Number(state.algorithmListPageSize) || 5);
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      const currentPage = Math.min(Math.max(1, Number(state.algorithmListPage) || 1), totalPages);
+      state.algorithmListPage = currentPage;
+      const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
       const currentMaterial = state.algorithmContext?.source === "twod"
         ? getCanonicalMaterialBySource("twod", state.algorithmContext.materialId)
         : null;
       mount.innerHTML = `
         <section class="card algorithm-overview-shell">
-          <div class="module-list-head algorithm-overview-head">
-            <div>
-              <h3>算法列表</h3>
-              <p>${currentMaterial ? `当前已带入候选材料 ${getTwodMaterialDisplayName(currentMaterial)}，可直接进入二维材料算法详情查看预测建议。` : "按四大类算法页签查看平台算法资源，支持查看算法详情、下载使用手册和代码包。"}</p>
-            </div>
-          </div>
           <div class="algorithm-tab-strip" role="tablist" aria-label="数据应用算法分类">
             ${Object.entries(algorithms).map(([key, item]) => `
               <button class="algorithm-tab-button${activeKey === key ? " active" : ""}" type="button" role="tab" aria-selected="${activeKey === key ? "true" : "false"}" data-algo-tab="${key}">
@@ -34028,34 +34342,40 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               </button>
             `).join("")}
           </div>
-          <div class="algorithm-tab-summary">
-            <div class="algorithm-overview-icon ${activeCategory.tone}">${activeCategory.icon}</div>
-            <div>
-              <h4>${activeCategory.title}</h4>
-              <p>${getAlgorithmCategoryDescription(activeKey)}</p>
-            </div>
-            <span class="algorithm-tab-count">算法总数 ${rows.length}</span>
-          </div>
+          ${currentMaterial ? `<div class="algorithm-context-note">当前已带入候选材料 ${getTwodMaterialDisplayName(currentMaterial)}，可直接进入二维材料算法详情查看预测建议。</div>` : ""}
           <div class="algorithm-list-panel">
-            ${rows.map((algorithm) => `
+            ${pageRows.map((algorithm) => `
               <div class="algorithm-list-row">
-                <div class="algorithm-list-main">
-                  <h4>${algorithm.title}</h4>
-                  <span>${algorithm.enTitle}</span>
-                </div>
-                <p class="algorithm-list-desc">${algorithm.desc}</p>
-                <div class="algorithm-list-meta">
-                  <span>${algorithm.subcategoryTitle}</span><br>
-                  <span>${algorithm.version} / ${algorithm.packageSize}</span><br>
-                  <span class="algorithm-status-pill ${algorithm.status}">${getAlgorithmStatusText(algorithm.status)}</span>
+                <div class="algorithm-list-content">
+                  <div class="algorithm-list-main">
+                    <h4 title="${algorithm.title}">${algorithm.title}</h4>
+                    <span>${algorithm.enTitle}</span>
+                  </div>
+                  <p class="algorithm-list-desc">${algorithm.desc}</p>
+                  <div class="algorithm-list-meta">
+                    <span title="${algorithm.type || algorithm.subcategoryTitle}">${algorithm.type || algorithm.subcategoryTitle}</span>
+                    <span>${algorithm.version} / ${algorithm.packageSize}</span>
+                    <span class="algorithm-status-pill ${algorithm.status}">${getAlgorithmStatusText(algorithm.status)}</span>
+                  </div>
                 </div>
                 <div class="algorithm-list-actions">
-                  <button class="btn" type="button" data-algo-action="doc" data-algo-id="${algorithm.id}">查看详情</button>
-                  <button class="btn" type="button" data-algo-action="manual" data-algo-id="${algorithm.id}">使用手册下载</button>
                   <button class="btn-primary" type="button" data-algo-action="${algorithm.status === "maintenance" ? "maintenance" : "code"}" data-algo-id="${algorithm.id}">代码包下载</button>
+                  <button class="btn" type="button" data-algo-action="manual" data-algo-id="${algorithm.id}">使用手册下载</button>
+                  <button class="btn" type="button" data-algo-action="doc" data-algo-id="${algorithm.id}">查看详情</button>
                 </div>
               </div>
-            `).join("")}
+            `).join("") || `<div class="module-list-empty">暂无算法数据</div>`}
+          </div>
+          <div class="algorithm-list-pagination">
+            ${renderSharedPaginationFooter({
+              total: rows.length,
+              currentPage,
+              totalPages,
+              pageSize,
+              pageSizeId: "algorithmListPageSize",
+              pageAttr: "data-algorithm-page",
+              jumpModule: "algorithm-list"
+            })}
           </div>
         </section>
       `;
@@ -34251,11 +34571,158 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       openModal("algorithmManualModal");
     }
 
+    function renderNonmagneticRelaxationDoc(algorithm) {
+      const inputExample = `{
+  "algorithmName": "非磁单层材料结构驰豫算法",
+  "materialName": "单层二硫化钼",
+  "formula": "MoS2",
+  "calculationSoftware": "VASP",
+  "inputFiles": {
+    "INCAR": "结构驰豫控制参数文件",
+    "POSCAR": "MoS2 单层初始结构文件",
+    "POTCAR": "Mo、S 元素赝势文件",
+    "KPOINTS": "k 点采样文件"
+  },
+  "settings": {
+    "spinPolarization": false,
+    "isMonolayer": true,
+    "materialMagnetism": "nonmagnetic"
+  }
+}`;
+      const outputExample = `{
+  "status": "success",
+  "materialName": "单层二硫化钼",
+  "formula": "MoS2",
+  "relaxedStructure": {
+    "latticeConstants": {
+      "a": "驰豫后晶格常数 a",
+      "b": "驰豫后晶格常数 b",
+      "c": "包含真空层的晶格常数 c"
+    },
+    "atomicPositions": "驰豫后的 Mo、S 原子坐标"
+  },
+  "calculationResults": {
+    "totalEnergy": "体系总能",
+    "maxForce": "最大原子受力",
+    "converged": true
+  },
+  "outputFiles": [
+    "CONTCAR",
+    "OUTCAR",
+    "OSZICAR",
+    "vasprun.xml"
+  ]
+}`;
+      return `
+        <div class="algorithm-doc-rich">
+          <h3 class="algorithm-doc-title">非磁单层材料结构驰豫算法详情</h3>
+          <section class="algorithm-doc-section">
+            <h4>基本信息</h4>
+            <table class="algorithm-doc-table">
+              <tbody>
+                <tr><th>算法名称</th><td>${algorithm.title}</td></tr>
+                <tr><th>分类</th><td>二维材料数据库应用算法 / 晶体结构驰豫算法</td></tr>
+                <tr><th>状态</th><td><span class="algorithm-status-pill ${algorithm.status}">${getAlgorithmStatusText(algorithm.status)}</span></td></tr>
+                <tr><th>版本</th><td>${algorithm.version}</td></tr>
+                <tr><th>更新时间</th><td>${algorithm.updatedAt}</td></tr>
+                <tr><th>接口地址</th><td><code>${algorithm.endpoint}</code></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="algorithm-doc-section">
+            <h4>算法介绍</h4>
+            <p>非磁单层材料结构驰豫算法用于对二维非磁性单层材料的初始晶体结构进行第一性原理优化计算，获得能量更低、结构更稳定的晶格参数和原子坐标。</p>
+            <p>该算法适用于以人工搭建或从材料数据库下载的二维材料结构为初始结构，通过 VASP 软件进行晶体结构驰豫。对于非磁性单层材料，计算过程中不需要开启自旋极化，可减少计算复杂度、缩短计算时间并节约计算资源。</p>
+            <p>驰豫完成后，得到的稳定结构可作为后续材料性质计算的基础，例如能带结构、态密度、弹性性质、光学性质、热电性质等。</p>
+          </section>
+          <section class="algorithm-doc-section">
+            <h4>输入参数</h4>
+            <table class="algorithm-doc-table">
+              <thead><tr><th>输入项</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><th>INCAR</th><td>VASP 控制参数文件，用于设置结构驰豫方式、收敛精度、电子步与离子步参数等。</td></tr>
+                <tr><th>POSCAR</th><td>初始结构文件，包含二维材料的晶格常数、真空层厚度和原子位置坐标。</td></tr>
+                <tr><th>POTCAR</th><td>赝势文件，包含体系中各元素对应的赝势信息。</td></tr>
+                <tr><th>KPOINTS</th><td>k 点采样文件，用于设置布里渊区积分网格。</td></tr>
+                <tr><th>材料类型</th><td>非磁性二维单层材料。</td></tr>
+                <tr><th>自旋设置</th><td>不开启自旋极化，通常设置 <code>ISPIN = 1</code>。</td></tr>
+                <tr><th>真空层设置</th><td>建议在垂直于二维平面的方向加入足够真空层，避免周期镜像相互作用。</td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="algorithm-doc-section">
+            <h4>输出结果</h4>
+            <table class="algorithm-doc-table">
+              <thead><tr><th>输出项</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><th>弛豫结构</th><td>得到能量较低且稳定的晶格常数与原子坐标。</td></tr>
+                <tr><th>总能</th><td>体系弛豫后的总能量。</td></tr>
+                <tr><th>受力</th><td>各原子所受力，用于判断结构是否收敛。</td></tr>
+                <tr><th>晶格参数</th><td>包括 a、b、c 轴长度及晶胞角度。</td></tr>
+                <tr><th>原子坐标</th><td>弛豫后的分数坐标或笛卡尔坐标。</td></tr>
+                <tr><th>结果文件</th><td>通常包括 <code>CONTCAR</code>、<code>OUTCAR</code>、<code>OSZICAR</code>、<code>vasprun.xml</code> 等。</td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="algorithm-doc-section">
+            <h4>应用场景</h4>
+            <ul class="algorithm-doc-list">
+              <li>为二维材料后续能带结构、态密度、形成能、声子谱等性质计算提供稳定结构。</li>
+              <li>对比数据库中已有结构结果，判断新上传结构是否合理、是否需要重新优化。</li>
+              <li>支撑二维材料高通量筛选流程中的结构预处理与统一化计算。</li>
+            </ul>
+          </section>
+          <section class="algorithm-doc-section">
+            <h4>示例展示</h4>
+            <table class="algorithm-doc-table">
+              <tbody>
+                <tr><th>示例材料</th><td>单层 MoS2</td></tr>
+                <tr><th>材料名称</th><td>单层二硫化钼</td></tr>
+                <tr><th>化学式</th><td>MoS2</td></tr>
+                <tr><th>材料类型</th><td>非磁性二维单层材料</td></tr>
+                <tr><th>计算方式</th><td>VASP 结构驰豫</td></tr>
+                <tr><th>接口地址</th><td><code>${algorithm.endpoint}/run</code></td></tr>
+              </tbody>
+            </table>
+            <h4 style="margin-top:18px;">示例输入</h4>
+            <pre class="algorithm-doc-code">${escapeHtml(inputExample)}</pre>
+            <h4 style="margin-top:18px;">示例输出</h4>
+            <pre class="algorithm-doc-code">${escapeHtml(outputExample)}</pre>
+          </section>
+        </div>
+      `;
+    }
+
     function renderAlgorithmDocModal(algorithmId) {
       const algorithm = findAlgorithmById(algorithmId);
       if (!algorithm) return;
       state.activeAlgorithmResourceId = algorithm.id;
       document.getElementById("algorithmDocTitle").textContent = `${algorithm.title} - 算法详情`;
+      const maintenanceAlert = document.getElementById("algorithmMaintenanceAlert");
+      const detailTitleNode = document.getElementById("algorithmDetailTitle");
+      const detailHeadNode = detailTitleNode?.closest(".algorithm-item-head");
+      const detailDescNode = document.getElementById("algorithmDetailDesc");
+      const detailTagsNode = document.getElementById("algorithmDetailTags");
+      const detailMetaNode = document.getElementById("algorithmDetailMeta");
+      if (algorithm.id === "twod-relax-nonmagnetic") {
+        if (detailHeadNode) detailHeadNode.hidden = true;
+        if (detailDescNode) detailDescNode.hidden = true;
+        if (detailTagsNode) detailTagsNode.hidden = true;
+        detailMetaNode.className = "algorithm-doc-mount";
+        document.getElementById("algorithmDetailTitle").textContent = algorithm.title;
+        document.getElementById("algorithmDetailSubtitle").textContent = "";
+        detailDescNode.textContent = "";
+        detailTagsNode.innerHTML = "";
+        detailMetaNode.innerHTML = renderNonmagneticRelaxationDoc(algorithm);
+        document.getElementById("algorithmEndpointList").innerHTML = "";
+        if (maintenanceAlert) maintenanceAlert.hidden = true;
+        openModal("algorithmDocModal");
+        return;
+      }
+      if (detailHeadNode) detailHeadNode.hidden = false;
+      if (detailDescNode) detailDescNode.hidden = false;
+      if (detailTagsNode) detailTagsNode.hidden = false;
+      detailMetaNode.className = "algorithm-info-grid";
       document.getElementById("algorithmDetailTitle").textContent = algorithm.title;
       document.getElementById("algorithmDetailSubtitle").textContent = algorithm.enTitle;
       document.getElementById("algorithmDetailDesc").textContent = algorithm.desc;
@@ -34281,7 +34748,6 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <code>GET /api/v1/tasks/{taskId}/result</code>
         </div>
       `;
-      const maintenanceAlert = document.getElementById("algorithmMaintenanceAlert");
       if (maintenanceAlert) {
         maintenanceAlert.hidden = algorithm.status !== "maintenance";
         document.getElementById("algorithmMaintenanceText").textContent = `${algorithm.title} 当前处于维护中。维护窗口为 2026-04-21 至 2026-04-25，维护期间暂停代码包下载与接口登记。`;
@@ -34403,6 +34869,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         if (tabTrigger) {
           state.algorithmPageView = "overview";
           state.selectedAlgorithmCategory = tabTrigger.dataset.algoTab;
+          state.algorithmListPage = 1;
           state.selectedAlgorithmSubcategory = Object.keys(getSelectedAlgorithmCategory().subcategories)[0];
           state.selectedAlgorithmItem = getSelectedAlgorithmSubcategory().algorithms[0]?.id || "";
           renderAlgorithms();
@@ -46699,7 +47166,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const breadcrumb = document.getElementById("breadcrumb");
       const meta = resolvePageMeta(page);
       const workflowGroups = ["workflow", "ingest", "standardization"];
-      const rootTitle = meta.group === "applications" || meta.group === "database" ? "低维材料主题应用" : workflowGroups.includes(meta.group) ? "数据管理" : meta.group === "analysis" ? "低维材料数据库分析预测" : meta.group === "monitor" ? "监控统计" : meta.group === "standards" ? "低维材料标准体系" : "系统管理";
+      const rootTitle = meta.group === "applications" || meta.group === "database" ? "低维材料主题应用" : workflowGroups.includes(meta.group) ? "数据管理" : meta.group === "analysis" ? "低维材料数据库分析预测" : meta.group === "monitor" ? "监控统计" : meta.group === "standards" ? "低维材料标准体系" : meta.group === "algorithm-tools" ? "算法/工具管理" : "系统管理";
       const pageTitle = meta.title || document.querySelector(`#page-${page} .page-head h2`)?.textContent || "";
       const parts = [`<span>${rootTitle}</span>`];
       if (meta.breadcrumbParent && meta.breadcrumbParent !== rootTitle) {
@@ -47767,7 +48234,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
       if (moduleKey === "algorithm-list") {
         state.algorithmListPage = page;
-        renderAlgorithmListTable();
+        renderAlgorithms();
         return;
       }
       if (moduleKey === "tool-list") {
@@ -47836,7 +48303,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         if (event.target.id === "algorithmListPageSize") {
           state.algorithmListPageSize = Number(event.target.value) || 5;
           state.algorithmListPage = 1;
-          renderAlgorithmListTable();
+          renderAlgorithms();
           return;
         }
         if (event.target.id === "toolListPageSize") {
@@ -47893,7 +48360,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const algorithmPage = event.target.closest("[data-algorithm-page]");
         if (algorithmPage?.dataset.algorithmPage) {
           state.algorithmListPage = Number(algorithmPage.dataset.algorithmPage) || 1;
-          renderAlgorithmListTable();
+          renderAlgorithms();
           return;
         }
         const toolPage = event.target.closest("[data-tool-page]");
@@ -49511,57 +49978,62 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     function renderToolOverviewPage() {
       const mount = document.getElementById("toolPageMount");
       if (!mount) return;
-      const activeCategory = toolCategoryConfigs[state.selectedToolCategory] ? state.selectedToolCategory : Object.keys(toolCategoryConfigs)[0];
+      const displayCategories = Object.keys(toolCategoryConfigs).filter((categoryName) => categoryName !== "机器学习模型接口");
+      const activeCategory = displayCategories.includes(state.selectedToolCategory) ? state.selectedToolCategory : displayCategories[0];
       state.selectedToolCategory = activeCategory;
       const config = toolCategoryConfigs[activeCategory];
       const rows = getToolRowsByCategory(activeCategory);
+      const pageSize = Math.max(1, Number(state.toolListPageSize) || 10);
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      const currentPage = Math.min(Math.max(1, Number(state.toolListPage) || 1), totalPages);
+      state.toolListPage = currentPage;
+      const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
       mount.innerHTML = `
         <section class="card algorithm-overview-shell">
-          <div class="module-list-head algorithm-overview-head">
-            <div>
-              <h3>工具列表</h3>
-              <p>按五大类工具页签查看平台工具资源，支持查看工具详情、下载使用手册和代码包。</p>
-            </div>
-          </div>
           <div class="algorithm-tab-strip" role="tablist" aria-label="数据工具开发分类">
-            ${Object.entries(toolCategoryConfigs).map(([categoryName, config]) => `
+            ${displayCategories.map((categoryName) => `
               <button class="algorithm-tab-button${activeCategory === categoryName ? " active" : ""}" type="button" role="tab" aria-selected="${activeCategory === categoryName ? "true" : "false"}" data-tool-tab="${categoryName}">
                 ${categoryName}
               </button>
             `).join("")}
           </div>
-          <div class="algorithm-tab-summary">
-            <div class="algorithm-overview-icon ${config.tone}">${config.icon}</div>
-            <div>
-              <h4>${activeCategory}</h4>
-              <p>${config.desc}</p>
-            </div>
-            <span class="algorithm-tab-count">工具总数 ${rows.length}</span>
-          </div>
           <div class="algorithm-list-panel">
-            ${rows.map((row) => {
+            ${pageRows.map((row) => {
               const info = toolSubmoduleData[row.id] || toolDetailData[row.detailId] || {};
               const firstEffect = info.effect?.[0] || config.scenario || config.desc;
               return `
                 <div class="algorithm-list-row">
-                  <div class="algorithm-list-main">
-                    <h4>${row.name}</h4>
-                    <span>${row.parent === "-" ? "独立工具" : row.parent}</span>
-                  </div>
-                  <p class="algorithm-list-desc">${firstEffect}</p>
-                  <div class="algorithm-list-meta">
-                    <span>${activeCategory}</span><br>
-                    <span>ZIP 代码包 / 使用手册</span><br>
-                    <span class="algorithm-status-pill available">可下载</span>
+                  <div class="algorithm-list-content">
+                    <div class="algorithm-list-main">
+                      <h4 title="${row.name}">${row.name}</h4>
+                      <span>${row.parent === "-" ? "独立工具" : row.parent}</span>
+                    </div>
+                    <p class="algorithm-list-desc">${firstEffect}</p>
+                    <div class="algorithm-list-meta">
+                      <span title="${activeCategory}">${activeCategory}</span>
+                      <span>ZIP 代码包 / 使用手册</span>
+                      <span class="algorithm-status-pill available">可下载</span>
+                    </div>
                   </div>
                   <div class="algorithm-list-actions">
-                    <button class="btn" type="button" data-tool-action="detail" data-tool-id="${row.id}">查看详情</button>
-                    <button class="btn" type="button" data-tool-action="guide" data-tool-id="${row.id}">使用手册下载</button>
                     <button class="btn-primary" type="button" data-tool-action="code" data-tool-id="${row.id}">代码包下载</button>
+                    <button class="btn" type="button" data-tool-action="guide" data-tool-id="${row.id}">使用手册下载</button>
+                    <button class="btn" type="button" data-tool-action="detail" data-tool-id="${row.id}">查看详情</button>
                   </div>
                 </div>
               `;
-            }).join("")}
+            }).join("") || `<div class="module-list-empty">暂无工具数据</div>`}
+          </div>
+          <div class="algorithm-list-pagination">
+            ${renderSharedPaginationFooter({
+              total: rows.length,
+              currentPage,
+              totalPages,
+              pageSize,
+              pageSizeId: "toolListPageSize",
+              pageAttr: "data-tool-page",
+              jumpModule: "tool-list"
+            })}
           </div>
         </section>
       `;
@@ -49677,6 +50149,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         if (tabTrigger) {
           state.toolPageView = "overview";
           state.selectedToolCategory = tabTrigger.dataset.toolTab;
+          state.toolListPage = 1;
           state.selectedToolItem = getToolRowsByCategory(state.selectedToolCategory)[0]?.id || "";
           renderToolsPage();
           return;
@@ -65207,7 +65680,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (meta) {
         const breadcrumb = document.getElementById("breadcrumb");
         if (!breadcrumb) return;
-        breadcrumb.innerHTML = `<span>系统管理</span><span>/</span><strong>${meta.title}</strong>`;
+        const rootTitle = meta.group === "algorithm-tools" ? "算法/工具管理" : "系统管理";
+        breadcrumb.innerHTML = `<span>${rootTitle}</span><span>/</span><strong>${meta.title}</strong>`;
         return;
       }
       baseUpdateBreadcrumbForSystem(page);
@@ -74311,6 +74785,2142 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     function start() { scan(document); observer.observe(document.body, { childList: true, subtree: true }); }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
     else start();
+  })();
+  </script>
+  <style id="data-submit-workbench-style">
+    #page-data-submit > *:not(.data-submit-workbench) {
+      display: none !important;
+    }
+    #page-data-submit {
+      padding: 0 !important;
+      background: transparent !important;
+    }
+    .data-submit-workbench {
+      min-height: calc(100vh - 132px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #d8e5f5;
+      border-radius: 8px;
+      box-shadow: 0 10px 26px rgba(52, 102, 182, 0.06);
+    }
+    .data-submit-workbench[hidden] {
+      display: none !important;
+    }
+    .data-submit-workbench-head {
+      padding: 19px 22px 0;
+    }
+    .data-submit-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 22px;
+      color: #66758a;
+      font-size: 12px;
+      line-height: 20px;
+    }
+    .data-submit-breadcrumb::before {
+      content: "⌂";
+      display: inline-grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      color: #b1bdca;
+      font-size: 14px;
+    }
+    .data-submit-breadcrumb span + span::before {
+      content: "/";
+      margin-right: 8px;
+      color: #c4ccd6;
+    }
+    .data-submit-title {
+      margin: 12px 0 3px;
+      color: #151b24;
+      font-size: 20px;
+      line-height: 28px;
+      font-weight: 800;
+    }
+    .data-submit-desc {
+      max-width: 980px;
+      margin: 0;
+      color: #6b7685;
+      font-size: 13px;
+      line-height: 22px;
+    }
+    .data-submit-stepper {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      margin: 29px 74px 25px;
+    }
+    .data-submit-step {
+      position: relative;
+      min-width: 0;
+      padding-right: 28px;
+      cursor: pointer;
+    }
+    .data-submit-step:last-child {
+      padding-right: 0;
+    }
+    .data-submit-step::after {
+      content: "";
+      position: absolute;
+      top: 11px;
+      left: 143px;
+      right: 28px;
+      height: 1px;
+      background: #d9dfe7;
+    }
+    .data-submit-step:last-child::after {
+      display: none;
+    }
+    .data-submit-step.is-complete::after,
+    .data-submit-step.is-current::after {
+      background: #1f5eff;
+    }
+    .data-submit-step.is-complete::after {
+      background: #16b43d;
+    }
+    .data-submit-step-index {
+      position: relative;
+      z-index: 1;
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid #aab4c0;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #8a949f;
+      font-size: 12px;
+      line-height: 20px;
+    }
+    .data-submit-step.is-current .data-submit-step-index {
+      border-color: #1f5eff;
+      background: #1f5eff;
+      color: #ffffff;
+    }
+    .data-submit-step.is-complete .data-submit-step-index {
+      border-color: #10ad36;
+      background: #10ad36;
+      color: #ffffff;
+      font-size: 0;
+    }
+    .data-submit-step.is-complete .data-submit-step-index::before {
+      content: "✓";
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .data-submit-step-name {
+      display: inline-block;
+      margin-left: 9px;
+      color: #171c24;
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 800;
+      vertical-align: top;
+    }
+    .data-submit-step:not(.is-current):not(.is-complete) .data-submit-step-name {
+      color: #8c949d;
+    }
+    .data-submit-step-desc {
+      display: block;
+      max-width: 150px;
+      margin: 5px 0 0 31px;
+      color: #7d8793;
+      font-size: 12px;
+      line-height: 19px;
+    }
+    .data-submit-step:not(.is-current):not(.is-complete) .data-submit-step-desc {
+      color: #a4abb4;
+    }
+    .data-submit-step.is-current::before,
+    .data-submit-step.is-complete::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      bottom: -27px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 0;
+      border-top: 9px solid #dfeeff;
+    }
+    .data-submit-step.is-current::before {
+      border-top-color: #dfeeff;
+    }
+    .data-submit-step.is-complete::before {
+      border-top-color: transparent;
+    }
+    .data-submit-content {
+      flex: 1;
+      min-height: 420px;
+      border-top: 1px solid #edf1f6;
+      padding: 29px 34px 36px;
+    }
+    .data-submit-stage {
+      min-height: 390px;
+    }
+    .data-submit-stage-title {
+      margin: 0 0 25px;
+      color: #11161d;
+      text-align: center;
+      font-size: 24px;
+      line-height: 34px;
+      font-weight: 800;
+    }
+    .data-submit-material-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 28px;
+      max-width: 1084px;
+      margin: 0 auto;
+      padding-top: 2px;
+    }
+    .data-submit-material-card {
+      position: relative;
+      min-height: 226px;
+      padding: 62px 19px 18px;
+      border: 1px solid #cedeff;
+      border-radius: 5px;
+      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+      cursor: pointer;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .data-submit-material-card:hover,
+    .data-submit-material-card.is-selected {
+      border-color: #1f5eff;
+      box-shadow: 0 7px 16px rgba(31, 94, 255, 0.12);
+      transform: translateY(-1px);
+    }
+    .data-submit-folder-tab {
+      position: absolute;
+      top: 0;
+      left: -1px;
+      width: 94px;
+      height: 33px;
+      border: 1px solid #cedeff;
+      border-top: 0;
+      border-left: 0;
+      border-radius: 0 0 5px 0;
+      background: #dfe9ff;
+      clip-path: polygon(0 0, 67% 0, 85% 28%, 100% 28%, 100% 100%, 0 100%);
+    }
+    .data-submit-material-card:first-child .data-submit-folder-tab {
+      background: #1f5eff;
+      border-color: #1f5eff;
+    }
+    .data-submit-folder-icon {
+      position: absolute;
+      top: 29px;
+      left: 19px;
+      width: 22px;
+      height: 16px;
+      border-radius: 2px 2px 3px 3px;
+      background: #1f5eff;
+      box-shadow: inset 0 3px 0 rgba(255,255,255,.16);
+    }
+    .data-submit-folder-icon::before {
+      content: "";
+      position: absolute;
+      top: -4px;
+      left: 2px;
+      width: 10px;
+      height: 6px;
+      border-radius: 2px 2px 0 0;
+      background: #1f5eff;
+    }
+    .data-submit-material-card h4 {
+      margin: 0 0 5px;
+      color: #11161d;
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 800;
+    }
+    .data-submit-material-card p {
+      min-height: 72px;
+      margin: 0;
+      color: #6f7986;
+      font-size: 12px;
+      line-height: 19px;
+    }
+    .data-submit-material-select {
+      min-height: 32px;
+      margin-top: 12px;
+      padding: 5px 17px;
+      border: 0;
+      border-radius: 4px;
+      background: #f0f2f5;
+      color: #66717f;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .data-submit-material-card:first-child .data-submit-material-select,
+    .data-submit-material-card.is-selected .data-submit-material-select {
+      background: #1f5eff;
+      color: #ffffff;
+    }
+    .data-submit-form {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px 32px;
+      max-width: 922px;
+      margin: 0 auto;
+    }
+    .data-submit-field {
+      min-width: 0;
+    }
+    .data-submit-field.is-wide {
+      grid-column: 1 / -1;
+    }
+    .data-submit-field label {
+      display: block;
+      margin-bottom: 7px;
+      color: #1f2935;
+      font-size: 13px;
+      line-height: 20px;
+    }
+    .data-submit-field label::before {
+      content: "*";
+      margin-right: 4px;
+      color: #f04444;
+    }
+    .data-submit-field input,
+    .data-submit-field select,
+    .data-submit-field textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 34px;
+      padding: 6px 11px;
+      border: 1px solid #d9dfe8;
+      border-radius: 4px;
+      outline: none;
+      background: #ffffff;
+      color: #283341;
+      font: inherit;
+      font-size: 13px;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    .data-submit-field input:focus,
+    .data-submit-field select:focus,
+    .data-submit-field textarea:focus {
+      border-color: #1f5eff;
+      box-shadow: 0 0 0 2px rgba(31, 94, 255, 0.10);
+    }
+    .data-submit-field textarea {
+      min-height: 107px;
+      resize: vertical;
+    }
+    .data-submit-input-unit {
+      position: relative;
+    }
+    .data-submit-input-unit input {
+      padding-right: 42px;
+    }
+    .data-submit-input-unit span {
+      position: absolute;
+      top: 0;
+      right: 11px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      color: #384350;
+      font-size: 12px;
+      pointer-events: none;
+    }
+    .data-submit-field input::placeholder,
+    .data-submit-field textarea::placeholder {
+      color: #b5bec9;
+    }
+    .data-submit-upload-panel {
+      max-width: 922px;
+      margin: 0 auto;
+    }
+    .data-submit-upload-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 34px;
+    }
+    .data-submit-upload-toolbar .data-submit-format {
+      flex: 1;
+      color: #a2acb8;
+      font-size: 13px;
+      line-height: 20px;
+    }
+    .data-submit-button {
+      min-height: 34px;
+      padding: 6px 16px;
+      border: 1px solid #dfe4eb;
+      border-radius: 4px;
+      background: #f4f5f7;
+      color: #5e6977;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .data-submit-button:hover {
+      border-color: #b9cbe7;
+      background: #eef4ff;
+      color: #1f5eff;
+    }
+    .data-submit-button.is-primary {
+      border-color: #1f5eff;
+      background: #1f5eff;
+      color: #ffffff;
+    }
+    .data-submit-button.is-primary:hover {
+      background: #174ed8;
+      color: #ffffff;
+    }
+    .data-submit-file-zone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 228px;
+      margin-top: 16px;
+      padding: 20px;
+      border: 1px dashed #d7dce3;
+      border-radius: 4px;
+      background: #fafafa;
+      color: #677487;
+      text-align: center;
+      font-size: 13px;
+      line-height: 22px;
+    }
+    .data-submit-file-zone.has-files {
+      align-items: flex-start;
+      justify-content: flex-start;
+      overflow: auto;
+      max-height: 228px;
+    }
+    .data-submit-file-list {
+      width: 100%;
+      display: grid;
+      gap: 8px;
+    }
+    .data-submit-file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 34px;
+      padding: 5px 10px;
+      border: 1px solid #e3e8ef;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #465364;
+      text-align: left;
+    }
+    .data-submit-file-item::before {
+      content: "▣";
+      color: #1f5eff;
+      font-size: 15px;
+    }
+    .data-submit-file-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .data-submit-success {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      min-height: 350px;
+      padding-top: 31px;
+      text-align: center;
+    }
+    .data-submit-success-icon {
+      position: relative;
+      width: 88px;
+      height: 70px;
+      margin: 20px 0 19px;
+      border-radius: 8px 8px 12px 12px;
+      background: linear-gradient(180deg, #54e7ae 0%, #b5f4d8 100%);
+      box-shadow: inset 0 5px 0 rgba(255,255,255,.18);
+    }
+    .data-submit-success-icon::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 5px;
+      width: 40px;
+      height: 18px;
+      border-radius: 6px 6px 0 0;
+      background: #2ad492;
+    }
+    .data-submit-success-icon::after {
+      content: "✓";
+      position: absolute;
+      top: 17px;
+      right: 15px;
+      color: #ffffff;
+      font-size: 27px;
+      font-weight: 900;
+    }
+    .data-submit-success h4 {
+      margin: 0;
+      color: #11161d;
+      font-size: 18px;
+      line-height: 26px;
+    }
+    .data-submit-success p {
+      margin: 4px 0 0;
+      color: #69788a;
+      font-size: 12px;
+      line-height: 20px;
+    }
+    .data-submit-success .data-submit-button {
+      width: 186px;
+      margin-top: 69px;
+    }
+    .data-submit-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 84px;
+      padding: 0 22px;
+      border-top: 1px solid #edf1f6;
+    }
+    .data-submit-footer .data-submit-button {
+      min-width: 74px;
+    }
+    @media (max-width: 1180px) {
+      .data-submit-stepper {
+        margin-right: 36px;
+        margin-left: 36px;
+      }
+      .data-submit-material-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        max-width: 780px;
+      }
+    }
+    @media (max-width: 760px) {
+      .data-submit-workbench {
+        min-height: 0;
+      }
+      .data-submit-workbench-head {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+      .data-submit-stepper {
+        grid-template-columns: repeat(4, 170px);
+        margin: 25px 16px 24px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      .data-submit-content {
+        padding: 24px 16px 28px;
+      }
+      .data-submit-stage-title {
+        font-size: 21px;
+      }
+      .data-submit-material-grid,
+      .data-submit-form {
+        grid-template-columns: 1fr;
+      }
+      .data-submit-field.is-wide {
+        grid-column: auto;
+      }
+      .data-submit-upload-toolbar {
+        flex-wrap: wrap;
+      }
+      .data-submit-upload-toolbar .data-submit-format {
+        flex-basis: 100%;
+        order: 3;
+      }
+      .data-submit-file-zone {
+        min-height: 180px;
+      }
+    }
+  </style>
+  <style id="data-management-single-line-tables">
+    /*
+     * Data management tables keep each record on one visual row.
+     * The wrapper scrolls horizontally when the viewport is narrower than
+     * the complete content, so long values remain readable instead of wrapping.
+     */
+    .page .table-wrap,
+    .catalyst-table-wrap,
+    .lowdim-standard-table-wrap,
+    .lowdim-workflow-table-wrap,
+    .lowdim-entry-table-wrap,
+    .lowdim-proc-table-wrap,
+    .twod-security-table-wrap,
+    .twod-std-table-wrap,
+    .twod-db-table-wrap,
+    #page-data-submit .data-batch-import-panel,
+    #page-my-submissions .my-submissions-batch-panel {
+      overflow-x: auto;
+    }
+    .page .table-wrap > table,
+    .catalyst-table-wrap > table,
+    .lowdim-standard-table-wrap > table,
+    .lowdim-workflow-table-wrap > table,
+    .lowdim-entry-table-wrap > table,
+    .lowdim-proc-table-wrap > table,
+    .twod-security-table-wrap > table,
+    .twod-std-table-wrap > table,
+    .twod-db-table-wrap > table,
+    #page-data-submit .data-batch-import-table,
+    #page-my-submissions .my-submissions-batch-table {
+      width: max-content;
+      min-width: 100%;
+      table-layout: auto;
+    }
+    .page .table-wrap th,
+    .page .table-wrap td,
+    .catalyst-table-wrap th,
+    .catalyst-table-wrap td,
+    .lowdim-standard-table-wrap th,
+    .lowdim-standard-table-wrap td,
+    .lowdim-workflow-table-wrap th,
+    .lowdim-workflow-table-wrap td,
+    .lowdim-entry-table-wrap th,
+    .lowdim-entry-table-wrap td,
+    .lowdim-proc-table-wrap th,
+    .lowdim-proc-table-wrap td,
+    .twod-security-table-wrap th,
+    .twod-security-table-wrap td,
+    .twod-std-table-wrap th,
+    .twod-std-table-wrap td,
+    .twod-db-table-wrap th,
+    .twod-db-table-wrap td,
+    #page-data-submit .data-batch-import-table th,
+    #page-data-submit .data-batch-import-table td,
+    #page-my-submissions .my-submissions-batch-table th,
+    #page-my-submissions .my-submissions-batch-table td {
+      white-space: nowrap;
+      word-break: keep-all;
+      overflow: visible;
+      text-overflow: clip;
+      vertical-align: middle;
+    }
+    #page-my-submissions .action-cell,
+    #page-my-submissions .action-cell .btn,
+    #page-my-submissions .action-cell .btn-primary,
+    #page-twod-review .twod-record-inline-actions,
+    #page-twod-review .twod-record-inline-actions .btn,
+    #page-twod-review .twod-record-inline-actions button,
+    #page-data-submit .data-batch-import-actions,
+    #page-my-submissions .my-submissions-batch-actions {
+      white-space: nowrap;
+      flex-wrap: nowrap;
+    }
+    #page-twod-review .twod-review-table th:last-child,
+    #page-twod-review .twod-review-table td:last-child,
+    #page-my-submissions table th:last-child,
+    #page-my-submissions table td:last-child {
+      min-width: 132px;
+    }
+    #page-twod-review .twod-review-table th:first-child,
+    #page-twod-review .twod-review-table td:first-child,
+    #page-my-submissions .table-wrap th:first-child,
+    #page-my-submissions .table-wrap td:first-child {
+      width: auto;
+      min-width: 168px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    #page-twod-review .twod-review-table th:first-child,
+    #page-twod-review .twod-review-table td:first-child {
+      min-width: 170px;
+    }
+    #page-data-submit .data-batch-import-table th:first-child,
+    #page-data-submit .data-batch-import-table td:first-child,
+    #page-my-submissions .my-submissions-batch-table th:first-child,
+    #page-my-submissions .my-submissions-batch-table td:first-child {
+      min-width: 190px;
+    }
+    #page-twod-review .twod-review-table td:last-child .twod-record-inline-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .page table td:last-child .btn,
+    .page table td:last-child .btn-sm,
+    .page table td:last-child .btn-primary,
+    .page table td:last-child button {
+      white-space: nowrap;
+    }
+    .page .module-list-name,
+    .page .module-list-cell-muted,
+    .page .module-list-row > *,
+    .page .algorithm-list-actions,
+    .page .algorithm-list-actions button,
+    .page .data-batch-status,
+    .page .status-badge,
+    .page .tag {
+      white-space: nowrap;
+    }
+    @media (max-width: 900px) {
+      #page-my-submissions .table-wrap,
+      #page-twod-review .table-wrap,
+      #page-data-submit .data-batch-import-panel,
+      #page-my-submissions .my-submissions-batch-panel {
+        overflow-x: auto;
+      }
+    }
+  </style>
+  <script>
+  (function () {
+    "use strict";
+
+    function keepDataTablesSingleLine(scope) {
+      var root = scope && scope.querySelectorAll ? scope : document;
+      root.querySelectorAll(".page table th, .page table td").forEach(function(cell) {
+        cell.style.whiteSpace = "nowrap";
+        cell.style.wordBreak = "keep-all";
+        if (!cell.hasAttribute("title")) {
+          var text = (cell.textContent || "").replace(/\s+/g, " ").trim();
+          if (text && text.length > 8) cell.setAttribute("title", text);
+        }
+      });
+      root.querySelectorAll(".page .action-cell, .page .batch-actions, .page .twod-record-inline-actions, .page td:last-child").forEach(function(node) {
+        node.style.whiteSpace = "nowrap";
+      });
+    }
+
+    window.keepDataTablesSingleLine = keepDataTablesSingleLine;
+
+    var materialCards = [
+      {
+        type: "二维材料",
+        title: "二维材料数据",
+        description: "用于二维层状材料科研数据录入，实现材料各类性能信息规范归档",
+        action: "选择材料"
+      },
+      {
+        type: "有机光电材料",
+        title: "有机光电材料",
+        description: "收录有机光电相关材料与器件参数，支撑光电方向数据标准化管理",
+        action: "选择材料"
+      },
+      {
+        type: "电解质材料",
+        title: "电解质材料",
+        description: "采集电解液、固态电解质关键性能数据，服务电化学与储能研究",
+        action: "选择材料"
+      },
+      {
+        type: "机器学习力场",
+        title: "机器学习力场",
+        description: "收纳原子模拟相关参数与结构数据，适配计算材料学与真研究",
+        action: "选择材料"
+      },
+      {
+        type: "催化材料",
+        title: "催化材料",
+        description: "录入催化材料性能、实验条件等信息，统一催化实验数据填报规范",
+        action: "选择材料"
+      }
+    ];
+
+    var state = window.__dataSubmitWorkbenchState || {
+      step: 1,
+      materialType: "二维材料",
+      files: [],
+      batchMode: false,
+      fields: {
+        materialName: "",
+        formula: "",
+        bandGap: "",
+        youngsModulus: "",
+        source: "",
+        methodDescription: ""
+      }
+    };
+    window.__dataSubmitWorkbenchState = state;
+
+    function esc(value) {
+      return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
+      });
+    }
+
+    function fieldValue(key) {
+      return state.fields[key] || "";
+    }
+
+    function renderStepper() {
+      var stepper = document.querySelector(".data-submit-stepper");
+      if (!stepper) return;
+      var items = stepper.querySelectorAll(".data-submit-step");
+      items.forEach(function (item, index) {
+        var number = index + 1;
+        item.classList.toggle("is-current", state.step === number);
+        item.classList.toggle("is-complete", state.step > number);
+        item.setAttribute("aria-current", state.step === number ? "step" : "false");
+      });
+    }
+
+    function renderStage() {
+      var stage = document.querySelector(".data-submit-stage");
+      var footer = document.querySelector(".data-submit-footer");
+      if (!stage || !footer) return;
+
+      renderStepper();
+      if (state.step === 1) {
+        stage.innerHTML =
+          '<h3 class="data-submit-stage-title">选择材料类型</h3>' +
+          '<div class="data-submit-material-grid">' +
+          materialCards.map(function (item, index) {
+            var selected = state.materialType === item.type;
+            return '<article class="data-submit-material-card ' + (selected ? "is-selected" : "") + '" data-material-type="' + esc(item.type) + '">' +
+              '<span class="data-submit-folder-tab"></span>' +
+              '<span class="data-submit-folder-icon" aria-hidden="true"></span>' +
+              '<h4>' + esc(item.title) + '</h4>' +
+              '<p>' + esc(item.description) + '</p>' +
+              '<button class="data-submit-material-select ' + (selected ? "is-selected" : "") + '" type="button" data-material-select="' + esc(item.type) + '">' + esc(item.action) + '</button>' +
+              '</article>';
+          }).join("") +
+          "</div>";
+        footer.innerHTML = '<button class="data-submit-button is-primary" type="button" data-workbench-next>下一步</button>';
+      } else if (state.step === 2) {
+        stage.innerHTML =
+          '<h3 class="data-submit-stage-title">填写材料信息</h3>' +
+          '<div class="data-submit-form">' +
+            '<div class="data-submit-field"><label for="workbenchMaterialName">材料名称</label><input id="workbenchMaterialName" data-workbench-field="materialName" value="' + esc(fieldValue("materialName")) + '" placeholder="请输入"></div>' +
+            '<div class="data-submit-field"><label for="workbenchFormula">化学式</label><input id="workbenchFormula" data-workbench-field="formula" value="' + esc(fieldValue("formula")) + '" placeholder="请输入"></div>' +
+            '<div class="data-submit-field"><label for="workbenchBandGap">能带间隙</label><div class="data-submit-input-unit"><input id="workbenchBandGap" data-workbench-field="bandGap" value="' + esc(fieldValue("bandGap")) + '" placeholder="请输入"><span>eV</span></div></div>' +
+            '<div class="data-submit-field"><label for="workbenchYoungsModulus">杨氏模量</label><div class="data-submit-input-unit"><input id="workbenchYoungsModulus" data-workbench-field="youngsModulus" value="' + esc(fieldValue("youngsModulus")) + '" placeholder="请输入"><span>Gpa</span></div></div>' +
+            '<div class="data-submit-field"><label for="workbenchSource">数据来源</label><select id="workbenchSource" data-workbench-field="source"><option value="">请输入</option><option value="自有数据集">自有数据集</option><option value="公开数据集">公开数据集</option></select></div>' +
+            '<div class="data-submit-field is-wide"><label for="workbenchMethod">计算方法与实验条件</label><textarea id="workbenchMethod" data-workbench-field="methodDescription" placeholder="描述计算方法（DFT/GGA-PBE等）、基组、收敛标准等">' + esc(fieldValue("methodDescription")) + '</textarea></div>' +
+          "</div>";
+        var source = document.getElementById("workbenchSource");
+        if (source) source.value = fieldValue("source");
+        footer.innerHTML =
+          '<button class="data-submit-button is-primary" type="button" data-workbench-next>下一步</button>' +
+          '<button class="data-submit-button" type="button" data-workbench-draft>保存草稿</button>';
+      } else if (state.step === 3) {
+        var files = state.files || [];
+        stage.innerHTML =
+          '<h3 class="data-submit-stage-title">上传材料附件</h3>' +
+          '<div class="data-submit-upload-panel">' +
+            '<div class="data-submit-upload-toolbar">' +
+              '<button class="data-submit-button is-primary" type="button" data-workbench-file-kind="structure">上传结构/数据附件</button>' +
+              '<button class="data-submit-button" type="button" data-workbench-file-kind="visual">上传图谱/结果文件</button>' +
+              '<span class="data-submit-format">格式要求：.cif / .vasp / .xsf / .xyz / .csv / .png</span>' +
+              '<button class="data-submit-button is-primary" type="button" data-workbench-batch>批量导入</button>' +
+            '</div>' +
+            '<div class="data-submit-file-zone ' + (files.length ? "has-files" : "") + '" data-workbench-dropzone>' +
+              (files.length
+                ? '<div class="data-submit-file-list">' + files.map(function (file) {
+                    return '<div class="data-submit-file-item" title="' + esc(file.name) + '"><span>' + esc(file.name) + " · " + esc(file.kind) + "</span></div>";
+                  }).join("") + "</div>"
+                : "已批量导入 0 个文件；提交记录已进入“我的提交”和“入库审核”") +
+            "</div>" +
+            '<input type="file" hidden multiple data-workbench-input="structure" accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5">' +
+            '<input type="file" hidden multiple data-workbench-input="visual" accept=".png,.jpg,.jpeg,.webp,.svg,.csv,.tsv,.json,.txt,.dat,.out,.log">' +
+            '<input type="file" hidden multiple data-workbench-input="batch" accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5,.png,.jpg,.jpeg,.webp,.svg,.zip">' +
+          "</div>";
+        footer.innerHTML =
+          '<button class="data-submit-button is-primary" type="button" data-workbench-submit>提交</button>' +
+          '<button class="data-submit-button" type="button" data-workbench-cancel>取消</button>' +
+          '<button class="data-submit-button" type="button" data-workbench-draft>保存草稿</button>';
+      } else {
+        stage.innerHTML =
+          '<div class="data-submit-success">' +
+            '<h3 class="data-submit-stage-title">提交成功</h3>' +
+            '<div class="data-submit-success-icon" aria-hidden="true"></div>' +
+            '<h4>您已提交成功</h4>' +
+            '<p>请前往我的提交列表查看文件状态</p>' +
+            '<button class="data-submit-button is-primary" type="button" data-workbench-my-submissions>查看我的提交</button>' +
+          "</div>";
+        footer.innerHTML = "";
+      }
+      bindStageInputs();
+    }
+
+    function bindStageInputs() {
+      document.querySelectorAll("[data-workbench-field]").forEach(function (input) {
+        input.addEventListener("input", function () {
+          state.fields[input.dataset.workbenchField] = input.value;
+        });
+        input.addEventListener("change", function () {
+          state.fields[input.dataset.workbenchField] = input.value;
+        });
+      });
+      document.querySelectorAll("[data-workbench-input]").forEach(function (input) {
+        input.addEventListener("change", function () {
+          var kind = input.dataset.workbenchInput;
+          var list = Array.from(input.files || []);
+          if (!list.length) return;
+          state.batchMode = kind === "batch";
+          state.files = list.map(function (file) {
+            return { name: file.name, size: file.size, kind: kind === "visual" ? "图谱/结果文件" : "结构/数据附件" };
+          });
+          if (kind === "batch") {
+            var legacy = document.getElementById("dataBatchImportInput");
+            if (legacy && typeof DataTransfer !== "undefined") {
+              try {
+                var transfer = new DataTransfer();
+                list.forEach(function (file) { transfer.items.add(file); });
+                legacy.files = transfer.files;
+                legacy.dispatchEvent(new Event("change", { bubbles: true }));
+              } catch (error) {}
+            }
+          }
+          renderStage();
+        });
+      });
+      var zone = document.querySelector("[data-workbench-dropzone]");
+      if (zone) {
+        zone.addEventListener("dragover", function (event) {
+          event.preventDefault();
+          zone.style.borderColor = "#1f5eff";
+          zone.style.background = "#f5f8ff";
+        });
+        zone.addEventListener("dragleave", function () {
+          zone.style.borderColor = "";
+          zone.style.background = "";
+        });
+        zone.addEventListener("drop", function (event) {
+          event.preventDefault();
+          zone.style.borderColor = "";
+          zone.style.background = "";
+          var files = Array.from(event.dataTransfer.files || []);
+          if (!files.length) return;
+          state.batchMode = true;
+          state.files = files.map(function (file) {
+            return { name: file.name, size: file.size, kind: "结构/数据附件" };
+          });
+          renderStage();
+        });
+      }
+    }
+
+    function showWorkbenchToast(title, message, type) {
+      if (typeof window.showToast === "function") window.showToast(title, message, type || "info");
+    }
+
+    function setLegacyFormFields() {
+      var group = document.querySelector('#page-data-submit .material-form-group[data-material="二维材料"]');
+      if (!group) return;
+      Object.keys(state.fields).forEach(function (key) {
+        var field = group.querySelector('[data-field="' + key + '"]');
+        if (field) field.value = state.fields[key] || "";
+      });
+      var chip = document.querySelector('#page-data-submit .twod-filter-chip');
+      if (chip) chip.classList.add("active");
+    }
+
+    function withRouteSuppressed(action) {
+      var router = window.MarvisRouter;
+      if (!router || typeof router.go !== "function") {
+        action();
+        return;
+      }
+      var originalGo = router.go;
+      var restored = false;
+      router.go = function (page) {
+        if (page === "page-data-submit" || page === "data-submit" || page === "page-my-submissions" || page === "my-submissions" || page === "page-twod-review" || page === "twod-review") return;
+        return originalGo.apply(router, arguments);
+      };
+      action();
+      window.setTimeout(function () {
+        if (!restored) {
+          restored = true;
+          router.go = originalGo;
+        }
+      }, 1200);
+    }
+
+    function submitLegacyForm(isDraft) {
+      setLegacyFormFields();
+      var selector = isDraft
+        ? '#page-data-submit .submit-actions .btn:not(.btn-primary)'
+        : '#page-data-submit .submit-actions .btn-primary';
+      var button = document.querySelector(selector);
+      if (!button) {
+        showWorkbenchToast("提交失败", "暂未找到提交控件，请刷新页面后重试", "warning");
+        return false;
+      }
+      withRouteSuppressed(function () {
+        button.click();
+      });
+      return true;
+    }
+
+    function attachFilesToLatestRecord() {
+      if (!state.files || !state.files.length) return;
+      var attachments = state.files.map(function (file) {
+        return { name: file.name, kind: file.kind, size: file.size };
+      });
+      var legacy = document.querySelector("#page-data-submit .material-form-group[data-material='二维材料']");
+      if (legacy) {
+        legacy.dataset.attachments = JSON.stringify(attachments);
+      }
+      var records = Array.isArray(window.twodUpdateRecords)
+        ? window.twodUpdateRecords
+        : (typeof twodUpdateRecords !== "undefined" ? twodUpdateRecords : null);
+      if (records && records.length) records[0].attachments = attachments;
+    }
+
+    function initWorkbench() {
+      var page = document.getElementById("page-data-submit");
+      if (!page || page.querySelector(".data-submit-workbench")) return;
+      var workbench = document.createElement("div");
+      workbench.className = "data-submit-workbench";
+      workbench.innerHTML =
+        '<div class="data-submit-workbench-head">' +
+          '<div class="data-submit-breadcrumb"><span>数据管理</span><span>数据上传</span></div>' +
+          '<h2 class="data-submit-title">数据上传</h2>' +
+          '<p class="data-submit-desc">统一承接五类材料的数据新增、补充提交与驳回重提；提交后可在“我的提交”查看状态，并由“入库审核”统一审核</p>' +
+          '<div class="data-submit-stepper">' +
+            '<div class="data-submit-step" data-workbench-step="1" tabindex="0"><span class="data-submit-step-index">1</span><span class="data-submit-step-name">选择材料类型</span><span class="data-submit-step-desc">选择研究材料类别，自动加载对应表单</span></div>' +
+            '<div class="data-submit-step" data-workbench-step="2" tabindex="0"><span class="data-submit-step-index">2</span><span class="data-submit-step-name">填写材料信息</span><span class="data-submit-step-desc">录入材料基础信息与电化学性能参数</span></div>' +
+            '<div class="data-submit-step" data-workbench-step="3" tabindex="0"><span class="data-submit-step-index">3</span><span class="data-submit-step-name">上传材料附件</span><span class="data-submit-step-desc">上传结构文件、测试图谱与原始数据附件</span></div>' +
+            '<div class="data-submit-step" data-workbench-step="4" tabindex="0"><span class="data-submit-step-index">4</span><span class="data-submit-step-name">提交成功</span><span class="data-submit-step-desc">校验全部信息提交表单，进入审核流程</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="data-submit-content"><div class="data-submit-stage"></div></div>' +
+        '<div class="data-submit-footer"></div>';
+      page.insertBefore(workbench, page.firstChild);
+
+      page.addEventListener("click", function (event) {
+        var target = event.target;
+        var step = target.closest("[data-workbench-step]");
+        if (step) {
+          var requested = Number(step.dataset.workbenchStep);
+          if (requested <= state.step || requested === state.step + 1 && state.step < 3) {
+            if (requested === 2 && state.step === 1) state.step = 2;
+            else if (requested === 3 && state.step >= 2) state.step = 3;
+            else if (requested === 1) state.step = 1;
+            renderStage();
+          }
+          return;
+        }
+        var material = target.closest("[data-material-select], [data-material-type]");
+        if (material) {
+          state.materialType = material.dataset.materialSelect || material.dataset.materialType;
+          state.step = 1;
+          renderStage();
+          return;
+        }
+        if (target.closest("[data-workbench-next]")) {
+          if (state.step === 1) state.step = 2;
+          else if (state.step === 2) state.step = 3;
+          renderStage();
+          return;
+        }
+        if (target.closest("[data-workbench-file-kind]")) {
+          var kindButton = target.closest("[data-workbench-file-kind]");
+          var input = page.querySelector('[data-workbench-input="' + kindButton.dataset.workbenchFileKind + '"]');
+          if (input) input.click();
+          return;
+        }
+        if (target.closest("[data-workbench-batch]")) {
+          var batchInput = page.querySelector('[data-workbench-input="batch"]');
+          if (batchInput) batchInput.click();
+          return;
+        }
+        if (target.closest("[data-workbench-draft]")) {
+          if (submitLegacyForm(true)) showWorkbenchToast("草稿已保存", "可在“我的提交”中继续编辑此条记录", "success");
+          return;
+        }
+        if (target.closest("[data-workbench-submit]")) {
+          if (!state.fields.materialName || !state.fields.formula) {
+            showWorkbenchToast("请补充材料信息", "材料名称和化学式为必填项", "warning");
+            state.step = 2;
+            renderStage();
+            return;
+          }
+          if (state.batchMode && state.files.length > 1) {
+            var batchConfirm = document.querySelector("[data-batch-import-confirm]");
+            if (batchConfirm) {
+              withRouteSuppressed(function () { batchConfirm.click(); });
+            }
+          } else {
+            submitLegacyForm(false);
+            window.setTimeout(attachFilesToLatestRecord, 60);
+          }
+          state.step = 4;
+          renderStage();
+          showWorkbenchToast("提交成功", "材料数据已进入审核流程", "success");
+          return;
+        }
+        if (target.closest("[data-workbench-cancel]")) {
+          state.step = 1;
+          state.files = [];
+          state.batchMode = false;
+          renderStage();
+          return;
+        }
+        if (target.closest("[data-workbench-my-submissions]")) {
+          if (window.MarvisRouter && typeof window.MarvisRouter.go === "function") window.MarvisRouter.go("page-my-submissions");
+        }
+      });
+
+      renderStage();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function() {
+        initWorkbench();
+        keepDataTablesSingleLine(document);
+      });
+    } else {
+      initWorkbench();
+      keepDataTablesSingleLine(document);
+    }
+    var singleLineObserver = new MutationObserver(function(mutations) {
+      var shouldSync = mutations.some(function(mutation) {
+        return Array.prototype.some.call(mutation.addedNodes || [], function(node) {
+          return node.nodeType === 1 && (
+            node.matches?.("table, tr, td, th, .table-wrap, .page") ||
+            node.querySelector?.("table, tr, td, th, .table-wrap")
+          );
+        });
+      });
+      if (shouldSync) window.requestAnimationFrame(function() {
+        keepDataTablesSingleLine(document);
+      });
+    });
+    if (document.body) {
+      singleLineObserver.observe(document.body, { childList: true, subtree: true });
+    }
+  })();
+  </script>
+  <style id="twod-upload-field-alignment-style">
+    .data-submit-content {
+      max-height: calc(100vh - 332px);
+      overflow-y: auto;
+    }
+
+    .twod-upload-section {
+      grid-column: 1 / -1;
+      padding: 16px 18px 18px;
+      border: 1px solid #d8e5f5;
+      border-radius: 8px;
+      background: #f8fbff;
+    }
+
+    .twod-upload-section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 14px;
+      color: #203656;
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 700;
+    }
+
+    .twod-upload-section-title::before {
+      content: "";
+      width: 4px;
+      height: 14px;
+      border-radius: 999px;
+      background: #1f5eff;
+    }
+
+    .twod-upload-field-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px 22px;
+    }
+
+    .twod-upload-section .data-submit-field textarea {
+      min-height: 68px;
+    }
+
+    .twod-upload-section .data-submit-field.is-wide,
+    .twod-upload-section .data-submit-field.is-full {
+      grid-column: 1 / -1;
+    }
+
+    .data-submit-field.is-optional label::before,
+    .twod-upload-section .data-submit-field label::before {
+      content: none;
+    }
+
+    .twod-upload-required label::before {
+      content: "*" !important;
+      margin-right: 4px;
+      color: #f04444;
+    }
+
+    @media (max-width: 980px) {
+      .twod-upload-field-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .data-submit-content {
+        max-height: none;
+      }
+
+      .twod-upload-field-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script id="twod-upload-field-alignment-script">
+  (function () {
+    "use strict";
+
+    const REQUIRED_FIELDS = new Set(["materialName", "formula"]);
+    const UPLOAD_FIELD_GROUPS = [
+      {
+        title: "基础信息",
+        fields: [
+          { key: "materialId", label: "材料编号", placeholder: "请输入材料编号，如 2D-MoS2-001" },
+          { key: "materialName", label: "材料名称", placeholder: "请输入材料名称", required: true },
+          { key: "formula", label: "化学式", placeholder: "请输入化学式，如 MoS2", required: true },
+          { key: "bandGap", label: "带隙", unit: "eV", placeholder: "请输入" },
+          { key: "formation", label: "形成能", unit: "eV/atom", placeholder: "请输入" },
+          { key: "density_g_cm3", label: "密度", unit: "g/cm3", placeholder: "请输入" },
+          { key: "volume_ang3", label: "晶胞体积", unit: "A3", placeholder: "请输入" },
+          { key: "elementsText", label: "元素组成", placeholder: "请输入，如 Mo, S" },
+          { key: "source", label: "数据来源", type: "select", options: ["", "自有数据集", "公开数据集"] }
+        ]
+      },
+      {
+        title: "结构特征",
+        fields: [
+          { key: "latticeA", label: "晶格常数 a", unit: "A", placeholder: "请输入" },
+          { key: "latticeB", label: "晶格常数 b", unit: "A", placeholder: "请输入" },
+          { key: "latticeC", label: "晶格常数 c", unit: "A", placeholder: "请输入" },
+          { key: "latticeAlpha", label: "夹角 α", unit: "deg", placeholder: "请输入" },
+          { key: "latticeBeta", label: "夹角 β", unit: "deg", placeholder: "请输入" },
+          { key: "latticeGamma", label: "夹角 γ", unit: "deg", placeholder: "请输入" },
+          { key: "layerThickness", label: "层厚", unit: "A", placeholder: "请输入" },
+          { key: "crystalSystem", label: "晶系", type: "select", options: ["", "立方晶系", "六方晶系", "四方晶系", "三方晶系", "正交晶系", "单斜晶系", "三斜晶系"] },
+          { key: "spaceGroup", label: "空间群", placeholder: "请输入" },
+          { key: "atomicCoordinatesText", label: "原子坐标", type: "textarea", wide: true, placeholder: "每行一个原子，如 Mo 0.000 0.000 0.500" },
+          { key: "bondLengthAngle", label: "键长键角", type: "textarea", wide: true, placeholder: "请输入键长、键角信息" }
+        ]
+      },
+      {
+        title: "电子结构",
+        fields: [
+          { key: "bandType", label: "能带结构类型", type: "select", options: ["", "金属", "半导体", "绝缘体", "直接带隙半导体"] },
+          { key: "dos", label: "态密度", unit: "states/eV", placeholder: "请输入" },
+          { key: "effectiveMass", label: "有效质量", unit: "cm2 V-1 s-1", placeholder: "请输入" },
+          { key: "bandChart", label: "能带图", placeholder: "请输入图谱文件名或链接" },
+          { key: "dosPlot", label: "态密度图", placeholder: "请输入图谱文件名或链接" }
+        ]
+      },
+      {
+        title: "电学性质",
+        fields: [
+          { key: "ferroelectricText", label: "铁电性质", type: "select", options: ["", "具有铁电性", "不具有铁电性"] },
+          { key: "ferroelectric", label: "铁电极化", unit: "μC/cm2", placeholder: "请输入" },
+          { key: "piezo", label: "压电系数", unit: "pC/N", placeholder: "请输入" },
+          { key: "piezoTensor", label: "压电张量/系数", placeholder: "如 e11 = 362 pC/m，d11 = 3.65 pm/V" }
+        ]
+      },
+      {
+        title: "磁学性质",
+        fields: [
+          { key: "magneticOrder", label: "磁基态构型", type: "select", options: ["", "铁磁", "反铁磁", "非磁性", "弱铁磁"] },
+          { key: "magnetization", label: "磁矩", unit: "μB", placeholder: "请输入" },
+          { key: "transitionTemp", label: "磁转变温度 Tc", unit: "K", placeholder: "请输入" },
+          { key: "magneticGroundStateImage", label: "磁基态构型图", placeholder: "请输入图谱文件名或链接" }
+        ]
+      },
+      {
+        title: "热学性质",
+        fields: [
+          { key: "phononSpectrum", label: "声子谱", placeholder: "请输入声学支/光学支或虚频信息" },
+          { key: "phononDos", label: "声子态密度", placeholder: "请输入振动贡献说明" },
+          { key: "phononDispersionImage", label: "声子谱图", placeholder: "请输入图谱文件名或链接" },
+          { key: "phononDosImage", label: "声子态密度图", placeholder: "请输入图谱文件名或链接" }
+        ]
+      },
+      {
+        title: "力学性质",
+        fields: [
+          { key: "elasticConstants", label: "弹性常数", placeholder: "如 C11=289.8 N/m，C12=63.7 N/m" },
+          { key: "young", label: "杨氏模量", unit: "N/m", placeholder: "请输入" },
+          { key: "poisson", label: "泊松比", placeholder: "请输入" }
+        ]
+      },
+      {
+        title: "光学性质",
+        fields: [
+          { key: "dielectric", label: "介电函数", placeholder: "请输入" },
+          { key: "absorption", label: "光吸收系数", unit: "cm-1", placeholder: "请输入" },
+          { key: "reflectance", label: "反射率", unit: "%", placeholder: "请输入" },
+          { key: "refractive", label: "折射率", placeholder: "请输入" },
+          { key: "extinction", label: "消光系数", placeholder: "请输入" },
+          { key: "dielectricFunctionImage", label: "介电函数图", placeholder: "请输入图谱文件名或链接" },
+          { key: "opticalAbsorptionImage", label: "光吸收系数图", placeholder: "请输入图谱文件名或链接" },
+          { key: "reflectanceImage", label: "反射率图", placeholder: "请输入图谱文件名或链接" },
+          { key: "refractiveIndexImage", label: "折射率图", placeholder: "请输入图谱文件名或链接" },
+          { key: "extinctionCoefficientImage", label: "消光系数图", placeholder: "请输入图谱文件名或链接" }
+        ]
+      },
+      {
+        title: "缺陷性质",
+        fields: [
+          { key: "defectType", label: "空位缺陷", placeholder: "请输入空位缺陷类型/数量" },
+          { key: "antisiteDefect", label: "反位缺陷", placeholder: "请输入反位缺陷类型/数量" },
+          { key: "defectEnergy", label: "缺陷形成能", unit: "eV", placeholder: "请输入" },
+          { key: "defectFormationEnergyImage", label: "缺陷形成能图", placeholder: "请输入图谱文件名或链接" },
+          { key: "defectStructureImage", label: "缺陷结构图", placeholder: "请输入图谱文件名或链接" }
+        ]
+      }
+    ];
+
+    function esc(value) {
+      return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
+      });
+    }
+
+    function getWorkbenchState() {
+      return window.__dataSubmitWorkbenchState || null;
+    }
+
+    function getFieldValue(key) {
+      const state = getWorkbenchState();
+      return state && state.fields ? state.fields[key] || "" : "";
+    }
+
+    function renderAlignedField(field) {
+      const id = "twodUpload" + field.key.replace(/[^a-zA-Z0-9]/g, "_");
+      const cls = [
+        "data-submit-field",
+        field.wide ? "is-wide" : "",
+        REQUIRED_FIELDS.has(field.key) ? "twod-upload-required" : "is-optional"
+      ].filter(Boolean).join(" ");
+      const label = '<label for="' + esc(id) + '">' + esc(field.label) + '</label>';
+      if (field.type === "select") {
+        return '<div class="' + cls + '">' + label + '<select id="' + esc(id) + '" data-workbench-field="' + esc(field.key) + '">' +
+          (field.options || []).map(function (option) {
+            const value = option || "";
+            const selected = getFieldValue(field.key) === value ? " selected" : "";
+            return '<option value="' + esc(value) + '"' + selected + '>' + esc(option || "请选择") + '</option>';
+          }).join("") +
+          '</select></div>';
+      }
+      if (field.type === "textarea") {
+        return '<div class="' + cls + '">' + label + '<textarea id="' + esc(id) + '" data-workbench-field="' + esc(field.key) + '" placeholder="' + esc(field.placeholder || "请输入") + '">' + esc(getFieldValue(field.key)) + '</textarea></div>';
+      }
+      const input = '<input id="' + esc(id) + '" data-workbench-field="' + esc(field.key) + '" value="' + esc(getFieldValue(field.key)) + '" placeholder="' + esc(field.placeholder || "请输入") + '">';
+      return '<div class="' + cls + '">' + label + (field.unit ? '<div class="data-submit-input-unit">' + input + '<span>' + esc(field.unit) + '</span></div>' : input) + '</div>';
+    }
+
+    function renderAlignedTwodUploadForm() {
+      return '<h3 class="data-submit-stage-title">填写材料信息</h3><div class="data-submit-form twod-upload-aligned-form">' +
+        UPLOAD_FIELD_GROUPS.map(function (group) {
+          return '<section class="twod-upload-section"><h4 class="twod-upload-section-title">' + esc(group.title) + '</h4><div class="twod-upload-field-grid">' +
+            group.fields.map(renderAlignedField).join("") +
+          '</div></section>';
+        }).join("") +
+        '<section class="twod-upload-section"><h4 class="twod-upload-section-title">数据描述</h4><div class="twod-upload-field-grid">' +
+          renderAlignedField({ key: "methodDescription", label: "计算方法与实验条件", type: "textarea", wide: true, placeholder: "描述计算方法、计算参数、数据来源补充说明和质量说明" }) +
+        '</div></section></div>';
+    }
+
+    function bindAlignedInputs(root) {
+      const state = getWorkbenchState();
+      if (!state) return;
+      state.fields = state.fields || {};
+      root.querySelectorAll("[data-workbench-field]").forEach(function (input) {
+        input.addEventListener("input", function () {
+          state.fields[input.dataset.workbenchField] = input.value;
+        });
+        input.addEventListener("change", function () {
+          state.fields[input.dataset.workbenchField] = input.value;
+        });
+      });
+    }
+
+    function isTwodWorkbenchInfoStage() {
+      const state = getWorkbenchState();
+      return state && state.step === 2 && state.materialType === "二维材料";
+    }
+
+    function applyAlignedUploadStage() {
+      if (!isTwodWorkbenchInfoStage()) return;
+      const stage = document.querySelector("#page-data-submit .data-submit-stage");
+      if (!stage || stage.dataset.twodAligned === "1") return;
+      stage.dataset.twodAligned = "1";
+      stage.innerHTML = renderAlignedTwodUploadForm();
+      bindAlignedInputs(stage);
+    }
+
+    function ensureLegacyField(group, field) {
+      if (!group || group.querySelector('[data-field="' + field.key + '"]')) return;
+      const holder = document.createElement("div");
+      holder.hidden = true;
+      let control;
+      if (field.type === "textarea") {
+        control = document.createElement("textarea");
+      } else if (field.type === "select") {
+        control = document.createElement("select");
+        (field.options || [""]).forEach(function (option) {
+          const opt = document.createElement("option");
+          opt.value = option || "";
+          opt.textContent = option || "请选择";
+          control.appendChild(opt);
+        });
+      } else {
+        control = document.createElement("input");
+        control.type = "text";
+      }
+      control.dataset.field = field.key;
+      holder.appendChild(control);
+      group.appendChild(holder);
+    }
+
+    function ensureLegacyTwodFields() {
+      const group = document.querySelector('#page-data-submit .material-form-group[data-material="二维材料"]');
+      if (!group) return;
+      UPLOAD_FIELD_GROUPS.forEach(function (section) {
+        section.fields.forEach(function (field) { ensureLegacyField(group, field); });
+      });
+    }
+
+    function syncAlignedFieldsToLegacy() {
+      const state = getWorkbenchState();
+      const group = document.querySelector('#page-data-submit .material-form-group[data-material="二维材料"]');
+      if (!state || !state.fields || !group) return;
+      ensureLegacyTwodFields();
+      Object.keys(state.fields).forEach(function (key) {
+        const field = group.querySelector('[data-field="' + key + '"]');
+        if (field) field.value = state.fields[key] || "";
+      });
+    }
+
+    function parseNumber(value) {
+      if (value == null || value === "") return undefined;
+      const cleaned = String(value).replace(/[^\d.+\-eE]/g, "");
+      const number = Number(cleaned);
+      return Number.isFinite(number) ? number : undefined;
+    }
+
+    function firstText(fields, keys) {
+      for (const key of keys) {
+        const value = fields && fields[key];
+        if (value != null && String(value).trim()) return String(value).trim();
+      }
+      return "";
+    }
+
+    function parseElements(fields, formula) {
+      const text = firstText(fields, ["elementsText", "elements"]);
+      const fromText = text ? text.split(/[,\s，、;；\-]+/).map(function (item) { return item.trim(); }).filter(Boolean) : [];
+      const fromFormula = String(formula || "").match(/[A-Z][a-z]?/g) || [];
+      return Array.from(new Set((fromText.length ? fromText : fromFormula).filter(Boolean)));
+    }
+
+    function parseAtomCoordinates(text) {
+      return String(text || "").split(/\n+/).map(function (line, index) {
+        const parts = line.trim().split(/[\s,，]+/).filter(Boolean);
+        if (!parts.length) return null;
+        const element = parts[0];
+        const x = parseNumber(parts[1]);
+        const y = parseNumber(parts[2]);
+        const z = parseNumber(parts[3]);
+        if (x == null && y == null && z == null) return null;
+        return { index: index + 1, element, x, y, z };
+      }).filter(Boolean);
+    }
+
+    function deriveBandType(fields, bandGap) {
+      const text = firstText(fields, ["bandType"]);
+      if (text) return text;
+      if (bandGap == null) return "";
+      if (bandGap <= 0.05) return "金属";
+      if (bandGap >= 3) return "绝缘体";
+      return "半导体";
+    }
+
+    function mapAlignedFieldsToTwodMaterial(record, template) {
+      const fields = Object.assign({}, record && record.fields);
+      const formula = firstText(fields, ["formula"]) || record.materialFormula || record.formula || "";
+      const bandGap = parseNumber(fields.bandGap);
+      const materialId = firstText(fields, ["materialId"]);
+      const elements = parseElements(fields, formula);
+      const material = {
+        id: materialId || record.databaseLinkedId || "",
+        name: firstText(fields, ["materialName"]) || record.materialName || "",
+        formula: formula || (template && template.formula) || "",
+        elements: elements.length ? elements : ((template && template.elements) ? template.elements.slice() : []),
+        source: firstText(fields, ["source"]) || record.source || "用户上传",
+        dataSource: firstText(fields, ["source"]) || record.source || "用户上传",
+        updatedAt: record.uploadedAt || "2026-08-12",
+        quality: "审核入库",
+        bandGap,
+        formation: parseNumber(fields.formation),
+        density_g_cm3: parseNumber(fields.density_g_cm3),
+        volume_ang3: parseNumber(fields.volume_ang3),
+        volume: parseNumber(fields.volume_ang3),
+        latticeA: parseNumber(fields.latticeA),
+        latticeB: parseNumber(fields.latticeB),
+        latticeC: parseNumber(fields.latticeC),
+        latticeAlpha: parseNumber(fields.latticeAlpha),
+        latticeBeta: parseNumber(fields.latticeBeta),
+        latticeGamma: parseNumber(fields.latticeGamma),
+        layerThickness: parseNumber(fields.layerThickness),
+        interlayer: parseNumber(fields.layerThickness),
+        crystalSystem: firstText(fields, ["crystalSystem"]) || (template && template.crystalSystem) || "",
+        spaceGroup: firstText(fields, ["spaceGroup"]) || (template && template.spaceGroup) || "",
+        bondLengthAngle: firstText(fields, ["bondLengthAngle"]),
+        atomCoordinates: parseAtomCoordinates(fields.atomicCoordinatesText),
+        type: deriveBandType(fields, bandGap),
+        dos: parseNumber(fields.dos),
+        effectiveMass: parseNumber(fields.effectiveMass),
+        bandChart: firstText(fields, ["bandChart"]),
+        dosPlot: firstText(fields, ["dosPlot"]),
+        ferroelectric: firstText(fields, ["ferroelectricText"]).includes("具有") ? 1 : parseNumber(fields.ferroelectric),
+        piezo: parseNumber(fields.piezo),
+        piezoTensor: firstText(fields, ["piezoTensor"]),
+        magneticOrder: firstText(fields, ["magneticOrder"]),
+        magnetization: parseNumber(fields.magnetization),
+        transitionTemp: parseNumber(fields.transitionTemp),
+        phononSpectrum: firstText(fields, ["phononSpectrum"]),
+        phononDos: firstText(fields, ["phononDos"]),
+        elasticConstants: firstText(fields, ["elasticConstants"]),
+        young: parseNumber(fields.young || fields.youngsModulus),
+        poisson: parseNumber(fields.poisson),
+        dielectric: parseNumber(fields.dielectric),
+        absorption: parseNumber(fields.absorption),
+        reflectance: parseNumber(fields.reflectance),
+        refractive: parseNumber(fields.refractive),
+        extinction: parseNumber(fields.extinction),
+        defectType: firstText(fields, ["defectType"]),
+        antisiteDefect: firstText(fields, ["antisiteDefect"]),
+        defectEnergy: parseNumber(fields.defectEnergy),
+        visuals: {
+          bandStructure: firstText(fields, ["bandChart"]),
+          dosPlot: firstText(fields, ["dosPlot"]),
+          magneticGroundState: firstText(fields, ["magneticGroundStateImage"]),
+          phononDispersion: firstText(fields, ["phononDispersionImage"]),
+          phononDOS: firstText(fields, ["phononDosImage"]),
+          dielectricFunction: firstText(fields, ["dielectricFunctionImage"]),
+          opticalAbsorption: firstText(fields, ["opticalAbsorptionImage"]),
+          reflectance: firstText(fields, ["reflectanceImage"]),
+          refractiveIndex: firstText(fields, ["refractiveIndexImage"]),
+          extinctionCoefficient: firstText(fields, ["extinctionCoefficientImage"]),
+          defectFormationEnergy: firstText(fields, ["defectFormationEnergyImage"]),
+          defectStructure: firstText(fields, ["defectStructureImage"])
+        }
+      };
+      Object.keys(material).forEach(function (key) {
+        if (material[key] === undefined || material[key] === "") delete material[key];
+      });
+      return material;
+    }
+
+    function patchEnsureRecordInDatabase() {
+      if (typeof window.ensureRecordInDatabase !== "function" || window.ensureRecordInDatabase.__twodAlignedPatched) return;
+      const original = window.ensureRecordInDatabase;
+      window.ensureRecordInDatabase = function (record) {
+        if (!record || record.databaseLinkedId || record.materialType !== "二维材料" || !record.fields) {
+          return original.apply(this, arguments);
+        }
+        const materials = Array.isArray(window.twodMaterials) ? window.twodMaterials : (typeof twodMaterials !== "undefined" ? twodMaterials : null);
+        if (!materials) return original.apply(this, arguments);
+        const formula = firstText(record.fields, ["formula"]) || record.materialFormula || "";
+        const name = firstText(record.fields, ["materialName"]) || record.materialName || "";
+        const existing = materials.find(function (item) {
+          return (name && String(item.name || "").toLowerCase() === name.toLowerCase()) ||
+            (formula && String(item.formula || "").toLowerCase() === formula.toLowerCase());
+        });
+        if (existing) {
+          record.databaseLinkedId = existing.id;
+          return existing.id;
+        }
+        const template = materials[materials.length % Math.max(materials.length, 1)] || materials[0] || {};
+        const sequence = materials.length + 1;
+        const material = Object.assign({}, template, mapAlignedFieldsToTwodMaterial(record, template));
+        material.id = material.id || "2D-UP-" + String(sequence).padStart(3, "0");
+        material.trueMaterialId = material.id;
+        material.displayName = material.name;
+        material.displayFormula = material.formula;
+        material.sampleImported = true;
+        material.source = material.source || "用户上传";
+        material.quality = material.quality || "审核入库";
+        materials.unshift(material);
+        record.databaseLinkedId = material.id;
+        return material.id;
+      };
+      window.ensureRecordInDatabase.__twodAlignedPatched = true;
+    }
+
+    function patchRecordDetail() {
+      document.addEventListener("click", function (event) {
+        const trigger = event.target.closest("[data-view-detail], [data-open-record], [data-approve-record]");
+        if (!trigger) return;
+        window.setTimeout(function () {
+          const extra = document.getElementById("recordExtraInfo");
+          if (!extra) return;
+          const records = Array.isArray(window.twodUpdateRecords) ? window.twodUpdateRecords : (typeof twodUpdateRecords !== "undefined" ? twodUpdateRecords : []);
+          const id = trigger.dataset.viewDetail || trigger.dataset.openRecord || trigger.dataset.approveRecord;
+          const record = records.find(function (item) { return item.id === id; });
+          if (!record || record.materialType !== "二维材料" || !record.fields || extra.dataset.twodAligned === id) return;
+          extra.dataset.twodAligned = id;
+          const fields = record.fields;
+          const rows = [
+            ["材料编号", firstText(fields, ["materialId"]) || record.databaseLinkedId || "未入库"],
+            ["材料名称", firstText(fields, ["materialName"]) || record.materialName || "-"],
+            ["化学式", firstText(fields, ["formula"]) || record.materialFormula || "-"],
+            ["元素组成", firstText(fields, ["elementsText"]) || parseElements(fields, fields.formula).join(", ") || "-"],
+            ["数据来源", firstText(fields, ["source"]) || record.source || "-"],
+            ["带隙", firstText(fields, ["bandGap"]) ? firstText(fields, ["bandGap"]) + " eV" : "-"],
+            ["形成能", firstText(fields, ["formation"]) ? firstText(fields, ["formation"]) + " eV/atom" : "-"],
+            ["晶胞体积", firstText(fields, ["volume_ang3"]) ? firstText(fields, ["volume_ang3"]) + " A3" : "-"],
+            ["晶系", firstText(fields, ["crystalSystem"]) || "-"],
+            ["空间群", firstText(fields, ["spaceGroup"]) || "-"]
+          ];
+          extra.innerHTML = rows.map(function (row) {
+            return '<span class="record-detail-label">' + esc(row[0]) + '</span><span class="record-detail-value" title="' + esc(row[1]) + '">' + esc(row[1]) + '</span>';
+          }).join("");
+        }, 80);
+      }, true);
+    }
+
+    function init() {
+      ensureLegacyTwodFields();
+      patchEnsureRecordInDatabase();
+      patchRecordDetail();
+      applyAlignedUploadStage();
+      document.addEventListener("click", function (event) {
+        if (event.target.closest("[data-workbench-next], [data-workbench-step], [data-material-select], [data-material-type], [data-workbench-draft], [data-workbench-submit]")) {
+          syncAlignedFieldsToLegacy();
+          window.setTimeout(applyAlignedUploadStage, 0);
+          window.setTimeout(syncAlignedFieldsToLegacy, 30);
+        }
+      }, true);
+      document.addEventListener("input", syncAlignedFieldsToLegacy, true);
+      document.addEventListener("change", syncAlignedFieldsToLegacy, true);
+      const page = document.getElementById("page-data-submit");
+      if (page && "MutationObserver" in window) {
+        const observer = new MutationObserver(function () {
+          applyAlignedUploadStage();
+          syncAlignedFieldsToLegacy();
+        });
+        observer.observe(page, { childList: true, subtree: true });
+      }
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+  })();
+  </script>
+  <style id="algorithm-interface-management-style">
+    #systemCrudModal .modal {
+      max-width: 980px;
+      width: min(980px, calc(100vw - 48px));
+    }
+
+    #systemCrudModal .modal-body {
+      max-height: min(72vh, 760px);
+      overflow: auto;
+    }
+
+    .algo-interface-form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .algo-interface-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 20px;
+    }
+
+    .algo-interface-grid .field.is-wide {
+      grid-column: 1 / -1;
+    }
+
+    .algo-interface-section {
+      padding: 16px 18px;
+      border: 1px solid #d8e5f5;
+      border-radius: 8px;
+      background: #f8fbff;
+    }
+
+    .algo-interface-section h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 14px;
+      color: #203656;
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 700;
+    }
+
+    .algo-interface-section h4::before {
+      content: "";
+      width: 4px;
+      height: 14px;
+      border-radius: 999px;
+      background: #1f5eff;
+    }
+
+    .algo-param-table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e2eaf5;
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    .algo-param-table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .algo-param-table th,
+    .algo-param-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf1f6;
+      color: #27364a;
+      font-size: 13px;
+      line-height: 20px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .algo-param-table th {
+      background: #f1f6ff;
+      color: #40536f;
+      font-weight: 700;
+    }
+
+    .algo-param-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .algo-param-table input {
+      width: 100%;
+      min-height: 34px;
+      box-sizing: border-box;
+      border: 1px solid #d9dfe8;
+      border-radius: 4px;
+      padding: 6px 10px;
+      color: #283341;
+      font-size: 13px;
+    }
+
+    .algo-param-table input:disabled,
+    .algo-rich-editor[contenteditable="false"] {
+      background: #f5f7fb;
+      color: #66717f;
+    }
+
+    .algo-param-tools {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .algo-param-delete {
+      border: none;
+      background: transparent;
+      color: #d93535;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .algo-rich-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 20px;
+    }
+
+    .algo-rich-editor {
+      min-height: 126px;
+      padding: 10px 12px;
+      border: 1px solid #d9dfe8;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #283341;
+      font-size: 13px;
+      line-height: 22px;
+      outline: none;
+      white-space: pre-wrap;
+    }
+
+    .algo-rich-editor:focus {
+      border-color: #1f5eff;
+      box-shadow: 0 0 0 3px rgba(31, 94, 255, .12);
+    }
+
+    #page-sys-algorithm .twod-result-table td,
+    #page-sys-algorithm .twod-result-table th {
+      white-space: nowrap;
+    }
+
+    #page-sys-algorithm .twod-result-table td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #page-sys-algorithm .table-action-link {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 820px) {
+      .algo-interface-grid,
+      .algo-rich-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script id="algorithm-interface-management-script">
+  (function () {
+    "use strict";
+
+    const ALGORITHM_TYPES = [
+      "二维材料数据库应用算法",
+      "低维材料数据库应用算法",
+      "机器学习力场数据库应用算法",
+      "催化材料数据库应用算法"
+    ];
+    const ALGORITHM_CLASSIFICATIONS = {
+      "二维材料数据库应用算法": ["晶体结构驰豫算法", "材料性质计算算法"],
+      "低维材料数据库应用算法": ["数据爬取算法", "数据分类算法"],
+      "机器学习力场数据库应用算法": ["力场格式校验算法", "力场参数生成算法"],
+      "催化材料数据库应用算法": ["催化活性预测算法", "吸附能计算算法"]
+    };
+
+    function esc(value) {
+      return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
+      });
+    }
+
+    function nowMinute() {
+      const now = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
+    function normalizeAlgorithmRecord(record) {
+      if (!record) return record;
+      const oldCategory = String(record.category || "").trim();
+      if (!record.algorithmType) {
+        if (oldCategory.includes("低维")) record.algorithmType = "低维材料数据库应用算法";
+        else if (oldCategory.includes("机器学习") || oldCategory.includes("力场")) record.algorithmType = "机器学习力场数据库应用算法";
+        else if (oldCategory.includes("催化")) record.algorithmType = "催化材料数据库应用算法";
+        else record.algorithmType = "二维材料数据库应用算法";
+      }
+      if (!record.algorithmCategory) {
+        const candidates = ALGORITHM_CLASSIFICATIONS[record.algorithmType] || [];
+        record.algorithmCategory = oldCategory.includes("催化") ? "催化活性预测算法" : candidates[0] || oldCategory || "";
+      }
+      record.category = record.algorithmCategory || record.category || "";
+      record.creator = record.creator || record.owner || "管理员";
+      record.createTime = record.createTime || record.createdAt || record.updatedAt || nowMinute();
+      record.inputParams = Array.isArray(record.inputParams) && record.inputParams.length
+        ? record.inputParams
+        : [{ item: "materialId", desc: "材料编号或结构文件索引" }];
+      record.outputParams = Array.isArray(record.outputParams) && record.outputParams.length
+        ? record.outputParams
+        : [{ item: "result", desc: "算法计算结果与图谱索引" }];
+      record.exampleInput = record.exampleInput || '{"materialId":"2D-MoS2-001","structureFile":"MoS2.cif"}';
+      record.exampleOutput = record.exampleOutput || '{"taskId":"TASK-20260812-001","status":"success","resultUrl":"/result/task"}';
+      return record;
+    }
+
+    function normalizeAlgorithmStore() {
+      if (typeof systemStore === "undefined" || !Array.isArray(systemStore.algorithms)) return;
+      systemStore.algorithms.forEach(normalizeAlgorithmRecord);
+      if (typeof systemState !== "undefined") {
+        systemState.search["sys-algorithm"] = Object.assign({ algorithmName: "", algorithmType: "", algorithmCategory: "" }, systemState.search["sys-algorithm"] || {});
+      }
+      if (typeof SYSTEM_PAGE_CONFIGS !== "undefined" && SYSTEM_PAGE_CONFIGS["sys-algorithm"]) {
+        SYSTEM_PAGE_CONFIGS["sys-algorithm"].searchFields = [
+          { key: "algorithmName", label: "算法/接口名称", type: "text", placeholder: "请输入算法/接口名称" },
+          { key: "algorithmType", label: "算法类型", type: "select", options: ["", ...ALGORITHM_TYPES] },
+          { key: "algorithmCategory", label: "算法分类", type: "text", placeholder: "请输入算法分类" }
+        ];
+        SYSTEM_PAGE_CONFIGS["sys-algorithm"].headers = ["算法/接口名称", "算法类型", "算法分类", "接口地址", "创建人", "创建时间", "操作"];
+      }
+    }
+
+    const originalRenderSystemManagementSection = typeof renderSystemManagementSection === "function" ? renderSystemManagementSection : null;
+    renderSystemManagementSection = function (page, options = {}) {
+      if (page !== "sys-algorithm" || typeof getSystemVisibleRecords !== "function") {
+        return originalRenderSystemManagementSection ? originalRenderSystemManagementSection(page, options) : "";
+      }
+      normalizeAlgorithmStore();
+      const cfg = SYSTEM_PAGE_CONFIGS[page];
+      const searchHtml = cfg.searchFields.map((field) => renderSystemSearchField(field, page)).join("");
+      const { rows, total, currentPage, totalPages, pageSize } = getSystemVisibleRecords(page);
+      return `
+        <section class="sys-table-card card">
+          <div class="sys-toolbar">
+            <div><h3>${options.title || "算法/接口管理"}</h3><p>${options.desc || "统一维护平台算法资源、接口地址、输入输出参数与示例调用内容。"}</p></div>
+            <div class="sys-toolbar-actions"><span class="sys-count">共<strong>${total}</strong> 条</span><button class="btn-primary" type="button" data-sys-add="sys-algorithm">新增</button></div>
+          </div>
+          <section class="sys-search-card card" style="margin-bottom:16px;">
+            <div class="sys-search-grid">${searchHtml}</div>
+            <div class="twod-action-bar" style="margin-top:14px;"><div class="action-row"><button class="btn-primary" type="button" data-sys-search="sys-algorithm">查询</button><button class="btn" type="button" data-sys-reset="sys-algorithm">重置</button></div></div>
+          </section>
+          <div class="table-wrap twod-result-table-wrap">
+            <table class="twod-result-table">
+              <thead><tr>${cfg.headers.map((item) => `<th>${item}</th>`).join("")}</tr></thead>
+              <tbody>${rows.length ? rows.map((record) => renderSystemRow(page, record)).join("") : `<tr><td colspan="${cfg.headers.length}"><div class="sys-empty">暂无数据</div></td></tr>`}</tbody>
+            </table>
+          </div>
+          ${renderSystemPaginationFooter(page, total, currentPage, totalPages, pageSize)}
+        </section>
+      `;
+    };
+
+    const originalRenderSystemRow = typeof renderSystemRow === "function" ? renderSystemRow : null;
+    renderSystemRow = function (page, record) {
+      if (page !== "sys-algorithm") return originalRenderSystemRow ? originalRenderSystemRow(page, record) : "";
+      normalizeAlgorithmRecord(record);
+      const viewBtn = `<button class="table-action-link" type="button" data-sys-view="${page}" data-id="${record.id}">查看</button>`;
+      const testBtn = `<button class="table-action-link" type="button" data-sys-test-algorithm="${record.id}">测试</button>`;
+      const editBtn = `<button class="table-action-link" type="button" data-sys-edit="${page}" data-id="${record.id}">编辑</button>`;
+      const deleteBtn = `<button class="table-action-link" type="button" data-sys-delete="${page}" data-id="${record.id}">删除</button>`;
+      return `<tr>
+        <td title="${esc(record.algorithmName)}">${esc(record.algorithmName)}</td>
+        <td title="${esc(record.algorithmType)}">${esc(record.algorithmType)}</td>
+        <td title="${esc(record.algorithmCategory)}">${esc(record.algorithmCategory)}</td>
+        <td title="${esc(record.endpoint)}">${esc(record.endpoint)}</td>
+        <td title="${esc(record.creator)}">${esc(record.creator)}</td>
+        <td title="${esc(record.createTime)}">${esc(record.createTime)}</td>
+        <td class="action-cell">${viewBtn}${testBtn}${editBtn}${deleteBtn}</td>
+      </tr>`;
+    };
+
+    function getAlgorithmRecord(id) {
+      return systemStore.algorithms.find((item) => String(item.id) === String(id));
+    }
+
+    function classificationOptions(type, selected) {
+      const options = ALGORITHM_CLASSIFICATIONS[type] || [];
+      return options.map((option) => `<option value="${esc(option)}"${String(option) === String(selected) ? " selected" : ""}>${esc(option)}</option>`).join("");
+    }
+
+    function renderParamRows(kind, rows, readonly) {
+      const list = Array.isArray(rows) && rows.length ? rows : [{ item: "", desc: "" }];
+      return list.map((row, index) => `
+        <tr>
+          <td style="width:72px;">${index + 1}</td>
+          <td><input type="text" value="${esc(row.item || "")}" data-algo-param-field="item"${readonly ? " disabled" : ""}></td>
+          <td><input type="text" value="${esc(row.desc || "")}" data-algo-param-field="desc"${readonly ? " disabled" : ""}></td>
+          <td style="width:86px;">${readonly ? "-" : `<button class="algo-param-delete" type="button" data-algo-param-delete="${kind}">删除</button>`}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderParamSection(title, kind, rows, readonly) {
+      return `
+        <section class="algo-interface-section">
+          <h4>${esc(title)}</h4>
+          <div class="algo-param-table-wrap">
+            <table class="algo-param-table" data-param-list="${esc(kind)}">
+              <thead><tr><th style="width:72px;">序号</th><th>输入项</th><th>说明</th><th style="width:86px;">操作</th></tr></thead>
+              <tbody>${renderParamRows(kind, rows, readonly)}</tbody>
+            </table>
+          </div>
+          ${readonly ? "" : `<div class="algo-param-tools"><button class="btn" type="button" data-algo-param-add="${esc(kind)}">新增</button></div>`}
+        </section>
+      `.replace("输入项", kind === "outputParams" ? "输出项" : "输入项");
+    }
+
+    function renderAlgorithmInterfaceForm(record, mode) {
+      const readonly = mode === "view";
+      const disabled = readonly ? " disabled" : "";
+      const typeValue = record.algorithmType || ALGORITHM_TYPES[0];
+      const categoryValue = record.algorithmCategory || (ALGORITHM_CLASSIFICATIONS[typeValue] || [])[0] || "";
+      const richEditable = readonly ? "false" : "true";
+      return `
+        <form class="sys-modal-form algo-interface-form" id="systemCrudForm">
+          <section class="algo-interface-section">
+            <h4>基本信息</h4>
+            <div class="algo-interface-grid">
+              <div class="field">
+                <label>算法/接口名称</label>
+                <input name="algorithmName" type="text" maxlength="20" value="${esc(record.algorithmName || "")}" placeholder="请输入20字以内名称"${disabled}>
+              </div>
+              <div class="field">
+                <label>算法类型</label>
+                <select name="algorithmType" id="algorithmInterfaceType"${disabled}>
+                  ${ALGORITHM_TYPES.map((type) => `<option value="${esc(type)}"${type === typeValue ? " selected" : ""}>${esc(type)}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label>算法分类</label>
+                <select name="algorithmCategory" id="algorithmInterfaceCategory"${disabled}>${classificationOptions(typeValue, categoryValue)}</select>
+              </div>
+              <div class="field">
+                <label>版本</label>
+                <input name="version" type="text" value="${esc(record.version || "")}" placeholder="请输入版本，如 v1.0"${disabled}>
+              </div>
+              <div class="field is-wide">
+                <label>接口地址</label>
+                <input name="endpoint" type="text" value="${esc(record.endpoint || "")}" placeholder="请输入接口地址，如 /api/v1/algorithms/twod/relax"${disabled}>
+              </div>
+              <div class="field is-wide">
+                <label>算法介绍</label>
+                <textarea name="remark" maxlength="1000" placeholder="请输入算法用途、适用材料和计算特点，1000字以内"${disabled}>${esc(record.remark || record.desc || "")}</textarea>
+              </div>
+            </div>
+          </section>
+          ${renderParamSection("输入参数", "inputParams", record.inputParams, readonly)}
+          ${renderParamSection("输出结果", "outputParams", record.outputParams, readonly)}
+          <section class="algo-interface-section">
+            <h4>示例展示</h4>
+            <div class="algo-rich-grid">
+              <div class="field">
+                <label>示例输入</label>
+                <div class="algo-rich-editor" data-rich-name="exampleInput" contenteditable="${richEditable}" role="textbox" aria-label="示例输入">${esc(record.exampleInput || "")}</div>
+              </div>
+              <div class="field">
+                <label>示例输出</label>
+                <div class="algo-rich-editor" data-rich-name="exampleOutput" contenteditable="${richEditable}" role="textbox" aria-label="示例输出">${esc(record.exampleOutput || "")}</div>
+              </div>
+            </div>
+          </section>
+        </form>
+      `;
+    }
+
+    const originalOpenSystemCrudModal = typeof openSystemCrudModal === "function" ? openSystemCrudModal : null;
+    openSystemCrudModal = function (page, mode, id = null) {
+      if (page !== "sys-algorithm") {
+        if (originalOpenSystemCrudModal) return originalOpenSystemCrudModal(page, mode, id);
+        return;
+      }
+      normalizeAlgorithmStore();
+      const body = document.getElementById("systemCrudModalBody");
+      const footer = document.getElementById("systemCrudModalFooter");
+      const title = document.getElementById("systemCrudModalTitle");
+      const subtitle = document.getElementById("systemCrudModalSubtitle");
+      const record = normalizeAlgorithmRecord(id == null ? {} : Object.assign({}, getAlgorithmRecord(id) || {}));
+      if (!body || !footer || !title || !subtitle) return;
+      systemState.modal = { page, mode, id };
+      title.textContent = mode === "add" ? "新增算法/接口" : mode === "edit" ? "编辑算法/接口" : "查看算法/接口";
+      subtitle.textContent = "维护算法类型、算法分类、接口地址、输入输出参数与示例调用内容";
+      body.innerHTML = renderAlgorithmInterfaceForm(record, mode);
+      footer.innerHTML = mode === "view"
+        ? `<button class="btn-primary" type="button" data-close-modal="systemCrudModal">关闭</button>`
+        : `<button class="btn" type="button" data-close-modal="systemCrudModal">取消</button><button class="btn-primary" type="button" data-sys-save="sys-algorithm">保存</button>`;
+      openModal("systemCrudModal");
+    };
+
+    function collectParamRows(kind) {
+      const table = document.querySelector(`.algo-param-table[data-param-list="${kind}"]`);
+      if (!table) return [];
+      return Array.from(table.querySelectorAll("tbody tr")).map((row) => {
+        const item = row.querySelector('[data-algo-param-field="item"]')?.value.trim() || "";
+        const desc = row.querySelector('[data-algo-param-field="desc"]')?.value.trim() || "";
+        return { item, desc };
+      }).filter((row) => row.item || row.desc);
+    }
+
+    function collectAlgorithmInterfacePayload() {
+      const form = document.getElementById("systemCrudForm");
+      if (!form) return null;
+      const name = String(form.elements.namedItem("algorithmName")?.value || "").trim();
+      const type = String(form.elements.namedItem("algorithmType")?.value || "").trim();
+      const category = String(form.elements.namedItem("algorithmCategory")?.value || "").trim();
+      const version = String(form.elements.namedItem("version")?.value || "").trim();
+      const endpoint = String(form.elements.namedItem("endpoint")?.value || "").trim();
+      const remark = String(form.elements.namedItem("remark")?.value || "").trim();
+      return {
+        algorithmName: name,
+        algorithmCode: name ? name.toLowerCase().replace(/\s+/g, "_").replace(/[^\w\u4e00-\u9fa5]/g, "") : "",
+        algorithmType: type,
+        algorithmCategory: category,
+        category,
+        version,
+        endpoint,
+        remark,
+        inputParams: collectParamRows("inputParams"),
+        outputParams: collectParamRows("outputParams"),
+        exampleInput: document.querySelector('[data-rich-name="exampleInput"]')?.innerHTML.trim() || "",
+        exampleOutput: document.querySelector('[data-rich-name="exampleOutput"]')?.innerHTML.trim() || ""
+      };
+    }
+
+    const originalSaveSystemRecord = typeof saveSystemRecord === "function" ? saveSystemRecord : null;
+    saveSystemRecord = function () {
+      const modal = systemState.modal || {};
+      if (modal.page !== "sys-algorithm") {
+        if (originalSaveSystemRecord) return originalSaveSystemRecord();
+        return;
+      }
+      const payload = collectAlgorithmInterfacePayload();
+      if (!payload) return;
+      if (!payload.algorithmName || !payload.algorithmType || !payload.algorithmCategory) {
+        showToast("保存失败", "请完整填写算法/接口名称、算法类型和算法分类。", "warning");
+        return;
+      }
+      if (payload.algorithmName.length > 20) {
+        showToast("保存失败", "算法/接口名称需控制在20字以内。", "warning");
+        return;
+      }
+      if (payload.remark.length > 1000) {
+        showToast("保存失败", "算法介绍需控制在1000字以内。", "warning");
+        return;
+      }
+      const stamp = nowMinute();
+      if (modal.mode === "add") {
+        const nextId = Math.max(0, ...systemStore.algorithms.map((item) => Number(item.id) || 0)) + 1;
+        systemStore.algorithms.unshift({
+          id: nextId,
+          creator: "管理员",
+          owner: "管理员",
+          createTime: stamp,
+          updatedAt: stamp,
+          status: "启用",
+          healthStatus: "未检测",
+          lastCheckedAt: "/",
+          ...payload
+        });
+      } else {
+        const record = getAlgorithmRecord(modal.id);
+        if (record) Object.assign(record, payload, { updatedAt: stamp });
+      }
+      closeModal("systemCrudModal");
+      normalizeAlgorithmStore();
+      renderSystemPages();
+      showToast("保存成功", "算法/接口信息已更新。", "success");
+    };
+
+    function refreshParamTable(kind) {
+      const table = document.querySelector(`.algo-param-table[data-param-list="${kind}"]`);
+      if (!table) return;
+      table.querySelector("tbody").innerHTML = renderParamRows(kind, collectParamRows(kind).concat([{ item: "", desc: "" }]), false);
+    }
+
+    document.addEventListener("change", function (event) {
+      const select = event.target.closest("#algorithmInterfaceType");
+      if (!select) return;
+      const category = document.getElementById("algorithmInterfaceCategory");
+      if (!category) return;
+      category.innerHTML = classificationOptions(select.value, "");
+    });
+
+    document.addEventListener("click", function (event) {
+      const add = event.target.closest("[data-algo-param-add]");
+      if (add) {
+        refreshParamTable(add.dataset.algoParamAdd);
+        return;
+      }
+      const del = event.target.closest("[data-algo-param-delete]");
+      if (del) {
+        const row = del.closest("tr");
+        const tbody = row && row.parentElement;
+        if (row && tbody && tbody.children.length > 1) row.remove();
+      }
+    });
+
+    normalizeAlgorithmStore();
+    if (typeof renderSystemPage === "function") {
+      setTimeout(function () {
+        renderSystemPage("sys-algorithm");
+        renderSystemPage("sys-api");
+      }, 0);
+    }
   })();
   </script>
 </body>
