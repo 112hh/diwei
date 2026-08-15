@@ -79528,12 +79528,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
   })();
   </script>
   <style id="algorithm-tools-hidden-style">
-    .portal-link[data-page="algorithms"],
-    .portal-link[data-page="tools"],
-    .sidebar-group[data-group="analysis"],
     .sidebar-group[data-group="algorithm-tools"],
-    #page-algorithms,
-    #page-tools,
     #page-sys-algorithm,
     #page-sys-api {
       display: none !important;
@@ -79541,7 +79536,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
   </style>
   <script id="algorithm-tools-hidden-script">
     (() => {
-      const hiddenAlgorithmToolPages = new Set(["algorithms", "tools", "sys-algorithm", "sys-api"]);
+      const hiddenAlgorithmToolPages = new Set(["sys-algorithm", "sys-api"]);
       const originalSwitchPage = typeof switchPage === "function" ? switchPage : null;
 
       if (originalSwitchPage && !window.__algorithmToolsHiddenSwitchWrapped) {
@@ -81169,5 +81164,1820 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       }
     }
   </style>
+  <style id="cross-database-search-platform-style">
+    #page-opto .twod-search-platform,
+    #page-mlff .twod-search-platform,
+    #page-catalyst .twod-search-platform {
+      padding: 0 !important;
+      border: 1px solid #d6e4fb !important;
+      border-radius: 8px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      overflow: hidden;
+    }
+
+    #page-opto .twod-mode-selector,
+    #page-mlff .twod-mode-selector,
+    #page-catalyst .twod-mode-selector {
+      display: flex !important;
+      align-items: center !important;
+      gap: 20px !important;
+      width: 100% !important;
+      min-height: 54px !important;
+      padding: 0 20px !important;
+      border: 0 !important;
+      border-bottom: 1px solid #e5edf9 !important;
+      border-radius: 0 !important;
+      background: #ffffff !important;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    #page-opto .twod-mode-btn,
+    #page-mlff .twod-mode-btn,
+    #page-catalyst .twod-mode-btn {
+      position: relative !important;
+      flex: 0 0 auto !important;
+      min-width: 0 !important;
+      min-height: 54px !important;
+      height: 54px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: #5c6f8a !important;
+      font-size: 15px !important;
+      line-height: 54px !important;
+      font-weight: 500 !important;
+    }
+
+    #page-opto .twod-mode-btn.active,
+    #page-mlff .twod-mode-btn.active,
+    #page-catalyst .twod-mode-btn.active {
+      color: #1677ff !important;
+      font-weight: 700 !important;
+    }
+
+    #page-opto .twod-mode-btn.active::after,
+    #page-mlff .twod-mode-btn.active::after,
+    #page-catalyst .twod-mode-btn.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: #1677ff;
+    }
+
+    #page-opto .twod-mode-stage,
+    #page-mlff .twod-mode-stage,
+    #page-catalyst .twod-mode-stage {
+      padding: 16px 20px 20px !important;
+      background: #ffffff !important;
+    }
+
+    #page-opto .twod-mode-panel,
+    #page-mlff .twod-mode-panel,
+    #page-catalyst .twod-mode-panel {
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    #page-opto .twod-search-row,
+    #page-mlff .twod-search-row,
+    #page-catalyst .twod-search-row,
+    #page-opto .cross-db-search-row,
+    #page-mlff .cross-db-search-row,
+    #page-catalyst .cross-db-search-row {
+      display: grid !important;
+      grid-template-columns: minmax(280px, 1fr) auto auto !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      overflow: visible !important;
+    }
+
+    #page-opto .twod-search-input,
+    #page-mlff .twod-search-input,
+    #page-catalyst .twod-search-input,
+    #page-opto .cross-db-input,
+    #page-mlff .cross-db-input,
+    #page-catalyst .cross-db-input,
+    #page-opto .cross-db-select,
+    #page-mlff .cross-db-select,
+    #page-catalyst .cross-db-select {
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      padding: 0 12px !important;
+      border: 1px solid #d6e4fb !important;
+      border-radius: 5px !important;
+      background: #ffffff !important;
+      color: #27384f !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
+    }
+
+    #page-opto .twod-search-input span,
+    #page-mlff .twod-search-input span,
+    #page-catalyst .twod-search-input span {
+      display: none !important;
+    }
+
+    #page-opto .twod-search-input input,
+    #page-mlff .twod-search-input input,
+    #page-catalyst .twod-search-input input {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+    }
+
+    #page-opto .twod-search-submit,
+    #page-mlff .twod-search-submit,
+    #page-catalyst .twod-search-submit,
+    #page-opto .cross-db-search-btn,
+    #page-mlff .cross-db-search-btn,
+    #page-catalyst .cross-db-search-btn {
+      width: 76px !important;
+      min-width: 76px !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 0 18px !important;
+      border-radius: 5px !important;
+      background: #1677ff !important;
+      color: #ffffff !important;
+      line-height: 40px !important;
+      font-weight: 700 !important;
+    }
+
+    #page-opto .twod-search-reset,
+    #page-mlff .twod-search-reset,
+    #page-catalyst .twod-search-reset,
+    #page-opto .cross-db-clear-btn,
+    #page-mlff .cross-db-clear-btn,
+    #page-catalyst .cross-db-clear-btn {
+      width: 106px !important;
+      min-width: 106px !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 0 18px !important;
+      border: 1px solid #d9d9d9 !important;
+      border-radius: 5px !important;
+      background: #ffffff !important;
+      color: #5f6470 !important;
+      line-height: 38px !important;
+      font-weight: 500 !important;
+    }
+
+    #page-opto .twod-platform-actions,
+    #page-mlff .twod-platform-actions,
+    #page-catalyst .twod-platform-actions {
+      margin-top: 16px !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      gap: 12px !important;
+    }
+
+    #page-opto .twod-status-text,
+    #page-mlff .twod-status-text,
+    #page-catalyst .twod-status-text {
+      color: #2d405b !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
+      font-weight: 700 !important;
+    }
+
+    #page-opto .twod-search-results,
+    #page-mlff .twod-search-results,
+    #page-catalyst .twod-search-results {
+      padding: 24px 26px 16px !important;
+      border: 1px solid #d6e4fb !important;
+      border-radius: 8px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+
+    #page-opto .twod-results-head,
+    #page-mlff .twod-results-head,
+    #page-catalyst .twod-results-head {
+      align-items: flex-start !important;
+      margin-bottom: 26px !important;
+      padding: 28px 20px 20px !important;
+      border-bottom: 1px solid #edf1f7 !important;
+    }
+
+    #page-opto .twod-result-count,
+    #page-mlff .twod-result-count,
+    #page-catalyst .twod-result-count {
+      color: #1f2937 !important;
+      font-size: 18px !important;
+      line-height: 28px !important;
+      font-weight: 800 !important;
+    }
+
+    #page-opto .twod-result-count strong,
+    #page-mlff .twod-result-count strong,
+    #page-catalyst .twod-result-count strong {
+      margin: 0 6px !important;
+      color: #1677ff !important;
+      font-size: 36px !important;
+      line-height: 40px !important;
+    }
+
+    #page-opto .twod-result-hint,
+    #page-mlff .twod-result-hint,
+    #page-catalyst .twod-result-hint {
+      margin-top: 6px !important;
+      color: #8a8f99 !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+    }
+
+    .cross-db-result-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid #e4ebf6;
+      border-radius: 6px;
+      background: #f8fbff;
+    }
+
+    .cross-db-toolbar-count {
+      color: #203454;
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .cross-db-toolbar-count strong {
+      margin: 0 3px;
+      color: #1677ff;
+      font-size: 18px;
+    }
+
+    .cross-db-toolbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    .cross-db-toolbar-menu {
+      position: relative;
+    }
+
+    .cross-db-toolbar-menu > summary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 102px;
+      height: 40px;
+      padding: 0 14px;
+      border: 1px solid #d6e4fb;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #2451c6;
+      font-size: 14px;
+      line-height: 38px;
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .cross-db-toolbar-menu > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .cross-db-toolbar-menu[open] > summary,
+    .cross-db-toolbar-menu > summary:hover {
+      border-color: #1677ff;
+      background: #edf4ff;
+      color: #1677ff;
+    }
+
+    .cross-db-toolbar-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 60;
+      width: 260px;
+      max-height: 360px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid #d9e2ef;
+      border-radius: 6px;
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(28, 51, 84, 0.16);
+    }
+
+    .cross-db-toolbar-panel button,
+    .cross-db-toolbar-panel label {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 30px;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #44576f;
+      font-size: 13px;
+      line-height: 18px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .cross-db-toolbar-panel button:hover,
+    .cross-db-toolbar-panel label:hover {
+      background: #f5f7fa;
+      color: #1677ff;
+    }
+
+    #page-opto .twod-result-table-wrap,
+    #page-mlff .twod-result-table-wrap,
+    #page-catalyst .twod-result-table-wrap {
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: #ffffff !important;
+      overflow-x: auto !important;
+    }
+
+    #page-opto .twod-result-table,
+    #page-mlff .twod-result-table,
+    #page-catalyst .twod-result-table {
+      width: max-content !important;
+      min-width: 100% !important;
+      table-layout: auto !important;
+      border-collapse: collapse !important;
+    }
+
+    #page-opto .twod-result-table th,
+    #page-opto .twod-result-table td,
+    #page-mlff .twod-result-table th,
+    #page-mlff .twod-result-table td,
+    #page-catalyst .twod-result-table th,
+    #page-catalyst .twod-result-table td {
+      max-width: 220px;
+      padding: 12px 16px !important;
+      white-space: nowrap !important;
+      word-break: keep-all !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      vertical-align: middle !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
+    }
+
+    #page-opto .twod-result-table th,
+    #page-mlff .twod-result-table th,
+    #page-catalyst .twod-result-table th {
+      background: #f3f3f3 !important;
+      color: #666f7e !important;
+      font-weight: 500 !important;
+    }
+
+    #page-opto .twod-result-table td:last-child,
+    #page-mlff .twod-result-table td:last-child,
+    #page-catalyst .twod-result-table td:last-child {
+      max-width: none;
+      overflow: visible !important;
+    }
+
+    #page-opto .twod-record-inline-actions,
+    #page-mlff .twod-record-inline-actions,
+    #page-catalyst .twod-record-inline-actions {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 16px !important;
+      flex-wrap: nowrap !important;
+      white-space: nowrap !important;
+    }
+
+    #page-opto .opto-combo-filter {
+      display: grid;
+      gap: 12px;
+    }
+
+    #page-opto .opto-combo-filter-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 92px minmax(220px, 1.1fr) auto;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #page-opto .opto-combo-range {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+    }
+
+    #page-opto .opto-combo-range span {
+      color: #8b98aa;
+      text-align: center;
+    }
+
+    #page-opto .opto-combo-row-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    #page-opto .opto-combo-mini-btn {
+      width: 36px;
+      min-width: 36px;
+      height: 36px;
+      min-height: 36px;
+      padding: 0;
+      border-radius: 5px;
+      font-size: 18px;
+      line-height: 34px;
+    }
+
+    @media (max-width: 768px) {
+      #page-opto .twod-search-row,
+      #page-mlff .twod-search-row,
+      #page-catalyst .twod-search-row,
+      #page-opto .cross-db-search-row,
+      #page-mlff .cross-db-search-row,
+      #page-catalyst .cross-db-search-row {
+        grid-template-columns: 1fr !important;
+      }
+
+      #page-opto .twod-search-submit,
+      #page-mlff .twod-search-submit,
+      #page-catalyst .twod-search-submit,
+      #page-opto .twod-search-reset,
+      #page-mlff .twod-search-reset,
+      #page-catalyst .twod-search-reset,
+      #page-opto .cross-db-search-btn,
+      #page-mlff .cross-db-search-btn,
+      #page-catalyst .cross-db-search-btn,
+      #page-opto .cross-db-clear-btn,
+      #page-mlff .cross-db-clear-btn,
+      #page-catalyst .cross-db-clear-btn {
+        width: 100% !important;
+      }
+
+      .cross-db-result-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .cross-db-toolbar-actions {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .cross-db-toolbar-panel {
+        left: 0;
+        right: auto;
+        width: min(260px, calc(100vw - 48px));
+      }
+
+      #page-opto .opto-combo-filter-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script id="cross-database-search-platform-script">
+    (() => {
+      if (window.__CROSS_DATABASE_SEARCH_PLATFORM_READY__) return;
+      window.__CROSS_DATABASE_SEARCH_PLATFORM_READY__ = true;
+
+      const html = (value) => String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+      const valueText = (value, options) => typeof formatLowDimValue === "function"
+        ? formatLowDimValue(value, options)
+        : (value == null || value === "" ? "暂无数据" : String(value));
+
+      const cell = (value, options) => {
+        const text = valueText(value, options);
+        return `<td title="${html(text)}">${text}</td>`;
+      };
+
+      const toolbarPanel = (items, type = "button") => items.map((item) => type === "check"
+        ? `<label><input type="checkbox" checked disabled><span>${html(item)}</span></label>`
+        : `<button type="button">${html(item)}</button>`).join("");
+
+      const renderCrossDatabaseToolbar = (total, config) => `
+        <div class="cross-db-result-toolbar">
+          <div class="cross-db-toolbar-count">共 <strong>${total}</strong> 条</div>
+          <div class="cross-db-toolbar-actions">
+            <details class="cross-db-toolbar-menu">
+              <summary>排序▾</summary>
+              <div class="cross-db-toolbar-panel">${toolbarPanel(config.sorts)}</div>
+            </details>
+            <details class="cross-db-toolbar-menu">
+              <summary>筛选▾</summary>
+              <div class="cross-db-toolbar-panel">${toolbarPanel(config.filters)}</div>
+            </details>
+            <details class="cross-db-toolbar-menu">
+              <summary>列设置▾</summary>
+              <div class="cross-db-toolbar-panel">${toolbarPanel(config.columns, "check")}</div>
+            </details>
+          </div>
+        </div>
+      `;
+
+      const renderFlatSearchWorkspace = (moduleKey, mode, config, value, applyAttr, resetAttr, inputAttr) => `
+        <div class="twod-mode-panel active">
+          <div class="twod-search-row">
+            <label class="twod-search-input">
+              <span>检索</span>
+              <input type="text" ${inputAttr}="${html(mode)}" value="${html(value || "")}" placeholder="${html(config.placeholder || "请输入检索条件")}">
+            </label>
+            <button class="btn-primary twod-search-submit" type="button" ${applyAttr}>检索</button>
+            <button class="btn twod-search-reset" type="button" ${resetAttr}>清空条件</button>
+          </div>
+          <div class="twod-platform-actions">
+            <div class="twod-status-text">${html(config.helper || "输入条件后点击检索，结果列表将按当前条件更新。")}</div>
+          </div>
+        </div>
+      `;
+
+      const normalizeFormula = (value) => String(value || "").replace(/\s+/g, "").toLowerCase();
+
+      const matchText = (query, values, matchMode = "fuzzy") => {
+        const keyword = String(query || "").trim().toLowerCase();
+        if (!keyword) return true;
+        const texts = values.map((value) => String(value || "").trim().toLowerCase()).filter(Boolean);
+        return matchMode === "exact"
+          ? texts.some((text) => text === keyword)
+          : texts.some((text) => text.includes(keyword));
+      };
+
+      const matchFormula = (query, formula, matchMode = "exact") => {
+        const keyword = normalizeFormula(query);
+        const target = normalizeFormula(formula);
+        if (!keyword) return true;
+        if (matchMode === "exact") return target === keyword;
+        if (matchMode === "substructure") return target.includes(keyword);
+        return target.includes(keyword) || keyword.includes(target) || [...keyword].every((char) => target.includes(char));
+      };
+
+      const ensureOptoSearchEnhancementState = () => {
+        ensureOptoRuntimeState();
+        if (!state.optoMatchModes) {
+          state.optoMatchModes = { name: "fuzzy", formula: "exact", code: "fuzzy" };
+        }
+        state.optoMatchModes.name = state.optoMatchModes.name || "fuzzy";
+        state.optoMatchModes.formula = state.optoMatchModes.formula || "exact";
+        state.optoMatchModes.code = state.optoMatchModes.code || "fuzzy";
+        const combo = state.optoSearchDraft.combo || {};
+        if (!Array.isArray(combo.conditions)) {
+          state.optoSearchDraft.combo = {
+            conditions: [{
+              logic: "AND",
+              propertyKey: combo.propertyKey || OPTO_COMBO_FIELDS[0]?.key || "molecularWeight",
+              min: combo.min || "",
+              max: combo.max || ""
+            }]
+          };
+        }
+        if (!state.optoSearchDraft.combo.conditions.length) {
+          state.optoSearchDraft.combo.conditions = [{
+            logic: "AND",
+            propertyKey: OPTO_COMBO_FIELDS[0]?.key || "molecularWeight",
+            min: "",
+            max: ""
+          }];
+        }
+      };
+
+      const getOptoComboConditions = (filters = state.optoSearchDraft.combo) => {
+        if (Array.isArray(filters?.conditions)) return filters.conditions;
+        return [{
+          logic: "AND",
+          propertyKey: filters?.propertyKey || OPTO_COMBO_FIELDS[0]?.key || "molecularWeight",
+          min: filters?.min || "",
+          max: filters?.max || ""
+        }];
+      };
+
+      const hasOptoComboConditionValue = (condition) => String(condition?.min || "").trim() || String(condition?.max || "").trim();
+
+      hasOptoActiveFilters = function hasOptoActiveFiltersUnified(mode, filters) {
+        if (!mode || filters == null) return false;
+        if (["name", "formula", "code"].includes(mode)) return String(filters || "").trim().length > 0;
+        if (mode === "combo") return getOptoComboConditions(filters).some(hasOptoComboConditionValue);
+        if (mode === "property" && Array.isArray(filters.conditions)) {
+          return filters.conditions.some((condition) => String(condition?.min || "").trim() || String(condition?.max || "").trim());
+        }
+        if (typeof filters === "object") return Object.values(filters).some((value) => String(value || "").trim());
+        return Boolean(String(filters || "").trim());
+      };
+
+      filterOptoByMode = function filterOptoByModeUnified(mode, filters) {
+        if (!hasOptoActiveFilters(mode, filters)) return optoMaterials.slice();
+        if (mode === "name") {
+          return optoMaterials.filter((item) => matchText(filters, [item.name, item.fullName, item.english, item.englishName], state.optoMatchModes?.name || "fuzzy"));
+        }
+        if (mode === "formula") {
+          return optoMaterials.filter((item) => matchFormula(filters, item.formula, state.optoMatchModes?.formula || "exact"));
+        }
+        if (mode === "code") {
+          return optoMaterials.filter((item) => matchText(filters, [item.code, item.id], state.optoMatchModes?.code || "fuzzy"));
+        }
+        if (mode === "combo") {
+          const activeConditions = getOptoComboConditions(filters).filter(hasOptoComboConditionValue);
+          if (!activeConditions.length) return optoMaterials.slice();
+          return optoMaterials.filter((item) => {
+            let result = null;
+            activeConditions.forEach((condition, index) => {
+              const current = Number(item[condition.propertyKey]);
+              const min = parseNumberValue(condition.min);
+              const max = parseNumberValue(condition.max);
+              const pass = Number.isFinite(current) && (min == null || current >= min) && (max == null || current <= max);
+              if (index === 0 || result == null) result = pass;
+              else result = condition.logic === "OR" ? result || pass : result && pass;
+            });
+            return Boolean(result);
+          });
+        }
+        return optoMaterials.slice();
+      };
+
+      getOptoResultHint = function getOptoResultHintUnified(list) {
+        const applied = state.optoAppliedSearch || {};
+        if (!applied.mode || !hasOptoActiveFilters(applied.mode, applied.filters)) {
+          return `默认展示有机光电材料库的全部 ${list.length} 条数据。`;
+        }
+        if (!list.length) return `已按“${getOptoModeLabel(applied.mode)}”执行检索，当前没有匹配结果。`;
+        return `已按“${getOptoModeLabel(applied.mode)}”检索到 ${list.length} 条匹配数据。`;
+      };
+
+      clearCurrentOptoModeDraft = function clearCurrentOptoModeDraftUnified() {
+        const mode = state.optoSearchMode;
+        if (mode === "combo") {
+          state.optoSearchDraft.combo = {
+            conditions: [{ logic: "AND", propertyKey: OPTO_COMBO_FIELDS[0]?.key || "molecularWeight", min: "", max: "" }]
+          };
+        } else if (mode === "property") {
+          state.optoSearchDraft.property = createOptoSearchDrafts().property;
+        } else {
+          state.optoSearchDraft[mode] = "";
+        }
+        state.optoAppliedSearch = { mode: "", filters: null };
+        state.optoCurrentPage = 1;
+      };
+
+      const renderOptoMatchSelect = (mode) => {
+        const current = state.optoMatchModes?.[mode] || (mode === "formula" ? "exact" : "fuzzy");
+        const options = mode === "formula"
+          ? [
+              ["exact", "全结构检索（精确匹配）"],
+              ["substructure", "子结构检索（片段匹配）"],
+              ["fuzzy", "模糊结构检索（近似匹配）"]
+            ]
+          : [
+              ["exact", "准确匹配"],
+              ["fuzzy", "模糊匹配"]
+            ];
+        return `
+          <select class="cross-db-select" data-opto-match-mode="${html(mode)}" aria-label="${html(OPTO_MODE_CONFIG[mode]?.label || "匹配方式")}">
+            ${options.map(([value, label]) => `<option value="${value}" ${current === value ? "selected" : ""}>${html(label)}</option>`).join("")}
+          </select>
+        `;
+      };
+
+      const renderOptoTextWorkspace = (mode) => {
+        const config = OPTO_MODE_CONFIG[mode] || OPTO_MODE_CONFIG.name;
+        const value = state.optoSearchDraft[mode] || "";
+        return `
+          <div class="twod-mode-panel active">
+            <div class="cross-db-search-row">
+              <label class="twod-search-input">
+                <span>检索</span>
+                <input type="text" data-opto-input="${html(mode)}" value="${html(value)}" placeholder="${html(config.placeholder || "请输入检索条件")}">
+              </label>
+              ${renderOptoMatchSelect(mode)}
+              <button class="btn-primary cross-db-search-btn" type="button" data-opto-apply>检索</button>
+              <button class="btn cross-db-clear-btn" type="button" data-opto-reset>清空条件</button>
+            </div>
+            <div class="twod-platform-actions"><div class="twod-status-text">${html(config.helper || "输入条件后点击检索，结果列表将按当前条件更新。")}</div></div>
+          </div>
+        `;
+      };
+
+      if (typeof filterOptoByMode === "function") {
+        getOptoResultList = function getOptoResultListUnified() {
+          ensureOptoRuntimeState();
+          const applied = state.optoAppliedSearch || {};
+          if (!applied.mode || !hasOptoActiveFilters(applied.mode, applied.filters)) {
+            return optoMaterials.slice();
+          }
+          return filterOptoByMode(applied.mode, applied.filters);
+        };
+      }
+
+      if (typeof filterMlffMaterials === "function") {
+        getMlffResultList = function getMlffResultListUnified() {
+          ensureMlffRuntimeState();
+          const applied = state.mlffAppliedSearch || {};
+          if (!applied.mode || !hasMlffActiveFilters(applied.mode, applied.filters)) {
+            return mlffMaterials.slice();
+          }
+          return filterMlffMaterials(applied.mode, applied.filters);
+        };
+      }
+
+      renderOptoModeWorkspace = function renderOptoModeWorkspaceUnified() {
+        ensureOptoSearchEnhancementState();
+        const mode = state.optoSearchMode || "name";
+        if (mode === "combo") {
+          const conditions = getOptoComboConditions(state.optoSearchDraft.combo);
+          return `
+            <div class="twod-mode-panel active">
+              <div class="opto-combo-filter" aria-label="性质组合条件筛选">
+                ${conditions.map((condition, index) => `
+                  <div class="opto-combo-filter-row">
+                    <select class="cross-db-select" data-opto-combo-row="${index}" data-opto-combo-role="property" aria-label="性质字段">
+                      ${OPTO_COMBO_FIELDS.map((item) => `<option value="${html(item.key)}" ${condition.propertyKey === item.key ? "selected" : ""}>${html(item.label)}（${html(item.unit)}）</option>`).join("")}
+                    </select>
+                    <select class="cross-db-select" data-opto-combo-row="${index}" data-opto-combo-role="logic" aria-label="关系条件">
+                      <option value="AND" ${condition.logic !== "OR" ? "selected" : ""}>AND</option>
+                      <option value="OR" ${condition.logic === "OR" ? "selected" : ""}>OR</option>
+                    </select>
+                    <div class="opto-combo-range">
+                      <input class="cross-db-input" type="text" data-opto-combo-row="${index}" data-opto-combo-role="min" value="${html(condition.min || "")}" placeholder="最小值">
+                      <span>-</span>
+                      <input class="cross-db-input" type="text" data-opto-combo-row="${index}" data-opto-combo-role="max" value="${html(condition.max || "")}" placeholder="最大值">
+                    </div>
+                    <div class="opto-combo-row-actions">
+                      ${conditions.length > 1 ? `<button class="btn opto-combo-mini-btn" type="button" data-opto-combo-remove="${index}" aria-label="删除条件">-</button>` : ""}
+                      ${index === conditions.length - 1 ? `<button class="btn opto-combo-mini-btn" type="button" data-opto-combo-add aria-label="新增条件">+</button>` : ""}
+                    </div>
+                  </div>
+                `).join("")}
+                <div class="cross-db-search-row">
+                  <button class="btn-primary cross-db-search-btn" type="button" data-opto-apply>检索</button>
+                  <button class="btn cross-db-clear-btn" type="button" data-opto-reset>清空条件</button>
+                </div>
+              </div>
+              <div class="twod-platform-actions"><div class="twod-status-text">${html(OPTO_MODE_CONFIG.combo.helper)}</div></div>
+            </div>
+          `;
+        }
+        if (mode === "property") {
+          const filters = state.optoSearchDraft.property || {};
+          return `
+            <div class="twod-mode-panel active">
+              <div class="opto-property-grid">
+                ${OPTO_PROPERTY_FIELD_GROUPS.map((group) => renderOptoPropertyCard(group, filters)).join("")}
+              </div>
+              <div class="twod-platform-actions">
+                <div class="twod-status-text">${html(OPTO_MODE_CONFIG.property.helper)}</div>
+                <div class="twod-detail-actions">
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn-primary" type="button" data-opto-apply>检索</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        return renderOptoTextWorkspace(mode);
+      };
+
+      renderMlffModeWorkspace = function renderMlffModeWorkspaceUnified() {
+        const mode = state.mlffSearchMode || "name";
+        if (mode === "property") {
+          const currentField = state.mlffSearchDraft.propertyField || MLFF_PROPERTY_FIELDS[0].key;
+          return `
+            <div class="twod-mode-panel active">
+              <div class="cross-db-search-row">
+                <select class="cross-db-select" id="mlffPropertyField" aria-label="性质数据">
+                  ${MLFF_PROPERTY_FIELDS.map((item) => `<option value="${html(item.key)}" ${currentField === item.key ? "selected" : ""}>${html(item.label)}</option>`).join("")}
+                </select>
+                <input class="cross-db-input" id="mlffPropertyKeyword" type="text" value="${html(state.mlffSearchDraft.propertyKeyword || "")}" placeholder="${html(MLFF_PROPERTY_PLACEHOLDERS[currentField] || "请输入对应内容")}">
+                <button class="btn-primary cross-db-search-btn" type="button" data-mlff-apply>检索</button>
+                <button class="btn cross-db-clear-btn" type="button" data-mlff-reset>清空条件</button>
+              </div>
+              <div class="twod-platform-actions"><div class="twod-status-text">${html(getMlffModeLabel(mode))}支持按参数、方法、能量和结构信息筛选。</div></div>
+            </div>
+          `;
+        }
+        const config = MLFF_SEARCH_MODES.find((item) => item.key === mode) || MLFF_SEARCH_MODES[0];
+        const value = mode === "name" ? state.mlffSearchDraft.name : state.mlffSearchDraft.formula;
+        return renderFlatSearchWorkspace("mlff", mode, config, value, "data-mlff-apply", "data-mlff-reset", "data-mlff-mode-input");
+      };
+
+      renderCatalystPlatformWorkspace = function renderCatalystPlatformWorkspaceUnified() {
+        const mode = state.catalystSearchMode || "keyword";
+        if (mode === "property") {
+          return `
+            <div class="twod-mode-panel active">
+              <div class="cross-db-search-row">
+                <select class="cross-db-select" id="catalystPropertyFieldPlatform" aria-label="性质项">
+                  ${CATALYST_PROPERTY_FIELDS.map((item) => `<option value="${html(item.key)}" ${state.catalystSearchDraft.propertyField === item.key ? "selected" : ""}>${html(item.label)}</option>`).join("")}
+                </select>
+                <input class="cross-db-input" id="catalystPropertyKeywordPlatform" type="text" value="${html(state.catalystSearchDraft.propertyKeyword || "")}" placeholder="请输入性质详情检索值">
+                <button class="btn-primary cross-db-search-btn" type="button" data-catalyst-platform-apply>检索</button>
+                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>清空条件</button>
+              </div>
+              <div class="twod-platform-actions"><div class="twod-status-text">${html(getCatalystSearchLabel(mode))}支持按元素组成、结构特征、晶格参数、电子性质和催化性能筛选。</div></div>
+            </div>
+          `;
+        }
+        if (mode === "route") {
+          return `
+            <div class="twod-mode-panel active">
+              <div class="cross-db-search-row">
+                <input class="cross-db-input" id="catalystRouteReactant" type="text" value="${html(state.catalystSearchDraft.routeReactant || "")}" placeholder="请输入反应物，如 O2、H2O、H+">
+                <input class="cross-db-input" id="catalystRouteProduct" type="text" value="${html(state.catalystSearchDraft.routeProduct || "")}" placeholder="请输入生成物，如 H2O、O2、H2">
+                <button class="btn-primary cross-db-search-btn" type="button" data-catalyst-platform-apply>检索</button>
+                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>清空条件</button>
+              </div>
+              <div class="twod-platform-actions"><div class="twod-status-text">${html(getCatalystSearchLabel(mode))}用于定位反应路线对应的催化材料记录。</div></div>
+            </div>
+          `;
+        }
+        const config = CATALYST_SEARCH_MODES.find((item) => item.key === mode) || CATALYST_SEARCH_MODES[0];
+        return renderFlatSearchWorkspace("catalyst", mode, config, state.catalystSearchDraft[mode] || "", "data-catalyst-platform-apply", "data-catalyst-platform-reset", "data-catalyst-mode-input");
+      };
+
+      renderOptoResultRows = function renderOptoResultRowsUnified(list) {
+        if (!list.length) return `<tr><td colspan="8" class="electrolyte-empty">未检索到符合条件的数据，请调整检索条件后重试。</td></tr>`;
+        const start = ((state.optoCurrentPage || 1) - 1) * (state.optoPageSize || 5);
+        return list.map((item, index) => `
+          <tr>
+            ${cell(start + index + 1)}
+            ${cell(item.code || item.id)}
+            <td title="${html(valueText(item.name))}"><button class="twod-material-link" type="button" data-open-material="opto:${html(item.id)}" data-material-view="basic">${valueText(item.name)}</button></td>
+            ${cell(item.fullName)}
+            ${cell(item.englishName || item.english || item.enName || item.name)}
+            <td title="${html(valueText(item.formula))}"><em>${valueText(item.formula)}</em></td>
+            <td>${renderLowDimDatasetSource(item, "opto")}</td>
+            <td>
+              <div class="twod-record-inline-actions">
+                <button class="twod-action-view" type="button" data-open-material="opto:${html(item.id)}" data-material-view="basic">查看详情</button>
+                <button class="twod-record-link" type="button" data-open-material="opto:${html(item.id)}" data-material-view="prediction">发起预测</button>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+      };
+
+      renderMlffResultRows = function renderMlffResultRowsUnified(list) {
+        if (!list.length) return `<tr><td colspan="13" class="opto-table-empty">未检索到符合条件的机器学习力场数据，请调整检索条件后重试。</td></tr>`;
+        const start = ((state.mlffPage || 1) - 1) * (state.mlffPageSize || 5);
+        return list.map((item, index) => `
+          <tr>
+            ${cell(start + index + 1)}
+            <td title="${html(valueText(item.name))}"><button class="twod-material-link" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="basic">${valueText(item.name)}</button></td>
+            ${cell(item.english)}
+            <td title="${html(valueText(item.formula))}"><em>${valueText(item.formula)}</em></td>
+            ${cell(item.atoms)}
+            ${cell(item.bond)}
+            ${cell(item.forceField)}
+            ${cell(item.method)}
+            ${cell(item.parameterName)}
+            ${cell(item.parameterValue)}
+            ${cell(item.energy, { numeric: true, digits: 2, suffix: " eV" })}
+            <td>${renderLowDimDatasetSource(item, "mlff")}</td>
+            <td>
+              <div class="twod-record-inline-actions">
+                <button class="twod-action-view" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="basic">查看详情</button>
+                <button class="twod-record-link" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="prediction">发起预测</button>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+      };
+
+      renderCatalystPlatformRows = function renderCatalystPlatformRowsUnified(list) {
+        if (!list.length) return `<tr><td colspan="15" class="opto-table-empty">未检索到符合条件的催化材料数据，请调整检索条件后重试。</td></tr>`;
+        const start = ((state.catalystPage || 1) - 1) * (state.catalystPageSize || 5);
+        return list.map((item, index) => `
+          <tr>
+            ${cell(start + index + 1)}
+            <td title="${html(valueText(item.name))}"><button class="twod-material-link" type="button" data-open-material="catalyst:${html(item.id)}" data-material-view="basic">${valueText(item.name)}</button></td>
+            ${cell(item.formula)}
+            ${cell((item.elements || []).join(", ") || item.composition)}
+            ${cell(item.catalystCategory)}
+            ${cell(item.reactionType || item.routeLabel)}
+            ${cell(item.intermediate)}
+            ${cell(item.surface)}
+            ${cell(item.site)}
+            ${cell(item.activationEnergy, { numeric: true, digits: 2, suffix: " eV" })}
+            ${cell(item.selectivity, { numeric: true, digits: 1, suffix: "%" })}
+            ${cell(item.tof, { numeric: true, digits: 1 })}
+            ${cell(item.updatedAt)}
+            <td>${renderLowDimDatasetSource(item, "catalyst")}</td>
+            <td>
+              <div class="twod-record-inline-actions">
+                <button class="twod-action-view" type="button" data-open-material="catalyst:${html(item.id)}" data-material-view="basic">查看详情</button>
+                <button class="twod-record-link" type="button" data-open-material="catalyst:${html(item.id)}" data-material-view="prediction">发起预测</button>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+      };
+
+      const resultToolbars = {
+        opto: {
+          sorts: ["默认排序", "分子量升序", "HOMO能级", "LUMO能级", "带隙排序", "吸收峰位"],
+          filters: ["自有数据集", "公开数据集", "OLED", "OPV", "发光材料", "传输材料"],
+          columns: ["序号", "材料编号", "材料简称", "完整名称", "英文名称", "分子式", "数据来源", "操作"]
+        },
+        mlff: {
+          sorts: ["默认排序", "能量升序", "偶极矩排序", "参数项排序", "更新时间"],
+          filters: ["自有数据集", "公开数据集", "电荷", "多级矩", "分子结构", "小体系结构", "大体系结构"],
+          columns: ["序号", "材料名称", "英文名称", "分子式", "原子组成", "键长/结构", "力场类型", "计算方法", "核心参数项", "参数值", "能量", "数据来源", "操作"]
+        },
+        catalyst: {
+          sorts: ["默认排序", "能垒升序", "选择性降序", "TOF降序", "更新时间"],
+          filters: ["自有数据集", "公开数据集", "金属单晶", "单原子催化剂", "ORR", "OER", "CO2RR"],
+          columns: ["序号", "材料名称", "化学式", "元素组成", "催化材料种类", "反应类型", "中间产物", "表面", "活性位点", "活化能", "选择性", "TOF", "更新时间", "数据来源", "操作"]
+        }
+      };
+
+      const renderModuleTabs = (module, active) => `
+        <div class="module-tab-strip">
+          <button class="module-tab-btn${active === "search" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="search">数据检索</button>
+          <button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="convert">文件转换</button>
+        </div>
+      `;
+
+      renderOptoModule = function renderOptoModuleUnifiedFinal() {
+        if (typeof ensureUnifiedClosureState === "function") ensureUnifiedClosureState();
+        ensureOptoRuntimeState();
+        const page = document.getElementById("page-opto");
+        if (!page) return;
+        if (state.optoTab === "convert") {
+          page.innerHTML = `
+            <div class="page-head"><div><h2>有机光电材料应用</h2><p>面向有机光电材料的统一检索与文件转换平台。</p></div></div>
+            ${renderModuleTabs("opto", "convert")}
+            ${renderMaterialConversionPanel("opto")}
+          `;
+          return;
+        }
+        ensureOptoSearchEnhancementState();
+        const resultList = getOptoResultList();
+        const hasApplied = true;
+        const total = resultList.length;
+        const totalPages = Math.max(1, Math.ceil(total / state.optoPageSize));
+        state.optoCurrentPage = Math.min(state.optoCurrentPage, totalPages);
+        const start = (state.optoCurrentPage - 1) * state.optoPageSize;
+        const pageItems = resultList.slice(start, start + state.optoPageSize);
+        page.innerHTML = `
+          <div class="page-head"><div><h2>有机光电材料应用</h2><p>面向有机光电材料的统一检索与数据查看平台。</p></div></div>
+          ${renderModuleTabs("opto", state.optoTab)}
+          <div class="twod-platform-shell">
+            <section class="card twod-search-platform">
+              <div class="twod-mode-selector" id="optoModeSelector">
+                ${Object.entries(OPTO_MODE_CONFIG).map(([key, item]) => `<button class="twod-mode-btn${state.optoSearchMode === key ? " active" : ""}" type="button" data-opto-mode="${html(key)}">${html(item.label)}</button>`).join("")}
+              </div>
+              <div class="twod-mode-stage" id="optoModeWorkspace">${renderOptoModeWorkspace()}</div>
+            </section>
+            ${hasApplied ? `
+              <section class="card twod-search-results">
+                <div class="twod-results-head"><div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关材料</div><p class="twod-result-hint">${html(getOptoResultHint(resultList))}</p></div></div>
+                ${renderCrossDatabaseToolbar(total, resultToolbars.opto)}
+                <div class="table-wrap twod-result-table-wrap">
+                  <table class="twod-result-table">
+                    <thead><tr><th>序号</th><th>材料编号</th><th>材料简称</th><th>完整名称</th><th>英文名称</th><th>分子式</th><th>数据来源</th><th>操作</th></tr></thead>
+                    <tbody>${renderOptoResultRows(pageItems)}</tbody>
+                  </table>
+                </div>
+                <div class="result-footer twod-result-footer">${renderSharedPaginationFooter({ total, currentPage: state.optoCurrentPage, totalPages, pageSize: state.optoPageSize, pageSizeId: "optoResultPageSize", pageAttr: "data-opto-page", jumpModule: "opto" })}</div>
+              </section>
+            ` : ""}
+          </div>
+        `;
+      };
+
+      renderMlffModule = function renderMlffModuleUnifiedFinal() {
+        if (typeof ensureUnifiedClosureState === "function") ensureUnifiedClosureState();
+        ensureMlffRuntimeState();
+        if (typeof ensureMlffPageStylesOverride === "function") ensureMlffPageStylesOverride();
+        const page = document.getElementById("page-mlff");
+        if (!page) return;
+        if (state.mlffTab === "convert") {
+          page.innerHTML = `
+            <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载与格式转换能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>数据术语表</button></div></div>
+            ${renderModuleTabs("mlff", "convert")}
+            ${renderMaterialConversionPanel("mlff")}
+          `;
+          return;
+        }
+        const hasResults = true;
+        const resultList = getMlffResultList();
+        const total = resultList.length;
+        const totalPages = Math.max(1, Math.ceil(total / state.mlffPageSize));
+        state.mlffPage = Math.min(state.mlffPage, totalPages);
+        const start = (state.mlffPage - 1) * state.mlffPageSize;
+        const pageRows = resultList.slice(start, start + state.mlffPageSize);
+        page.innerHTML = `
+          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载和术语表浏览能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>数据术语表</button></div></div>
+          ${renderModuleTabs("mlff", state.mlffTab)}
+          <div class="twod-platform-shell">
+            <section class="card twod-search-platform">
+              <div class="twod-mode-selector" id="mlffModeSelector">
+                ${MLFF_SEARCH_MODES.map((item) => `<button class="twod-mode-btn${state.mlffSearchMode === item.key ? " active" : ""}" type="button" data-mlff-mode="${html(item.key)}">${html(getMlffDisplayModeLabel(item.key))}</button>`).join("")}
+              </div>
+              <div class="twod-mode-stage" id="mlffModeWorkspace">${renderMlffModeWorkspace()}</div>
+            </section>
+            ${hasResults ? `
+              <section class="card twod-search-results">
+                <div class="twod-results-head"><div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关数据</div><p class="twod-result-hint">${html(getMlffResultHint(resultList))}</p></div></div>
+                ${renderCrossDatabaseToolbar(total, resultToolbars.mlff)}
+                <div class="table-wrap twod-result-table-wrap">
+                  <table class="twod-result-table">
+                    <thead><tr><th>序号</th><th>材料名称</th><th>英文名称</th><th>分子式</th><th>原子组成</th><th>键长/结构</th><th>力场类型</th><th>计算方法</th><th>核心参数项</th><th>参数值</th><th>能量</th><th>数据来源</th><th>操作</th></tr></thead>
+                    <tbody>${renderMlffResultRows(pageRows)}</tbody>
+                  </table>
+                </div>
+                <div class="result-footer twod-result-footer">${renderSharedPaginationFooter({ total, currentPage: state.mlffPage, totalPages, pageSize: state.mlffPageSize, pageSizeId: "mlffPageSizeFinal", pageAttr: "data-mlff-page", jumpModule: "mlff" })}</div>
+              </section>
+            ` : ""}
+          </div>
+        `;
+      };
+
+      renderCatalystModule = function renderCatalystModuleUnifiedFinal() {
+        if (typeof ensureUnifiedClosureState === "function") ensureUnifiedClosureState();
+        ensureCatalystPlatformState();
+        if (typeof ensureCatalystPageStylesOverride === "function") ensureCatalystPageStylesOverride();
+        const page = document.getElementById("page-catalyst");
+        if (!page) return;
+        if (state.catalystTab === "convert") {
+          page.innerHTML = `
+            <div class="page-head"><div><h2>催化材料应用</h2><p>围绕催化材料检索、位点分析、材料对比、催化构建与文件转换形成完整业务链路。</p></div></div>
+            ${renderModuleTabs("catalyst", "convert")}
+            ${renderMaterialConversionPanel("catalyst")}
+          `;
+          return;
+        }
+        const resultList = getCatalystPlatformResults();
+        const total = resultList.length;
+        const hasApplied = true;
+        const { totalPages, items } = getCatalystPagedPlatformResults(resultList);
+        page.innerHTML = `
+          <div class="page-head"><div><h2>催化材料应用</h2><p>围绕催化材料检索、位点分析、材料对比与催化构建形成完整业务链路。</p></div></div>
+          ${renderModuleTabs("catalyst", state.catalystTab)}
+          <div class="twod-platform-shell">
+            <section class="card twod-search-platform">
+              <div class="twod-mode-selector" id="catalystModeSelector">
+                ${CATALYST_SEARCH_MODES.map((item) => `<button class="twod-mode-btn${state.catalystSearchMode === item.key ? " active" : ""}" type="button" data-catalyst-mode="${html(item.key)}">${html(item.label)}</button>`).join("")}
+              </div>
+              <div class="twod-mode-stage" id="catalystModeWorkspace">${renderCatalystPlatformWorkspace()}</div>
+            </section>
+            ${hasApplied ? `
+              <section class="card twod-search-results">
+                <div class="twod-results-head"><div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关数据</div><p class="twod-result-hint">${html(getCatalystPlatformHint(resultList))}</p></div></div>
+                ${renderCrossDatabaseToolbar(total, resultToolbars.catalyst)}
+                <div class="table-wrap twod-result-table-wrap">
+                  <table class="twod-result-table">
+                    <thead><tr><th>序号</th><th>材料名称</th><th>化学式</th><th>元素组成</th><th>催化材料种类</th><th>反应类型</th><th>中间产物</th><th>表面</th><th>活性位点</th><th>活化能</th><th>选择性</th><th>TOF</th><th>更新时间</th><th>数据来源</th><th>操作</th></tr></thead>
+                    <tbody>${renderCatalystPlatformRows(items)}</tbody>
+                  </table>
+                </div>
+                <div class="result-footer twod-result-footer">${renderSharedPaginationFooter({ total, currentPage: state.catalystPage, totalPages, pageSize: state.catalystPageSize, pageSizeId: "catalystPageSizePlatform", pageAttr: "data-catalyst-platform-page", jumpModule: "catalyst" })}</div>
+              </section>
+            ` : ""}
+          </div>
+        `;
+      };
+
+      applyOptoSearch = function applyOptoSearchUnified() {
+        ensureOptoSearchEnhancementState();
+        const page = document.getElementById("page-opto");
+        const mode = state.optoSearchMode || "name";
+        if (["name", "formula", "code"].includes(mode)) {
+          const input = page?.querySelector(`[data-opto-input="${mode}"]`);
+          state.optoSearchDraft[mode] = input ? input.value : (state.optoSearchDraft[mode] || "");
+        }
+        if (mode === "combo") {
+          syncOptoComboDraftFromDom();
+        }
+        const filters = mode === "combo" || mode === "property"
+          ? JSON.parse(JSON.stringify(state.optoSearchDraft[mode]))
+          : state.optoSearchDraft[mode];
+        state.optoAppliedSearch = { mode, filters };
+        state.optoCurrentPage = 1;
+      };
+
+      function syncOptoComboDraftFromDom() {
+        ensureOptoSearchEnhancementState();
+        const rows = [...document.querySelectorAll("#page-opto [data-opto-combo-row][data-opto-combo-role='property']")];
+        if (!rows.length) return;
+        const conditions = rows.map((propertySelect) => {
+          const index = propertySelect.dataset.optoComboRow;
+          return {
+            propertyKey: propertySelect.value || OPTO_COMBO_FIELDS[0]?.key || "molecularWeight",
+            logic: document.querySelector(`#page-opto [data-opto-combo-row="${index}"][data-opto-combo-role="logic"]`)?.value || "AND",
+            min: document.querySelector(`#page-opto [data-opto-combo-row="${index}"][data-opto-combo-role="min"]`)?.value || "",
+            max: document.querySelector(`#page-opto [data-opto-combo-row="${index}"][data-opto-combo-role="max"]`)?.value || ""
+          };
+        });
+        state.optoSearchDraft.combo = { conditions };
+      }
+
+      document.body.addEventListener("input", (event) => {
+        const target = event.target;
+        if (!target.closest?.("#page-opto")) return;
+        const row = target.getAttribute("data-opto-combo-row");
+        const role = target.getAttribute("data-opto-combo-role");
+        if (row == null || !role) return;
+        ensureOptoSearchEnhancementState();
+        const condition = state.optoSearchDraft.combo.conditions[Number(row)];
+        if (!condition) return;
+        if (role === "min") condition.min = target.value;
+        if (role === "max") condition.max = target.value;
+      });
+
+      document.body.addEventListener("change", (event) => {
+        const target = event.target;
+        if (!target.closest?.("#page-opto")) return;
+        const matchMode = target.getAttribute("data-opto-match-mode");
+        if (matchMode) {
+          ensureOptoSearchEnhancementState();
+          state.optoMatchModes[matchMode] = target.value;
+          return;
+        }
+        const row = target.getAttribute("data-opto-combo-row");
+        const role = target.getAttribute("data-opto-combo-role");
+        if (row == null || !role) return;
+        ensureOptoSearchEnhancementState();
+        const condition = state.optoSearchDraft.combo.conditions[Number(row)];
+        if (!condition) return;
+        if (role === "property") condition.propertyKey = target.value;
+        if (role === "logic") condition.logic = target.value === "OR" ? "OR" : "AND";
+      });
+
+      document.body.addEventListener("click", (event) => {
+        const addButton = event.target.closest?.("[data-opto-combo-add]");
+        const removeButton = event.target.closest?.("[data-opto-combo-remove]");
+        if (!addButton && !removeButton) return;
+        ensureOptoSearchEnhancementState();
+        if (addButton) {
+          state.optoSearchDraft.combo.conditions.push({
+            logic: "AND",
+            propertyKey: OPTO_COMBO_FIELDS[0]?.key || "molecularWeight",
+            min: "",
+            max: ""
+          });
+        }
+        if (removeButton) {
+          const index = Number(removeButton.dataset.optoComboRemove);
+          state.optoSearchDraft.combo.conditions = state.optoSearchDraft.combo.conditions.filter((_, itemIndex) => itemIndex !== index);
+          if (!state.optoSearchDraft.combo.conditions.length) {
+            state.optoSearchDraft.combo.conditions.push({
+              logic: "AND",
+              propertyKey: OPTO_COMBO_FIELDS[0]?.key || "molecularWeight",
+              min: "",
+              max: ""
+            });
+          }
+        }
+        renderOptoModule();
+      });
+
+      if (typeof filterElectrolyteMaterials === "function") {
+        getElectrolyteResultList = function getElectrolyteResultListUnifiedDefault() {
+          ensureElectrolyteRuntimeState();
+          const { applied, hasQuery } = getElectrolyteAppliedSearchOverride();
+          const baseList = state.electrolyteScope === "all"
+            ? electrolyteMaterials.slice()
+            : getElectrolyteCategoryMaterials(state.electrolyteCategory);
+          if (!hasQuery) return baseList;
+          return filterElectrolyteMaterials(applied.category, applied.mode, applied.filters, baseList);
+        };
+      }
+
+      if (typeof filterCatalystPlatformResults === "function") {
+        getCatalystPlatformResults = function getCatalystPlatformResultsUnifiedDefault() {
+          ensureCatalystPlatformState();
+          const applied = state.catalystAppliedSearch || {};
+          const list = !applied.mode || !hasCatalystActiveFilters(applied.mode, applied.filters)
+            ? catalystMaterials.slice()
+            : filterCatalystPlatformResults(applied.mode, applied.filters);
+          state.catalystBatchSelection = state.catalystBatchSelection.filter((id) => list.some((item) => item.id === id));
+          return list;
+        };
+      }
+
+      if (typeof refreshTwodResults === "function") {
+        refreshTwodResults = function refreshTwodResultsUnifiedDefault(options = {}) {
+          const body = document.getElementById("twodBaseTableBody");
+          if (!body) return;
+          const { resetPage = false } = options;
+          state.twodHasSearched = true;
+          const hasAppliedCondition = Boolean(
+            String(state.twodSearchApplied?.formula || "").trim()
+            || String(state.twodSearchApplied?.elements || "").trim()
+            || String(state.twodSearchApplied?.materialId || "").trim()
+            || (Array.isArray(state.twodPeriodicApplied) && state.twodPeriodicApplied.length)
+            || state.twodAppliedPropertyCategory
+          );
+          const list = hasAppliedCondition ? getActiveTwodResults() : twodMaterials.slice();
+          const processedList = typeof getTwodProcessedResults === "function" ? getTwodProcessedResults(list) : list.slice();
+          state.twodLastResults = processedList.slice();
+          renderTwodSearchResults(list, resetPage);
+          const hint = hasAppliedCondition
+            ? getTwodResultHint(state.twodSearchMode, processedList)
+            : `默认展示二维材料数据库的全部 ${processedList.length} 条数据。`;
+          const hintNode = document.getElementById("twodResultHint");
+          if (hintNode) hintNode.textContent = hint;
+          if (typeof setTwodResultVisibility === "function") setTwodResultVisibility(true);
+        };
+      }
+
+      if (state?.page === "opto") renderOptoModule();
+      if (state?.page === "mlff") renderMlffModule();
+      if (state?.page === "catalyst") renderCatalystModule();
+    })();
+  </script>
+  <style id="algorithm-detail-reference-style">
+    #algorithmDocModal .modal-lg {
+      width: min(1120px, calc(100vw - 48px));
+      max-height: calc(100vh - 48px);
+      overflow: hidden;
+    }
+
+    #algorithmDocModal .modal-body {
+      max-height: calc(100vh - 156px);
+      overflow-y: auto;
+      padding: 0;
+      background: linear-gradient(180deg, #f7f9ff 0%, #ffffff 34%, #ffffff 100%);
+    }
+
+    #algorithmDocModal .modal-footer {
+      border-top: 1px solid #e8edf7;
+      background: #ffffff;
+    }
+
+    .algorithm-reference-doc {
+      padding: 22px 22px 26px;
+      color: #172033;
+    }
+
+    .algorithm-reference-crumb {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+      color: #6b768b;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .algorithm-reference-crumb strong {
+      color: #2f5bea;
+      font-weight: 600;
+    }
+
+    .algorithm-reference-hero {
+      padding: 22px 22px 20px;
+      border: 1px solid #e5ebf6;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 10px 30px rgba(32, 83, 177, 0.08);
+    }
+
+    .algorithm-reference-hero h3 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.35;
+      color: #121a2c;
+      font-weight: 700;
+    }
+
+    .algorithm-reference-hero p {
+      margin: 10px 0 0;
+      color: #5e6a7d;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .algorithm-reference-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .algorithm-reference-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px 12px;
+      border: 1px solid #edf1f8;
+      border-radius: 6px;
+      background: #fbfcff;
+      color: #26344d;
+      font-size: 13px;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    .algorithm-reference-tag span {
+      margin-right: 8px;
+      color: #7a8699;
+    }
+
+    .algorithm-reference-section {
+      margin-top: 24px;
+    }
+
+    .algorithm-reference-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .algorithm-reference-section h4 {
+      margin: 0;
+      color: #121a2c;
+      font-size: 17px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .algorithm-reference-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 0 14px;
+      border: 1px solid #dbe4f3;
+      border-radius: 18px;
+      background: #ffffff;
+      color: #283449;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+
+    .algorithm-reference-copy:hover {
+      border-color: #2f5bea;
+      background: #f5f8ff;
+      color: #244bd6;
+    }
+
+    .algorithm-reference-code {
+      margin: 0;
+      max-height: 360px;
+      overflow: auto;
+      padding: 22px 20px;
+      border-radius: 7px;
+      background: #1f2430;
+      color: #eef3ff;
+      font: 13px/1.75 "Consolas", "SFMono-Regular", "Menlo", monospace;
+      white-space: pre;
+    }
+
+    .algorithm-reference-table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e8edf7;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .algorithm-reference-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      table-layout: fixed;
+    }
+
+    .algorithm-reference-table th,
+    .algorithm-reference-table td {
+      padding: 13px 14px;
+      border-bottom: 1px solid #eef2f8;
+      color: #344158;
+      font-size: 13px;
+      line-height: 1.55;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .algorithm-reference-table th {
+      background: #f8faff;
+      color: #26344d;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .algorithm-reference-table tr:last-child th,
+    .algorithm-reference-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .algorithm-reference-table code,
+    .algorithm-reference-required {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #eef3ff;
+      color: #2f5bea;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .algorithm-reference-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .algorithm-reference-info {
+      min-width: 0;
+      padding: 14px 16px;
+      border: 1px solid #e8edf7;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .algorithm-reference-info span {
+      display: block;
+      margin-bottom: 7px;
+      color: #7a8699;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .algorithm-reference-info strong {
+      display: block;
+      overflow: hidden;
+      color: #172033;
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .algorithm-reference-prose {
+      padding: 16px 18px;
+      border: 1px solid #e8edf7;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #4b5870;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .algorithm-reference-prose p {
+      margin: 0;
+    }
+
+    .algorithm-reference-prose p + p {
+      margin-top: 10px;
+    }
+
+    @media (max-width: 860px) {
+      #algorithmDocModal .modal-lg {
+        width: calc(100vw - 24px);
+      }
+
+      .algorithm-reference-doc {
+        padding: 16px;
+      }
+
+      .algorithm-reference-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .algorithm-reference-section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+
+  <script id="algorithm-detail-reference-script">
+    (() => {
+      const html = (value) => typeof escapeHtml === "function"
+        ? escapeHtml(value)
+        : String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+
+      const camelParam = (value, fallback) => {
+        const raw = String(value || "").trim();
+        const known = {
+          "结构文件索引": "structure_file_id",
+          "晶格约束": "lattice_constraints",
+          "收敛阈值": "convergence_threshold",
+          "自旋设置": "spin_settings",
+          "缺陷类型": "defect_type",
+          "超胞索引": "supercell_id",
+          "层数": "layer_count",
+          "堆垛方式": "stacking_mode",
+          "特征选择": "feature_columns",
+          "结构索引": "structure_id",
+          "k 点路径": "k_path",
+          "能量范围": "energy_range",
+          "材料索引": "material_id",
+          "温度区间": "temperature_range",
+          "结果类型": "result_type",
+          "材料名称": "material_name",
+          "外部数据库源": "source_database",
+          "字段映射模板": "field_mapping",
+          "电解质类型": "electrolyte_type",
+          "数据源": "data_source",
+          "采集字段": "collect_fields",
+          "光电材料数据集": "opto_dataset_id",
+          "分类模板": "classification_template",
+          "标签体系": "tag_schema",
+          "电解质数据集": "electrolyte_dataset_id",
+          "分类字段": "classification_fields",
+          "标签规则": "tag_rules",
+          "参考数据索引": "reference_dataset_id",
+          "元素类型": "element_types",
+          "拟合区间": "fit_range",
+          "势函数模板": "potential_template",
+          "分子结构索引": "molecule_structure_id",
+          "电荷设置": "charge_settings",
+          "分子索引": "molecule_id",
+          "多极矩模板": "multipole_template",
+          "训练集索引": "training_dataset_id",
+          "模型版本": "model_version",
+          "返回格式": "response_format",
+          "模型索引": "model_id",
+          "数据集编号": "dataset_code",
+          "回调方式": "callback_mode",
+          "输出格式": "output_format",
+          "表面索引": "surface_id",
+          "反应类型": "reaction_type",
+          "吸附物": "adsorbate",
+          "目标产物": "target_product",
+          "筛选条件": "filter_rules",
+          "催化剂索引": "catalyst_id",
+          "反应条件": "reaction_conditions",
+          "表面模型": "surface_model",
+          "反应路径索引": "reaction_path_id",
+          "温度": "temperature",
+          "环境参数": "environment_parameters",
+          "吸附物索引": "adsorbate_id",
+          "表面位点": "surface_site"
+        };
+        return known[raw] || `param_${fallback}`;
+      };
+
+      const getAlgorithmPath = (algorithmId) => {
+        if (typeof algorithms === "undefined") return null;
+        for (const [categoryKey, category] of Object.entries(algorithms)) {
+          for (const [subcategoryKey, subcategory] of Object.entries(category.subcategories || {})) {
+            const match = (subcategory.algorithms || []).find((item) => item.id === algorithmId);
+            if (match) return { categoryKey, category, subcategoryKey, subcategory, algorithm: match };
+          }
+        }
+        return null;
+      };
+
+      const splitItems = (value) => String(value || "").split(/[、,，]/).map((item) => item.trim()).filter(Boolean);
+
+      const normalizeEndpoint = (endpoint) => {
+        const raw = String(endpoint || "").trim();
+        if (!raw) return { method: "POST", path: "/api/v1/algorithms/run" };
+        const match = raw.match(/^(GET|POST|PUT|DELETE|PATCH)\s+(.+)$/i);
+        return match ? { method: match[1].toUpperCase(), path: match[2].trim() } : { method: "POST", path: raw };
+      };
+
+      const getAlgorithmScenario = (path) => {
+        const title = path?.category?.title || "";
+        const subTitle = path?.subcategory?.title || "";
+        if (title.includes("二维材料")) {
+          return subTitle.includes("驰豫")
+            ? "二维材料结构优化、后续性质计算前处理、数据库结构结果对比"
+            : "二维材料性质计算、图谱数据生成、数据库字段自动补全";
+        }
+        if (title.includes("低维材料")) return "多源低维材料数据采集、数据分类、字段标准化入库";
+        if (title.includes("机器学习力场")) return "力场参数拟合、势能面建模、结构能量和受力快速预测";
+        if (title.includes("催化材料")) return "催化性能筛选、表面结构预测、反应路径和吸附态分析";
+        return "低维材料数据库分析预测、批量调用和结果对比";
+      };
+
+      const getAlgorithmFeatureText = (algorithm, path) => {
+        const tags = Array.isArray(algorithm.tags) ? algorithm.tags.join("、") : "";
+        const status = typeof getAlgorithmStatusText === "function" ? getAlgorithmStatusText(algorithm.status) : algorithm.status;
+        return `${tags || path.subcategory.title}；${algorithm.version || "v1.0"}；接口状态${status}`;
+      };
+
+      const getRequestRows = (algorithm) => {
+        const items = splitItems(algorithm.input);
+        return (items.length ? items : ["输入数据索引", "计算参数", "返回格式"]).map((item, index) => ({
+          name: camelParam(item, index + 1),
+          type: index === 0 ? "string" : "string | array",
+          required: index < 2,
+          desc: item
+        }));
+      };
+
+      const getOutputRows = (algorithm) => {
+        const items = splitItems(algorithm.output);
+        return (items.length ? items : ["任务状态", "结果文件", "摘要报告"]).map((item, index) => ({
+          name: camelParam(item, index + 1).replace(/^param_/, "result_"),
+          type: index === 0 ? "object" : "string | object",
+          desc: item
+        }));
+      };
+
+      const buildExampleParams = (rows) => {
+        const params = {};
+        rows.slice(0, 4).forEach((row, index) => {
+          if (row.type.includes("array")) params[row.name] = index === 0 ? ["sample_id"] : [row.desc];
+          else params[row.name] = index === 0 ? "sample_material_001" : row.desc;
+        });
+        return JSON.stringify(params, null, 4).replace(/^/gm, "    ");
+      };
+
+      const buildAlgorithmApiCode = (algorithm, path, requestRows) => {
+        const endpoint = normalizeEndpoint(algorithm.endpoint);
+        const paramsBlock = buildExampleParams(requestRows);
+        return `# ${algorithm.title}：按数据应用算法接口调用
+import json
+import requests
+
+url = "https://api.lowdim-materials.local${endpoint.path}"
+params = ${paramsBlock.trimStart()}
+
+with open("input_material_data.zip", "rb") as file:
+    resp = requests.${endpoint.method.toLowerCase()}(
+        url,
+        files={"file": file},
+        data={"params": json.dumps(params, ensure_ascii=False)}
+    )
+
+print(resp.json())`;
+      };
+
+      const buildAlgorithmInputExample = (algorithm, path, rows) => {
+        return JSON.stringify({
+          algorithmName: algorithm.title,
+          algorithmType: path.category.title,
+          algorithmCategory: path.subcategory.title,
+          version: algorithm.version || "v1.0",
+          params: rows.reduce((acc, row, index) => {
+            acc[row.name] = index === 0 ? "sample_material_001" : row.desc;
+            return acc;
+          }, {})
+        }, null, 2);
+      };
+
+      const buildAlgorithmOutputExample = (algorithm, outputRows) => {
+        return JSON.stringify({
+          status: algorithm.status === "maintenance" ? "maintenance" : "success",
+          taskId: `${algorithm.slug || algorithm.id}_task_20260815`,
+          algorithmName: algorithm.title,
+          results: outputRows.reduce((acc, row) => {
+            acc[row.name] = row.desc;
+            return acc;
+          }, {}),
+          updatedAt: algorithm.updatedAt || "2026-08-15"
+        }, null, 2);
+      };
+
+      const renderRows = (rows, type) => rows.map((row) => `
+        <tr>
+          <td><code>${html(row.name)}</code></td>
+          <td>${html(row.type)}</td>
+          ${type === "request" ? `<td>${row.required ? '<span class="algorithm-reference-required">必填</span>' : "否"}</td>` : ""}
+          <td>${html(row.desc)}</td>
+        </tr>
+      `).join("");
+
+      function renderUnifiedAlgorithmDoc(algorithm, path) {
+        const requestRows = getRequestRows(algorithm);
+        const outputRows = getOutputRows(algorithm);
+        const endpoint = normalizeEndpoint(algorithm.endpoint);
+        const statusText = typeof getAlgorithmStatusText === "function" ? getAlgorithmStatusText(algorithm.status) : algorithm.status;
+        const apiCode = buildAlgorithmApiCode(algorithm, path, requestRows);
+        return `
+          <div class="algorithm-reference-doc">
+            <div class="algorithm-reference-crumb">
+              <span>算法中心</span><span>/</span><span>${html(path.category.title)}</span><span>/</span><strong>${html(path.subcategory.title)}</strong>
+            </div>
+            <section class="algorithm-reference-hero">
+              <h3>${html(algorithm.title)}</h3>
+              <p>${html(algorithm.desc || "该算法用于低维材料数据库分析预测任务，支持通过 API 调用完成批量计算、数据处理和结果回写。")}</p>
+              <div class="algorithm-reference-tags">
+                <div class="algorithm-reference-tag"><span>功能特点</span>${html(getAlgorithmFeatureText(algorithm, path))}</div>
+                <div class="algorithm-reference-tag"><span>适用场景</span>${html(getAlgorithmScenario(path))}</div>
+              </div>
+            </section>
+
+            <section class="algorithm-reference-section">
+              <div class="algorithm-reference-grid">
+                <div class="algorithm-reference-info"><span>算法类型</span><strong title="${html(path.category.title)}">${html(path.category.title)}</strong></div>
+                <div class="algorithm-reference-info"><span>算法分类</span><strong title="${html(path.subcategory.title)}">${html(path.subcategory.title)}</strong></div>
+                <div class="algorithm-reference-info"><span>算法状态</span><strong>${html(statusText)}</strong></div>
+                <div class="algorithm-reference-info"><span>算法版本/大小</span><strong>${html(algorithm.version || "v1.0")} / ${html(algorithm.packageSize || "-")}</strong></div>
+                <div class="algorithm-reference-info"><span>更新时间</span><strong>${html(algorithm.updatedAt || "-")}</strong></div>
+                <div class="algorithm-reference-info"><span>接口地址</span><strong title="${html(endpoint.path)}">${html(endpoint.method)} ${html(endpoint.path)}</strong></div>
+              </div>
+            </section>
+
+            <section class="algorithm-reference-section">
+              <div class="algorithm-reference-section-head">
+                <h4>API 调用示例</h4>
+                <button class="algorithm-reference-copy" type="button" data-algorithm-copy-code>复制代码</button>
+              </div>
+              <pre class="algorithm-reference-code" id="algorithmReferenceCode">${html(apiCode)}</pre>
+            </section>
+
+            <section class="algorithm-reference-section">
+              <div class="algorithm-reference-section-head"><h4>请求参数</h4></div>
+              <div class="algorithm-reference-table-wrap">
+                <table class="algorithm-reference-table">
+                  <thead><tr><th style="width:24%;">参数名</th><th style="width:16%;">类型</th><th style="width:12%;">必填</th><th>说明</th></tr></thead>
+                  <tbody>${renderRows(requestRows, "request")}</tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="algorithm-reference-section">
+              <div class="algorithm-reference-section-head"><h4>输出结果</h4></div>
+              <div class="algorithm-reference-table-wrap">
+                <table class="algorithm-reference-table">
+                  <thead><tr><th style="width:24%;">字段名</th><th style="width:18%;">类型</th><th>说明</th></tr></thead>
+                  <tbody>${renderRows(outputRows, "output")}</tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        `;
+      }
+
+      window.renderAlgorithmDocModal = function renderAlgorithmDocModalUnifiedReference(algorithmId) {
+        const path = getAlgorithmPath(algorithmId);
+        const algorithm = path?.algorithm || (typeof findAlgorithmById === "function" ? findAlgorithmById(algorithmId) : null);
+        if (!algorithm || !path) return;
+        if (typeof state !== "undefined") state.activeAlgorithmResourceId = algorithm.id;
+
+        const title = document.getElementById("algorithmDocTitle");
+        const detailTitleNode = document.getElementById("algorithmDetailTitle");
+        const detailHeadNode = detailTitleNode?.closest(".algorithm-item-head");
+        const detailDescNode = document.getElementById("algorithmDetailDesc");
+        const detailTagsNode = document.getElementById("algorithmDetailTags");
+        const detailMetaNode = document.getElementById("algorithmDetailMeta");
+        const endpointNode = document.getElementById("algorithmEndpointList");
+        const maintenanceAlert = document.getElementById("algorithmMaintenanceAlert");
+
+        if (title) title.textContent = `${algorithm.title} - 算法详情`;
+        if (detailHeadNode) detailHeadNode.hidden = true;
+        if (detailDescNode) detailDescNode.hidden = true;
+        if (detailTagsNode) detailTagsNode.hidden = true;
+        if (endpointNode) endpointNode.innerHTML = "";
+        if (maintenanceAlert) maintenanceAlert.hidden = true;
+        if (detailMetaNode) {
+          detailMetaNode.className = "algorithm-doc-mount";
+          detailMetaNode.innerHTML = renderUnifiedAlgorithmDoc(algorithm, path);
+        }
+        if (typeof openModal === "function") openModal("algorithmDocModal");
+      };
+
+      document.body.addEventListener("click", (event) => {
+        const copyButton = event.target.closest?.("[data-algorithm-copy-code]");
+        if (!copyButton) return;
+        const code = document.getElementById("algorithmReferenceCode")?.textContent || "";
+        const done = () => {
+          copyButton.textContent = "已复制";
+          window.setTimeout(() => { copyButton.textContent = "复制代码"; }, 1600);
+          if (typeof showToast === "function") showToast("算法详情", "API 调用示例已复制。");
+        };
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(code).then(done).catch(done);
+        } else {
+          done();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
