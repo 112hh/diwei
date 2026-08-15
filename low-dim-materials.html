@@ -13712,8 +13712,16 @@
     }
 
     #page-twod .twod-property-select-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(280px, 1fr);
       align-items: end;
       gap: 16px;
+    }
+
+    #page-twod .twod-property-select,
+    #page-twod .twod-property-field-filter-slot {
+      width: 100%;
+      min-width: 0;
     }
 
     #page-twod .twod-property-panel,
@@ -37668,7 +37676,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 <label for="propertyCategorySelect">性质类别</label>
                 <select id="propertyCategorySelect"></select>
               </div>
-              <div class="twod-status-text">选择性质类别后，展示对应的二维材料性质字段。</div>
+              <div class="twod-property-field-filter-slot" id="propertyFieldFilterSlot"></div>
             </div>
             <div class="twod-property-panel">
               <div class="twod-property-panel-head">
@@ -52472,6 +52480,49 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       "机器学习力场数据库标准",
       "催化材料数据库标准"
     ];
+    const LOWDIM_STANDARD_MANAGEMENT_LEVELS = [
+      "强制性国标 GB",
+      "推荐性国标 GB/T",
+      "国家环境保护标准 HJ",
+      "行业标准",
+      "地方标准",
+      "团体标准",
+      "企业标准",
+      "平台标准"
+    ];
+    const LOWDIM_STANDARD_MANAGEMENT_STATUSES = ["启用", "停用", "待审核"];
+    const LOWDIM_STANDARD_MANAGEMENT_DEFAULTS = {
+      "二维材料数据库标准": {
+        standardNo: "STD-2D-001",
+        standardLevel: "平台标准",
+        publishOrganization: "二维材料数据库建设组",
+        publishDate: "2026-08-11"
+      },
+      "有机光电材料数据库标准": {
+        standardNo: "STD-OPTO-001",
+        standardLevel: "平台标准",
+        publishOrganization: "有机光电材料数据库建设组",
+        publishDate: "2026-08-10"
+      },
+      "电解质材料数据库标准": {
+        standardNo: "STD-EL-001",
+        standardLevel: "平台标准",
+        publishOrganization: "电解质材料数据库建设组",
+        publishDate: "2026-08-09"
+      },
+      "机器学习力场数据库标准": {
+        standardNo: "STD-MLFF-001",
+        standardLevel: "平台标准",
+        publishOrganization: "机器学习力场数据库建设组",
+        publishDate: "2026-08-08"
+      },
+      "催化材料数据库标准": {
+        standardNo: "STD-CA-001",
+        standardLevel: "平台标准",
+        publishOrganization: "催化材料数据库建设组",
+        publishDate: "2026-08-07"
+      }
+    };
 
     function getLowdimStandardSystemState() {
       if (!state.lowdimStandardSystem) {
@@ -52588,14 +52639,24 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const files = normalizeLowdimStandardFiles(record);
       const standardFileName = record.standardFileName || record.standardName || files[0]?.name || "未命名标准文件";
       const intro = record.intro || record.systemPurpose || record.standardContent || "暂无简介";
+      const defaults = LOWDIM_STANDARD_MANAGEMENT_DEFAULTS[record.standardType] || LOWDIM_STANDARD_MANAGEMENT_DEFAULTS[LOWDIM_STANDARD_SYSTEM_TYPES[0]];
+      const fallbackNo = `STD-${String(record.id || "standard").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toUpperCase()}`;
+      const createdDate = String(record.createdAt || "").match(/\d{4}-\d{2}-\d{2}/)?.[0] || defaults.publishDate;
       return {
         ...record,
+        standardNo: record.standardNo || defaults.standardNo || fallbackNo,
         standardFileName,
         intro,
         uploadUser: record.uploadUser || record.creator || "管理员9527",
         uploadTime: record.uploadTime || record.createdAt || "2026-08-11 10:00",
         format: record.format || (files.length ? Array.from(new Set(files.map((file) => file.format || getLowdimStandardFileFormat(file)))).join(" / ") : "未上传"),
         standardType: record.standardType || LOWDIM_STANDARD_SYSTEM_TYPES[0],
+        standardLevel: record.standardLevel || "平台标准",
+        publishOrganization: record.publishOrganization || defaults.publishOrganization || "低维材料标准体系建设组",
+        publishDate: record.publishDate || createdDate,
+        modifiedBy: record.modifiedBy || record.creator || record.uploadUser || "管理员9527",
+        status: record.status || "启用",
+        updatedAt: record.updatedAt || record.uploadTime || record.createdAt || "2026-08-11 10:00",
         files
       };
     }
@@ -52605,7 +52666,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const keyword = String(std.keyword || "").trim().toLowerCase();
       return (std.records || []).filter((record) => {
         const typeMatch = record.standardType === std.activeType;
-        const text = `${record.standardFileName} ${record.intro} ${record.uploadUser} ${record.uploadTime} ${record.format} ${record.standardType} ${record.files.map((file) => file.name).join(" ")}`.toLowerCase();
+        const text = `${record.standardNo} ${record.standardFileName} ${record.intro} ${record.standardLevel} ${record.publishOrganization} ${record.publishDate} ${record.modifiedBy} ${record.status} ${record.updatedAt} ${record.format} ${record.standardType} ${record.files.map((file) => file.name).join(" ")}`.toLowerCase();
         return typeMatch && (!keyword || text.includes(keyword));
       });
     }
@@ -52664,6 +52725,107 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       `;
     }
 
+    function renderLowdimStandardManageTable(records) {
+      return `
+        <div class="lowdim-standard-table-wrap">
+          <table class="lowdim-standard-table lowdim-standard-manage-table">
+            <thead>
+              <tr>
+                <th style="width:150px;">编号</th>
+                <th style="width:220px;">标准文件名称</th>
+                <th style="width:250px;">简介</th>
+                <th style="width:150px;">标准级别</th>
+                <th style="width:220px;">发布机构</th>
+                <th style="width:132px;">发布日期</th>
+                <th style="width:120px;">修改用户</th>
+                <th style="width:90px;">状态</th>
+                <th style="width:160px;">更新时间</th>
+                <th style="width:190px;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${records.length ? records.map((record) => `
+                <tr>
+                  <td data-label="编号" class="lowdim-standard-nowrap-cell" title="${escapeLowdimStandardHtml(record.standardNo)}">${escapeLowdimStandardHtml(record.standardNo)}</td>
+                  <td data-label="标准文件名称" class="lowdim-standard-nowrap-cell" title="${escapeLowdimStandardHtml(record.standardFileName)}"><strong>${escapeLowdimStandardHtml(record.standardFileName)}</strong></td>
+                  <td data-label="简介" class="lowdim-standard-manage-intro-cell" title="${escapeLowdimStandardHtml(record.intro)}">${renderLowdimStandardIntroPreview(record.intro, 14)}</td>
+                  <td data-label="标准级别"><span class="lowdim-standard-type-tag" title="${escapeLowdimStandardHtml(record.standardLevel)}">${escapeLowdimStandardHtml(record.standardLevel)}</span></td>
+                  <td data-label="发布机构" class="lowdim-standard-manage-organization-cell" title="${escapeLowdimStandardHtml(record.publishOrganization)}">${escapeLowdimStandardHtml(record.publishOrganization)}</td>
+                  <td data-label="发布日期" class="lowdim-standard-nowrap-cell">${escapeLowdimStandardHtml(record.publishDate)}</td>
+                  <td data-label="修改用户" class="lowdim-standard-nowrap-cell">${escapeLowdimStandardHtml(record.modifiedBy)}</td>
+                  <td data-label="状态"><span class="lowdim-standard-status-tag ${record.status === "启用" ? "is-active" : record.status === "停用" ? "is-disabled" : "is-pending"}">${escapeLowdimStandardHtml(record.status)}</span></td>
+                  <td data-label="更新时间" class="lowdim-standard-nowrap-cell">${escapeLowdimStandardHtml(record.updatedAt)}</td>
+                  <td data-label="操作">
+                    <div class="lowdim-standard-manage-actions">
+                      <button class="btn btn-sm" type="button" data-lowdim-standard-view="${record.id}">查看</button>
+                      <button class="btn btn-sm" type="button" data-lowdim-standard-edit="${record.id}">编辑</button>
+                      <button class="btn btn-sm btn-danger-outline" type="button" data-lowdim-standard-delete="${record.id}">删除</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("") : `<tr><td colspan="10"><div class="lowdim-standard-empty">暂无符合条件的标准体系记录</div></td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderLowdimStandardManagePage() {
+      const page = document.getElementById("page-standard-twod");
+      if (!page) return;
+      const std = getLowdimStandardSystemState();
+      const detailRecord = std.detailId ? std.records.find((item) => item.id === std.detailId) : null;
+      if (detailRecord) {
+        page.innerHTML = renderLowdimStandardDetailPage(detailRecord);
+        return;
+      }
+      const records = getLowdimStandardFilteredRecords();
+      const total = std.records.length;
+      const filteredTotal = records.length;
+      const pageSize = Number(std.pageSize) || 5;
+      const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize));
+      std.currentPage = Math.min(Math.max(1, Number(std.currentPage) || 1), totalPages);
+      const pageRecords = records.slice((std.currentPage - 1) * pageSize, std.currentPage * pageSize);
+      page.innerHTML = `
+        <style>${getLowdimStandardSystemStyles()}</style>
+        <div class="lowdim-standard-type-tabs" role="tablist" aria-label="标准类型">
+          <span class="lowdim-standard-type-label">标准类型：</span>
+          ${LOWDIM_STANDARD_SYSTEM_TYPES.map((type) => `<button class="${std.activeType === type ? "active" : ""}" type="button" role="tab" aria-selected="${std.activeType === type ? "true" : "false"}" data-lowdim-standard-type="${escapeLowdimStandardHtml(type)}">${escapeLowdimStandardHtml(type)}</button>`).join("")}
+        </div>
+        <div class="lowdim-standard-shell">
+          <div class="lowdim-standard-head">
+            <div>
+              <span class="twod-search-eyebrow">低维材料标准体系</span>
+              <h2>低维材料标准体系管理</h2>
+              <p>统一维护各类数据库标准文件的编号、发布信息、状态和更新时间，支持查看、编辑和删除。</p>
+            </div>
+            <button class="btn-primary" type="button" data-lowdim-standard-add>新增标准体系</button>
+          </div>
+          <section class="lowdim-standard-panel">
+            <div class="lowdim-standard-toolbar">
+              <span class="lowdim-standard-total">共 ${filteredTotal === total ? total : `${filteredTotal} / ${total}`} 条标准</span>
+              <label class="lowdim-standard-search" aria-label="筛选标准体系管理记录">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <input type="search" value="${escapeLowdimStandardHtml(std.keyword || "")}" placeholder="筛选编号、文件名称、简介、发布机构或状态" data-lowdim-standard-search>
+              </label>
+            </div>
+          </section>
+          ${renderLowdimStandardManageTable(pageRecords)}
+          <div class="result-footer twod-result-footer lowdim-standard-footer">
+            ${renderSharedPaginationFooter({
+              total: filteredTotal,
+              currentPage: std.currentPage,
+              totalPages,
+              pageSize,
+              pageSizeId: "lowdimStandardPageSize",
+              pageAttr: "data-lowdim-standard-page",
+              jumpModule: "lowdim-standard"
+            })}
+          </div>
+        </div>
+      `;
+    }
+
     function renderLowdimStandardDetailPage(record) {
       const std = getLowdimStandardSystemState();
       const files = record?.files || [];
@@ -52685,10 +52847,15 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <section class="lowdim-standard-panel">
             <div class="lowdim-standard-detail-grid">
               ${[
+                ["编号", record.standardNo],
                 ["标准文件名称", record.standardFileName],
                 ["简介", record.intro],
-                ["上传用户", record.uploadUser],
-                ["上传时间", record.uploadTime],
+                ["标准级别", record.standardLevel],
+                ["发布机构", record.publishOrganization],
+                ["发布日期", record.publishDate],
+                ["修改用户", record.modifiedBy],
+                ["状态", record.status],
+                ["更新时间", record.updatedAt],
                 ["格式", record.format],
                 ["标准类型", record.standardType],
                 ["文件数量", `${files.length} 个`]
@@ -52755,11 +52922,19 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         #page-standard-twod .lowdim-standard-search input{width:100%;border:0;outline:none;background:transparent;color:#142033;font-size:13px;}
         #page-standard-twod .lowdim-standard-table-wrap{overflow:auto;border:1px solid #dfe6f1;border-radius:8px;background:#fff;}
         #page-standard-twod .lowdim-standard-table{width:100%;min-width:1180px;border-collapse:collapse;table-layout:fixed;}
+        #page-standard-twod .lowdim-standard-manage-table{min-width:1580px;}
         #page-standard-twod .lowdim-standard-table th{position:sticky;top:0;background:#edf3fb;color:#0f2377;text-align:left;font-weight:800;z-index:1;}
         #page-standard-twod .lowdim-standard-table th,#page-standard-twod .lowdim-standard-table td{padding:12px;border-bottom:1px solid #e7edf5;font-size:13px;line-height:22px;vertical-align:top;overflow-wrap:anywhere;word-break:break-word;}
         #page-standard-twod .lowdim-standard-table tbody tr:nth-child(odd){background:#fbfdff;}
         #page-standard-twod .lowdim-standard-table tbody tr:hover{background:#f0f6ff;}
         #page-standard-twod .lowdim-standard-type-tag{display:inline-flex;align-items:center;min-height:26px;padding:2px 10px;border-radius:999px;background:#edf4ff;color:#123c9c;font-weight:800;font-size:12px;}
+        #page-standard-twod .lowdim-standard-nowrap-cell{white-space:nowrap;word-break:keep-all;overflow:hidden;text-overflow:ellipsis;}
+        #page-standard-twod .lowdim-standard-manage-intro-cell,#page-standard-twod .lowdim-standard-manage-organization-cell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        #page-standard-twod .lowdim-standard-manage-actions{display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;}
+        #page-standard-twod .lowdim-standard-status-tag{display:inline-flex;align-items:center;justify-content:center;min-width:52px;min-height:26px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap;}
+        #page-standard-twod .lowdim-standard-status-tag.is-active{background:#e8f7ef;color:#087443;}
+        #page-standard-twod .lowdim-standard-status-tag.is-disabled{background:#f1f3f5;color:#667085;}
+        #page-standard-twod .lowdim-standard-status-tag.is-pending{background:#fff5df;color:#a15c00;}
         #page-standard-twod .lowdim-standard-file-empty{color:#94a3b8;font-size:13px;}
         #page-standard-twod .lowdim-standard-file-pill{display:grid;gap:2px;min-width:0;padding:7px 10px;border:1px solid #d8e2f1;border-radius:6px;background:#f8fafc;}
         #page-standard-twod .lowdim-standard-file-pill strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#142033;font-size:13px;}
@@ -52803,13 +52978,17 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         .lowdim-standard-system-modal .lowdim-standard-upload-summary strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#111827;font-size:14px;}
         .lowdim-standard-system-modal .lowdim-standard-upload-summary small{color:#64748b;font-size:12px;}
         .lowdim-standard-system-modal .lowdim-standard-upload-summary ul{margin:4px 0 0;padding-left:18px;color:#334155;font-size:12px;line-height:20px;}
-        @media (max-width:768px){#page-standard-twod{margin:-18px -12px -24px;}#page-standard-twod .lowdim-standard-shell{padding:14px;}#page-standard-twod .lowdim-standard-detail-grid,.lowdim-standard-system-modal .lowdim-standard-form{grid-template-columns:1fr;}#page-standard-twod .lowdim-standard-table{min-width:980px;}}
+        @media (max-width:768px){#page-standard-twod{margin:-18px -12px -24px;}#page-standard-twod .lowdim-standard-shell{padding:14px;}#page-standard-twod .lowdim-standard-detail-grid,.lowdim-standard-system-modal .lowdim-standard-form{grid-template-columns:1fr;}#page-standard-twod .lowdim-standard-table{min-width:980px;}#page-standard-twod .lowdim-standard-manage-table{min-width:1580px;}}
       `;
     }
 
     function renderLowdimStandardSystemPage() {
       const page = document.getElementById("page-standard-twod");
       if (!page) return;
+      if (state?.page === "standard-system-manage") {
+        renderLowdimStandardManagePage();
+        return;
+      }
       const std = getLowdimStandardSystemState();
       const detailRecord = std.detailId ? std.records.find((item) => item.id === std.detailId) : null;
       if (detailRecord) {
@@ -52894,53 +53073,84 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       `;
     }
 
-    function openLowdimStandardAddModal() {
+    function openLowdimStandardManageModal(mode = "add", recordId = "") {
       const std = getLowdimStandardSystemState();
-      std.editingId = "";
-      std.fileDrafts = [];
-      const uploadTime = getLowdimStandardUploadTime();
-      showLowdimStandardModal("新增标准体系", `
+      const record = mode === "edit" ? std.records.find((item) => item.id === recordId) : null;
+      const now = getLowdimStandardUploadTime();
+      const publishDate = record?.publishDate || now.slice(0, 10);
+      std.editingId = record?.id || "";
+      std.fileDrafts = record?.files?.slice() || [];
+      showLowdimStandardModal(`${record ? "编辑" : "新增"}标准体系`, `
         <div class="lowdim-standard-form">
           <div class="lowdim-standard-form-error" data-lowdim-standard-error></div>
           <label class="field">
+            <span>编号*</span>
+            <input data-lowdim-standard-field="standardNo" maxlength="40" value="${escapeLowdimStandardHtml(record?.standardNo || "")}" placeholder="请输入标准编号">
+          </label>
+          <label class="field">
             <span>标准文件名称*</span>
-            <input data-lowdim-standard-field="standardFileName" maxlength="30" placeholder="请输入标准文件名称，30字以内">
+            <input data-lowdim-standard-field="standardFileName" maxlength="30" value="${escapeLowdimStandardHtml(record?.standardFileName || "")}" placeholder="请输入标准文件名称，30字以内">
+          </label>
+          <label class="field">
+            <span>标准级别*</span>
+            <select data-lowdim-standard-field="standardLevel">
+              <option value="">请选择标准级别</option>
+              ${LOWDIM_STANDARD_MANAGEMENT_LEVELS.map((level) => `<option value="${escapeLowdimStandardHtml(level)}"${record?.standardLevel === level ? " selected" : ""}>${escapeLowdimStandardHtml(level)}</option>`).join("")}
+            </select>
           </label>
           <label class="field">
             <span>标准类型*</span>
             <select data-lowdim-standard-field="standardType">
               <option value="">请选择标准类型</option>
-              ${LOWDIM_STANDARD_SYSTEM_TYPES.map((type) => `<option value="${escapeLowdimStandardHtml(type)}">${escapeLowdimStandardHtml(type)}</option>`).join("")}
+              ${LOWDIM_STANDARD_SYSTEM_TYPES.map((type) => `<option value="${escapeLowdimStandardHtml(type)}"${record?.standardType === type ? " selected" : ""}>${escapeLowdimStandardHtml(type)}</option>`).join("")}
             </select>
           </label>
           <label class="field">
-            <span>上传用户</span>
-            <input data-lowdim-standard-field="uploadUser" value="管理员9527" readonly>
+            <span>发布机构*</span>
+            <input data-lowdim-standard-field="publishOrganization" value="${escapeLowdimStandardHtml(record?.publishOrganization || "")}" placeholder="请输入发布机构">
           </label>
           <label class="field">
-            <span>上传时间</span>
-            <input data-lowdim-standard-field="uploadTime" value="${uploadTime}" readonly>
+            <span>发布日期*</span>
+            <input type="date" data-lowdim-standard-field="publishDate" value="${escapeLowdimStandardHtml(publishDate)}">
           </label>
           <label class="field">
-            <span>格式</span>
-            <input data-lowdim-standard-field="format" value="上传文件后自动识别" readonly>
+            <span>修改用户*</span>
+            <input data-lowdim-standard-field="modifiedBy" value="${escapeLowdimStandardHtml(record?.modifiedBy || "管理员9527")}" placeholder="请输入修改用户">
+          </label>
+          <label class="field">
+            <span>状态*</span>
+            <select data-lowdim-standard-field="status">
+              ${LOWDIM_STANDARD_MANAGEMENT_STATUSES.map((status) => `<option value="${escapeLowdimStandardHtml(status)}"${(record?.status || "启用") === status ? " selected" : ""}>${escapeLowdimStandardHtml(status)}</option>`).join("")}
+            </select>
+          </label>
+          <label class="field">
+            <span>更新时间*</span>
+            <input data-lowdim-standard-field="updatedAt" value="${escapeLowdimStandardHtml(record?.updatedAt || now)}" placeholder="如：2026-08-14 10:30">
           </label>
           <label class="field wide">
             <span>简介*</span>
-            <textarea data-lowdim-standard-field="intro" maxlength="100" placeholder="请输入简介，100字以内"></textarea>
+            <textarea data-lowdim-standard-field="intro" maxlength="100" placeholder="请输入简介，100字以内">${escapeLowdimStandardHtml(record?.intro || "")}</textarea>
+          </label>
+          <label class="field">
+            <span>格式</span>
+            <input data-lowdim-standard-field="format" value="${escapeLowdimStandardHtml(record?.format || "上传文件后自动识别")}" readonly>
           </label>
           <div class="field wide">
-            <span>上传文件*</span>
+            <span>上传文件${record ? "" : "*"}</span>
             <div class="lowdim-standard-upload-row">
               <label class="lowdim-standard-upload-control">
                 上传文件
                 <input type="file" multiple accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-lowdim-standard-files>
               </label>
-              <div class="lowdim-standard-upload-summary" data-lowdim-standard-upload-summary>${renderLowdimStandardUploadSummary([])}</div>
+              <div class="lowdim-standard-upload-summary" data-lowdim-standard-upload-summary>${renderLowdimStandardUploadSummary(std.fileDrafts)}</div>
             </div>
           </div>
         </div>
-      `, `<button class="btn" type="button" data-close-modal="twodStandardFieldModal">取消</button><button class="btn-primary" type="button" data-lowdim-standard-save>保存</button>`);
+      `, `<button class="btn" type="button" data-close-modal="twodStandardFieldModal">取消</button><button class="btn-primary" type="button" data-lowdim-standard-save>${record ? "保存修改" : "保存"}</button>`);
+    }
+
+    function openLowdimStandardAddModal() {
+      openLowdimStandardManageModal("add");
     }
 
     function saveLowdimStandardSystemRecord() {
@@ -52957,30 +53167,50 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
       };
       const draft = {
+        standardNo: read("standardNo"),
         standardFileName: read("standardFileName"),
         intro: read("intro"),
-        uploadUser: read("uploadUser") || "管理员9527",
-        uploadTime: read("uploadTime") || getLowdimStandardUploadTime(),
-        format: read("format"),
+        standardLevel: read("standardLevel"),
         standardType: read("standardType"),
+        publishOrganization: read("publishOrganization"),
+        publishDate: read("publishDate"),
+        modifiedBy: read("modifiedBy"),
+        status: read("status") || "启用",
+        updatedAt: read("updatedAt") || getLowdimStandardUploadTime(),
+        format: read("format")
       };
+      const editingId = std.editingId || "";
+      const existing = editingId ? std.records.find((item) => item.id === editingId) : null;
+      if (!draft.standardNo) return fail("请输入编号。");
+      if (draft.standardNo.length > 40) return fail("编号需控制在40个字符以内。");
       if (!draft.standardFileName) return fail("请输入标准文件名称。");
       if (draft.standardFileName.length > 30) return fail("标准文件名称需控制在30字以内。");
       if (!draft.intro) return fail("请输入简介。");
       if (draft.intro.length > 100) return fail("简介需控制在100字以内。");
+      if (!draft.standardLevel) return fail("请选择标准级别。");
       if (!draft.standardType) return fail("请选择标准类型。");
-      if (!std.fileDrafts?.length) return fail("请上传至少一个 PDF / Word 标准文件。");
-      draft.format = Array.from(new Set(std.fileDrafts.map((file) => file.format || getLowdimStandardFileFormat(file)))).join(" / ");
-      std.records.unshift({
-        id: `std-system-${Date.now()}`,
-        ...draft,
-        files: std.fileDrafts.slice()
-      });
+      if (!draft.publishOrganization) return fail("请输入发布机构。");
+      if (!draft.publishDate) return fail("请选择发布日期。");
+      if (!draft.modifiedBy) return fail("请输入修改用户。");
+      if (!draft.updatedAt) return fail("请输入更新时间。");
+      if (!std.fileDrafts?.length && !existing?.files?.length) return fail("请上传至少一个 PDF / Word 标准文件。");
+      draft.format = Array.from(new Set(std.fileDrafts.map((file) => file.format || getLowdimStandardFileFormat(file)))).join(" / ") || existing?.format || "未上传";
+      if (existing) {
+        Object.assign(existing, draft, { files: std.fileDrafts.length ? std.fileDrafts.slice() : existing.files });
+      } else {
+        std.records.unshift({
+          id: `std-system-${Date.now()}`,
+          ...draft,
+          files: std.fileDrafts.slice()
+        });
+      }
       std.activeType = draft.standardType;
       std.currentPage = 1;
+      std.editingId = "";
+      std.fileDrafts = [];
       closeModal("twodStandardFieldModal");
       renderLowdimStandardSystemPage();
-      showToast("标准体系", "新增标准体系已保存。");
+      showToast("标准体系", existing ? "标准体系已更新。" : "新增标准体系已保存。");
     }
 
     function readLowdimStandardFiles(fileList) {
@@ -53084,6 +53314,19 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       return getLowdimStandardSystemState().records.find((item) => item.id === recordId) || null;
     }
 
+    function deleteLowdimStandardSystemRecord(recordId) {
+      const std = getLowdimStandardSystemState();
+      const record = getLowdimStandardRecord(recordId);
+      if (!record) return;
+      if (!window.confirm(`确认删除「${record.standardFileName}」吗？`)) return;
+      std.records = std.records.filter((item) => item.id !== recordId);
+      std.detailId = "";
+      std.previewFileKey = "";
+      std.currentPage = 1;
+      renderLowdimStandardSystemPage();
+      showToast("标准体系", "标准体系记录已删除。");
+    }
+
     function downloadLowdimStandardAttachment(recordId) {
       downloadLowdimStandardAllFiles(recordId);
     }
@@ -53113,6 +53356,16 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
         if (event.target.closest("[data-lowdim-standard-add]")) {
           openLowdimStandardAddModal();
+          return;
+        }
+        const editButton = event.target.closest("[data-lowdim-standard-edit]");
+        if (editButton) {
+          openLowdimStandardManageModal("edit", editButton.dataset.lowdimStandardEdit || "");
+          return;
+        }
+        const deleteButton = event.target.closest("[data-lowdim-standard-delete]");
+        if (deleteButton) {
+          deleteLowdimStandardSystemRecord(deleteButton.dataset.lowdimStandardDelete || "");
           return;
         }
         if (event.target.closest("[data-lowdim-standard-save]")) {
@@ -77609,7 +77862,13 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (!categoryKey) return [];
       const schema = twodPropertySchemas[categoryKey];
       if (!schema) return twodMaterials.slice();
-      return twodMaterials.filter((item) => schema.fields.every((field) => {
+      const appliedKeys = Array.isArray(state.twodAppliedPropertyFields)
+        ? state.twodAppliedPropertyFields.filter(Boolean)
+        : [];
+      const activeFields = appliedKeys.length
+        ? schema.fields.filter((field) => appliedKeys.includes(field.key))
+        : schema.fields;
+      return twodMaterials.filter((item) => activeFields.every((field) => {
         if (field.kind === "conditionalNumber" && source?.[field.dependsOn] !== field.dependsValue) return true;
         if (field.kind === "file") {
           const fileName = normalizeText(source?.[field.key]);
@@ -78247,5 +78506,2668 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
   })();
   </script>
+  <script id="lowdim-standard-management-menu-script">
+  (() => {
+    if (window.__LOWDIM_STANDARD_MANAGEMENT_MENU_READY__) return;
+    window.__LOWDIM_STANDARD_MANAGEMENT_MENU_READY__ = true;
+
+    const MANAGE_PAGE = "standard-system-manage";
+
+    function ensureLowdimStandardManageMeta() {
+      try {
+        if (typeof PAGE_LAYOUT !== "undefined" && !PAGE_LAYOUT[MANAGE_PAGE]) {
+          PAGE_LAYOUT[MANAGE_PAGE] = {
+            group: "standards",
+            portal: "system",
+            title: "低维材料标准体系管理",
+            breadcrumbParent: "低维材料标准体系"
+          };
+        }
+        if (typeof SYSTEM_PAGE_META !== "undefined" && !SYSTEM_PAGE_META[MANAGE_PAGE]) {
+          SYSTEM_PAGE_META[MANAGE_PAGE] = {
+            group: "standards",
+            portal: "system",
+            title: "低维材料标准体系管理",
+            breadcrumbParent: "低维材料标准体系"
+          };
+        }
+        if (typeof systemStore !== "undefined" && Array.isArray(systemStore.menus) && !systemStore.menus.some((item) => item.path === "/standards/manage")) {
+          systemStore.menus.push({
+            id: 231,
+            menuName: "低维材料标准体系管理",
+            level: 1,
+            type: "菜单",
+            parent: "低维材料标准体系",
+            path: "/standards/manage",
+            perms: "standards:manage:list",
+            icon: "standard",
+            orderNum: 2,
+            status: "启用"
+          });
+        }
+      } catch (error) {
+        console.warn("低维材料标准体系管理元信息注册失败", error);
+      }
+    }
+
+    function ensureLowdimStandardManageMenu() {
+      const standardsNav = document.querySelector('.sidebar-group[data-group="standards"] .nav');
+      if (!standardsNav || standardsNav.querySelector(`[data-page="${MANAGE_PAGE}"]`)) return;
+      const current = standardsNav.querySelector('[data-page="standard-twod"]');
+      const menuHtml = `
+        <button class="nav-btn lowdim-standard-manage-nav" data-group="standards" data-page="${MANAGE_PAGE}" data-label="低维材料标准体系管理" type="button">
+          <span class="nav-icon">SM</span><span>低维材料标准体系管理</span>
+        </button>
+      `;
+      if (current) current.insertAdjacentHTML("afterend", menuHtml);
+      else standardsNav.insertAdjacentHTML("beforeend", menuHtml);
+      standardsNav.querySelector(`[data-page="${MANAGE_PAGE}"]`)?.addEventListener("click", () => {
+        if (typeof switchPage === "function") switchPage(MANAGE_PAGE);
+      });
+    }
+
+    function ensureLowdimStandardManagePage() {
+      if (document.getElementById(`page-${MANAGE_PAGE}`)) return;
+      const source = document.getElementById("page-standard-twod");
+      const section = document.createElement("section");
+      section.className = "page";
+      section.id = `page-${MANAGE_PAGE}`;
+      if (source?.parentNode) source.parentNode.insertBefore(section, source.nextSibling);
+      else document.querySelector("main")?.appendChild(section);
+    }
+
+    function ensureLowdimStandardManageStyles() {
+      let style = document.getElementById("lowdim-standard-management-menu-style");
+      if (!style) {
+        style = document.createElement("style");
+        style.id = "lowdim-standard-management-menu-style";
+        document.head.appendChild(style);
+      }
+      const clonedRules = Array.from(document.querySelectorAll("style"))
+        .filter((node) => node.id !== "lowdim-standard-management-menu-style")
+        .map((node) => node.textContent || "")
+        .filter((text) => text.includes("#page-standard-twod"))
+        .map((text) => text.replaceAll("#page-standard-twod", `#page-${MANAGE_PAGE}`))
+        .join("\n");
+      style.textContent = `
+        .sidebar-group[data-group="standards"] .lowdim-standard-manage-nav .nav-icon {
+          color: #123c9c;
+          background: #eef4ff;
+        }
+        .sidebar-group[data-group="standards"] .lowdim-standard-manage-nav.active .nav-icon {
+          color: #ffffff;
+          background: rgba(255,255,255,.18);
+        }
+        ${clonedRules}
+      `;
+    }
+
+    function syncLowdimStandardManagePage() {
+      if (state?.page !== MANAGE_PAGE) return;
+      const source = document.getElementById("page-standard-twod");
+      const target = document.getElementById(`page-${MANAGE_PAGE}`);
+      if (!source || !target) return;
+      target.innerHTML = source.innerHTML;
+      target.querySelector(".lowdim-standard-head h2")?.replaceChildren(document.createTextNode("低维材料标准体系管理"));
+      const eyebrow = target.querySelector(".lowdim-standard-head .twod-search-eyebrow");
+      if (eyebrow) eyebrow.textContent = "低维材料标准体系";
+    }
+
+    function renderLowdimStandardManagePage() {
+      ensureLowdimStandardManagePage();
+      if (typeof renderTwodStandardPage === "function") renderTwodStandardPage();
+      ensureLowdimStandardManageStyles();
+      syncLowdimStandardManagePage();
+    }
+
+    ensureLowdimStandardManageMeta();
+    ensureLowdimStandardManageMenu();
+    ensureLowdimStandardManagePage();
+    ensureLowdimStandardManageStyles();
+
+    const baseSwitchPage = typeof switchPage === "function" ? switchPage : null;
+    if (baseSwitchPage && !baseSwitchPage.__lowdimStandardManagePatched) {
+      const patchedSwitchPage = function switchPageWithLowdimStandardManage(page) {
+        baseSwitchPage(page);
+        if (page === MANAGE_PAGE) renderLowdimStandardManagePage();
+      };
+      patchedSwitchPage.__lowdimStandardManagePatched = true;
+      switchPage = patchedSwitchPage;
+      if (window.MarvisRouter) {
+        window.MarvisRouter.go = function(pageId) {
+          const cleanId = String(pageId || "").startsWith("page-") ? String(pageId).slice(5) : pageId;
+          switchPage(cleanId);
+        };
+      }
+    }
+
+    document.body.addEventListener("click", () => {
+      if (state?.page === MANAGE_PAGE) setTimeout(syncLowdimStandardManagePage, 0);
+    });
+    document.body.addEventListener("input", () => {
+      if (state?.page === MANAGE_PAGE) setTimeout(syncLowdimStandardManagePage, 0);
+    });
+    document.body.addEventListener("change", () => {
+      if (state?.page === MANAGE_PAGE) setTimeout(syncLowdimStandardManagePage, 0);
+    });
+
+    if (state?.page === MANAGE_PAGE) renderLowdimStandardManagePage();
+  })();
+  </script>
+  <script id="lowdim-standard-browser-final-script">
+  (() => {
+    if (window.__LOWDIM_STANDARD_BROWSER_FINAL_READY__) return;
+    window.__LOWDIM_STANDARD_BROWSER_FINAL_READY__ = true;
+
+    const MANAGEMENT_PAGE = "standard-system-manage";
+    const legacyTwodStandardRenderer = typeof renderTwodStandardPage === "function" ? renderTwodStandardPage : null;
+
+    const browserTypes = [
+      "二维材料数据库标准体系",
+      "有机光电材料数据库标准体系",
+      "电解质材料数据库标准体系",
+      "机器学习力场数据库标准体系",
+      "催化材料数据库标准体系"
+    ];
+    const browserLevels = [
+      "强制性国标 GB",
+      "推荐性国标 GB/T",
+      "国家环境保护标准 HJ",
+      "行业标准",
+      "地方标准",
+      "团体标准",
+      "企业标准",
+      "暂无专项国标"
+    ];
+    const browserReferences = [
+      "[1] GB/T 30544.13-2018，纳米科技 术语 第 13 部分：石墨烯及相关二维材料 [S].",
+      "[2] GB/T 40069-2021，纳米技术 石墨烯相关二维材料的层数测量 拉曼光谱法 [S].",
+      "[3] GB/T 40071-2021，纳米技术 石墨烯相关二维材料的层数测量 光学对比度法 [S].",
+      "[4] GB/T 44935-2024，纳米技术 二硫化钼薄片的层数测量 拉曼光谱法 [S].",
+      "[5] GB/T 30451-2021，石墨烯电导率测试方法（四探针法）[S].",
+      "[6] GB/T 43682-2024，纳米技术 亚纳米厚度石墨烯薄膜载流子迁移率及方块电阻测量方法 [S].",
+      "[7] GB/T 30904-2014，无机化工产品 晶型结构分析 X 射线衍射法 [S].",
+      "[8] GB/T 7714-2015，信息与文献 参考文献著录规则 [S].",
+      "[9] T/CSTM 00800—2021，材料基因工程数据通则 [S]."
+    ];
+    const browserExtendedReferences = [
+      "[1] GB/T 33876-2017，科研数据元数据规范 [S].",
+      "[2] GB/T 7714-2015，信息与文献 参考文献著录规则 [S].",
+      "[3] GB/T 6040-2002，红外光谱分析方法通则 [S].",
+      "[4] GB/T 21186-2007，傅立叶变换红外光谱仪 [S].",
+      "[5] GB/T 261-2008，闪点的测定 宾斯基 - 马丁闭口杯法 [S].",
+      "[6] GB/T 617-2006，化学试剂 熔点范围测定通用方法 [S].",
+      "[7] GB/T 35305-2017，有机发光二极管（OLED）器件测试方法 [S].",
+      "[8] GB/T 22231-2022，锂离子电池用电解液 [S].",
+      "[9] GB/T 11007-2008，电导率仪试验方法 [S].",
+      "[10] GB/T 30835-2014，锂离子电池用磷酸铁锂 [S].",
+      "[11] GB/T 13390-2008，金属粉末比表面积的测定 氮吸附法 [S].",
+      "[12] GB/T 30904-2014，无机化工产品 晶型结构分析 X 射线衍射法 [S].",
+      "[13] GB/T 38219-2019，烟气脱硝催化剂检测技术规范 [S].",
+      "[14] HJ 2534-2013，环境标志产品技术要求 电池 [S].",
+      "[15] T/CSTM 00800—2021，材料基因工程数据通则 [S]."
+    ];
+    const browserRecords = [
+      {
+        id: "browser-std-33876",
+        type: browserTypes,
+        standardNo: "GB/T 33876-2017",
+        standardName: "科研数据元数据规范",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2017-12-29",
+        effectiveDate: "2018-07-01",
+        level: "推荐性国标 GB/T",
+        intro: "统一科研数据集的元数据描述框架，为数据库字段设计和数据溯源提供基础规范。",
+        coreContent: "规定科研数据集元数据框架，包含标识信息、数据内容、获取方式、质量信息和溯源信息，定义结构化数据集描述规范。",
+        projectMatch: "适用于有机光电、电解质、机器学习力场、催化和二维材料五类数据库，指导结构化字段设计、数据溯源管理和摘要规范。",
+        attachmentName: "GB_T33876-2017_科研数据元数据规范.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-6040",
+        type: browserTypes,
+        standardNo: "GB/T 6040-2002",
+        standardName: "红外光谱分析方法通则",
+        organization: "国家质量监督检验检疫总局、国家标准化管理委员会",
+        publishDate: "2002-10-18",
+        effectiveDate: "2003-04-01",
+        level: "推荐性国标 GB/T",
+        intro: "统一红外光谱样品制备、测试和图谱解析流程，支撑实验图谱数据质量控制。",
+        coreContent: "规定傅里叶变换红外光谱的样品制备、测试流程、图谱采集和谱图解析通用规范。",
+        projectMatch: "适用于有机光电材料和电解质材料红外光谱表征图谱入库与数据质量校验。",
+        attachmentName: "GB_T6040-2002_红外光谱分析方法通则.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-21186",
+        type: browserTypes,
+        standardNo: "GB/T 21186-2007",
+        standardName: "傅立叶变换红外光谱仪",
+        organization: "国家质量监督检验检疫总局、国家标准化管理委员会",
+        publishDate: "2007-08-28",
+        effectiveDate: "2008-03-01",
+        level: "推荐性国标 GB/T",
+        intro: "规定傅立叶变换红外光谱仪的技术要求和性能检定方法，为仪器数据对标提供依据。",
+        coreContent: "规定红外光谱仪器的技术要求、性能指标和检定方法，统一实验设备输出数据的基本质量要求。",
+        projectMatch: "用于有机光电材料和电解质材料红外图谱实验数据的设备对标和质量审核。",
+        attachmentName: "GB_T21186-2007_傅立叶变换红外光谱仪.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-30544-13",
+        type: browserTypes[0],
+        standardNo: "GB/T 30544.13-2018",
+        standardName: "纳米科技 术语 第 13 部分：石墨烯及相关二维材料",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2018-12-28",
+        effectiveDate: "2019-11-01",
+        level: "推荐性国标 GB/T",
+        intro: "统一石墨烯及相关二维材料的术语定义，为结构、表征与数据库字段命名提供共同语境。",
+        coreContent: "等同采用 ISO/TS 80004-13:2017；界定石墨烯及相关二维材料统一术语定义，包含单层、少层二维材料、层厚、堆垛方式、缺陷、纳米片等名词；规范二维材料结构、表征相关专业词汇。",
+        projectMatch: "二维材料摘要规范，统一数据库字段术语、筛选标签名词。",
+        attachmentName: "GB_T30544.13-2018_石墨烯及相关二维材料术语.txt"
+      },
+      {
+        id: "browser-std-40069",
+        type: browserTypes[0],
+        standardNo: "GB/T 40069-2021",
+        standardName: "纳米技术 石墨烯相关二维材料的层数测量 拉曼光谱法",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2021-05-21",
+        effectiveDate: "2021-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "规范石墨烯薄片层数的拉曼光谱测量流程与判定规则，支撑实验数据质量校验。",
+        coreContent: "规定利用拉曼光谱判定石墨烯薄片层数的三类测试方法；规范光源、样品预处理、激光功率、峰拟合、图谱采集、层数判定规则；适用于机械剥离、AB/ABC 堆垛 CVD 石墨烯。",
+        projectMatch: "数据质量衡量标准，结构参数实验对标、层厚与层数实验数据校验。",
+        attachmentName: "GB_T40069-2021_拉曼光谱法.txt"
+      },
+      {
+        id: "browser-std-40071",
+        type: browserTypes[0],
+        standardNo: "GB/T 40071-2021",
+        standardName: "纳米技术 石墨烯相关二维材料的层数测量 光学对比度法",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2021-05-21",
+        effectiveDate: "2021-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "建立基于光学对比度的石墨烯层数无损测量方法，用于快速实验初筛。",
+        coreContent: "建立反射光谱法、光学显微灰度对比度法测量石墨烯层数；规范衬底、物镜参数、图像校正算法，实现无损、快速的层数初筛。",
+        projectMatch: "二维材料结构表征实验数据入库校验依据。",
+        attachmentName: "GB_T40071-2021_光学对比度法.txt"
+      },
+      {
+        id: "browser-std-44935",
+        type: browserTypes[0],
+        standardNo: "GB/T 44935-2024",
+        standardName: "纳米技术 二硫化钼薄片的层数测量 拉曼光谱法",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2024-03-15",
+        effectiveDate: "2025-07-01",
+        level: "推荐性国标 GB/T",
+        intro: "面向 2H 相 MoS₂ 二维薄片，提供可复用的拉曼层数判定方法与参考光谱。",
+        coreContent: "针对 2H 相 MoS₂ 二维薄片，规定 3 种拉曼层数判定方法；规范低频呼吸模、E₂g¹ 与 A₁g 峰位差标定方法，并提供标准参考光谱。",
+        projectMatch: "数据库 TMDs 二维材料实验表征对标依据。",
+        attachmentName: "GB_T44935-2024_MoS2层数测量.txt"
+      },
+      {
+        id: "browser-std-30451",
+        type: browserTypes[0],
+        standardNo: "GB/T 30451-2021",
+        standardName: "石墨烯电导率测试方法（四探针法）",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2021-03-09",
+        effectiveDate: "2021-10-01",
+        level: "推荐性国标 GB/T",
+        intro: "规定石墨烯薄膜方块电阻和面电导率的四探针测试流程与仪器校准要求。",
+        coreContent: "常温直线四探针法测量石墨烯薄膜方块电阻、面电导率；包含边缘效应修正、多点均匀性采样和仪器校准规范。",
+        projectMatch: "电学性质实验数据与 DFT 计算参数交叉比对基准。",
+        attachmentName: "GB_T30451-2021_四探针法.txt"
+      },
+      {
+        id: "browser-std-43682",
+        type: browserTypes[0],
+        standardNo: "GB/T 43682-2024",
+        standardName: "纳米技术 亚纳米厚度石墨烯薄膜载流子迁移率及方块电阻测量方法",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2024-03-15",
+        effectiveDate: "2024-07-01",
+        level: "推荐性国标 GB/T",
+        intro: "规范亚纳米厚度石墨烯薄膜载流子迁移率、方块电阻和载流子浓度的器件法测量。",
+        coreContent: "基于场效应晶体管器件法测试石墨烯薄膜载流子迁移率、方块电阻和载流子浓度；规范器件制备、电压扫描、接触电阻修正及不确定度评估。",
+        projectMatch: "数据库电学输运参数（有效质量、迁移率）实验对照标准。",
+        attachmentName: "GB_T43682-2024_载流子迁移率测量.txt"
+      },
+      {
+        id: "browser-std-30904",
+        type: browserTypes[0],
+        standardNo: "GB/T 30904-2014",
+        standardName: "无机化工产品 晶型结构分析 X 射线衍射法",
+        organization: "国家质量监督检验检疫总局、中国国家标准化管理委员会",
+        publishDate: "2014-07-08",
+        effectiveDate: "2014-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "规范 X 射线衍射法开展晶体物相、晶格常数和晶面间距测试的流程与图谱解析。",
+        coreContent: "规定 XRD 衍射仪法开展晶体物相、晶格常数和晶面间距测试流程，包括样品制备、测试条件和图谱解析方法。",
+        projectMatch: "数据质量衡量标准，DFT 计算晶格常数与实验 XRD 数据对比，校验结构模型合理性。",
+        attachmentName: "GB_T30904-2014_X射线衍射法.txt"
+      },
+      {
+        id: "browser-std-7714",
+        type: browserTypes,
+        standardNo: "GB/T 7714-2015",
+        standardName: "信息与文献 参考文献著录规则",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2015-12-31",
+        effectiveDate: "2016-07-01",
+        level: "推荐性国标 GB/T",
+        intro: "统一文献、实验数据和计算成果的引用格式，支撑数据库数据溯源与元数据标准化。",
+        coreContent: "规范文献、实验数据、计算成果来源的引用格式，支撑数据库数据溯源和文献元数据标准化录入。",
+        projectMatch: "二维材料数据库数据来源、文献引用和成果溯源的统一规范。",
+        attachmentName: "GB_T7714-2015_参考文献著录规则.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-cstm-00800",
+        type: browserTypes,
+        standardNo: "T/CSTM 00800—2021",
+        standardName: "材料基因工程数据通则",
+        organization: "中国材料与试验标准化技术委员会（CSTM）",
+        publishDate: "2021",
+        effectiveDate: "2021",
+        level: "团体标准",
+        intro: "材料基因工程领域的高通量计算、数据分类、元数据、数据质量与 FAIR 原则顶层规范。",
+        coreContent: "指导材料高通量计算的数据分类、元数据、数据质量和 FAIR 原则，弥补二维材料 DFT 计算暂无国标的空白。",
+        projectMatch: "为二维材料数据库的数据组织、质量评价和开放共享提供上位规范依据。",
+        attachmentName: "T_CSTM00800-2021_材料基因工程数据通则.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-organic-261",
+        type: browserTypes[1],
+        standardNo: "GB/T 261-2008",
+        standardName: "闪点的测定 宾斯基 - 马丁闭口杯法",
+        organization: "国家质量监督检验检疫总局、国家标准化管理委员会",
+        publishDate: "2008-06-19",
+        effectiveDate: "2008-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "规定有机液体闪点的通用测试方法，为材料安全性和物性参数入库提供统一依据。",
+        coreContent: "规定采用宾斯基 - 马丁闭口杯法测定有机液体闪点的仪器、样品处理、测试步骤和结果判定要求。",
+        projectMatch: "有机光电材料选择标准和闪点物性参数的实验对照依据。",
+        attachmentName: "GB_T261-2008_闪点测定.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-organic-617",
+        type: browserTypes[1],
+        standardNo: "GB/T 617-2006",
+        standardName: "化学试剂 熔点范围测定通用方法",
+        organization: "国家质量监督检验检疫总局、国家标准化管理委员会",
+        publishDate: "2006-11-03",
+        effectiveDate: "2007-06-01",
+        level: "推荐性国标 GB/T",
+        intro: "统一有机小分子熔点范围测定方法，用于材料物性数据质量校验。",
+        coreContent: "规定化学试剂熔点范围测定的仪器、样品装填、升温速率、观察记录和结果表示方法。",
+        projectMatch: "有机光电材料熔点物性数据的实验测量与数据质量校验。",
+        attachmentName: "GB_T617-2006_熔点范围测定.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-organic-35305",
+        type: browserTypes[1],
+        standardNo: "GB/T 35305-2017",
+        standardName: "有机发光二极管（OLED）器件测试方法",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2017-12-29",
+        effectiveDate: "2018-07-01",
+        level: "推荐性国标 GB/T",
+        intro: "规范 OLED 器件光电性能测试，为有机光电材料发光性能评价提供实验参照。",
+        coreContent: "规定 OLED 器件发光亮度、发光光谱、色坐标、开启电压和发光效率等指标的测试方法。",
+        projectMatch: "有机光电材料发光性能和发光颜色筛选指标的实验参照。",
+        attachmentName: "GB_T35305-2017_OLED器件测试方法.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-electrolyte-hj2534",
+        type: browserTypes[2],
+        standardNo: "HJ 2534-2013",
+        standardName: "环境标志产品技术要求 电池",
+        organization: "中华人民共和国环境保护部",
+        publishDate: "2013-12-20",
+        effectiveDate: "2014-03-01",
+        level: "国家环境保护标准 HJ",
+        intro: "规定电池产品的环保准入要求，为电解质材料入库提供环境标准依据。",
+        coreContent: "规定电池原材料重金属限值、生产禁用溶剂、回收与环保管控要求，作为强制环保依据使用。",
+        projectMatch: "电解质材料环境准入判定和环保属性审核。",
+        attachmentName: "HJ_2534-2013_环境标志产品技术要求电池.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-electrolyte-30835",
+        type: browserTypes[2],
+        standardNo: "GB/T 30835-2014",
+        standardName: "锂离子电池用磷酸铁锂",
+        organization: "国家质量监督检验检疫总局、国家标准化管理委员会",
+        publishDate: "2014-07-08",
+        effectiveDate: "2014-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "规定锂离子电池无机材料的理化性能和电化学性能测试要求。",
+        coreContent: "规定锂离子电池用磷酸铁锂的理化性能、电导率、电化学性能和检验规则，可作为固态无机电解质测试参照。",
+        projectMatch: "固态无机电解质电学性能和电化学性能测试参照。",
+        attachmentName: "GB_T30835-2014_锂离子电池用磷酸铁锂.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-electrolyte-11007",
+        type: browserTypes[2],
+        standardNo: "GB/T 11007-2008",
+        standardName: "电导率仪试验方法",
+        organization: "国家质量监督检验检疫总局、国家标准化管理委员会",
+        publishDate: "2008-06-19",
+        effectiveDate: "2008-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "统一溶液和固体电导率仪器的校准与测试方法。",
+        coreContent: "规定电导率仪的校准、检验、测试条件和结果处理方法，覆盖溶液与固体电导率测量。",
+        projectMatch: "有机电解液、固态有机和无机电解质电导率实验数据对标。",
+        attachmentName: "GB_T11007-2008_电导率仪试验方法.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-electrolyte-22231",
+        type: browserTypes[2],
+        standardNo: "GB/T 22231-2022",
+        standardName: "锂离子电池用电解液",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2022-10-14",
+        effectiveDate: "2023-05-01",
+        level: "推荐性国标 GB/T",
+        intro: "规定锂离子电池用液态电解液的水分、酸度、稳定性和理化指标测试方法。",
+        coreContent: "规定锂离子电池用电解液的分类、技术要求、试验方法、检验规则、标志、包装、运输和贮存要求。",
+        projectMatch: "有机液态电解液数据集物性数据质量衡量和入库审核。",
+        attachmentName: "GB_T22231-2022_锂离子电池用电解液.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-electrolyte-solid-oxide",
+        type: browserTypes[2],
+        standardNo: "团体标准（编号待补充）",
+        standardName: "固态锂电池用固态电解质性能要求及测试方法 无机氧化物固态电解质",
+        organization: "相关材料与电池行业团体标准组织",
+        publishDate: "暂无",
+        effectiveDate: "参照执行",
+        level: "团体标准",
+        intro: "面向无机氧化物固态电解质的性能要求和测试方法，作为电解质数据库的配套团体标准实例。",
+        coreContent: "围绕离子电导率、化学稳定性、界面相容性和样品测试条件建立性能评价与数据记录要求。",
+        projectMatch: "固态无机电解质数据集的性能字段设计、测试数据归一化和质量审核。",
+        attachmentName: "固态电解质性能要求_无机氧化物.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-electrolyte-solid-polymer",
+        type: browserTypes[2],
+        standardNo: "团体标准（编号待补充）",
+        standardName: "固态锂电池用固态电解质性能要求及测试方法 聚合物及复合固态电解质",
+        organization: "相关材料与电池行业团体标准组织",
+        publishDate: "暂无",
+        effectiveDate: "参照执行",
+        level: "团体标准",
+        intro: "面向聚合物及复合固态电解质的性能要求和测试方法，补充电解质数据库标准体系。",
+        coreContent: "围绕离子传导、机械性能、热稳定性和界面性能建立测试方法与结果记录要求。",
+        projectMatch: "聚合物及复合固态电解质数据集的性能字段设计和测试结果对标。",
+        attachmentName: "固态电解质性能要求_聚合物及复合材料.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-mlff-note",
+        type: browserTypes[3],
+        standardNo: "暂无专项国标",
+        standardName: "机器学习力场数据库构建技术依据说明",
+        organization: "平台标准说明",
+        publishDate: "暂无专项国家标准",
+        effectiveDate: "参照执行",
+        level: "暂无专项国标",
+        intro: "国内暂无针对机器学习力场数据库、分子动力学训练集和势能面数据集的独立国家标准。",
+        coreContent: "机器学习力场、分子动力学训练集和势能面数据集属于计算化学前沿方向，国内暂无直接相关国家标准。数据集构建、结构采样和能量精度控制参照 T/CSTM 00800—2021《材料基因工程数据通则》，同时遵循国际力场数据集通用规范。",
+        projectMatch: "机器学习力场数据库的数据集构建、结构采样、能量精度控制、训练集溯源和质量评估。",
+        attachmentName: "机器学习力场数据库技术依据说明.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-catalyst-13390",
+        type: browserTypes[4],
+        standardNo: "GB/T 13390-2008",
+        standardName: "金属粉末比表面积的测定 氮吸附法",
+        organization: "国家质量监督检验检疫总局、国家标准化管理委员会",
+        publishDate: "2008-06-19",
+        effectiveDate: "2008-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "规定金属粉末比表面积的氮吸附测试方法，用于催化材料活性位点表征。",
+        coreContent: "规定采用氮吸附法测定金属粉末比表面积的仪器、样品处理、测试流程和结果计算方法。",
+        projectMatch: "催化材料结构特征、活性位点和比表面积相关实验数据校验。",
+        attachmentName: "GB_T13390-2008_金属粉末比表面积.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-catalyst-30904",
+        type: browserTypes[4],
+        standardNo: "GB/T 30904-2014",
+        standardName: "无机化工产品 晶型结构分析 X 射线衍射法",
+        organization: "国家质量监督检验检疫总局、中国国家标准化管理委员会",
+        publishDate: "2014-07-08",
+        effectiveDate: "2014-12-01",
+        level: "推荐性国标 GB/T",
+        intro: "规定 XRD 测试晶体结构、晶格常数和物相的通用流程。",
+        coreContent: "规定 XRD 衍射仪开展晶体物相、晶格常数和晶面间距测试的样品制备、测试条件和图谱解析方法。",
+        projectMatch: "铜基催化材料晶体结构、晶面（Cu (100)/Cu (111) 等）模型合理性比对。",
+        attachmentName: "GB_T30904-2014_催化材料X射线衍射法.txt",
+        references: browserExtendedReferences
+      },
+      {
+        id: "browser-std-catalyst-38219",
+        type: browserTypes[4],
+        standardNo: "GB/T 38219-2019",
+        standardName: "烟气脱硝催化剂检测技术规范",
+        organization: "国家市场监督管理总局、中国国家标准化管理委员会",
+        publishDate: "2019-10-18",
+        effectiveDate: "2020-05-01",
+        level: "推荐性国标 GB/T",
+        intro: "建立催化剂活性、选择性和微观结构的通用检测框架，可作为电催化材料评价参考。",
+        coreContent: "规定烟气脱硝催化剂的样品制备、活性和选择性测试、微观结构表征及结果评价要求。",
+        projectMatch: "催化材料数据质量衡量、催化活性指标交叉比对和实验评价方法参考。",
+        attachmentName: "GB_T38219-2019_烟气脱硝催化剂检测.txt",
+        references: browserExtendedReferences
+      }
+    ];
+
+    const browserState = {
+      activeType: browserTypes[0],
+      keyword: "",
+      publishFrom: "",
+      publishTo: "",
+      level: "",
+      page: 1,
+      pageSize: 6,
+      detailId: ""
+    };
+    let browserKeywordTimer = null;
+
+    function escapeBrowserHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function browserDateValue(value) {
+      const match = String(value || "").match(/\d{4}-\d{2}-\d{2}/);
+      return match ? match[0] : "";
+    }
+
+    function getBrowserRecords() {
+      const keyword = browserState.keyword.trim().toLowerCase();
+      const from = browserState.publishFrom || "";
+      const to = browserState.publishTo || "";
+      return browserRecords.filter((record) => {
+        const typeMatch = Array.isArray(record.type)
+          ? record.type.includes(browserState.activeType)
+          : record.type === browserState.activeType;
+        if (!typeMatch) return false;
+        const searchable = `${record.standardNo} ${record.standardName} ${record.organization} ${record.intro} ${record.level}`.toLowerCase();
+        const publishDate = browserDateValue(record.publishDate);
+        return (!keyword || searchable.includes(keyword))
+          && (!from || publishDate >= from)
+          && (!to || publishDate <= to)
+          && (!browserState.level || record.level === browserState.level);
+      });
+    }
+
+    function browserPager(total) {
+      const totalPages = Math.max(1, Math.ceil(total / browserState.pageSize));
+      browserState.page = Math.min(Math.max(1, browserState.page), totalPages);
+      const start = (browserState.page - 1) * browserState.pageSize;
+      return {
+        totalPages,
+        records: getBrowserRecords().slice(start, start + browserState.pageSize)
+      };
+    }
+
+    function browserCard(record) {
+      return `
+        <article class="lowdim-standard-browser-card">
+          <div class="lowdim-standard-browser-card-top">
+            <span class="lowdim-standard-browser-badge">${escapeBrowserHtml(record.level)}</span>
+            <span class="lowdim-standard-browser-number">${escapeBrowserHtml(record.standardNo)}</span>
+          </div>
+          <h3 title="${escapeBrowserHtml(record.standardName)}">${escapeBrowserHtml(record.standardName)}</h3>
+          <p class="lowdim-standard-browser-intro" title="${escapeBrowserHtml(record.intro)}">${escapeBrowserHtml(record.intro)}</p>
+          <dl class="lowdim-standard-browser-meta">
+            <div><dt>发布机构</dt><dd title="${escapeBrowserHtml(record.organization)}">${escapeBrowserHtml(record.organization)}</dd></div>
+            <div><dt>发布日期</dt><dd>${escapeBrowserHtml(record.publishDate)}</dd></div>
+            <div><dt>实施日期</dt><dd>${escapeBrowserHtml(record.effectiveDate)}</dd></div>
+          </dl>
+          <div class="lowdim-standard-browser-card-footer">
+            <button class="btn btn-sm lowdim-standard-browser-detail-btn" type="button" data-standard-browser-view="${escapeBrowserHtml(record.id)}">查看详情</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function browserPagination(total, totalPages) {
+      const page = browserState.page;
+      const buttons = [];
+      const first = Math.max(1, Math.min(page - 2, totalPages - 4));
+      const last = Math.min(totalPages, first + 4);
+      for (let index = first; index <= last; index += 1) {
+        buttons.push(`<button type="button" class="${index === page ? "active" : ""}" data-standard-browser-page="${index}" aria-current="${index === page ? "page" : "false"}">${index}</button>`);
+      }
+      return `
+        <div class="lowdim-standard-browser-pagination">
+          <span>共 ${total} 条标准</span>
+          <div class="lowdim-standard-browser-page-buttons">
+            <button type="button" ${page <= 1 ? "disabled" : ""} data-standard-browser-page="${page - 1}" aria-label="上一页">‹</button>
+            ${buttons.join("")}
+            <button type="button" ${page >= totalPages ? "disabled" : ""} data-standard-browser-page="${page + 1}" aria-label="下一页">›</button>
+          </div>
+          <span>第 ${page} / ${totalPages} 页</span>
+        </div>
+      `;
+    }
+
+    function browserDetailPager(record) {
+      const records = getBrowserRecords();
+      const index = records.findIndex((item) => item.id === record.id);
+      const position = index >= 0 ? index + 1 : 1;
+      return `
+        <div class="lowdim-standard-browser-detail-pager" aria-label="标准详情分页">
+          <button type="button" class="lowdim-standard-browser-detail-pager-btn" data-standard-browser-detail-nav="prev" ${index <= 0 ? "disabled" : ""} aria-label="上一条">‹</button>
+          <span>${position} / ${Math.max(records.length, 1)}</span>
+          <button type="button" class="lowdim-standard-browser-detail-pager-btn" data-standard-browser-detail-nav="next" ${index < 0 || index >= records.length - 1 ? "disabled" : ""} aria-label="下一条">›</button>
+        </div>
+      `;
+    }
+
+    function browserDetail(record) {
+      const references = record.references || browserReferences;
+      return `
+        <div class="lowdim-standard-browser-shell lowdim-standard-browser-detail-shell">
+          <div class="lowdim-standard-browser-head">
+            <div>
+              <div class="lowdim-standard-browser-breadcrumb">
+                <span>首页</span><i>/</i><span>低维材料标准体系</span><i>/</i><strong>标准详情</strong>
+              </div>
+              <div class="lowdim-standard-browser-title-row">
+                <button class="lowdim-standard-browser-back-icon" type="button" data-standard-browser-back aria-label="返回标准列表">‹</button>
+                <div>
+                  <span class="twod-search-eyebrow">低维材料标准体系</span>
+                  <h2>${escapeBrowserHtml(record.standardName)}</h2>
+                  <p>${escapeBrowserHtml(record.standardNo)}</p>
+                </div>
+              </div>
+            </div>
+            <div class="lowdim-standard-browser-head-actions">
+              <button class="btn" type="button" data-standard-browser-back>返回列表</button>
+            </div>
+          </div>
+          <section class="lowdim-standard-browser-panel">
+            <div class="lowdim-standard-browser-section-title">
+              <div class="lowdim-standard-browser-section-heading"><span class="lowdim-standard-browser-section-icon" aria-hidden="true">i</span><h3>基本信息</h3></div>
+            </div>
+            <div class="lowdim-standard-browser-detail-grid">
+              <div class="lowdim-standard-browser-detail-item"><span>标准编号</span><strong>${escapeBrowserHtml(record.standardNo)}</strong></div>
+              <div class="lowdim-standard-browser-detail-item"><span>标准文件名称</span><strong>${escapeBrowserHtml(record.standardName)}</strong></div>
+              <div class="lowdim-standard-browser-detail-item"><span>标准级别</span><strong>${escapeBrowserHtml(record.level)}</strong></div>
+              <div class="lowdim-standard-browser-detail-item"><span>发布机构</span><strong>${escapeBrowserHtml(record.organization)}</strong></div>
+              <div class="lowdim-standard-browser-detail-item"><span>发布日期</span><strong>${escapeBrowserHtml(record.publishDate)}</strong></div>
+              <div class="lowdim-standard-browser-detail-item"><span>实施日期</span><strong>${escapeBrowserHtml(record.effectiveDate)}</strong></div>
+            </div>
+          </section>
+          <section class="lowdim-standard-browser-panel">
+            <div class="lowdim-standard-browser-section-title">
+              <div class="lowdim-standard-browser-section-heading"><span class="lowdim-standard-browser-section-icon" aria-hidden="true"></span><h3>适用范围</h3></div>
+            </div>
+            <div class="lowdim-standard-browser-scope">
+              <p>${escapeBrowserHtml(record.intro)}</p>
+              <p>${escapeBrowserHtml(record.projectMatch)}</p>
+            </div>
+          </section>
+          <section class="lowdim-standard-browser-panel">
+            <div class="lowdim-standard-browser-section-title">
+              <div class="lowdim-standard-browser-section-heading"><span class="lowdim-standard-browser-section-icon" aria-hidden="true">▤</span><h3>规范性引用文件</h3></div>
+              <span>${references.length} 项</span>
+            </div>
+            <p class="lowdim-standard-browser-section-desc">下列文件用于说明本标准的引用依据和相关技术来源。</p>
+            <ol class="lowdim-standard-browser-references">${references.map((item) => `<li>${escapeBrowserHtml(item)}</li>`).join("")}</ol>
+          </section>
+          <section class="lowdim-standard-browser-panel">
+            <div class="lowdim-standard-browser-section-title">
+              <div class="lowdim-standard-browser-section-heading"><span class="lowdim-standard-browser-section-icon" aria-hidden="true">▣</span><h3>标准核心内容</h3></div>
+            </div>
+            <div class="lowdim-standard-browser-rich-view">
+              <div class="lowdim-standard-browser-rich-block">
+                <span>核心内容说明</span>
+                <p>${escapeBrowserHtml(record.coreContent)}</p>
+              </div>
+              <div class="lowdim-standard-browser-rich-block">
+                <span>项目匹配场景</span>
+                <p>${escapeBrowserHtml(record.projectMatch)}</p>
+              </div>
+            </div>
+          </section>
+          <section class="lowdim-standard-browser-panel">
+            <div class="lowdim-standard-browser-section-title">
+              <div class="lowdim-standard-browser-section-heading"><span class="lowdim-standard-browser-section-icon" aria-hidden="true">↗</span><h3>附件</h3></div>
+              <span>支持下载</span>
+            </div>
+            <div class="lowdim-standard-browser-attachment-detail">
+              <div class="lowdim-standard-browser-file-main">
+                <span class="lowdim-standard-browser-file-icon" aria-hidden="true">TXT</span>
+                <div>
+                  <strong>${escapeBrowserHtml(record.attachmentName)}</strong>
+                  <p>标准文档摘要附件 · TXT</p>
+                </div>
+              </div>
+              <button class="btn-primary btn-sm" type="button" data-standard-browser-download="${escapeBrowserHtml(record.id)}">下载附件</button>
+            </div>
+          </section>
+          ${browserDetailPager(record)}
+        </div>
+      `;
+    }
+
+    function renderLowdimStandardBrowserPage() {
+      const page = document.getElementById("page-standard-twod");
+      if (!page || state?.page === MANAGEMENT_PAGE) return;
+      const activeRecord = browserRecords.find((record) => record.id === browserState.detailId);
+      if (activeRecord) {
+        page.innerHTML = `<style>${getLowdimStandardBrowserStyles()}</style>${browserDetail(activeRecord)}`;
+        return;
+      }
+      const filtered = getBrowserRecords();
+      const { records, totalPages } = browserPager(filtered.length);
+      page.innerHTML = `
+        <style>${getLowdimStandardBrowserStyles()}</style>
+        <div class="lowdim-standard-browser-type-tabs" role="tablist" aria-label="标准类型">
+          <span class="lowdim-standard-browser-type-label">标准类型</span>
+          ${browserTypes.map((type) => `<button type="button" class="${browserState.activeType === type ? "active" : ""}" data-standard-browser-type="${escapeBrowserHtml(type)}" role="tab" aria-selected="${browserState.activeType === type ? "true" : "false"}">${escapeBrowserHtml(type)}</button>`).join("")}
+        </div>
+        <div class="lowdim-standard-browser-shell">
+          <div class="lowdim-standard-browser-head">
+            <div>
+              <span class="twod-search-eyebrow">低维材料标准体系</span>
+              <h2>低维材料标准体系</h2>
+            </div>
+            <button class="btn-primary" type="button" data-standard-browser-manage>标准体系管理</button>
+          </div>
+          <section class="lowdim-standard-browser-panel lowdim-standard-browser-filter-panel">
+            <div class="lowdim-standard-browser-filters">
+              <label><span>标准名称</span><input type="search" value="${escapeBrowserHtml(browserState.keyword)}" placeholder="请输入标准名称" data-standard-browser-keyword></label>
+              <label><span>发布时间</span><div class="lowdim-standard-browser-date-range"><input type="date" value="${escapeBrowserHtml(browserState.publishFrom)}" aria-label="发布时间开始" data-standard-browser-from><i>至</i><input type="date" value="${escapeBrowserHtml(browserState.publishTo)}" aria-label="发布时间结束" data-standard-browser-to></div></label>
+              <label><span>标准级别</span><select data-standard-browser-level><option value="">请选择标准级别</option>${browserLevels.map((level) => `<option value="${escapeBrowserHtml(level)}" ${browserState.level === level ? "selected" : ""}>${escapeBrowserHtml(level)}</option>`).join("")}</select></label>
+              <button class="btn lowdim-standard-browser-clear" type="button" data-standard-browser-clear>清空条件</button>
+            </div>
+          </section>
+          <div class="lowdim-standard-browser-list-head"><strong>共 ${filtered.length} 条标准</strong><span>${escapeBrowserHtml(browserState.activeType)}</span></div>
+          <section class="lowdim-standard-browser-grid">${records.length ? records.map(browserCard).join("") : `<div class="lowdim-standard-browser-empty">暂无符合条件的标准文件</div>`}</section>
+          ${browserPagination(filtered.length, totalPages)}
+        </div>
+      `;
+    }
+
+    function getLowdimStandardBrowserStyles() {
+      return `
+        #page-standard-twod{background:#f6f8fb;margin:-18px -22px -24px;min-height:calc(100vh - var(--topbar-height));padding:0 0 28px;color:#142033;}
+        #page-standard-twod .lowdim-standard-browser-shell{padding:22px;display:grid;gap:16px;}
+        #page-standard-twod .lowdim-standard-browser-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
+        #page-standard-twod .lowdim-standard-browser-head h2{margin:6px 0 0;color:#0f2377;font-size:24px;line-height:32px;font-weight:800;}
+        #page-standard-twod .lowdim-standard-browser-head p{margin:8px 0 0;color:#526176;font-size:14px;line-height:24px;}
+        #page-standard-twod .lowdim-standard-browser-head-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+        #page-standard-twod .lowdim-standard-browser-detail-shell{gap:22px;}
+        #page-standard-twod .lowdim-standard-browser-breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:#8a97aa;font-size:13px;line-height:20px;}
+        #page-standard-twod .lowdim-standard-browser-breadcrumb i{font-style:normal;color:#b4bfcc;}
+        #page-standard-twod .lowdim-standard-browser-breadcrumb strong{color:#2451c6;font-weight:800;}
+        #page-standard-twod .lowdim-standard-browser-title-row{display:flex;align-items:center;gap:12px;}
+        #page-standard-twod .lowdim-standard-browser-back-icon{display:grid;width:34px;height:34px;flex:0 0 auto;place-items:center;border:1px solid #dce4ef;border-radius:50%;background:#fff;color:#718096;font-size:26px;line-height:1;cursor:pointer;}
+        #page-standard-twod .lowdim-standard-browser-back-icon:hover{border-color:#9db9e9;background:#eef5ff;color:#2451c6;}
+        #page-standard-twod .lowdim-standard-browser-section-heading{display:flex;align-items:center;gap:8px;min-width:0;}
+        #page-standard-twod .lowdim-standard-browser-section-icon{display:inline-grid;width:22px;height:22px;flex:0 0 auto;place-items:center;border-radius:5px;background:#e8f2ff;color:#2d6cdf;font-size:13px;font-weight:800;line-height:1;}
+        #page-standard-twod .lowdim-standard-browser-section-heading h3{min-width:0;}
+        #page-standard-twod .lowdim-standard-browser-scope{display:grid;gap:12px;color:#526176;font-size:14px;line-height:28px;}
+        #page-standard-twod .lowdim-standard-browser-scope p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;}
+        #page-standard-twod .lowdim-standard-browser-section-desc{margin:0 0 12px;color:#7b8798;font-size:13px;line-height:24px;}
+        #page-standard-twod .lowdim-standard-browser-type-tabs{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:12px 22px;background:#fff;border-bottom:1px solid #dfe6f1;}
+        #page-standard-twod .lowdim-standard-browser-type-label{flex:0 0 auto;color:#0f2377;font-size:14px;font-weight:800;white-space:nowrap;}
+        #page-standard-twod .lowdim-standard-browser-type-tabs button{min-height:40px;padding:0 16px;border:1px solid #dce4ef;border-radius:6px;background:#fff;color:#26344b;font-size:13px;font-weight:700;white-space:nowrap;transition:background .2s ease,color .2s ease,border-color .2s ease;}
+        #page-standard-twod .lowdim-standard-browser-type-tabs button:hover{background:#eef5ff;}
+        #page-standard-twod .lowdim-standard-browser-type-tabs button.active{background:#123c9c;color:#fff;border-color:#123c9c;}
+        #page-standard-twod .lowdim-standard-browser-panel{background:#fff;border:1px solid #dfe6f1;border-radius:8px;padding:16px;box-shadow:0 10px 24px rgba(31,55,92,.06);}
+        #page-standard-twod .lowdim-standard-browser-filters{display:grid;grid-template-columns:minmax(220px,1fr) minmax(300px,1.2fr) minmax(200px,.8fr) auto;align-items:end;gap:12px;}
+        #page-standard-twod .lowdim-standard-browser-filters label{display:grid;gap:6px;color:#334155;font-size:13px;font-weight:700;}
+        #page-standard-twod .lowdim-standard-browser-filters input,#page-standard-twod .lowdim-standard-browser-filters select{width:100%;min-height:42px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;padding:0 11px;color:#142033;outline:none;}
+        #page-standard-twod .lowdim-standard-browser-filters input:focus,#page-standard-twod .lowdim-standard-browser-filters select:focus{border-color:#2451c6;box-shadow:0 0 0 3px rgba(36,81,198,.12);}
+        #page-standard-twod .lowdim-standard-browser-date-range{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;}
+        #page-standard-twod .lowdim-standard-browser-date-range i{font-style:normal;color:#94a3b8;}
+        #page-standard-twod .lowdim-standard-browser-clear{min-height:42px;white-space:nowrap;}
+        #page-standard-twod .lowdim-standard-browser-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#64748b;font-size:13px;}
+        #page-standard-twod .lowdim-standard-browser-list-head strong{color:#123c9c;font-size:17px;}
+        #page-standard-twod .lowdim-standard-browser-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+        #page-standard-twod .lowdim-standard-browser-card{min-width:0;display:flex;flex-direction:column;min-height:286px;padding:16px;border:1px solid #dfe6f1;border-radius:8px;background:#fff;box-shadow:0 8px 20px rgba(31,55,92,.05);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;}
+        #page-standard-twod .lowdim-standard-browser-card:hover{transform:translateY(-2px);border-color:#a9bfe9;box-shadow:0 14px 28px rgba(31,55,92,.1);}
+        #page-standard-twod .lowdim-standard-browser-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;}
+        #page-standard-twod .lowdim-standard-browser-badge{display:inline-flex;align-items:center;min-height:24px;padding:2px 9px;border-radius:999px;background:#edf4ff;color:#123c9c;font-size:12px;font-weight:800;white-space:nowrap;}
+        #page-standard-twod .lowdim-standard-browser-number{color:#64748b;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+        #page-standard-twod .lowdim-standard-browser-card h3{display:-webkit-box;margin:0;color:#142033;font-size:16px;line-height:24px;font-weight:800;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;}
+        #page-standard-twod .lowdim-standard-browser-intro{display:-webkit-box;min-height:48px;margin:10px 0 14px;color:#64748b;font-size:13px;line-height:24px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;}
+        #page-standard-twod .lowdim-standard-browser-meta{display:grid;gap:7px;margin:0;}
+        #page-standard-twod .lowdim-standard-browser-meta div{display:grid;grid-template-columns:68px minmax(0,1fr);gap:8px;min-width:0;font-size:12px;line-height:20px;}
+        #page-standard-twod .lowdim-standard-browser-meta dt{color:#94a3b8;}
+        #page-standard-twod .lowdim-standard-browser-meta dd{min-width:0;margin:0;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        #page-standard-twod .lowdim-standard-browser-card-footer{display:flex;justify-content:flex-end;margin-top:auto;padding-top:14px;border-top:1px solid #edf1f6;}
+        #page-standard-twod .lowdim-standard-browser-detail-btn{min-width:88px;color:#123c9c;border-color:#2451c6;background:#fff;}
+        #page-standard-twod .lowdim-standard-browser-empty{grid-column:1/-1;padding:46px 18px;text-align:center;color:#64748b;border:1px dashed #cfd8e6;border-radius:8px;background:#fbfdff;}
+        #page-standard-twod .lowdim-standard-browser-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 2px 0;color:#64748b;font-size:13px;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons{display:flex;align-items:center;gap:6px;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons button{width:34px;height:34px;border:1px solid #d4deeb;border-radius:5px;background:#fff;color:#334155;cursor:pointer;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons button:hover:not(:disabled){border-color:#2451c6;color:#123c9c;background:#f0f6ff;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons button.active{border-color:#123c9c;background:#123c9c;color:#fff;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons button:disabled{cursor:not-allowed;opacity:.45;}
+        #page-standard-twod .lowdim-standard-browser-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+        #page-standard-twod .lowdim-standard-browser-section-title h3{margin:0;color:#0f2377;font-size:18px;line-height:26px;}
+        #page-standard-twod .lowdim-standard-browser-section-title span{color:#64748b;font-size:13px;}
+        #page-standard-twod .lowdim-standard-browser-info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+        #page-standard-twod .lowdim-standard-browser-info-grid div{display:grid;gap:6px;min-width:0;padding:12px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;}
+        #page-standard-twod .lowdim-standard-browser-info-grid span{color:#64748b;font-size:12px;font-weight:700;}
+        #page-standard-twod .lowdim-standard-browser-info-grid strong{color:#142033;font-size:14px;line-height:22px;overflow-wrap:anywhere;}
+        #page-standard-twod .lowdim-standard-browser-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+        #page-standard-twod .lowdim-standard-browser-detail-item{display:grid;gap:6px;min-width:0;padding:12px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;}
+        #page-standard-twod .lowdim-standard-browser-detail-item span{color:#64748b;font-size:12px;font-weight:700;}
+        #page-standard-twod .lowdim-standard-browser-detail-item strong{color:#142033;font-size:14px;line-height:22px;overflow-wrap:anywhere;word-break:break-word;}
+        #page-standard-twod .lowdim-standard-browser-rich-view{display:grid;gap:14px;min-height:120px;padding:14px;border:1px solid #dfe6f1;border-radius:6px;background:#fbfdff;color:#334155;font-size:14px;line-height:26px;overflow-wrap:anywhere;}
+        #page-standard-twod .lowdim-standard-browser-rich-block{min-width:0;}
+        #page-standard-twod .lowdim-standard-browser-rich-block + .lowdim-standard-browser-rich-block{padding-top:14px;border-top:1px solid #e7edf5;}
+        #page-standard-twod .lowdim-standard-browser-rich-block span{display:block;margin-bottom:4px;color:#64748b;font-size:12px;font-weight:800;}
+        #page-standard-twod .lowdim-standard-browser-rich-block p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;}
+        #page-standard-twod .lowdim-standard-browser-rich{padding:14px;border:1px solid #dfe6f1;border-radius:6px;background:#fbfdff;color:#334155;font-size:14px;line-height:26px;overflow-wrap:anywhere;}
+        #page-standard-twod .lowdim-standard-browser-references{display:grid;gap:8px;margin:0;padding:0 0 0 22px;color:#334155;font-size:13px;line-height:24px;}
+        #page-standard-twod .lowdim-standard-browser-attachment-detail{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px;border:1px solid #dfe6f1;border-radius:8px;background:#f8fafc;}
+        #page-standard-twod .lowdim-standard-browser-attachment-detail strong{display:block;color:#142033;font-size:14px;overflow-wrap:anywhere;word-break:break-word;}
+        #page-standard-twod .lowdim-standard-browser-attachment-detail p{margin:6px 0 0;color:#64748b;line-height:22px;}
+        #page-standard-twod .lowdim-standard-browser-file-main{display:flex;align-items:center;gap:12px;min-width:0;}
+        #page-standard-twod .lowdim-standard-browser-file-main > div{min-width:0;}
+        #page-standard-twod .lowdim-standard-browser-file-icon{display:grid;width:38px;height:42px;flex:0 0 auto;place-items:center;border:1px solid #ff6b6b;border-radius:5px;background:#fff4f4;color:#f04444;font-size:10px;font-weight:800;}
+        #page-standard-twod .lowdim-standard-browser-detail-pager{display:flex;align-items:center;justify-content:center;gap:14px;min-height:42px;color:#526176;font-size:13px;}
+        #page-standard-twod .lowdim-standard-browser-detail-pager-btn{display:grid;width:34px;height:34px;place-items:center;border:1px solid #d4deeb;border-radius:5px;background:#fff;color:#334155;font-size:22px;line-height:1;cursor:pointer;}
+        #page-standard-twod .lowdim-standard-browser-detail-pager-btn:hover:not(:disabled){border-color:#2451c6;background:#f0f6ff;color:#123c9c;}
+        #page-standard-twod .lowdim-standard-browser-detail-pager-btn:disabled{cursor:not-allowed;opacity:.4;}
+        @media (max-width:1100px){#page-standard-twod .lowdim-standard-browser-filters{grid-template-columns:repeat(2,minmax(0,1fr));}#page-standard-twod .lowdim-standard-browser-grid{grid-template-columns:repeat(2,minmax(0,1fr));}#page-standard-twod .lowdim-standard-browser-info-grid,#page-standard-twod .lowdim-standard-browser-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+        @media (max-width:720px){#page-standard-twod{margin:-18px -12px -24px;}#page-standard-twod .lowdim-standard-browser-shell{padding:14px;}#page-standard-twod .lowdim-standard-browser-type-tabs{padding:10px 14px;}#page-standard-twod .lowdim-standard-browser-filters,#page-standard-twod .lowdim-standard-browser-grid,#page-standard-twod .lowdim-standard-browser-info-grid,#page-standard-twod .lowdim-standard-browser-detail-grid{grid-template-columns:1fr;}#page-standard-twod .lowdim-standard-browser-date-range{grid-template-columns:1fr;}.lowdim-standard-browser-date-range i{display:none;}}
+        @media (prefers-reduced-motion:reduce){#page-standard-twod .lowdim-standard-browser-card,#page-standard-twod .lowdim-standard-browser-type-tabs button{transition:none;}}
+      `;
+    }
+
+    function downloadBrowserAttachment(record) {
+      const references = record.references || browserReferences;
+      const content = [
+        record.standardNo,
+        record.standardName,
+        `发布机构：${record.organization}`,
+        `发布日期：${record.publishDate}`,
+        `实施日期：${record.effectiveDate}`,
+        `标准级别：${record.level}`,
+        "",
+        `简介：${record.intro}`,
+        "",
+        `核心内容：${record.coreContent}`,
+        "",
+        `项目匹配：${record.projectMatch}`,
+        "",
+        "规范性引用文件：",
+        ...references
+      ].join("\n");
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = record.attachmentName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      if (typeof showToast === "function") showToast("标准体系", `${record.standardNo} 附件已开始下载。`);
+    }
+
+    renderTwodStandardPage = function renderLowdimStandardBrowserOrLegacy() {
+      if (state?.page === MANAGEMENT_PAGE && legacyTwodStandardRenderer) {
+        legacyTwodStandardRenderer();
+        return;
+      }
+      renderLowdimStandardBrowserPage();
+    };
+
+    document.body.addEventListener("click", (event) => {
+      const typeButton = event.target.closest("[data-standard-browser-type]");
+      if (typeButton) {
+        browserState.activeType = typeButton.dataset.standardBrowserType || browserTypes[0];
+        browserState.keyword = "";
+        browserState.publishFrom = "";
+        browserState.publishTo = "";
+        browserState.level = "";
+        browserState.page = 1;
+        browserState.detailId = "";
+        renderLowdimStandardBrowserPage();
+        return;
+      }
+      if (event.target.closest("[data-standard-browser-manage]")) {
+        if (typeof switchPage === "function") switchPage(MANAGEMENT_PAGE);
+        return;
+      }
+      const detailNavButton = event.target.closest("[data-standard-browser-detail-nav]");
+      if (detailNavButton && !detailNavButton.disabled) {
+        const records = getBrowserRecords();
+        const currentIndex = records.findIndex((record) => record.id === browserState.detailId);
+        const direction = detailNavButton.dataset.standardBrowserDetailNav === "prev" ? -1 : 1;
+        const nextRecord = records[currentIndex + direction];
+        if (nextRecord) {
+          browserState.detailId = nextRecord.id;
+          renderLowdimStandardBrowserPage();
+        }
+        return;
+      }
+      const viewButton = event.target.closest("[data-standard-browser-view]");
+      if (viewButton) {
+        browserState.detailId = viewButton.dataset.standardBrowserView || "";
+        renderLowdimStandardBrowserPage();
+        return;
+      }
+      if (event.target.closest("[data-standard-browser-back]")) {
+        browserState.detailId = "";
+        renderLowdimStandardBrowserPage();
+        return;
+      }
+      const downloadButton = event.target.closest("[data-standard-browser-download]");
+      if (downloadButton) {
+        const record = browserRecords.find((item) => item.id === downloadButton.dataset.standardBrowserDownload);
+        if (record) downloadBrowserAttachment(record);
+        return;
+      }
+      const pageButton = event.target.closest("[data-standard-browser-page]");
+      if (pageButton && !pageButton.disabled) {
+        browserState.page = Number(pageButton.dataset.standardBrowserPage) || 1;
+        renderLowdimStandardBrowserPage();
+        return;
+      }
+      if (event.target.closest("[data-standard-browser-clear]")) {
+        browserState.keyword = "";
+        browserState.publishFrom = "";
+        browserState.publishTo = "";
+        browserState.level = "";
+        browserState.page = 1;
+        renderLowdimStandardBrowserPage();
+      }
+    });
+
+    document.body.addEventListener("input", (event) => {
+      if (event.target.closest("[data-standard-browser-keyword]")) {
+        browserState.keyword = event.target.value || "";
+        browserState.page = 1;
+        clearTimeout(browserKeywordTimer);
+        browserKeywordTimer = setTimeout(() => renderLowdimStandardBrowserPage(), 160);
+      }
+    });
+
+    document.body.addEventListener("change", (event) => {
+      if (event.target.closest("[data-standard-browser-from]")) browserState.publishFrom = event.target.value || "";
+      if (event.target.closest("[data-standard-browser-to]")) browserState.publishTo = event.target.value || "";
+      if (event.target.closest("[data-standard-browser-level]")) browserState.level = event.target.value || "";
+      if (event.target.closest("[data-standard-browser-from],[data-standard-browser-to],[data-standard-browser-level]")) {
+        browserState.page = 1;
+        renderLowdimStandardBrowserPage();
+      }
+    });
+
+    if (state?.page === "standard-twod") renderLowdimStandardBrowserPage();
+  })();
+  </script>
+  <style id="algorithm-tools-hidden-style">
+    .portal-link[data-page="algorithms"],
+    .portal-link[data-page="tools"],
+    .sidebar-group[data-group="analysis"],
+    .sidebar-group[data-group="algorithm-tools"],
+    #page-algorithms,
+    #page-tools,
+    #page-sys-algorithm,
+    #page-sys-api {
+      display: none !important;
+    }
+  </style>
+  <script id="algorithm-tools-hidden-script">
+    (() => {
+      const hiddenAlgorithmToolPages = new Set(["algorithms", "tools", "sys-algorithm", "sys-api"]);
+      const originalSwitchPage = typeof switchPage === "function" ? switchPage : null;
+
+      if (originalSwitchPage && !window.__algorithmToolsHiddenSwitchWrapped) {
+        switchPage = function guardedSwitchPage(page) {
+          return originalSwitchPage(hiddenAlgorithmToolPages.has(page) ? "twod" : page);
+        };
+        window.__algorithmToolsHiddenSwitchWrapped = true;
+      }
+
+      const syncHiddenAlgorithmToolPage = () => {
+        if (typeof state !== "undefined" && hiddenAlgorithmToolPages.has(state?.page) && typeof switchPage === "function") {
+          switchPage("twod");
+        }
+      };
+
+      syncHiddenAlgorithmToolPage();
+      setTimeout(syncHiddenAlgorithmToolPage, 0);
+    })();
+  </script>
+  <style id="twod-property-field-filter-style">
+    #page-twod .twod-property-field-filter {
+      position: relative;
+      margin: 0;
+      padding: 12px 14px;
+      border: 1px solid #dbe5f2;
+      border-radius: 8px;
+      background: #f8fbff;
+    }
+
+    #page-twod .twod-property-field-filter-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 0;
+    }
+
+    #page-twod .twod-property-field-filter-label {
+      color: #223657;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    #page-twod .twod-property-field-dropdown {
+      position: relative;
+      min-width: 260px;
+    }
+
+    #page-twod .twod-property-field-dropdown summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 34px;
+      padding: 0 10px;
+      border: 1px solid #cbd8e8;
+      border-radius: 5px;
+      background: #fff;
+      color: #475569;
+      font-size: 12px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    #page-twod .twod-property-field-dropdown summary::-webkit-details-marker {
+      display: none;
+    }
+
+    #page-twod .twod-property-field-dropdown summary::after {
+      content: "\2304";
+      color: #64748b;
+      font-size: 16px;
+      line-height: 1;
+      transform: translateY(-2px);
+    }
+
+    #page-twod .twod-property-field-dropdown[open] summary {
+      border-color: #1677ff;
+      color: #123c9c;
+    }
+
+    #page-twod .twod-property-field-dropdown[open] summary::after {
+      content: "\2303";
+    }
+
+    #page-twod .twod-property-field-filter-summary {
+      color: #64748b;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    #page-twod .twod-property-field-options {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(150px, 1fr));
+      gap: 8px 10px;
+      width: min(520px, calc(100vw - 64px));
+      padding: 10px;
+      border: 1px solid #cbd8e8;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 12px 28px rgba(31, 55, 92, .14);
+    }
+
+    #page-twod .twod-property-field-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid #d5e0ef;
+      border-radius: 5px;
+      background: #fff;
+      color: #475569;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #page-twod .twod-property-field-option:hover {
+      border-color: #8fb1e8;
+      background: #f2f7ff;
+      color: #123c9c;
+    }
+
+    #page-twod .twod-property-field-option input {
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      accent-color: #1677ff;
+    }
+
+    #page-twod .twod-property-field-option:has(input:checked) {
+      border-color: #1677ff;
+      background: #edf4ff;
+      color: #123c9c;
+    }
+
+    #page-twod .twod-property-field-empty {
+      grid-column: 1 / -1;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed #cbd8e8;
+      border-radius: 6px;
+      background: #fbfdff;
+      color: #7b8ba3;
+      font-size: 13px;
+    }
+
+    @media (max-width: 640px) {
+      #page-twod .twod-property-select-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+
+      #page-twod .twod-property-field-filter-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      #page-twod .twod-property-field-dropdown {
+        width: 100%;
+      }
+
+      #page-twod .twod-property-field-options {
+        left: 0;
+        right: auto;
+        width: 100%;
+      }
+
+      #page-twod .twod-property-field-option {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  </style>
+  <script id="twod-property-field-filter-script">
+    (() => {
+      if (window.__TWOD_PROPERTY_FIELD_FILTER_READY__) return;
+      window.__TWOD_PROPERTY_FIELD_FILTER_READY__ = true;
+
+      state.twodPropertySelectedFields = Array.isArray(state.twodPropertySelectedFields)
+        ? state.twodPropertySelectedFields
+        : [];
+      state.twodAppliedPropertyFields = Array.isArray(state.twodAppliedPropertyFields)
+        ? state.twodAppliedPropertyFields
+        : [];
+
+      const propertyFieldKeys = (field) => {
+        const keys = Array.isArray(field?.keys) ? field.keys.slice() : [];
+        if (field?.key) keys.unshift(field.key);
+        if (field?.kind === "range" && field?.key) keys.push(`${field.key}_min`, `${field.key}_max`);
+        if (field?.dependsOn) keys.push(field.dependsOn);
+        return [...new Set(keys)];
+      };
+
+      const getSchemaFields = (categoryKey = state.selectedPropertyCategory) => {
+        const schema = typeof twodPropertySchemas !== "undefined" ? twodPropertySchemas[categoryKey] : null;
+        return Array.isArray(schema?.fields) ? schema.fields : [];
+      };
+
+      const getSelectedFieldKeys = (categoryKey = state.selectedPropertyCategory) => {
+        const available = new Set(getSchemaFields(categoryKey).map((field) => field.key));
+        return [...new Set((state.twodPropertySelectedFields || []).filter((key) => available.has(key)))];
+      };
+
+      const clearDraftForField = (field) => {
+        propertyFieldKeys(field).forEach((key) => {
+          if (state.twodPropertyDraft) delete state.twodPropertyDraft[key];
+        });
+      };
+
+      const renderFieldPicker = (schema, selectedKeys) => {
+        const labels = selectedKeys.length
+          ? `\u5df2\u9009 ${selectedKeys.length} \u4e2a\u5b57\u6bb5`
+          : "\u8bf7\u9009\u62e9\u4e00\u4e2a\u6216\u591a\u4e2a\u5b57\u6bb5";
+        return `
+          <div class="twod-property-field-filter" id="propertyFieldFilter">
+            <div class="twod-property-field-filter-head">
+              <span class="twod-property-field-filter-label">\u7279\u5f81\u5b57\u6bb5\u7b5b\u9009</span>
+              <details class="twod-property-field-dropdown">
+                <summary><span class="twod-property-field-filter-summary">${labels}</span></summary>
+                <div class="twod-property-field-options" role="group" aria-label="\u7279\u5f81\u5b57\u6bb5\u7b5b\u9009">
+                  ${schema.fields.map((field) => `
+                    <label class="twod-property-field-option" title="${escapeTwodHtml(field.title || field.label || field.key)}">
+                      <input type="checkbox" value="${escapeTwodHtml(field.key)}" data-property-field-option ${selectedKeys.includes(field.key) ? "checked" : ""}>
+                      <span>${escapeTwodHtml(field.title || field.label || field.key)}</span>
+                    </label>
+                  `).join("")}
+                </div>
+              </details>
+            </div>
+          </div>
+        `;
+      };
+
+      const renderSelectedFields = (schema, selectedKeys) => {
+        const fields = schema.fields.filter((field) => selectedKeys.includes(field.key));
+        return fields.length
+          ? fields.map((field) => buildPropertyFieldCard(field)).join("")
+          : `<div class="twod-property-field-empty">\u8bf7\u5148\u5728\u4e0a\u65b9\u52fe\u9009\u4e00\u4e2a\u6216\u591a\u4e2a\u68c0\u7d22\u5b57\u6bb5</div>`;
+      };
+
+      const syncSelectedPropertyFields = () => {
+        const selected = [...document.querySelectorAll("[data-property-field-option]:checked")].map((node) => node.value);
+        state.twodPropertySelectedFields = selected;
+        state.twodAppliedPropertyCategory = "";
+        state.twodAppliedPropertyFields = [];
+        state.twodPropertyApplied = {};
+        state.twodHasSearched = false;
+        refreshTwodResults({ resetPage: true });
+      };
+
+      const originalRenderPropertiesWithFieldFilter = typeof renderProperties === "function" ? renderProperties : null;
+      renderProperties = function renderPropertiesWithFieldFilter() {
+        const select = document.getElementById("propertyCategorySelect");
+        const wrap = document.getElementById("propertyDynamicFields");
+        if (!select || !wrap || typeof twodPropertySchemas === "undefined") {
+          if (originalRenderPropertiesWithFieldFilter) originalRenderPropertiesWithFieldFilter();
+          return;
+        }
+
+        const currentValue = state.selectedPropertyCategory || "";
+        select.innerHTML = `
+          <option value="">\u8bf7\u9009\u62e9\u6027\u8d28\u8fdb\u884c\u7b5b\u9009</option>
+          ${Object.entries(twodPropertySchemas).map(([key, schema]) => `
+            <option value="${escapeTwodHtml(key)}" ${currentValue === key ? "selected" : ""}>${escapeTwodHtml(schema.label)}</option>
+          `).join("")}
+        `;
+
+        const pickerSlot = document.getElementById("propertyFieldFilterSlot");
+        if (pickerSlot) pickerSlot.innerHTML = "";
+        const oldPicker = document.getElementById("propertyFieldFilter");
+        if (oldPicker) oldPicker.remove();
+
+        if (!currentValue) {
+          document.getElementById("propertyPanelTitle").textContent = "\u8bf7\u5148\u9009\u62e9\u6027\u8d28\u7c7b\u522b";
+          document.getElementById("propertyPanelDesc").textContent = "\u9009\u62e9\u6027\u8d28\u7c7b\u522b\u540e\uff0c\u5148\u52fe\u9009\u9700\u8981\u68c0\u7d22\u7684\u5b57\u6bb5\uff0c\u518d\u8f93\u5165\u5bf9\u5e94\u6761\u4ef6\u3002";
+          wrap.innerHTML = "";
+          state.twodPropertySelectedFields = [];
+          return;
+        }
+
+        const schema = twodPropertySchemas[currentValue];
+        const selectedKeys = getSelectedFieldKeys(currentValue);
+        state.twodPropertySelectedFields = selectedKeys;
+        document.getElementById("propertyPanelTitle").textContent = schema.title;
+        document.getElementById("propertyPanelDesc").textContent = "\u5148\u52fe\u9009\u4e00\u4e2a\u6216\u591a\u4e2a\u7279\u5f81\u5b57\u6bb5\uff0c\u53ea\u5c55\u793a\u5df2\u9009\u5b57\u6bb5\u7684\u68c0\u7d22\u6761\u4ef6\u3002";
+        if (pickerSlot) {
+          pickerSlot.innerHTML = renderFieldPicker(schema, selectedKeys);
+        } else {
+          wrap.insertAdjacentHTML("beforebegin", renderFieldPicker(schema, selectedKeys));
+        }
+        wrap.innerHTML = renderSelectedFields(schema, selectedKeys);
+
+        document.getElementById("propertyFieldFilter")?.addEventListener("change", (event) => {
+          const checkbox = event.target.closest("[data-property-field-option]");
+          if (!checkbox) return;
+          const field = schema.fields.find((item) => item.key === checkbox.value);
+          let nextKeys = getSelectedFieldKeys(currentValue);
+          if (checkbox.checked) {
+            nextKeys = [...new Set([...nextKeys, checkbox.value])];
+            if (field?.dependsOn) nextKeys = [...new Set([field.dependsOn, ...nextKeys])];
+          } else {
+            nextKeys = nextKeys.filter((key) => key !== checkbox.value);
+          }
+          schema.fields.forEach((item) => {
+            if (!nextKeys.includes(item.key)) clearDraftForField(item);
+          });
+          state.twodPropertySelectedFields = nextKeys;
+          renderProperties();
+        });
+      };
+
+      const originalApplyTwodSearchByModeWithFieldFilter = typeof applyTwodSearchByMode === "function" ? applyTwodSearchByMode : null;
+      applyTwodSearchByMode = function applyTwodSearchByModeWithFieldFilter(mode) {
+        if (mode === "property") {
+          const selectedKeys = getSelectedFieldKeys();
+          if (!state.selectedPropertyCategory || !selectedKeys.length) {
+            showToast("\u4e8c\u7ef4\u6750\u6599\u6027\u8d28\u68c0\u7d22", "\u8bf7\u5148\u52fe\u9009\u81f3\u5c11\u4e00\u4e2a\u7279\u5f81\u5b57\u6bb5\u3002");
+            return false;
+          }
+          state.twodAppliedPropertyFields = selectedKeys.slice();
+        }
+        return originalApplyTwodSearchByModeWithFieldFilter
+          ? originalApplyTwodSearchByModeWithFieldFilter(mode)
+          : false;
+      };
+
+      const originalClearTwodSearchConditionsWithFieldFilter = typeof clearTwodSearchConditions === "function" ? clearTwodSearchConditions : null;
+      clearTwodSearchConditions = function clearTwodSearchConditionsWithFieldFilter() {
+        if (originalClearTwodSearchConditionsWithFieldFilter) originalClearTwodSearchConditionsWithFieldFilter();
+        state.twodPropertySelectedFields = [];
+        state.twodAppliedPropertyFields = [];
+      };
+
+      renderProperties();
+    })();
+  </script>
+  <style id="global-ui-consistency-final-style">
+    :root {
+      --ui-primary: #4472c4;
+      --ui-primary-strong: #2f5496;
+      --ui-primary-soft: #edf3ff;
+      --ui-text: #262626;
+      --ui-muted: #5f7398;
+      --ui-line: #d9e2f3;
+      --ui-line-soft: #e7edf5;
+      --ui-surface: #ffffff;
+      --ui-surface-soft: #f8fafd;
+      --ui-radius: 8px;
+      --ui-control-height: 40px;
+      --ui-shadow: 0 6px 18px rgba(68, 84, 106, 0.08);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      color: var(--ui-text);
+    }
+
+    .app,
+    .main,
+    main,
+    .page,
+    .page-content,
+    .content,
+    .content-area,
+    .workspace,
+    .page-body {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .main,
+    main,
+    .page {
+      overflow-x: hidden;
+    }
+
+    .page-head,
+    .page-tools,
+    .table-toolbar,
+    .table-tools,
+    .search-row,
+    .filter-row,
+    .filter-actions,
+    .action-row,
+    .toolbar,
+    .toolbar-actions,
+    .panel-actions,
+    .detail-actions,
+    .modal-footer {
+      min-width: 0;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .page-head {
+      margin-bottom: 18px;
+    }
+
+    .page-head > *,
+    .page-tools > *,
+    .table-toolbar > *,
+    .table-tools > *,
+    .search-row > *,
+    .filter-row > *,
+    .action-row > * {
+      min-width: 0;
+    }
+
+    .btn,
+    .btn-primary,
+    .btn-link,
+    .view-btn,
+    .tab-btn,
+    .subtab-btn,
+    .chip,
+    .mini-btn,
+    .algorithm-action-btn,
+    .twod-pagination-btn,
+    .pager button,
+    .page-select,
+    .page-jump button,
+    .page-jump input {
+      min-height: var(--ui-control-height);
+      border-radius: var(--ui-radius);
+      border: 1px solid var(--ui-line);
+      box-shadow: none;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+      transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+    }
+
+    .btn,
+    .btn-primary,
+    .btn-link,
+    .mini-btn,
+    .algorithm-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 14px;
+      max-width: 100%;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .btn,
+    .btn-link,
+    .mini-btn,
+    .algorithm-action-btn {
+      background: var(--ui-surface);
+      color: var(--ui-primary-strong);
+      border-color: #b9cbe8;
+    }
+
+    .btn-primary,
+    .mini-btn.primary,
+    .algorithm-action-btn.primary {
+      background: var(--ui-primary);
+      color: #fff;
+      border-color: var(--ui-primary);
+    }
+
+    .btn:hover,
+    .btn-link:hover,
+    .mini-btn:hover,
+    .algorithm-action-btn:hover {
+      color: var(--ui-primary-strong);
+      border-color: #8eabd8;
+      background: var(--ui-primary-soft);
+    }
+
+    .btn-primary:hover,
+    .mini-btn.primary:hover,
+    .algorithm-action-btn.primary:hover {
+      color: #fff;
+      border-color: var(--ui-primary-strong);
+      background: var(--ui-primary-strong);
+    }
+
+    .btn:focus-visible,
+    .btn-primary:focus-visible,
+    .btn-link:focus-visible,
+    .view-btn:focus-visible,
+    .tab-btn:focus-visible,
+    .subtab-btn:focus-visible,
+    .chip:focus-visible,
+    .mini-btn:focus-visible,
+    .pager button:focus-visible,
+    .page-select:focus-visible,
+    .page-jump button:focus-visible,
+    .page-jump input:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid rgba(68, 114, 196, .32);
+      outline-offset: 1px;
+    }
+
+    .btn-sm,
+    .mini-btn,
+    .algorithm-action-btn,
+    .lowdim-standard-browser-detail-btn {
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+      cursor: not-allowed;
+    }
+
+    .field,
+    .form-field,
+    .filter-field,
+    .search-field,
+    .twod-field,
+    .sys-field {
+      min-width: 0;
+    }
+
+    .field input,
+    .field select,
+    .field textarea,
+    .form-field input,
+    .form-field select,
+    .form-field textarea,
+    .filter-field input,
+    .filter-field select,
+    .filter-field textarea,
+    .search-field input,
+    .search-field select,
+    .twod-field input,
+    .twod-field select,
+    .twod-field textarea,
+    .sys-field input,
+    .sys-field select,
+    .sys-field textarea,
+    input[type="text"],
+    input[type="search"],
+    input[type="number"],
+    input[type="date"],
+    input[type="datetime-local"],
+    input[type="email"],
+    input[type="url"],
+    select,
+    textarea {
+      max-width: 100%;
+      min-height: var(--ui-control-height);
+      border: 1px solid var(--ui-line);
+      border-radius: var(--ui-radius);
+      background: var(--ui-surface);
+      color: var(--ui-text);
+      padding: 8px 11px;
+      line-height: 22px;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #8b9ab0;
+    }
+
+    .table-wrap,
+    .table-scroll,
+    .table-container,
+    .table-card,
+    .sys-table-card,
+    .result-table-wrap,
+    .twod-result-table-wrap,
+    .material-convert-record-table-wrap,
+    [class*="table-wrap"],
+    [class*="table-scroll"] {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      max-width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    table th {
+      white-space: nowrap;
+    }
+
+    table td:last-child,
+    table th:last-child {
+      white-space: nowrap;
+    }
+
+    .table-actions,
+    .row-actions,
+    .table-row-actions,
+    .list-actions,
+    .algorithm-list-actions,
+    .tool-list-actions,
+    .lowdim-standard-row-actions,
+    .lowdim-standard-browser-card-footer,
+    .material-convert-actions-nowrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 1px;
+      scrollbar-width: thin;
+    }
+
+    .table-actions .btn,
+    .row-actions .btn,
+    .table-row-actions .btn,
+    .list-actions .btn,
+    .algorithm-list-actions .btn,
+    .tool-list-actions .btn,
+    .lowdim-standard-row-actions .btn {
+      flex: 0 0 auto;
+    }
+
+    .result-footer,
+    .pagination,
+    .pager,
+    .algorithm-list-pagination,
+    .opto-pagination,
+    .mlff-pagination,
+    .lowdim-standard-footer,
+    .lowdim-standard-browser-pagination {
+      min-width: 0;
+      max-width: 100%;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pagination,
+    .pager,
+    .algorithm-list-pagination .pager,
+    .lowdim-standard-browser-page-buttons {
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
+    }
+
+    .pagination button,
+    .pager button,
+    .page-select,
+    .page-jump button,
+    .page-jump input,
+    .twod-pagination-btn {
+      flex: 0 0 auto;
+      min-width: 36px;
+      min-height: 34px;
+      border-radius: 6px;
+    }
+
+    .card,
+    .app-card,
+    .table-card,
+    .material-card,
+    .detail-card,
+    .material-section,
+    .property-card,
+    .visual-card,
+    .algo-card,
+    .endpoint-card,
+    .detail-panel,
+    .panel,
+    .lowdim-standard-browser-panel {
+      min-width: 0;
+      max-width: 100%;
+      border-radius: var(--ui-radius);
+      box-shadow: var(--ui-shadow);
+    }
+
+    .detail-grid,
+    .material-modal-grid,
+    .material-detail-grid,
+    .property-grid,
+    .visual-grid,
+    .algorithm-detail-grid,
+    .algorithm-detail-layout-v2,
+    .algorithm-detail-summary-grid,
+    .opto-detail-grid,
+    .catalyst-detail-grid,
+    .lowdim-standard-browser-info-grid,
+    [class*="detail-grid"],
+    [class*="summary-grid"] {
+      min-width: 0;
+    }
+
+    .detail-grid > *,
+    .material-modal-grid > *,
+    .material-detail-grid > *,
+    .property-grid > *,
+    .visual-grid > *,
+    .algorithm-detail-grid > *,
+    .algorithm-detail-layout-v2 > *,
+    .algorithm-detail-summary-grid > *,
+    .opto-detail-grid > *,
+    .catalyst-detail-grid > *,
+    [class*="detail-grid"] > *,
+    [class*="summary-grid"] > * {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    img,
+    svg,
+    canvas,
+    video,
+    iframe {
+      max-width: 100%;
+    }
+
+    .sidebar {
+      min-width: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .nav-btn,
+    .sidebar-group-toggle,
+    .portal-link {
+      min-width: 0;
+    }
+
+    .nav-btn span:last-child,
+    .sidebar-group-toggle span,
+    .portal-link span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tab-row,
+    .subtab-row,
+    .tab-list,
+    .tabs,
+    [role="tablist"] {
+      max-width: 100%;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      scrollbar-width: thin;
+    }
+
+    .tab-row > *,
+    .subtab-row > *,
+    .tab-list > *,
+    .tabs > *,
+    [role="tablist"] > * {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .overlay {
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .modal {
+      width: min(100%, 1180px);
+      max-width: calc(100vw - 32px);
+      max-height: calc(100dvh - 32px);
+      min-height: 0;
+      border-radius: var(--ui-radius);
+    }
+
+    .modal-md {
+      width: min(100%, 780px);
+    }
+
+    .modal-lg {
+      width: min(100%, 1160px);
+    }
+
+    .modal-xl {
+      width: min(100%, 1320px);
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+      min-width: 0;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+    }
+
+    .modal-header h3,
+    .modal-header p {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .modal-body {
+      min-height: 0;
+      max-height: calc(100dvh - 174px);
+      overflow: auto;
+      padding: 18px 20px;
+    }
+
+    .modal-footer {
+      padding: 14px 20px 18px;
+      justify-content: flex-end;
+    }
+
+    .modal-footer .btn,
+    .modal-footer .btn-primary {
+      flex: 0 0 auto;
+    }
+
+    .modal-close {
+      flex: 0 0 auto;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+    }
+
+    .property-card p,
+    .visual-card p,
+    .algo-card p,
+    .endpoint-card p,
+    .detail-card p,
+    .section-subtitle,
+    .page-head p {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    [class*="detail-preview"],
+    [class*="preview-panel"],
+    pre,
+    code {
+      max-width: 100%;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    @media (max-width: 900px) {
+      .page-head {
+        align-items: stretch;
+      }
+
+      .page-tools {
+        justify-content: flex-start;
+      }
+
+      .filter-row,
+      .search-row,
+      .table-toolbar {
+        align-items: stretch;
+      }
+
+      .filter-row > *,
+      .search-row > *,
+      .table-toolbar > * {
+        min-width: min(100%, 240px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-head h2 {
+        font-size: 20px;
+        line-height: 28px;
+      }
+
+      .page-tools,
+      .action-row,
+      .modal-footer {
+        width: 100%;
+      }
+
+      .page-tools .btn,
+      .page-tools .btn-primary,
+      .action-row .btn,
+      .action-row .btn-primary {
+        flex: 1 1 auto;
+      }
+
+      .overlay {
+        padding: 8px;
+      }
+
+      .modal,
+      .modal-md,
+      .modal-lg,
+      .modal-xl {
+        max-width: calc(100vw - 16px);
+        max-height: calc(100dvh - 16px);
+      }
+
+      .modal-header,
+      .modal-body,
+      .modal-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .modal-footer .btn,
+      .modal-footer .btn-primary {
+        flex: 1 1 140px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+  <style id="electrolyte-ui-consistency-final-style">
+    #page-electrolyte {
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    #page-electrolyte .electrolyte-main-column,
+    #page-electrolyte .twod-platform-shell {
+      display: grid;
+      min-width: 0;
+      max-width: 100%;
+      gap: 16px;
+    }
+
+    #page-electrolyte .module-tab-strip {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      margin: 0 0 16px !important;
+      padding: 0 !important;
+      overflow-x: auto !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      scrollbar-width: thin;
+    }
+
+    #page-electrolyte .module-tab-btn {
+      flex: 0 0 auto !important;
+      min-width: 96px !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      padding: 0 18px !important;
+      border: 1px solid #d6e4fb !important;
+      border-radius: 6px !important;
+      background: #edf3ff !important;
+      color: #516b8d !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      line-height: 20px !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .module-tab-btn:hover {
+      border-color: #9fb9e7 !important;
+      background: #e3edff !important;
+      color: #2451c6 !important;
+    }
+
+    #page-electrolyte .module-tab-btn.active {
+      border-color: #1677ff !important;
+      background: #1677ff !important;
+      color: #ffffff !important;
+    }
+
+    #page-electrolyte .electrolyte-search-panel,
+    #page-electrolyte .twod-search-platform {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      border: 1px solid #d6e4fb !important;
+      border-radius: 8px !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: #262626 !important;
+    }
+
+    #page-electrolyte .electrolyte-search-head,
+    #page-electrolyte .twod-search-hero {
+      display: block !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+    }
+
+    #page-electrolyte .electrolyte-search-copy,
+    #page-electrolyte .electrolyte-search-copy .eyebrow {
+      display: none !important;
+    }
+
+    #page-electrolyte .electrolyte-mode-selector,
+    #page-electrolyte .twod-mode-selector {
+      display: flex !important;
+      align-items: flex-end !important;
+      flex-wrap: nowrap !important;
+      gap: 20px !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 12px 16px 0 !important;
+      overflow-x: auto !important;
+      border: 1px solid #d6e4fb !important;
+      border-bottom: 0 !important;
+      border-radius: 6px 6px 0 0 !important;
+      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%) !important;
+      box-shadow: none !important;
+      scrollbar-width: thin;
+    }
+
+    #page-electrolyte .electrolyte-mode-selector .twod-mode-btn,
+    #page-electrolyte .twod-mode-selector .twod-mode-btn,
+    #page-electrolyte .electrolyte-mode-selector .twod-mode-btn + .twod-mode-btn,
+    #page-electrolyte .twod-mode-selector .twod-mode-btn + .twod-mode-btn {
+      flex: 0 0 auto !important;
+      min-width: max-content !important;
+      min-height: 32px !important;
+      height: 32px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-bottom: 2px solid transparent !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      color: #606f82 !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 30px !important;
+      box-shadow: none !important;
+      transform: none !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .electrolyte-mode-selector .twod-mode-btn:hover,
+    #page-electrolyte .twod-mode-selector .twod-mode-btn:hover {
+      color: #2451c6 !important;
+      background: transparent !important;
+    }
+
+    #page-electrolyte .electrolyte-mode-selector .twod-mode-btn.active,
+    #page-electrolyte .twod-mode-selector .twod-mode-btn.active {
+      border-bottom-color: #1677ff !important;
+      background: transparent !important;
+      color: #1677ff !important;
+    }
+
+    #page-electrolyte .twod-mode-stage {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    #page-electrolyte .twod-mode-panel {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding: 14px 16px !important;
+      border: 1px solid #d6e4fb !important;
+      border-top: 0 !important;
+      border-radius: 0 0 6px 6px !important;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%) !important;
+      box-shadow: none !important;
+    }
+
+    #page-electrolyte .twod-search-row {
+      display: grid !important;
+      grid-template-columns: minmax(240px, 1fr) auto auto !important;
+      align-items: center !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      gap: 10px !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+    }
+
+    #page-electrolyte .twod-search-input {
+      display: flex !important;
+      align-items: center !important;
+      min-width: 0 !important;
+      width: 100% !important;
+      min-height: 34px !important;
+      height: 34px !important;
+      padding: 0 10px !important;
+      border: 1px solid #d7dfeb !important;
+      border-radius: 6px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+
+    #page-electrolyte .twod-search-input span {
+      display: none !important;
+    }
+
+    #page-electrolyte .twod-search-input input {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 32px !important;
+      min-height: 32px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      color: #262626 !important;
+      font-size: 13px !important;
+      line-height: 32px !important;
+      box-shadow: none !important;
+    }
+
+    #page-electrolyte .twod-search-input input:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    #page-electrolyte .twod-search-submit,
+    #page-electrolyte .twod-search-reset,
+    #page-electrolyte .electrolyte-property-actions .btn,
+    #page-electrolyte .electrolyte-property-actions .btn-primary {
+      flex: 0 0 auto !important;
+      min-width: 72px !important;
+      min-height: 34px !important;
+      height: 34px !important;
+      padding: 0 14px !important;
+      border-radius: 6px !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .twod-search-submit,
+    #page-electrolyte .electrolyte-property-actions .btn-primary {
+      border: 1px solid #1677ff !important;
+      background: #1677ff !important;
+      color: #ffffff !important;
+    }
+
+    #page-electrolyte .twod-search-submit:hover,
+    #page-electrolyte .electrolyte-property-actions .btn-primary:hover {
+      border-color: #2f5496 !important;
+      background: #2f5496 !important;
+    }
+
+    #page-electrolyte .twod-search-reset,
+    #page-electrolyte .electrolyte-property-actions .btn {
+      border: 1px solid #d9d9d9 !important;
+      background: #ffffff !important;
+      color: #595959 !important;
+    }
+
+    #page-electrolyte .twod-search-reset:hover,
+    #page-electrolyte .electrolyte-property-actions .btn:hover {
+      border-color: #1677ff !important;
+      background: #ffffff !important;
+      color: #1677ff !important;
+    }
+
+    #page-electrolyte .twod-status-text {
+      max-width: 100% !important;
+      margin-top: 10px !important;
+      color: #79869a !important;
+      font-size: 12px !important;
+      line-height: 20px !important;
+      overflow-wrap: anywhere;
+    }
+
+    #page-electrolyte .electrolyte-inline-query-shell,
+    #page-electrolyte .electrolyte-inline-query,
+    #page-electrolyte .electrolyte-property-grid {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding: 14px !important;
+      border: 1px solid #dfe8f5 !important;
+      border-radius: 6px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-row {
+      display: grid !important;
+      grid-template-columns: minmax(90px, 128px) minmax(0, 1fr) !important;
+      align-items: start !important;
+      min-width: 0 !important;
+      gap: 12px !important;
+      padding: 12px 0 !important;
+      border-bottom: 1px solid #edf1f6 !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-row:first-child {
+      padding-top: 0 !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-row:last-child {
+      padding-bottom: 0 !important;
+      border-bottom: 0 !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-row > strong {
+      min-width: 0 !important;
+      color: #405064 !important;
+      font-size: 13px !important;
+      line-height: 22px !important;
+      overflow-wrap: anywhere;
+    }
+
+    #page-electrolyte .electrolyte-inline-row-body,
+    #page-electrolyte .electrolyte-organic-condition-list,
+    #page-electrolyte .electrolyte-safety-inline {
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    #page-electrolyte .electrolyte-organic-condition-row {
+      display: grid !important;
+      grid-template-columns: minmax(160px, 240px) minmax(160px, 1fr) auto !important;
+      align-items: center !important;
+      min-width: 0 !important;
+      gap: 8px !important;
+      margin-bottom: 8px !important;
+    }
+
+    #page-electrolyte .electrolyte-organic-condition-row select,
+    #page-electrolyte .electrolyte-organic-condition-row input,
+    #page-electrolyte .electrolyte-safety-inline select,
+    #page-electrolyte .electrolyte-safety-inline input {
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 34px !important;
+      height: 34px !important;
+      padding: 0 10px !important;
+      border-radius: 6px !important;
+      font-size: 13px !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-actions {
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      gap: 6px !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .electrolyte-mini-btn {
+      width: 34px !important;
+      min-width: 34px !important;
+      height: 34px !important;
+      min-height: 34px !important;
+      padding: 0 !important;
+      border-radius: 6px !important;
+    }
+
+    #page-electrolyte .twod-platform-actions,
+    #page-electrolyte .electrolyte-property-actions {
+      display: flex !important;
+      justify-content: flex-end !important;
+      align-items: center !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      gap: 8px !important;
+      margin-top: 12px !important;
+    }
+
+    #page-electrolyte .twod-search-results {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      border: 1px solid #d6e4fb !important;
+      border-radius: 8px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+
+    #page-electrolyte .twod-results-head {
+      min-width: 0 !important;
+      min-height: 64px !important;
+      padding: 16px !important;
+      border-bottom: 1px solid #f0f0f0 !important;
+    }
+
+    #page-electrolyte .twod-result-count {
+      color: #262626 !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
+    }
+
+    #page-electrolyte .twod-result-count strong {
+      color: #1677ff !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+    }
+
+    #page-electrolyte .twod-result-hint {
+      max-width: 100% !important;
+      margin-top: 4px !important;
+      color: #8c8c8c !important;
+      font-size: 12px !important;
+      line-height: 20px !important;
+      overflow-wrap: anywhere;
+    }
+
+    #page-electrolyte .twod-result-table-wrap {
+      max-width: 100% !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: #ffffff !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+    }
+
+    #page-electrolyte .twod-result-table {
+      width: 100% !important;
+      min-width: 1180px !important;
+      table-layout: fixed !important;
+    }
+
+    #page-electrolyte .twod-result-table th,
+    #page-electrolyte .twod-result-table td {
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 8px 16px !important;
+      border-bottom: 1px solid #f0f0f0 !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      vertical-align: middle !important;
+    }
+
+    #page-electrolyte .twod-result-table th {
+      background: #f5f5f5 !important;
+      color: #595959 !important;
+      font-weight: 600 !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .twod-result-table td {
+      color: #262626 !important;
+    }
+
+    #page-electrolyte .twod-result-table tbody tr:hover td {
+      background: #fafafa !important;
+    }
+
+    #page-electrolyte .twod-result-table th:nth-child(1),
+    #page-electrolyte .twod-result-table td:nth-child(1) {
+      width: 180px !important;
+    }
+
+    #page-electrolyte .twod-result-table th:nth-child(2),
+    #page-electrolyte .twod-result-table td:nth-child(2) {
+      width: 140px !important;
+    }
+
+    #page-electrolyte .twod-result-table th:nth-child(3),
+    #page-electrolyte .twod-result-table td:nth-child(3) {
+      width: 150px !important;
+    }
+
+    #page-electrolyte .twod-result-table th:nth-child(4),
+    #page-electrolyte .twod-result-table td:nth-child(4) {
+      width: 150px !important;
+    }
+
+    #page-electrolyte .twod-result-table th:nth-child(5),
+    #page-electrolyte .twod-result-table td:nth-child(5) {
+      width: 180px !important;
+    }
+
+    #page-electrolyte .twod-result-table th:nth-child(6),
+    #page-electrolyte .twod-result-table td:nth-child(6) {
+      width: 160px !important;
+    }
+
+    #page-electrolyte .twod-result-table th:nth-child(7),
+    #page-electrolyte .twod-result-table td:nth-child(7) {
+      width: 130px !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .twod-result-table th:last-child,
+    #page-electrolyte .twod-result-table td:last-child {
+      width: 190px !important;
+      min-width: 190px !important;
+      white-space: nowrap !important;
+      overflow: visible !important;
+    }
+
+    #page-electrolyte .electrolyte-name-stack,
+    #page-electrolyte .electrolyte-name-stack strong,
+    #page-electrolyte .electrolyte-name-stack span,
+    #page-electrolyte .electrolyte-keywords,
+    #page-electrolyte .twod-source-stack {
+      display: block !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .electrolyte-name-stack strong {
+      color: #262626 !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+    }
+
+    #page-electrolyte .electrolyte-name-stack span {
+      margin-top: 2px !important;
+      color: #8c8c8c !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+    }
+
+    #page-electrolyte .twod-record-inline-actions,
+    #page-electrolyte .table-actions {
+      display: inline-flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      gap: 8px !important;
+      max-width: 100% !important;
+      white-space: nowrap !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      scrollbar-width: thin;
+    }
+
+    #page-electrolyte .twod-record-inline-actions button,
+    #page-electrolyte .table-actions button,
+    #page-electrolyte .twod-action-view,
+    #page-electrolyte .twod-record-link,
+    #page-electrolyte .electrolyte-link-btn {
+      flex: 0 0 auto !important;
+      min-width: 78px !important;
+      min-height: 32px !important;
+      height: 32px !important;
+      padding: 0 10px !important;
+      border: 1px solid #b9cbe8 !important;
+      border-radius: 6px !important;
+      background: #ffffff !important;
+      color: #2451c6 !important;
+      font-size: 12px !important;
+      line-height: 20px !important;
+      white-space: nowrap !important;
+      text-decoration: none !important;
+    }
+
+    #page-electrolyte .twod-record-inline-actions button:hover,
+    #page-electrolyte .table-actions button:hover,
+    #page-electrolyte .twod-action-view:hover,
+    #page-electrolyte .twod-record-link:hover,
+    #page-electrolyte .electrolyte-link-btn:hover {
+      border-color: #1677ff !important;
+      background: #edf3ff !important;
+      color: #1677ff !important;
+    }
+
+    #page-electrolyte .twod-result-footer,
+    #page-electrolyte .result-footer {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      min-height: 48px !important;
+      padding: 12px 16px !important;
+      justify-content: flex-end !important;
+      border-top: 1px solid #f0f0f0 !important;
+      background: #ffffff !important;
+    }
+
+    #page-electrolyte .electrolyte-result-empty {
+      max-width: 100% !important;
+      padding: 24px !important;
+      border: 1px dashed #d6e2f4 !important;
+      border-radius: 8px !important;
+      background: #fbfdff !important;
+    }
+
+    #page-electrolyte .electrolyte-result-empty h4 {
+      margin: 0 0 8px !important;
+      color: #20324f !important;
+      font-size: 16px !important;
+      line-height: 24px !important;
+    }
+
+    #page-electrolyte .electrolyte-result-empty p {
+      margin: 0 !important;
+      color: #68809f !important;
+      font-size: 13px !important;
+      line-height: 22px !important;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 980px) {
+      #page-electrolyte .electrolyte-mode-selector,
+      #page-electrolyte .twod-mode-selector {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        overflow-x: visible !important;
+      }
+
+      #page-electrolyte .electrolyte-mode-selector .twod-mode-btn,
+      #page-electrolyte .twod-mode-selector .twod-mode-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 36px !important;
+        height: 36px !important;
+        padding: 0 8px !important;
+        border: 1px solid #d6e4fb !important;
+        border-radius: 6px !important;
+        line-height: 34px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      #page-electrolyte .electrolyte-mode-selector .twod-mode-btn.active,
+      #page-electrolyte .twod-mode-selector .twod-mode-btn.active {
+        border-color: #1677ff !important;
+        background: #edf3ff !important;
+      }
+
+      #page-electrolyte .twod-search-row {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      #page-electrolyte .twod-search-input {
+        grid-column: 1 / -1 !important;
+      }
+
+      #page-electrolyte .twod-search-submit,
+      #page-electrolyte .twod-search-reset {
+        width: 100% !important;
+      }
+
+      #page-electrolyte .electrolyte-organic-condition-row {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      #page-electrolyte .electrolyte-inline-actions {
+        justify-content: flex-start !important;
+      }
+    }
+
+    @media (max-width: 640px) {
+      #page-electrolyte .module-tab-strip {
+        margin-bottom: 12px !important;
+      }
+
+      #page-electrolyte .module-tab-btn {
+        min-width: 88px !important;
+        padding: 0 12px !important;
+      }
+
+      #page-electrolyte .twod-mode-panel {
+        padding: 12px !important;
+      }
+
+      #page-electrolyte .electrolyte-inline-row {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+      }
+
+      #page-electrolyte .electrolyte-organic-condition-row {
+        grid-template-columns: 1fr !important;
+      }
+
+      #page-electrolyte .twod-result-table {
+        min-width: 1080px !important;
+      }
+    }
+  </style>
 </body>
 </html>
