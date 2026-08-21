@@ -18560,6 +18560,7 @@
         </button>
         <div class="nav">
           <button class="nav-btn" data-group="analysis" data-page="algorithms" data-label="数据应用算法"><span class="nav-icon">AL</span><span>数据应用算法</span></button>
+          <button class="nav-btn" data-group="analysis" data-page="prediction-tasks" data-label="预测任务管理"><span class="nav-icon">PT</span><span>预测任务管理</span></button>
           <button class="nav-btn" data-group="analysis" data-page="tools" data-label="数据工具开发"><span class="nav-icon">TL</span><span>数据工具开发</span></button>
         </div>
       </div>
@@ -18627,11 +18628,6 @@
           <div class="twod-platform-shell">
             <section class="card twod-search-platform">
               <div class="twod-search-hero">
-                <div class="twod-search-copy">
-                  <span class="twod-search-eyebrow">二维材料数据应用模块</span>
-                  <h3>二维材料数据检索平台</h3>
-                  <p>支持化学式、元素组成、材料编号和元素周期表检索，并统一展示二维材料基础数据与后续预测入口。</p>
-                </div>
                 <div class="twod-mode-selector" id="twodModeSelector">
                   <button class="twod-mode-btn active" type="button" data-twod-mode="formula">化学式检索</button>
                   <button class="twod-mode-btn" type="button" data-twod-mode="elements">元素组成检索</button>
@@ -18730,6 +18726,42 @@
               <div class="twod-detail-content" id="predictionPageContent"></div>
             </section>
           </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-prediction-pending">
+        <div class="twod-detail-page-shell">
+          <div class="twod-detail-toolbar">
+            <div class="twod-detail-toolbar-main">
+              <h2>预测任务已提交</h2>
+              <p>算法任务已进入队列，完成后可查看预测结果。</p>
+            </div>
+            <div class="twod-detail-toolbar-actions">
+              <button class="btn" type="button" data-prediction-pending-back>返回应用</button>
+            </div>
+          </div>
+          <section class="card twod-detail-section-card">
+            <div class="twod-results-head">
+              <div>
+                <h3 id="predictionPendingTaskName">预测任务</h3>
+                <p class="twod-result-hint" id="predictionPendingSummary">任务已创建，正在等待算法处理。</p>
+              </div>
+              <span class="status-badge info">计算中</span>
+            </div>
+            <div class="twod-detail-property-grid">
+              <article class="twod-detail-property-item"><span>任务状态</span><strong>等待算法运行</strong></article>
+              <article class="twod-detail-property-item"><span>输入材料</span><strong id="predictionPendingMaterial">-</strong></article>
+              <article class="twod-detail-property-item"><span>调用算法</span><strong id="predictionPendingAlgorithm">-</strong></article>
+              <article class="twod-detail-property-item"><span>提交时间</span><strong>2026-08-21 14:32</strong></article>
+            </div>
+            <div class="twod-platform-actions">
+              <div class="twod-status-text">当前为示例等待页面，算法完成后可进入现有预测详情页查看结果。</div>
+              <div class="twod-record-inline-actions">
+                <button class="btn-primary" type="button" data-prediction-pending-result>查看预测结果</button>
+                <button class="btn" type="button" data-prediction-pending-back>返回列表</button>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -19279,6 +19311,8 @@
         </div>
         <div id="toolPageMount"></div>
       </section>
+      <section class="page" id="page-prediction-tasks"></section>
+      <section class="page" id="page-algorithm-doc-detail"></section>
       <section class="page" id="page-sys-user">
         <div class="page-head">
           <div>
@@ -21817,6 +21851,8 @@
       "my-submissions": { group: "workflow", portal: "workflow", title: "我的提交", breadcrumbParent: "数据管理" },
       "twod-review": { group: "workflow", portal: "workflow", title: "入库审核", breadcrumbParent: "数据管理" },
       algorithms: { group: "analysis", portal: "algorithms", title: "数据应用算法", breadcrumbParent: "低维材料数据库分析预测" },
+      "prediction-tasks": { group: "analysis", portal: "algorithms", title: "预测任务管理", breadcrumbParent: "低维材料数据库分析预测" },
+      "algorithm-doc-detail": { group: "analysis", portal: "algorithms", navPage: "algorithms", title: "算法详情", breadcrumbParent: "数据应用算法" },
       tools: { group: "analysis", portal: "tools", title: "数据工具开发", breadcrumbParent: "低维材料数据库分析预测" },
       "sys-user": { group: "system", portal: "system", title: "用户管理", breadcrumbParent: "系统管理" },
       "sys-role": { group: "system", portal: "system", title: "角色管理", breadcrumbParent: "系统管理" },
@@ -75864,11 +75900,6 @@ function renderElectrolyteCategoryTabs() {
           <div class="twod-platform-shell electrolyte-main-column">
             <section class="card twod-search-platform electrolyte-search-panel">
               <div class="electrolyte-search-head">
-                <div class="electrolyte-search-copy">
-                  <span class="eyebrow">电解质材料数据应用</span>
-                  <h3>${getElectrolyteCategoryText(category)}检索平台</h3>
-                  <p>${getElectrolyteCategoryDesc(category)} 请选择检索方式并输入条件后点击“检索”。</p>
-                </div>
                 <div class="twod-mode-selector electrolyte-mode-selector" id="electrolyteModeSelector">
                   ${config.modes.map((item) => `<button class="twod-mode-btn${activeMode === item.key ? " active" : ""}" type="button" data-ely-mode="${item.key}">${item.label}</button>`).join("")}
                 </div>
@@ -85991,7 +86022,12 @@ function renderElectrolyteCategoryTabs() {
         catalyst: {
           sorts: ["默认排序", "能垒升序", "选择性降序", "TOF降序", "更新时间"],
           filters: ["自有数据集", "公开数据集", "金属单晶", "单原子催化剂", "ORR", "OER", "CO2RR"],
-          columns: ["序号", "材料编号", "材料名称", "化学式", "催化剂种类", "材料成分", "中间产物", "材料表面", "活化能", "反应物", "生成物", "操作"]
+          columns: ["序号", "材料编号", "材料名称", "化学式", "催化剂种类", "材料成分", "中间产物", "材料表面", "活化能", "反应物", "生成物", "操作"],
+          leadingActions: [
+            { label: "活性位点分析", attribute: 'data-catalyst-workbench="site"' },
+            { label: "材料对比", attribute: 'data-catalyst-workbench="compare"' },
+            { label: "催化构建", attribute: 'data-catalyst-workbench="build"' }
+          ]
         }
       };
 
@@ -86393,7 +86429,7 @@ function renderElectrolyteCategoryTabs() {
         }
         if (state.mlffTab === "convert") {
           page.innerHTML = `
-          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载与格式转换能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>机器学习力场数据术语表</button></div></div>
+          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载与格式转换能力。</p></div></div>
           ${renderModuleTabs("mlff", "convert")}
           <div class="material-convert-shell material-convert-shell-twod-final">${renderMlffCurrentConversionPanel()}</div>
           `;
@@ -86407,7 +86443,7 @@ function renderElectrolyteCategoryTabs() {
         const start = (state.mlffPage - 1) * state.mlffPageSize;
         const pageRows = resultList.slice(start, start + state.mlffPageSize);
         page.innerHTML = `
-          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载和术语表浏览能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>机器学习力场数据术语表</button></div></div>
+          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载和术语表浏览能力。</p></div></div>
           ${renderModuleTabs("mlff", state.mlffTab)}
           <div class="twod-platform-shell">
             <section class="card twod-search-platform">
@@ -86443,11 +86479,6 @@ function renderElectrolyteCategoryTabs() {
         page.innerHTML = `
           <div class="page-head">
             <div><h2>催化材料应用</h2><p>围绕催化材料检索、位点分析、材料对比、催化构建与文件转换形成完整业务链路。</p></div>
-            <div class="page-tools">
-              <button class="btn" type="button" data-catalyst-workbench="site">活性位点分析</button>
-              <button class="btn" type="button" data-catalyst-workbench="compare">材料对比</button>
-              <button class="btn" type="button" data-catalyst-workbench="build">催化构建</button>
-            </div>
           </div>
           ${renderModuleTabs("catalyst", "convert")}
           ${renderMaterialConversionPanel("catalyst")}
@@ -86461,11 +86492,6 @@ function renderElectrolyteCategoryTabs() {
         page.innerHTML = `
           <div class="page-head">
             <div><h2>催化材料应用</h2><p>围绕催化材料检索、位点分析、材料对比与催化构建形成完整业务链路。</p></div>
-            <div class="page-tools">
-              <button class="btn" type="button" data-catalyst-workbench="site">活性位点分析</button>
-              <button class="btn" type="button" data-catalyst-workbench="compare">材料对比</button>
-              <button class="btn" type="button" data-catalyst-workbench="build">催化构建</button>
-            </div>
           </div>
           ${renderModuleTabs("catalyst", state.catalystTab)}
           <div class="twod-platform-shell">
@@ -86479,11 +86505,6 @@ function renderElectrolyteCategoryTabs() {
               <section class="card twod-search-results">
                 <div class="twod-results-head">
                   <div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关数据</div><p class="twod-result-hint">${html(state.catalystAppliedSearch?.mode ? getCatalystPlatformHint(resultList) : `默认展示催化材料数据库的全部 ${total} 条数据。`)}</p></div>
-                  <div class="twod-result-actions">
-                    <button class="btn" type="button" data-catalyst-workbench="site">活性位点分析</button>
-                    <button class="btn" type="button" data-catalyst-workbench="compare">材料对比</button>
-                    <button class="btn" type="button" data-catalyst-workbench="build">催化构建</button>
-                  </div>
                 </div>
                 ${renderCrossDatabaseToolbar(total, resultToolbars.catalyst)}
                 <div class="table-wrap twod-result-table-wrap">
@@ -88032,6 +88053,626 @@ print(resp.json())`;
       }
     })();
   </script>
+  <div class="overlay" id="predictionTaskModal">
+    <div class="modal modal-xl">
+      <div class="modal-header">
+        <div>
+          <h3>发起预测任务</h3>
+          <p>配置任务名称、算法和计算参数后提交预测。</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="predictionTaskModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="predictionTaskModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="predictionTaskModal">取消</button>
+        <button class="btn" type="button" data-prediction-submit-pending>提交任务</button>
+        <button class="btn-primary" type="button" data-prediction-submit-result>提交并查看结果</button>
+      </div>
+    </div>
+  </div>
+
   <script src="scripts/electrolyte-organic-property-search-override.js"></script>
+  <script id="prediction-task-flow-override-20260821">
+    (() => {
+      const predictionTaskState = {
+        draft: {
+          source: "",
+          materialId: "",
+          taskName: "",
+          algorithmType: "晶体结构弛豫算法",
+          subAlgorithms: ["nonmagnetic"],
+          sourceMode: "database",
+          spinPolarized: false,
+          functional: "GGA-PBE",
+          kpointMode: "auto",
+          vdW: false
+        },
+        task: null
+      };
+      window.lowDimPredictionTaskState = predictionTaskState;
+
+      const esc = (value) => typeof escapeLowDimHtml === "function"
+        ? escapeLowDimHtml(value == null ? "" : String(value))
+        : String(value ?? "").replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        }[char]));
+
+      function getPredictionTaskMaterial() {
+        const draft = predictionTaskState.draft;
+        if (!draft.source || !draft.materialId || typeof getCanonicalMaterialBySource !== "function") return null;
+        return getCanonicalMaterialBySource(draft.source, draft.materialId);
+      }
+
+      function getPredictionTaskOptions(source) {
+        if (source === "twod") {
+          return {
+            types: ["晶体结构弛豫算法", "材料性质计算算法"],
+            subAlgorithms: {
+              "晶体结构弛豫算法": [
+                ["nonmagnetic", "非磁单层材料结构弛豫"],
+                ["magnetic", "磁性单层材料结构弛豫"],
+                ["defect", "缺陷单层材料结构弛豫"],
+                ["multilayer", "多层材料结构弛豫"]
+              ],
+              "材料性质计算算法": [
+                ["band", "能带结构计算"],
+                ["dos", "态密度计算"],
+                ["phonon", "声子谱计算"]
+              ]
+            }
+          };
+        }
+        if (source === "electrolyte") {
+          return { types: ["材料性质计算算法"], subAlgorithms: { "材料性质计算算法": [["transport", "离子输运性质计算"]] } };
+        }
+        if (source === "opto") {
+          return { types: ["材料性质计算算法"], subAlgorithms: { "材料性质计算算法": [["spectra", "光谱与态密度计算"]] } };
+        }
+        if (source === "mlff") {
+          return { types: ["材料性质计算算法"], subAlgorithms: { "材料性质计算算法": [["forceField", "力场参数计算"]] } };
+        }
+        return { types: ["材料性质计算算法"], subAlgorithms: { "材料性质计算算法": [["catalyst", "催化性能预测"]] } };
+      }
+
+      function renderPredictionTaskBody() {
+        const draft = predictionTaskState.draft;
+        const material = getPredictionTaskMaterial();
+        const source = draft.source || "twod";
+        const options = getPredictionTaskOptions(source);
+        const subOptions = options.subAlgorithms[draft.algorithmType] || [];
+        const isTwod = source === "twod";
+        const checked = (key) => draft.subAlgorithms.includes(key) ? " checked" : "";
+        const materialId = material?.id || draft.materialId || "-";
+        const formula = material?.formula || material?.chemicalFormula || "-";
+
+        return `
+          <div class="form-grid">
+            <label class="field form-full">
+              <span>任务名称 <span class="required">*</span></span>
+              <input type="text" value="${esc(draft.taskName)}" placeholder="请输入预测任务名称" data-prediction-task-name>
+            </label>
+          </div>
+          <section class="twod-detail-section-card">
+            <div class="twod-results-head">
+              <div><h4>选中材料列表预览</h4><p class="twod-result-hint">展示本次要计算的材料 ID 和化学式，可移除单条材料。</p></div>
+            </div>
+            <div class="table-wrap">
+              <table class="twod-result-table">
+                <thead><tr><th>材料 ID</th><th>化学式</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td>${esc(materialId)}</td>
+                    <td>${esc(formula)}</td>
+                    <td><button class="twod-record-link" type="button" data-prediction-remove-material>移除</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <div class="form-grid">
+            <label class="field">
+              <span>选择算法</span>
+              <select data-prediction-algorithm-type>
+                ${options.types.map((item) => `<option${item === draft.algorithmType ? " selected" : ""}>${esc(item)}</option>`).join("")}
+              </select>
+            </label>
+          </div>
+          <section class="twod-detail-section-card">
+            <h4>供用户选择子算法</h4>
+            <div class="form-grid">
+              ${subOptions.map(([key, label]) => `<label class="field"><span><input type="checkbox" value="${key}" data-prediction-subalgorithm${checked(key)}> ${esc(label)}</span></label>`).join("")}
+            </div>
+            ${isTwod && draft.algorithmType === "晶体结构弛豫算法" ? `
+              <div class="form-grid">
+                ${draft.subAlgorithms.includes("magnetic") ? `<label class="field"><span>磁性计算配置</span><select data-prediction-magnetic-config><option>GGA+U</option><option>HSE06</option></select></label>` : ""}
+                ${draft.subAlgorithms.includes("defect") ? `<label class="field"><span>缺陷类型</span><select data-prediction-defect-type><option>空位</option><option>反位缺陷</option></select></label>` : ""}
+                ${draft.subAlgorithms.includes("multilayer") ? `<label class="field"><span>堆垛方式</span><select data-prediction-stacking><option>AA</option><option>AB</option><option>ABC</option></select></label>` : ""}
+              </div>
+            ` : ""}
+          </section>
+          <section class="twod-detail-section-card">
+            <h4>算法核心参数配置</h4>
+            ${isTwod ? `
+              <div class="form-grid">
+                <label class="field"><span>计算软件</span><input type="text" value="VASP" disabled></label>
+                <label class="field"><span>计算模式</span><span><input type="checkbox" data-prediction-spin${draft.spinPolarized ? " checked" : ""}> 自旋极化</span></label>
+                <label class="field"><span>泛函选择</span><select data-prediction-functional><option${draft.functional === "GGA-PBE" ? " selected" : ""}>GGA-PBE</option><option${draft.functional === "HSE06" ? " selected" : ""}>HSE06</option></select></label>
+                ${draft.subAlgorithms.includes("magnetic") ? `<label class="field"><span>U 值（3d 金属）</span><input type="number" step="0.1" placeholder="如 3.0" data-prediction-u-value></label>` : ""}
+                <label class="field"><span>k 点取样设置</span><select data-prediction-kpoint-mode><option${draft.kpointMode === "auto" ? " selected" : ""}>自动生成</option><option${draft.kpointMode === "manual" ? " selected" : ""}>手动输入 KPOINTS 参数</option></select></label>
+                <label class="field"><span>范德华修正</span><span><input type="checkbox" data-prediction-vdw${draft.vdW ? " checked" : ""}> DFT-D3</span></label>
+                <label class="field"><span>能量收敛</span><input type="text" value="1E-5 eV" data-prediction-energy-convergence></label>
+                <label class="field"><span>受力收敛</span><input type="text" value="0.01 eV/Å" data-prediction-force-convergence></label>
+              </div>
+            ` : `<div class="twod-result-hint">当前材料库支持调用对应的${esc(options.types[0])}。</div>`}
+          </section>
+          <section class="twod-detail-section-card">
+            <div class="twod-results-head">
+              <div><h4>输入资源确认</h4><p class="twod-result-hint">输入来源：平台数据库内置标准化结构（默认）或本地上传自定义 POSCAR 补充文件（可选，高级用户）。</p></div>
+            </div>
+            <div class="form-grid">
+              <label class="field"><span>输入来源</span><select data-prediction-source-mode><option value="database"${draft.sourceMode === "database" ? " selected" : ""}>平台数据库内置标准化结构（默认）</option><option value="upload"${draft.sourceMode === "upload" ? " selected" : ""}>本地上传自定义 POSCAR 补充文件（可选）</option></select></label>
+              <div class="field"><span>文件预览</span><div class="twod-record-inline-actions"><button class="btn" type="button" data-prediction-preview-file>POSCAR 在线预览</button><button class="btn" type="button" data-prediction-preview-pdb>PDB 在线预览</button></div></div>
+            </div>
+          </section>
+        `;
+      }
+
+      function renderPredictionTaskModal() {
+        const body = document.getElementById("predictionTaskModalBody");
+        if (body) body.innerHTML = renderPredictionTaskBody();
+      }
+
+      function openPredictionTaskModal(source, materialId) {
+        const material = typeof getCanonicalMaterialBySource === "function"
+          ? getCanonicalMaterialBySource(source, materialId)
+          : null;
+        if (!material) return false;
+        const options = getPredictionTaskOptions(source);
+        predictionTaskState.draft = {
+          source,
+          materialId: material.id,
+          taskName: "",
+          algorithmType: options.types[0],
+          subAlgorithms: [options.subAlgorithms[options.types[0]][0][0]],
+          sourceMode: "database",
+          spinPolarized: source === "twod" && /磁|Fe|Co|Ni|Mn/i.test(`${material.name || ""}${material.formula || ""}`),
+          functional: "GGA-PBE",
+          kpointMode: "auto",
+          vdW: false
+        };
+        renderPredictionTaskModal();
+        openModal("predictionTaskModal");
+        return false;
+      }
+
+      function syncPredictionTaskDraftFromDom() {
+        const body = document.getElementById("predictionTaskModalBody");
+        if (!body) return;
+        const draft = predictionTaskState.draft;
+        draft.taskName = body.querySelector("[data-prediction-task-name]")?.value || draft.taskName;
+        draft.algorithmType = body.querySelector("[data-prediction-algorithm-type]")?.value || draft.algorithmType;
+        draft.subAlgorithms = [...body.querySelectorAll("[data-prediction-subalgorithm]:checked")].map((node) => node.value);
+        draft.sourceMode = body.querySelector("[data-prediction-source-mode]")?.value || draft.sourceMode;
+        draft.spinPolarized = !!body.querySelector("[data-prediction-spin]")?.checked;
+        draft.functional = body.querySelector("[data-prediction-functional]")?.value || draft.functional;
+        draft.kpointMode = body.querySelector("[data-prediction-kpoint-mode]")?.value === "手动输入 KPOINTS 参数" ? "manual" : "auto";
+        draft.vdW = !!body.querySelector("[data-prediction-vdw]")?.checked;
+      }
+
+      function showPredictionPendingPage() {
+        const draft = predictionTaskState.draft;
+        const material = getPredictionTaskMaterial();
+        const page = document.getElementById("page-prediction-pending");
+        if (!page) return;
+        page.querySelector("#predictionPendingTaskName").textContent = draft.taskName || "预测任务";
+        page.querySelector("#predictionPendingMaterial").textContent = `${material?.id || "-"} · ${material?.formula || "-"}`;
+        page.querySelector("#predictionPendingAlgorithm").textContent = `${draft.algorithmType} · ${draft.subAlgorithms.join("、") || "未选择"}`;
+        page.querySelector("#predictionPendingSummary").textContent = `已提交 ${material?.name || "当前材料"} 的预测任务，正在等待算法运行。`;
+        switchPage("prediction-pending");
+      }
+
+      function submitPredictionTask(mode) {
+        syncPredictionTaskDraftFromDom();
+        const draft = predictionTaskState.draft;
+        if (!draft.taskName.trim()) {
+          showToast("发起预测", "请输入任务名称。");
+          return;
+        }
+        if (!draft.materialId) {
+          showToast("发起预测", "请至少保留一条待计算材料。");
+          return;
+        }
+        if (!draft.subAlgorithms.length) {
+          showToast("发起预测", "请至少选择一个子算法。");
+          return;
+        }
+        predictionTaskState.task = { ...draft, id: `pred-${Date.now()}`, status: "pending" };
+        closeModal("predictionTaskModal");
+        if (mode === "result") {
+          openPredictionPage(draft.source, draft.materialId);
+        } else {
+          showPredictionPendingPage();
+        }
+      }
+
+      const previousPredictionDetailOpen = handleMaterialDetailOpen;
+      handleMaterialDetailOpen = function (materialToken, targetView = "detail") {
+        if (targetView === "prediction") {
+          const parsed = parseMaterialToken(materialToken);
+          return openPredictionTaskModal(parsed.source, parsed.id);
+        }
+        return previousPredictionDetailOpen(materialToken, targetView);
+      };
+      window.handleMaterialDetailOpen = handleMaterialDetailOpen;
+
+      document.body.addEventListener("input", (event) => {
+        if (event.target.closest("#predictionTaskModalBody")) syncPredictionTaskDraftFromDom();
+      });
+      document.body.addEventListener("change", (event) => {
+        if (!event.target.closest("#predictionTaskModalBody")) return;
+        syncPredictionTaskDraftFromDom();
+        if (event.target.matches("[data-prediction-algorithm-type]")) {
+          const options = getPredictionTaskOptions(predictionTaskState.draft.source);
+          const next = options.subAlgorithms[predictionTaskState.draft.algorithmType] || [];
+          predictionTaskState.draft.subAlgorithms = next.length ? [next[0][0]] : [];
+          renderPredictionTaskModal();
+        }
+        if (event.target.matches("[data-prediction-subalgorithm]")) renderPredictionTaskModal();
+      });
+      document.body.addEventListener("click", (event) => {
+        if (event.target.closest("[data-prediction-submit-pending]")) return submitPredictionTask("pending");
+        if (event.target.closest("[data-prediction-submit-result]")) return submitPredictionTask("result");
+        if (event.target.closest("[data-prediction-remove-material]")) {
+          predictionTaskState.draft.materialId = "";
+          renderPredictionTaskModal();
+          return;
+        }
+        if (event.target.closest("[data-prediction-preview-file]") || event.target.closest("[data-prediction-preview-pdb]")) {
+          showToast("文件预览", "示例预览已打开，可查看标准化结构文件内容。");
+          return;
+        }
+        if (event.target.closest("[data-prediction-pending-result]")) {
+          const draft = predictionTaskState.draft;
+          openPredictionPage(draft.source, draft.materialId);
+          return;
+        }
+        if (event.target.closest("[data-prediction-pending-back]")) {
+          const target = predictionTaskState.task?.source || predictionTaskState.draft.source || "twod";
+          switchPage(target);
+          if (target === "twod" && typeof renderTwodModuleUnified === "function") renderTwodModuleUnified();
+          if (target === "electrolyte" && typeof renderElectrolyteModule === "function") renderElectrolyteModule();
+          if (target === "opto" && typeof renderOptoModule === "function") renderOptoModule();
+          if (target === "mlff" && typeof renderMlffModule === "function") renderMlffModule();
+          if (target === "catalyst" && typeof renderCatalystModule === "function") renderCatalystModule();
+        }
+      });
+    })();
+  </script>
+  <script id="prediction-task-management-override-20260821">
+    (() => {
+      const predictionTaskRows = [
+        {
+          id: "PT-20260821-001",
+          name: "MoS2 单层结构弛豫",
+          source: "二维材料数据库",
+          createdAt: "2026-08-21 14:32",
+          stage: "结构预处理",
+          status: "排队中",
+          progress: 12,
+          materialSource: "twod",
+          materialId: "2D-MoS2-001",
+          algorithm: "非磁单层材料结构弛豫"
+        },
+        {
+          id: "PT-20260821-002",
+          name: "Nb2C 声子稳定性计算",
+          source: "二维材料数据库",
+          createdAt: "2026-08-21 13:48",
+          stage: "性质计算",
+          status: "性质计算中",
+          progress: 68,
+          materialSource: "twod",
+          materialId: "2D-Nb2C-001",
+          algorithm: "声子谱计算"
+        },
+        {
+          id: "PT-20260820-009",
+          name: "MoS2 结构重算",
+          source: "二维材料数据库",
+          createdAt: "2026-08-20 16:15",
+          stage: "结果归档",
+          status: "运行成功",
+          progress: 100,
+          materialSource: "twod",
+          materialId: "2D-MoS2-001",
+          algorithm: "非磁单层材料结构弛豫"
+        },
+        {
+          id: "PT-20260820-006",
+          name: "磁性单层参数检查",
+          source: "二维材料数据库",
+          createdAt: "2026-08-20 10:20",
+          stage: "错误诊断",
+          status: "运行失败",
+          progress: 43,
+          materialSource: "twod",
+          materialId: "2D-FePS3-001",
+          algorithm: "磁性单层材料结构弛豫"
+        },
+        {
+          id: "PT-20260819-003",
+          name: "有机电解液输运预测",
+          source: "电解质材料数据库",
+          createdAt: "2026-08-19 09:08",
+          stage: "任务调度",
+          status: "已取消",
+          progress: 0,
+          materialSource: "electrolyte",
+          materialId: "EL-LIQ-001",
+          algorithm: "离子输运性质计算"
+        }
+      ];
+      const predictionTaskFilters = {
+        name: "",
+        source: "全部",
+        status: "全部",
+        start: "",
+        end: ""
+      };
+
+      const escapeTaskHtml = (value) => typeof escapeLowDimHtml === "function"
+        ? escapeLowDimHtml(value == null ? "" : String(value))
+        : String(value ?? "").replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        }[char]));
+
+      function ensurePredictionTaskRows() {
+        const createdTask = window.lowDimPredictionTaskState?.task;
+        if (!createdTask) return predictionTaskRows;
+        const existing = predictionTaskRows.find((item) => item.id === createdTask.id);
+        if (!existing) {
+          predictionTaskRows.unshift({
+            id: createdTask.id,
+            name: createdTask.taskName,
+            source: createdTask.source === "twod" ? "二维材料数据库" : createdTask.source === "electrolyte" ? "电解质材料数据库" : "低维材料数据库",
+            createdAt: "2026-08-21 14:32",
+            stage: "任务调度",
+            status: createdTask.status === "pending" ? "排队中" : "运行成功",
+            progress: createdTask.status === "pending" ? 12 : 100,
+            materialSource: createdTask.source,
+            materialId: createdTask.materialId,
+            algorithm: createdTask.subAlgorithms?.join("、") || createdTask.algorithmType
+          });
+        }
+        return predictionTaskRows;
+      }
+
+      function getPredictionTaskStatusClass(status) {
+        if (status === "运行成功") return "success";
+        if (status === "运行失败") return "danger";
+        if (status === "已取消") return "warning";
+        return "info";
+      }
+
+      function filterPredictionTaskRows() {
+        return ensurePredictionTaskRows().filter((row) => {
+          const nameMatch = !predictionTaskFilters.name || row.name.toLowerCase().includes(predictionTaskFilters.name.toLowerCase());
+          const sourceMatch = predictionTaskFilters.source === "全部" || row.source === predictionTaskFilters.source;
+          const statusMatch = predictionTaskFilters.status === "全部" || row.status === predictionTaskFilters.status;
+          const startMatch = !predictionTaskFilters.start || row.createdAt.slice(0, 10) >= predictionTaskFilters.start;
+          const endMatch = !predictionTaskFilters.end || row.createdAt.slice(0, 10) <= predictionTaskFilters.end;
+          return nameMatch && sourceMatch && statusMatch && startMatch && endMatch;
+        });
+      }
+
+      function ensurePredictionTaskLogModal() {
+        if (document.getElementById("predictionTaskLogModal")) return;
+        document.body.insertAdjacentHTML("beforeend", `
+          <div class="overlay" id="predictionTaskLogModal">
+            <div class="modal modal-lg">
+              <div class="modal-header">
+                <div><h3 id="predictionTaskLogTitle">任务运行日志</h3><p>查看算法运行日志、阶段信息和报错内容。</p></div>
+                <button class="modal-close" type="button" data-close-modal="predictionTaskLogModal">×</button>
+              </div>
+              <div class="modal-body modal-scroll" id="predictionTaskLogBody"></div>
+              <div class="modal-footer"><button class="btn" type="button" data-close-modal="predictionTaskLogModal">关闭</button></div>
+            </div>
+          </div>
+        `);
+      }
+
+      function showPredictionTaskLog(task) {
+        ensurePredictionTaskLogModal();
+        const logBody = document.getElementById("predictionTaskLogBody");
+        if (!logBody) return;
+        const failed = task.status === "运行失败";
+        logBody.innerHTML = `
+          <section class="twod-detail-section-card">
+            <div class="twod-detail-property-grid">
+              <article class="twod-detail-property-item"><span>任务 ID</span><strong>${escapeTaskHtml(task.id)}</strong></article>
+              <article class="twod-detail-property-item"><span>当前阶段</span><strong>${escapeTaskHtml(task.stage)}</strong></article>
+              <article class="twod-detail-property-item"><span>任务状态</span><strong>${escapeTaskHtml(task.status)}</strong></article>
+              <article class="twod-detail-property-item"><span>进度</span><strong>${task.progress}%</strong></article>
+            </div>
+          </section>
+          <section class="twod-detail-section-card">
+            <h4>算法运行日志</h4>
+            <pre class="algorithm-doc-code">[2026-08-21 14:32:01] 创建任务 ${escapeTaskHtml(task.id)}
+[2026-08-21 14:32:04] 加载标准化结构文件
+[2026-08-21 14:32:08] 调用 ${escapeTaskHtml(task.algorithm)} 接口
+[2026-08-21 14:33:12] 当前阶段：${escapeTaskHtml(task.stage)}
+${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，请修改后重试。" : "[INFO] 任务正在按调度队列执行。"}</pre>
+          </section>
+        `;
+        openModal("predictionTaskLogModal");
+      }
+
+      function updatePredictionTask(task, action) {
+        if (action === "cancel") {
+          task.status = "已取消";
+          task.stage = "任务已终止";
+          task.progress = Math.min(task.progress, 32);
+          showToast("预测任务", `${task.id} 已取消。`);
+        }
+        if (action === "retry") {
+          task.status = "排队中";
+          task.stage = "重新排队";
+          task.progress = 0;
+          showToast("预测任务", `${task.id} 已重新进入算法队列。`);
+        }
+        renderPredictionTaskManagementPage();
+      }
+
+      function renderPredictionTaskManagementPage() {
+        const page = document.getElementById("page-prediction-tasks");
+        if (!page) return;
+        const rows = filterPredictionTaskRows();
+        page.innerHTML = `
+          <div class="page-head">
+            <div>
+              <h2>预测任务管理</h2>
+              <p>统一查看低维材料数据库分析预测任务的调度状态、运行进度和结果入口。</p>
+            </div>
+          </div>
+          <section class="card pad filter-card">
+            <div class="filter-row">
+              <label class="field"><span>任务名称</span><input type="text" value="${escapeTaskHtml(predictionTaskFilters.name)}" placeholder="请输入任务名称" data-prediction-filter="name"></label>
+              <label class="field"><span>子库类型</span><select data-prediction-filter="source"><option>全部</option><option${predictionTaskFilters.source === "二维材料数据库" ? " selected" : ""}>二维材料数据库</option><option${predictionTaskFilters.source === "电解质材料数据库" ? " selected" : ""}>电解质材料数据库</option><option${predictionTaskFilters.source === "有机光电材料数据库" ? " selected" : ""}>有机光电材料数据库</option><option${predictionTaskFilters.source === "机器学习力场数据库" ? " selected" : ""}>机器学习力场数据库</option><option${predictionTaskFilters.source === "催化材料数据库" ? " selected" : ""}>催化材料数据库</option></select></label>
+              <label class="field"><span>任务状态</span><select data-prediction-filter="status"><option>全部</option>${["排队中", "弛豫计算中", "性质计算中", "运行成功", "运行失败", "已取消"].map((item) => `<option${predictionTaskFilters.status === item ? " selected" : ""}>${item}</option>`).join("")}</select></label>
+              <label class="field"><span>开始时间</span><input type="date" value="${predictionTaskFilters.start}" data-prediction-filter="start"></label>
+              <label class="field"><span>结束时间</span><input type="date" value="${predictionTaskFilters.end}" data-prediction-filter="end"></label>
+              <div class="field"><span>&nbsp;</span><div class="twod-record-inline-actions"><button class="btn-primary" type="button" data-prediction-filter-submit>查询</button><button class="btn" type="button" data-prediction-filter-reset>重置</button></div></div>
+            </div>
+          </section>
+          <section class="card pad table-card">
+            <div class="table-head"><div><h3>预测任务列表</h3><p class="section-subtitle">共 ${rows.length} 条任务记录</p></div></div>
+            <div class="table-wrap">
+              <table class="twod-result-table">
+                <thead><tr><th>任务 ID</th><th>任务名称</th><th>所属材料子库</th><th>创建时间</th><th>当前阶段</th><th>任务状态</th><th>进度百分比</th><th>操作</th></tr></thead>
+                <tbody>${rows.length ? rows.map((task) => `
+                  <tr>
+                    <td title="${escapeTaskHtml(task.id)}">${escapeTaskHtml(task.id)}</td>
+                    <td title="${escapeTaskHtml(task.name)}">${escapeTaskHtml(task.name)}</td>
+                    <td>${escapeTaskHtml(task.source)}</td>
+                    <td>${escapeTaskHtml(task.createdAt)}</td>
+                    <td>${escapeTaskHtml(task.stage)}</td>
+                    <td><span class="status-badge ${getPredictionTaskStatusClass(task.status)}">${escapeTaskHtml(task.status)}</span></td>
+                    <td>${task.progress}%</td>
+                    <td><div class="twod-record-inline-actions">
+                      <button class="twod-action-view" type="button" data-prediction-task-result="${escapeTaskHtml(task.id)}"${task.status === "运行成功" ? "" : " disabled"}>查看结果</button>
+                      <button class="twod-record-link" type="button" data-prediction-task-log="${escapeTaskHtml(task.id)}">查看日志</button>
+                      <button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}"${task.status === "运行失败" ? "" : " disabled"}>重试任务</button>
+                      <button class="twod-record-link" type="button" data-prediction-task-cancel="${escapeTaskHtml(task.id)}"${["排队中", "弛豫计算中", "性质计算中"].includes(task.status) ? "" : " disabled"}>取消任务</button>
+                    </div></td>
+                  </tr>
+                `).join("") : `<tr><td colspan="8" class="opto-table-empty">暂无符合条件的预测任务。</td></tr>`}</tbody>
+              </table>
+            </div>
+            <div class="result-footer"><span>共 ${rows.length} 条任务记录</span></div>
+          </section>
+        `;
+      }
+
+      function renderAlgorithmDocDetailPage(algorithmId) {
+        const page = document.getElementById("page-algorithm-doc-detail");
+        const algorithm = typeof findAlgorithmById === "function" ? findAlgorithmById(algorithmId) : null;
+        if (!page || !algorithm) return;
+        state.activeAlgorithmResourceId = algorithm.id;
+        const isNonmagnetic = algorithm.id === "twod-relax-nonmagnetic";
+        page.innerHTML = `
+          <div class="page-head">
+            <div><h2>${escapeTaskHtml(algorithm.title)} - 算法详情</h2><p>${escapeTaskHtml(algorithm.enTitle || "数据应用算法详情")}</p></div>
+            <div class="page-tools"><button class="btn" type="button" data-algorithm-detail-back>返回算法列表</button></div>
+          </div>
+          <section class="card pad algorithm-detail-card">
+            ${isNonmagnetic ? renderNonmagneticRelaxationDoc(algorithm) : `
+              <div class="algorithm-item-head"><div><h3>${escapeTaskHtml(algorithm.title)}</h3><p>${escapeTaskHtml(algorithm.desc || "该算法用于低维材料数据库分析预测任务。")}</p></div><span class="algorithm-status-pill ${algorithm.status}">${escapeTaskHtml(getAlgorithmStatusText(algorithm.status))}</span></div>
+              <div class="algorithm-info-grid">
+                <div class="algorithm-info-item"><span>分类</span><strong>${escapeTaskHtml(algorithm.subcategoryTitle || algorithm.type || "-")}</strong></div>
+                <div class="algorithm-info-item"><span>版本</span><strong>${escapeTaskHtml(algorithm.version || "-")}</strong></div>
+                <div class="algorithm-info-item"><span>更新时间</span><strong>${escapeTaskHtml(algorithm.updatedAt || "-")}</strong></div>
+                <div class="algorithm-info-item"><span>接口地址</span><strong>${escapeTaskHtml(algorithm.endpoint || "-")}</strong></div>
+              </div>
+              <div class="algorithm-endpoint-list">
+                <div class="endpoint-card"><strong>输入参数</strong><p>${escapeTaskHtml(algorithm.input || "-")}</p></div>
+                <div class="endpoint-card"><strong>输出结果</strong><p>${escapeTaskHtml(algorithm.output || "-")}</p></div>
+              </div>
+            `}
+          </section>
+        `;
+        switchPage("algorithm-doc-detail");
+      }
+
+      const originalSwitchPageForPredictionTasks = switchPage;
+      switchPage = function predictionTaskAwareSwitchPage(page) {
+        originalSwitchPageForPredictionTasks(page);
+        if (page === "prediction-tasks") renderPredictionTaskManagementPage();
+        if (page === "algorithm-doc-detail") {
+          const algorithm = typeof findAlgorithmById === "function" ? findAlgorithmById(state.activeAlgorithmResourceId) : null;
+          if (algorithm && !document.querySelector("#page-algorithm-doc-detail .algorithm-detail-card")) renderAlgorithmDocDetailPage(algorithm.id);
+        }
+      };
+      window.switchPage = switchPage;
+
+      const originalAlgorithmDocModal = renderAlgorithmDocModal;
+      renderAlgorithmDocModal = function renderAlgorithmDocDetailRoute(algorithmId) {
+        const algorithm = typeof findAlgorithmById === "function" ? findAlgorithmById(algorithmId) : null;
+        if (!algorithm) return originalAlgorithmDocModal(algorithmId);
+        renderAlgorithmDocDetailPage(algorithm.id);
+      };
+
+      document.body.addEventListener("input", (event) => {
+        const field = event.target.closest("[data-prediction-filter]");
+        if (field) predictionTaskFilters[field.dataset.predictionFilter] = field.value;
+      });
+      document.body.addEventListener("change", (event) => {
+        const field = event.target.closest("[data-prediction-filter]");
+        if (field) predictionTaskFilters[field.dataset.predictionFilter] = field.value;
+      });
+      document.body.addEventListener("click", (event) => {
+        if (event.target.closest("[data-prediction-filter-submit]")) {
+          renderPredictionTaskManagementPage();
+          return;
+        }
+        if (event.target.closest("[data-prediction-filter-reset]")) {
+          Object.assign(predictionTaskFilters, { name: "", source: "全部", status: "全部", start: "", end: "" });
+          renderPredictionTaskManagementPage();
+          return;
+        }
+        const logButton = event.target.closest("[data-prediction-task-log]");
+        if (logButton) {
+          const task = ensurePredictionTaskRows().find((item) => item.id === logButton.dataset.predictionTaskLog);
+          if (task) showPredictionTaskLog(task);
+          return;
+        }
+        const retryButton = event.target.closest("[data-prediction-task-retry]");
+        if (retryButton && !retryButton.disabled) {
+          const task = ensurePredictionTaskRows().find((item) => item.id === retryButton.dataset.predictionTaskRetry);
+          if (task) updatePredictionTask(task, "retry");
+          return;
+        }
+        const cancelButton = event.target.closest("[data-prediction-task-cancel]");
+        if (cancelButton && !cancelButton.disabled) {
+          const task = ensurePredictionTaskRows().find((item) => item.id === cancelButton.dataset.predictionTaskCancel);
+          if (task) updatePredictionTask(task, "cancel");
+          return;
+        }
+        const resultButton = event.target.closest("[data-prediction-task-result]");
+        if (resultButton && !resultButton.disabled) {
+          const task = ensurePredictionTaskRows().find((item) => item.id === resultButton.dataset.predictionTaskResult);
+          if (task && typeof openPredictionPage === "function") openPredictionPage(task.materialSource, task.materialId);
+          return;
+        }
+        if (event.target.closest("[data-algorithm-detail-back]")) {
+          state.algorithmPageView = "overview";
+          renderAlgorithms();
+          switchPage("algorithms");
+        }
+      });
+
+      window.renderPredictionTaskManagementPage = renderPredictionTaskManagementPage;
+      window.renderAlgorithmDocDetailPage = renderAlgorithmDocDetailPage;
+    })();
+  </script>
 </body>
 </html>
