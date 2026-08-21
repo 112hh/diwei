@@ -85455,6 +85455,7 @@ function renderElectrolyteCategoryTabs() {
         <div class="cross-db-result-toolbar">
           <div class="cross-db-toolbar-count">共 <strong>${total}</strong> 条</div>
           <div class="cross-db-toolbar-actions">
+            ${config.leadingActions ? config.leadingActions.map((item) => `<button class="btn" type="button" ${item.attribute || ""}>${html(item.label)}</button>`).join("") : ""}
             <details class="cross-db-toolbar-menu">
               <summary>排序▾</summary>
               <div class="cross-db-toolbar-panel">${toolbarPanel(config.sorts)}</div>
@@ -85901,12 +85902,13 @@ function renderElectrolyteCategoryTabs() {
       }
 
       function getMlffChargeSummary(item) {
-        if (Array.isArray(item.chargeValues) && item.chargeValues.length) {
+        if (Array.isArray(item.chargeValues) && item.chargeValues.length && item.chargeValues.every((value) => Number.isFinite(Number(value)) && Math.abs(Number(value)) <= 10)) {
           const min = Math.min.apply(null, item.chargeValues);
           const max = Math.max.apply(null, item.chargeValues);
           return min === max ? `${min.toFixed(2)} e` : `${min.toFixed(2)} ~ ${max.toFixed(2)} e`;
         }
         if (item.charge != null) return String(item.charge);
+        if (item.parameterValue && /电荷|charge/i.test(String(item.parameterName || ""))) return String(item.parameterValue);
         return LOW_DIM_NO_PROPERTY_TEXT;
       }
 
@@ -85925,31 +85927,23 @@ function renderElectrolyteCategoryTabs() {
       }
 
       renderMlffResultRows = function renderMlffResultRowsUnified(list) {
-        if (!list.length) return `<tr><td colspan="18" class="opto-table-empty">未检索到符合条件的机器学习力场数据，请调整检索条件后重试。</td></tr>`;
+        if (!list.length) return `<tr><td colspan="9" class="opto-table-empty">未检索到符合条件的机器学习力场数据，请调整检索条件后重试。</td></tr>`;
         const start = ((state.mlffPage || 1) - 1) * (state.mlffPageSize || 5);
         return list.map((item, index) => `
           <tr>
-            ${cell(start + index + 1)}
+            ${cell(item.id)}
             <td title="${html(valueText(item.name))}"><button class="twod-material-link" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="basic">${valueText(item.name)}</button></td>
             ${cell(item.english)}
             <td title="${html(valueText(item.formula))}"><em>${valueText(item.formula)}</em></td>
-            ${cell(item.atoms)}
-            ${cell(item.bond)}
-            ${cell(getMlffAtomPropertySummary(item))}
             ${cell(getMlffChargeSummary(item))}
             ${cell(getMlffMultipoleSummary(item))}
-            ${cell(getMlffPolarizabilitySummary(item))}
-            ${cell(getMlffDispersionCoefficientSummary(item))}
-            ${cell(item.forceField)}
-            ${cell(item.method)}
-            ${cell(item.parameterName)}
-            ${cell(item.parameterValue)}
-            ${cell(item.energy, { numeric: true, digits: 2, suffix: " eV" })}
-            <td>${renderLowDimDatasetSource(item, "mlff")}</td>
+            <td title="${html(`极化率：${getMlffPolarizabilitySummary(item)}；色散系数：${getMlffDispersionCoefficientSummary(item)}`)}">极化率：${valueText(getMlffPolarizabilitySummary(item))}；色散系数：${valueText(getMlffDispersionCoefficientSummary(item))}</td>
+            <td title="${html(valueText(item.bond || item.structureType))}">${valueText(item.bond || item.structureType)}</td>
             <td>
               <div class="twod-record-inline-actions">
                 <button class="twod-action-view" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="basic">查看详情</button>
                 <button class="twod-record-link" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="prediction">发起预测</button>
+                <button class="twod-record-link" type="button" data-mlff-field-update="${html(item.id)}">场数据更新</button>
               </div>
             </td>
           </tr>
@@ -85991,7 +85985,8 @@ function renderElectrolyteCategoryTabs() {
         mlff: {
           sorts: ["默认排序", "能量升序", "偶极矩排序", "参数项排序", "更新时间"],
           filters: ["自有数据集", "公开数据集", "电荷", "多级矩", "分子结构", "小体系结构", "大体系结构"],
-          columns: ["序号", "材料名称", "英文名称", "分子式", "原子组成", "键长/结构", "原子性质", "电荷", "多极矩", "极化率", "色散系数", "力场类型", "计算方法", "核心参数项", "参数值", "能量", "数据来源", "操作"]
+          columns: ["材料编号", "中文名称", "英文名称", "分子式", "电荷", "多极矩", "极化率和色散系数", "键长/结构", "操作"],
+          leadingActions: [{ label: "机器学习力场数据术语表", attribute: "data-mlff-glossary-page" }]
         },
         catalyst: {
           sorts: ["默认排序", "能垒升序", "选择性降序", "TOF降序", "更新时间"],
@@ -85999,6 +85994,332 @@ function renderElectrolyteCategoryTabs() {
           columns: ["序号", "材料编号", "材料名称", "化学式", "催化剂种类", "材料成分", "中间产物", "材料表面", "活化能", "反应物", "生成物", "操作"]
         }
       };
+
+      function renderMlffCurrentConversionPanel() {
+        ensureMlffConvertSelection();
+        const typeDescriptions = {
+          "拓扑文件": "拓扑文件是描述体系原子种类、原子坐标信息的文件。通过拓扑文件转换器，可以转换常用的几种拓扑文件格式，在不同软件上进行分子动力学模拟或力场能力计算时灵活使用。",
+          "力场文件": "力场文件转换方便将力场参数转换为各大计算软件包常用的类型，用户可以得到一组力场参数并将其运用在不同的计算软件平台上。"
+        };
+        const records = getMlffConvertRecordsByType(state.mlffConvertFilterType);
+        const activeRecord = records.find((item) => item.id === state.mlffConvertRecordId) || null;
+        const allFormats = getMlffConvertTargetFormatsByType(state.mlffConvertFilterType);
+        const sourceFormat = String(activeRecord?.sourceFormat || "").toUpperCase();
+        const targetFormats = allFormats.filter((item) => item !== sourceFormat);
+        return `
+          <section class="card pad material-convert-workbench material-convert-workbench-final">
+            <div class="material-convert-head">
+              <div>
+                <span class="twod-search-eyebrow">机器学习力场应用模块</span>
+                <h3>机器学习力场文件转换</h3>
+                <p>支持拓扑文件和力场文件的格式转换，转换结果可用于不同计算软件平台。</p>
+              </div>
+            </div>
+            <div class="twod-convert-page-panel twod-convert-select-panel">
+              <div class="twod-convert-status-head">
+                <div><h3>选择转换类型</h3><p>${html(typeDescriptions[state.mlffConvertFilterType])}</p></div>
+              </div>
+              <div class="twod-convert-filter-row">
+                <div class="twod-convert-filter-tags">
+                  ${["拓扑文件", "力场文件"].map((item) => `<button class="twod-convert-filter-tag${state.mlffConvertFilterType === item ? " active" : ""}" type="button" data-mlff-current-convert-type="${item}">${item}转换</button>`).join("")}
+                </div>
+              </div>
+              ${records.length ? `
+                <div class="twod-convert-form-grid">
+                  <div class="field"><label for="mlffCurrentConvertRecord">系统内文件</label><select id="mlffCurrentConvertRecord" data-mlff-current-convert-record>
+                    ${records.map((record) => `<option value="${html(record.id)}"${record.id === state.mlffConvertRecordId ? " selected" : ""}>${html(record.fileName)} · ${html(record.sourceFormat || "自动识别")}</option>`).join("")}
+                  </select></div>
+                  <div class="field"><label for="mlffCurrentConvertTarget">目标格式</label><select id="mlffCurrentConvertTarget" data-mlff-current-convert-target>
+                    ${targetFormats.map((format) => `<option value="${format}"${format === state.mlffConvertTargetFormat ? " selected" : ""}>${format}</option>`).join("")}
+                  </select></div>
+                </div>
+                <div class="twod-convert-note">${html(typeDescriptions[state.mlffConvertFilterType])}</div>
+                <div class="twod-convert-summary">${buildTwodConvertSummary([
+                  { label: "转换类型", value: state.mlffConvertFilterType },
+                  { label: "源文件", value: activeRecord?.fileName || "-" },
+                  { label: "源格式", value: activeRecord?.sourceFormat || "-" },
+                  { label: "目标格式", value: state.mlffConvertTargetFormat || "-" }
+                ])}</div>
+                <div class="twod-convert-actions"><button class="btn-primary" type="button" data-mlff-current-convert-start ${state.mlffConvertTargetFormat ? "" : "disabled"}>格式转换</button><button class="btn" type="button" data-mlff-current-convert-cancel>返回检索页</button></div>
+              ` : `<div class="twod-convert-empty-card">当前系统内暂无可用于转换的${state.mlffConvertFilterType}记录，请先在系统中上传对应文件后再进行格式转换。</div>`}
+            </div>
+          </section>
+        `;
+      }
+
+      function renderMlffGlossaryPage() {
+        const isDefinition = state.mlffGlossaryTab !== "method";
+        const definitionItems = mlffGlossaryDefinitions.filter((item) => {
+          const keyword = String(state.mlffTermKeyword || "").trim().toLowerCase();
+          return !keyword || `${item.cn} ${item.en} ${item.desc}`.toLowerCase().includes(keyword);
+        });
+        const methodItems = mlffGlossaryMethods.filter((item) => {
+          const keyword = String(state.mlffTermKeyword || "").trim().toLowerCase();
+          const typeMatch = state.mlffMethodFilter === "all" || item.type.includes(state.mlffMethodFilter);
+          const keywordMatch = !keyword || `${item.title} ${item.type} ${item.desc} ${item.scope}`.toLowerCase().includes(keyword);
+          return typeMatch && keywordMatch;
+        });
+        const definitionBody = `
+          <section class="card table-card">
+            <div class="table-head"><div><h3>参数数据定义列表</h3><p class="section-subtitle">提供机器学习力场参数数据的中文术语、英文名称、定义说明与单位。</p></div></div>
+            <div class="table-wrap"><table class="summary-table"><thead><tr><th>首字母</th><th>术语名称</th><th>英文名称</th><th>定义说明</th><th>单位</th></tr></thead><tbody>
+              ${definitionItems.map((item) => `<tr><td><strong>${html(item.letter)}</strong></td><td>${html(item.cn)}</td><td>${html(item.en)}</td><td>${html(item.desc)}</td><td>${html(item.unit)}</td></tr>`).join("") || `<tr><td colspan="5" class="opto-table-empty">暂无匹配术语</td></tr>`}
+            </tbody></table></div>
+          </section>
+        `;
+        const methodBody = `
+          <section class="card table-card">
+            <div class="table-head"><div><h3>数据获取方法概览</h3><p class="section-subtitle">提供数据来源方法、适用范围、计算成本和数据质量说明。</p></div></div>
+            <div class="mlff-platform-kpis">
+              <article class="mlff-kpi-card"><strong>${methodItems.filter((item) => item.type === "量子化学计算").length}</strong><span>DFT计算类方法</span></article>
+              <article class="mlff-kpi-card"><strong>${methodItems.filter((item) => item.type === "实验测量").length}</strong><span>实验数据类方法</span></article>
+              <article class="mlff-kpi-card"><strong>${methodItems.filter((item) => item.type === "机器学习方法").length}</strong><span>机器学习类方法</span></article>
+            </div>
+            <div class="mlff-method-grid">
+              ${methodItems.map((item) => `<article class="mlff-method-card"><h4>${html(item.title)}</h4><p>${html(item.desc)}</p><div class="mlff-method-meta"><span>方法类别：${html(item.type)}</span><span>适用范围：${html(item.scope)}</span><span>计算成本：${html(item.cost)}</span><span>数据质量：${html(item.quality)}</span></div></article>`).join("") || `<div class="opto-table-empty">暂无匹配方法</div>`}
+            </div>
+          </section>
+        `;
+        return `
+          <div class="page-head"><div><h2>机器学习力场数据术语表</h2><p>提供机器学习力场参数数据定义与数据获取方法，支持检索和分类查看。</p></div></div>
+          <div class="twod-platform-shell">
+            <section class="card twod-search-platform">
+              <div class="twod-results-head"><div><h3>术语表分类</h3><p class="twod-result-hint">当前页面仅展示机器学习力场数据相关术语和获取方法。</p></div><button class="btn" type="button" data-mlff-glossary-back>返回数据检索</button></div>
+              <div class="module-tab-strip"><button class="module-tab-btn${isDefinition ? " active" : ""}" type="button" data-mlff-glossary-page-tab="definition">机器学习力场参数数据定义表</button><button class="module-tab-btn${!isDefinition ? " active" : ""}" type="button" data-mlff-glossary-page-tab="method">机器学习力场数据获取方法表</button></div>
+              ${isDefinition ? `<div class="twod-search-row"><label class="twod-search-input"><span>术语检索</span><input type="text" value="${html(state.mlffTermKeyword || "")}" placeholder="输入术语名称、英文缩写或参数类型进行检索" data-mlff-glossary-keyword></label><button class="btn-primary" type="button" data-mlff-glossary-search>检索</button><button class="btn" type="button" data-mlff-glossary-reset>重置条件</button></div><div class="twod-platform-actions"><div class="twod-status-text">按汉字、英文名称或定义说明筛选术语。</div></div>` : `<div class="twod-search-row"><label class="twod-search-input"><span>深度检索</span><input type="text" value="${html(state.mlffTermKeyword || "")}" placeholder="输入参数名称、获取方法或关键词进行深度检索" data-mlff-glossary-method-keyword></label><label class="field"><span>获取方法</span><select data-mlff-glossary-method-filter><option value="all">全部方法</option><option value="量子化学计算">量子化学计算</option><option value="机器学习方法">机器学习方法</option><option value="实验测量">实验测量</option></select></label><button class="btn-primary" type="button" data-mlff-glossary-search>检索</button><button class="btn" type="button" data-mlff-glossary-reset>重置条件</button></div>`}
+            </section>
+            ${isDefinition ? definitionBody : methodBody}
+          </div>
+        `;
+      }
+
+      if (document.body.dataset.mlffCurrentConversionBound !== "true") {
+        document.body.dataset.mlffCurrentConversionBound = "true";
+        document.body.addEventListener("change", (event) => {
+          if (event.target.matches("[data-mlff-current-convert-record]")) {
+            state.mlffConvertRecordId = event.target.value;
+            ensureMlffConvertSelection();
+            renderMlffModule();
+          }
+          if (event.target.matches("[data-mlff-current-convert-target]")) state.mlffConvertTargetFormat = event.target.value;
+        });
+        document.body.addEventListener("click", (event) => {
+          const typeButton = event.target.closest("[data-mlff-current-convert-type]");
+          if (typeButton) {
+            state.mlffConvertFilterType = typeButton.dataset.mlffCurrentConvertType;
+            state.mlffConvertRecordId = "";
+            state.mlffConvertTargetFormat = "";
+            renderMlffModule();
+            return;
+          }
+          if (event.target.closest("[data-mlff-current-convert-start]")) {
+            startMlffConvertFlow();
+            return;
+          }
+          if (event.target.closest("[data-mlff-current-convert-cancel]")) {
+            state.mlffTab = "search";
+            renderMlffModule();
+          }
+        });
+      }
+
+      if (document.body.dataset.mlffGlossaryPageBound !== "true") {
+        document.body.dataset.mlffGlossaryPageBound = "true";
+        document.body.addEventListener("click", (event) => {
+          if (event.target.closest("[data-mlff-glossary-page]")) {
+            state.mlffTab = "glossary";
+            renderMlffModule();
+            return;
+          }
+          const tabButton = event.target.closest("[data-mlff-glossary-page-tab]");
+          if (tabButton) {
+            state.mlffGlossaryTab = tabButton.dataset.mlffGlossaryPageTab;
+            renderMlffModule();
+            return;
+          }
+          if (event.target.closest("[data-mlff-glossary-back]")) {
+            state.mlffTab = "search";
+            renderMlffModule();
+            return;
+          }
+          if (event.target.closest("[data-mlff-glossary-reset]")) {
+            state.mlffTermKeyword = "";
+            state.mlffMethodFilter = "all";
+            renderMlffModule();
+            return;
+          }
+          if (event.target.closest("[data-mlff-glossary-search]")) {
+            renderMlffModule();
+          }
+        });
+        document.body.addEventListener("input", (event) => {
+          if (event.target.matches("[data-mlff-glossary-keyword]")) {
+            state.mlffTermKeyword = event.target.value;
+          }
+          if (event.target.matches("[data-mlff-glossary-method-keyword]")) {
+            state.mlffTermKeyword = event.target.value;
+          }
+        });
+        document.body.addEventListener("change", (event) => {
+          if (event.target.matches("[data-mlff-glossary-method-filter]")) {
+            state.mlffMethodFilter = event.target.value;
+            renderMlffModule();
+          }
+        });
+      }
+
+      function ensureMlffFieldUpdateState() {
+        if (state.mlffFieldUpdateOpen == null) state.mlffFieldUpdateOpen = false;
+        if (!state.mlffFieldUpdateView) state.mlffFieldUpdateView = "list";
+        if (!state.mlffFieldUpdateSelectedId) state.mlffFieldUpdateSelectedId = "";
+        if (!state.mlffFieldUpdateModalOpen) state.mlffFieldUpdateModalOpen = false;
+      }
+
+      function resetTopicApplicationEntry(moduleKey) {
+        if (!["twod", "electrolyte", "opto", "mlff", "catalyst"].includes(moduleKey)) return;
+        if (moduleKey === "twod") {
+          state.twodTab = "search";
+          state.twodHasSearched = false;
+          state.twodSearchApplied = { formula: "", elements: "", materialId: "" };
+          state.twodPropertyApplied = {};
+          state.twodAppliedPropertyCategory = "";
+          state.twodPeriodicApplied = [];
+          state.twodCurrentPage = 1;
+        }
+        if (moduleKey === "electrolyte") {
+          state.electrolyteTab = "search";
+          state.electrolyteScope = "all";
+          state.electrolyteCurrentPage = 1;
+          if (typeof resetElectrolyteAppliedSearch === "function") resetElectrolyteAppliedSearch();
+        }
+        if (moduleKey === "opto") {
+          state.optoTab = "search";
+          state.optoCurrentPage = 1;
+          state.optoAppliedSearch = { mode: "", filters: null };
+        }
+        if (moduleKey === "mlff") {
+          state.mlffTab = "search";
+          state.mlffFieldUpdateOpen = false;
+          state.mlffPage = 1;
+          state.mlffAppliedSearch = { mode: "", filters: null };
+        }
+        if (moduleKey === "catalyst") {
+          state.catalystTab = "search";
+          state.catalystPage = 1;
+          state.catalystCurrentPage = 1;
+          state.catalystAppliedSearch = { mode: "", filters: null };
+        }
+        setTimeout(() => {
+          if (moduleKey === "twod" && typeof renderTwodModuleUnified === "function") renderTwodModuleUnified();
+          if (moduleKey === "electrolyte" && typeof renderElectrolyteModule === "function") renderElectrolyteModule();
+          if (moduleKey === "opto" && typeof renderOptoModule === "function") renderOptoModule();
+          if (moduleKey === "mlff" && typeof renderMlffModule === "function") renderMlffModule();
+          if (moduleKey === "catalyst" && typeof renderCatalystModule === "function") renderCatalystModule();
+        }, 0);
+      }
+
+      if (!document.getElementById("topicApplicationSingleLineStyle")) {
+        const style = document.createElement("style");
+        style.id = "topicApplicationSingleLineStyle";
+        style.textContent = "#page-twod table th,#page-twod table td,#page-electrolyte table th,#page-electrolyte table td,#page-opto table th,#page-opto table td,#page-mlff table th,#page-mlff table td,#page-catalyst table th,#page-catalyst table td{white-space:nowrap!important;}#page-twod .twod-record-inline-actions,#page-electrolyte .twod-record-inline-actions,#page-opto .twod-record-inline-actions,#page-mlff .twod-record-inline-actions,#page-catalyst .twod-record-inline-actions{white-space:nowrap!important;}";
+        document.head.appendChild(style);
+      }
+
+      if (document.body.dataset.topicApplicationEntryBound !== "true") {
+        document.body.dataset.topicApplicationEntryBound = "true";
+        document.body.addEventListener("click", (event) => {
+          const nav = event.target.closest(".nav-btn[data-page]");
+          if (nav) resetTopicApplicationEntry(nav.dataset.page);
+        });
+      }
+
+      function getMlffFieldUpdateRows() {
+        return [
+          { id: "atomic-charge", name: "原子电荷参数", type: "电子结构参数", source: "DFT计算", saved: "2024-01-15 14:32", updated: "2024-01-15 14:32", status: "已生效", version: "v3.2", values: [["Mulliken电荷", "-0.452", "e", "Mulliken布居分析"], ["Bader电荷", "-0.387", "e", "Bader拓扑分析"], ["Hirshfeld电荷", "-0.298", "e", "Hirshfeld布居分析"]] },
+          { id: "bond-set", name: "成键参数集", type: "力场参数", source: "量子化学计算", saved: "2024-01-15 11:20", updated: "2024-01-15 11:20", status: "已生效", version: "v2.0", values: [["C-C键长", "1.42", "Å", "平衡键长"], ["键角", "120.0", "°", "平衡键角"]] },
+          { id: "lj-set", name: "对势参数-LJ", type: "力场参数", source: "实验数据拟合", saved: "2024-01-14 16:45", updated: "2024-01-14 16:45", status: "已生效", version: "v1.5", values: [["epsilon", "0.152", "kcal/mol", "Lennard-Jones势阱深度"], ["sigma", "3.405", "Å", "Lennard-Jones距离参数"]] },
+          { id: "dihedral-set", name: "二面角参数集", type: "力场参数", source: "量子化学计算", saved: "2024-01-14 10:15", updated: "2024-01-14 10:15", status: "已生效", version: "v1.2", values: [["扭转势系数", "0.650", "kcal/mol", "二面角拟合参数"]] },
+          { id: "bohr", name: "玻尔兹曼常数", type: "物理常数", source: "CODATA推荐值", saved: "2024-01-13 09:30", updated: "2024-01-13 09:30", status: "已生效", version: "v1.0", values: [["Boltzmann常数", "1.380649e-23", "J/K", "CODATA推荐值"]] }
+        ];
+      }
+
+      function getMlffFieldUpdateRow(id) {
+        return getMlffFieldUpdateRows().find((item) => item.id === id) || getMlffFieldUpdateRows()[0];
+      }
+
+      function renderMlffFieldUpdatePage() {
+        ensureMlffFieldUpdateState();
+        const rows = getMlffFieldUpdateRows();
+        if (state.mlffFieldUpdateView === "history") return renderMlffFieldUpdateHistory(getMlffFieldUpdateRow(state.mlffFieldUpdateSelectedId));
+        return `
+          <div class="page-head"><div><h2>场数据更新</h2><p>对现有数据进行补充和存储，支持编辑、历史记录对比与批量操作。</p></div><div class="page-tools"><button class="btn-primary" type="button" data-mlff-field-store>存入数据</button><button class="btn" type="button" data-mlff-field-batch>批量操作</button></div></div>
+          <div class="twod-platform-shell">
+            <section class="card twod-search-platform"><div class="twod-results-head"><div><p class="twod-result-hint">您可以通过存入按钮对现有数据库中不存在的数据进行补充和存储，进一步拓展数据库的可用性。</p></div><span class="status-badge success">已认证</span></div></section>
+            <section class="card twod-search-results">
+              <div class="twod-results-head"><div><h3>已存入数据列表 <span class="twod-result-count">共 ${rows.length} 条</span></h3></div><div class="twod-search-row"><button class="btn-primary" type="button" data-mlff-field-store>存入数据</button><button class="btn" type="button" data-mlff-field-batch>批量操作</button><input class="cross-db-input" placeholder="搜索数据名称或参数" data-mlff-field-keyword><button class="btn" type="button" data-mlff-field-filter>筛选</button></div></div>
+              <div class="twod-platform-actions"><div class="twod-status-text">已选择 3 项</div><div class="twod-detail-actions"><button class="btn-primary" type="button" data-mlff-field-edit>批量编辑</button><button class="btn" type="button" data-mlff-field-revoke>批量撤销</button><button class="btn" type="button" data-mlff-field-clear-selection>取消选择</button></div></div>
+              <div class="table-wrap twod-result-table-wrap"><table class="twod-result-table"><thead><tr><th>数据名称</th><th>参数类型</th><th>数据来源</th><th>存入时间</th><th>更新时间</th><th>状态</th><th>操作</th></tr></thead><tbody>
+                ${rows.map((row) => `<tr><td><strong>${html(row.name)}</strong><span class="status-badge success">新</span></td><td>${html(row.type)}</td><td>${html(row.source)}</td><td>${html(row.saved)}</td><td>${html(row.updated)}</td><td><span class="status-badge success">${html(row.status)}</span></td><td><div class="twod-record-inline-actions"><button class="twod-action-view" type="button" data-mlff-field-edit-row="${html(row.id)}">编辑</button><button class="twod-record-link" type="button" data-mlff-field-history="${html(row.id)}">历史</button><button class="twod-record-link" type="button" data-mlff-field-revoke-row="${html(row.id)}">撤销</button></div></td></tr>`).join("")}
+              </tbody></table></div>
+              <div class="result-footer twod-result-footer"><span>显示 1 - ${rows.length} 条，共 ${rows.length} 条记录</span>${renderSharedPaginationFooter({ total: rows.length, currentPage: 1, totalPages: 1, pageSize: rows.length, pageSizeId: "mlffFieldPageSize", pageAttr: "data-mlff-field-page", jumpModule: "mlff" })}</div>
+            </section>
+          </div>
+        `;
+      }
+
+      function renderMlffFieldUpdateHistory(row) {
+        return `<div class="page-head"><div><h2>历史记录对比</h2><p>保存历史上传的历史记录，供用户对比参考，保证数据的有效性。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-field-history-back>返回列表</button></div></div><div class="twod-platform-shell"><section class="card twod-search-results"><div class="twod-results-head"><div><h3>${html(row.name)}</h3><p class="twod-result-hint">数据ID：MLFF-${html(row.id)}　参数类型：${html(row.type)}　数据来源：${html(row.source)}　当前版本：${html(row.version)}</p></div></div><div class="table-wrap twod-result-table-wrap"><table class="twod-result-table"><thead><tr><th>参数名称</th><th>版本 A（${html(row.version)}）</th><th>版本 B（v2.0）</th><th>差异</th></tr></thead><tbody>${row.values.map((value, index) => `<tr><td>${html(value[0])}</td><td>${html(value[1])} ${html(value[2])}</td><td>${index === 0 ? html(value[1]) + " " + html(value[2]) : "—"}</td><td><span class="status-badge success">${index === 0 ? "无差异" : "新增"}</span></td></tr>`).join("")}</tbody></table></div><div class="mlff-platform-kpis"><article class="mlff-kpi-card"><strong>2</strong><span>个参数有差异</span></article><article class="mlff-kpi-card"><strong>1</strong><span>个参数新增</span></article><article class="mlff-kpi-card"><strong>1</strong><span>个参数无变化</span></article></div><h3>历史版本记录</h3><div class="card table-card"><div class="table-wrap"><table class="twod-result-table"><tbody><tr><td><strong>v3.2</strong></td><td>更新参数数值，新增参数</td><td>2024-01-15 14:32 · 研究员</td><td><button class="btn" type="button">查看</button></td></tr><tr><td><strong>v2.0</strong></td><td>修正参数计算误差</td><td>2023-11-20 09:15 · 研究员</td><td><button class="btn" type="button">对比</button><button class="btn" type="button">查看</button></td></tr><tr><td><strong>v1.0</strong></td><td>初始版本，录入基础参数数据</td><td>2023-03-08 14:00 · 研究员</td><td><button class="btn" type="button">对比</button><button class="btn" type="button">查看</button></td></tr></tbody></table></div></div></section></div>`;
+      }
+
+      function renderMlffFieldStoreModal() {
+        let modal = document.getElementById("mlffFieldStoreModal");
+        if (!modal) { document.body.insertAdjacentHTML("beforeend", `<div class="overlay" id="mlffFieldStoreModal"><div class="modal modal-xl"><div class="modal-header"><div><h3>存入数据</h3><p>对现有数据进行补充和存储。</p></div><button class="modal-close" type="button" data-mlff-field-store-close>×</button></div><div class="modal-body modal-scroll" id="mlffFieldStoreBody"></div><div class="modal-footer"><button class="btn" type="button" data-mlff-field-store-close>取消</button><button class="btn" type="button">保存草稿</button><button class="btn-primary" type="button" data-mlff-field-store-submit>提交存入</button></div></div></div>`); modal = document.getElementById("mlffFieldStoreModal"); }
+        modal.querySelector("#mlffFieldStoreBody").innerHTML = `<section class="card table-card"><div class="table-head"><h3>选择存入方式</h3></div><div class="twod-detail-actions"><button class="btn-primary" type="button">手动录入</button><button class="btn" type="button">文件批量上传</button></div></section><section class="card table-card"><h3>数据基本信息</h3><div class="twod-detail-property-grid"><label class="field"><span>数据名称 *</span><input value="原子电荷参数"></label><label class="field"><span>参数类型 *</span><select><option>电子结构参数</option><option>力场参数</option></select></label><label class="field"><span>数据来源 *</span><select><option>DFT计算</option><option>量子化学计算</option></select></label><label class="field"><span>英文名称</span><input value="Atomic Charge"></label><label class="field"><span>单位</span><input value="e"></label><label class="field"><span>数据精度</span><input value="1e-4"></label></div><h3>数据值录入</h3><div class="table-wrap"><table class="twod-result-table"><thead><tr><th>序号</th><th>参数名称</th><th>参数值</th><th>单位</th><th>参数说明</th><th>操作</th></tr></thead><tbody>${getMlffFieldUpdateRows()[0].values.map((value, index) => `<tr><td>${index + 1}</td><td><input value="${html(value[0])}"></td><td><input value="${html(value[1])}"></td><td>${html(value[2])}</td><td>${html(value[3])}</td><td><button class="btn" type="button">删除</button></td></tr>`).join("")}</tbody></table></div><button class="btn" type="button">+ 添加参数行</button><h3>备注信息</h3><textarea class="cross-db-input" placeholder="请输入数据备注信息"></textarea></section>`;
+        modal.hidden = false;
+        if (typeof openModal === "function") openModal("mlffFieldStoreModal");
+      }
+
+      if (document.body.dataset.mlffFieldUpdateBound !== "true") {
+        document.body.dataset.mlffFieldUpdateBound = "true";
+        document.body.addEventListener("click", (event) => {
+          const updateButton = event.target.closest("[data-mlff-field-update]");
+          if (updateButton) {
+            ensureMlffFieldUpdateState();
+            state.mlffFieldUpdateOpen = true;
+            state.mlffFieldUpdateView = "list";
+            state.mlffFieldUpdateSelectedId = updateButton.dataset.mlffFieldUpdate;
+            renderMlffModule();
+            return;
+          }
+          if (state.mlffFieldUpdateOpen && event.target.closest("[data-mlff-field-store]")) {
+            renderMlffFieldStoreModal();
+            return;
+          }
+          if (state.mlffFieldUpdateOpen && (event.target.closest("[data-mlff-field-history]") || event.target.closest("[data-mlff-field-history-row]"))) {
+            const trigger = event.target.closest("[data-mlff-field-history]") || event.target.closest("[data-mlff-field-history-row]");
+            state.mlffFieldUpdateSelectedId = trigger.dataset.mlffFieldHistory || trigger.dataset.mlffFieldHistoryRow;
+            state.mlffFieldUpdateView = "history";
+            renderMlffModule();
+            return;
+          }
+          if (state.mlffFieldUpdateOpen && event.target.closest("[data-mlff-field-history-back]")) {
+            state.mlffFieldUpdateView = "list";
+            renderMlffModule();
+            return;
+          }
+          if (state.mlffFieldUpdateOpen && event.target.closest("[data-mlff-field-store-close]")) {
+            const modal = document.getElementById("mlffFieldStoreModal");
+            if (modal) modal.hidden = true;
+            return;
+          }
+          if (state.mlffFieldUpdateOpen && event.target.closest("[data-mlff-field-store-submit]")) {
+            const modal = document.getElementById("mlffFieldStoreModal");
+            if (modal) modal.hidden = true;
+            showToast("存入数据", "数据已提交存入，正在生成新版本记录。");
+            return;
+          }
+        });
+      }
 
       const renderModuleTabs = (module, active) => `
         <div class="module-tab-strip">
@@ -86061,11 +86382,20 @@ function renderElectrolyteCategoryTabs() {
         if (typeof ensureMlffPageStylesOverride === "function") ensureMlffPageStylesOverride();
         const page = document.getElementById("page-mlff");
         if (!page) return;
+        ensureMlffFieldUpdateState();
+        if (state.mlffFieldUpdateOpen) {
+          page.innerHTML = renderMlffFieldUpdatePage();
+          return;
+        }
+        if (state.mlffTab === "glossary") {
+          page.innerHTML = renderMlffGlossaryPage();
+          return;
+        }
         if (state.mlffTab === "convert") {
           page.innerHTML = `
-            <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载与格式转换能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>数据术语表</button></div></div>
-            ${renderModuleTabs("mlff", "convert")}
-            ${renderMaterialConversionPanel("mlff")}
+          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载与格式转换能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>机器学习力场数据术语表</button></div></div>
+          ${renderModuleTabs("mlff", "convert")}
+          <div class="material-convert-shell material-convert-shell-twod-final">${renderMlffCurrentConversionPanel()}</div>
           `;
           return;
         }
@@ -86077,7 +86407,7 @@ function renderElectrolyteCategoryTabs() {
         const start = (state.mlffPage - 1) * state.mlffPageSize;
         const pageRows = resultList.slice(start, start + state.mlffPageSize);
         page.innerHTML = `
-          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载和术语表浏览能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>数据术语表</button></div></div>
+          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载和术语表浏览能力。</p></div><div class="page-tools"><button class="btn" type="button" data-mlff-glossary-jump>机器学习力场数据术语表</button></div></div>
           ${renderModuleTabs("mlff", state.mlffTab)}
           <div class="twod-platform-shell">
             <section class="card twod-search-platform">
@@ -86088,11 +86418,11 @@ function renderElectrolyteCategoryTabs() {
             </section>
             ${hasResults ? `
               <section class="card twod-search-results">
-                <div class="twod-results-head"><div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关数据</div><p class="twod-result-hint">${html(getMlffResultHint(resultList))}</p></div></div>
+                <div class="twod-results-head"><div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关数据</div><p class="twod-result-hint">${html(state.mlffAppliedSearch?.mode ? getMlffResultHint(resultList) : `默认展示机器学习力场数据库的全部 ${total} 条数据。`)}</p></div></div>
                 ${renderCrossDatabaseToolbar(total, resultToolbars.mlff)}
                 <div class="table-wrap twod-result-table-wrap">
                   <table class="twod-result-table">
-                    <thead><tr><th>序号</th><th>材料名称</th><th>英文名称</th><th>分子式</th><th>原子组成</th><th>键长/结构</th><th>原子性质</th><th>电荷</th><th>多极矩</th><th>极化率</th><th>色散系数</th><th>力场类型</th><th>计算方法</th><th>核心参数项</th><th>参数值</th><th>能量</th><th>数据来源</th><th>操作</th></tr></thead>
+                    <thead><tr><th>材料编号</th><th>中文名称</th><th>英文名称</th><th>分子式</th><th>电荷</th><th>多极矩</th><th>极化率和色散系数</th><th>键长/结构</th><th>操作</th></tr></thead>
                     <tbody>${renderMlffResultRows(pageRows)}</tbody>
                   </table>
                 </div>
@@ -86148,7 +86478,7 @@ function renderElectrolyteCategoryTabs() {
             ${hasApplied ? `
               <section class="card twod-search-results">
                 <div class="twod-results-head">
-                  <div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关数据</div><p class="twod-result-hint">${html(getCatalystPlatformHint(resultList))}</p></div>
+                  <div><div class="twod-result-count">找到 <strong>${total}</strong> 条相关数据</div><p class="twod-result-hint">${html(state.catalystAppliedSearch?.mode ? getCatalystPlatformHint(resultList) : `默认展示催化材料数据库的全部 ${total} 条数据。`)}</p></div>
                   <div class="twod-result-actions">
                     <button class="btn" type="button" data-catalyst-workbench="site">活性位点分析</button>
                     <button class="btn" type="button" data-catalyst-workbench="compare">材料对比</button>
@@ -87702,5 +88032,6 @@ print(resp.json())`;
       }
     })();
   </script>
+  <script src="scripts/electrolyte-organic-property-search-override.js"></script>
 </body>
 </html>
