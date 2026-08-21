@@ -18641,12 +18641,7 @@
             </section>
 
             <section class="card twod-search-results">
-              <div class="twod-results-head">
-                <div>
-                  <div class="twod-result-count">找到 <strong id="twodResultCount">0</strong> 条相关材料</div>
-                  <p class="twod-result-hint" id="twodResultHint">当前数据库已收录全部二维材料数据，可按当前检索模式输入条件进一步筛选。</p>
-                </div>
-              </div>
+              <div class="twod-results-head"></div>
 
               <div class="table-wrap twod-result-table-wrap" id="twodBaseTableWrap">
                 <table class="twod-result-table">
@@ -36923,7 +36918,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         panel.hidden = !active;
         panel.classList.toggle("active", active);
       });
-      document.getElementById("twodResultHint").textContent = getTwodDefaultHint(mode);
+      const _hintEl = document.getElementById("twodResultHint"); if (_hintEl) _hintEl.textContent = getTwodDefaultHint(mode);
     }
 
     function updateSelectedElements() {
@@ -37192,7 +37187,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         `).join("")
         : `<tr><td colspan="6" class="table-empty">暂无符合条件的二维材料数据</td></tr>`;
 
-      document.getElementById("twodResultCount").textContent = String(total);
+      const _countEl = document.getElementById("twodResultCount"); if (_countEl) _countEl.textContent = String(total);
       document.getElementById("twodBaseFooter").innerHTML = renderSharedPaginationFooter({
         total,
         currentPage: state.twodCurrentPage,
@@ -37209,7 +37204,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const list = getActiveTwodResults();
       state.twodLastResults = list.slice();
       renderTwodSearchResults(list, resetPage);
-      document.getElementById("twodResultHint").textContent = getTwodResultHint(state.twodSearchMode, list);
+      const _hintEl = document.getElementById("twodResultHint"); if (_hintEl) _hintEl.textContent = getTwodResultHint(state.twodSearchMode, list);
     }
 
     function renderPropertyResults(list) {
@@ -38611,8 +38606,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       });
       renderTwodModeWorkspace();
       state.twodHasSearched = false;
-      document.getElementById("twodResultHint").textContent = getTwodDefaultHint(mode);
-      document.getElementById("twodResultCount").textContent = state.twodHasSearched ? String(twodMaterials.length) : "0";
+      const _hintEl = document.getElementById("twodResultHint"); if (_hintEl) _hintEl.textContent = getTwodDefaultHint(mode);
+      const _countEl = document.getElementById("twodResultCount"); if (_countEl) _countEl.textContent = state.twodHasSearched ? String(twodMaterials.length) : "0";
       setTwodResultVisibility(state.twodHasSearched);
     }
 
@@ -39118,7 +39113,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         `).join("")
         : `<tr><td colspan="11" class="table-empty">暂无符合条件的二维材料数据</td></tr>`;
 
-      document.getElementById("twodResultCount").textContent = String(total);
+      const _countEl = document.getElementById("twodResultCount"); if (_countEl) _countEl.textContent = String(total);
       document.getElementById("twodBaseFooter").innerHTML = renderSharedPaginationFooter({
         total,
         currentPage: state.twodCurrentPage,
@@ -39134,8 +39129,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     function refreshTwodResults(options = {}) {
       const { resetPage = false } = options;
       if (!state.twodHasSearched) {
-        document.getElementById("twodResultCount").textContent = "0";
-        document.getElementById("twodResultHint").textContent = getTwodDefaultHint(state.twodSearchMode);
+        const _countEl = document.getElementById("twodResultCount"); if (_countEl) _countEl.textContent = "0";
+        const _hintEl = document.getElementById("twodResultHint"); if (_hintEl) _hintEl.textContent = getTwodDefaultHint(state.twodSearchMode);
         document.getElementById("twodBaseTableBody").innerHTML = "";
         document.getElementById("twodBaseFooter").innerHTML = "";
         state.twodLastResults = [];
@@ -39146,7 +39141,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const processedList = typeof getTwodProcessedResults === "function" ? getTwodProcessedResults(list) : list.slice();
       state.twodLastResults = processedList.slice();
       renderTwodSearchResults(list, resetPage);
-      document.getElementById("twodResultHint").textContent = getTwodResultHint(state.twodSearchMode, processedList);
+      const _hintEl = document.getElementById("twodResultHint"); if (_hintEl) _hintEl.textContent = getTwodResultHint(state.twodSearchMode, processedList);
     }
 
     function renderPropertyResults(list) {
@@ -39179,7 +39174,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         `).join("")
         : `<tr><td colspan="${columns.length}" class="table-empty">暂无符合条件的二维材料数据</td></tr>`;
 
-      document.getElementById("twodResultCount").textContent = String(total);
+      const _countEl = document.getElementById("twodResultCount"); if (_countEl) _countEl.textContent = String(total);
       document.getElementById("twodBaseFooter").innerHTML = renderSharedPaginationFooter({
         total,
         currentPage: state.twodCurrentPage,
@@ -88676,3 +88671,8 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
   </script>
 </body>
 </html>
+
+
+
+
+
