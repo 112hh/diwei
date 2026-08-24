@@ -44411,19 +44411,49 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         </div>
       `;
       const methodBody = `
-        <div class="mlff-method-grid">
-          ${mlffGlossaryMethods.map((item) => `
-            <article class="mlff-method-card">
-              <h4>${item.title}</h4>
-              <p>${item.desc}</p>
-              <div class="mlff-method-meta">
-                <span>方法类别：${item.type}</span>
-                <span>适用范围：${item.scope}</span>
-                <span>计算成本：${item.cost}</span>
-                <span>数据质量：${item.quality}</span>
-              </div>
-            </article>
-          `).join("")}
+        <div class="mlff-method-list">
+          ${mlffGlossaryMethods.map((item) => {
+            const toneColors = { blue: { bg: '#e8f0fe', fg: '#1660ff' }, purple: { bg: '#f3e8ff', fg: '#8c46ff' }, green: { bg: '#e8f8f0', fg: '#21a65d' }, orange: { bg: '#fff3e0', fg: '#e87722' } };
+            const tc = toneColors[item.tone] || toneColors.blue;
+            const iconMap = { dft: '🔬', mlp: '🤖', expfit: '', fffit: '⚙️', lit: '' };
+            const icon = iconMap[item.id] || '📋';
+            return `
+              <article class="mlff-method-card">
+                <div class="mlff-method-card-header">
+                  <div class="mlff-method-card-title-row">
+                    <div class="mlff-method-icon" style="background:${tc.bg};font-size:20px;">${icon}</div>
+                    <div class="mlff-method-card-title-info">
+                      <h4>${item.title} <span class="mlff-method-type-badge" style="background:${tc.bg};color:${tc.fg};">${item.type}</span></h4>
+                      <div class="mlff-method-card-subtitle">${item.shortTitle} · 使用频率：${item.frequency}</div>
+                    </div>
+                  </div>
+                  <div class="mlff-method-card-actions">
+                    <button class="mlff-detail-btn" type="button">查看详情</button>
+                    <button class="mlff-fav-btn" type="button" title="收藏">☆</button>
+                  </div>
+                </div>
+                <div class="mlff-method-section mlff-method-desc-section">
+                  <div class="mlff-method-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> 方法说明</div>
+                  <p>${item.desc}</p>
+                </div>
+                <div class="mlff-method-section mlff-method-analysis-section">
+                  <div class="mlff-method-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> 方法分析</div>
+                  <div class="mlff-method-analysis-content">
+                    <span class="mlff-method-pros">✓ 优势：${item.analysis.pros}</span>
+                    <span class="mlff-method-cons">✗ 不足：${item.analysis.cons}</span>
+                    <span class="mlff-method-apply">适用于：${item.analysis.apply}</span>
+                  </div>
+                </div>
+                <div class="mlff-method-footer">
+                  <div class="mlff-method-params">
+                    <span class="mlff-method-params-label">关联参数：</span>
+                    ${item.params.map(p => '<span class="mlff-method-param-tag">' + p + '</span>').join('')}
+                  </div>
+                  <div class="mlff-method-updated"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 更新于 ${item.updatedAt}</div>
+                </div>
+              </article>
+            `;
+          }).join("")}
         </div>
       `;
       return `
