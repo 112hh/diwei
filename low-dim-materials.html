@@ -76505,6 +76505,8 @@ function renderElectrolyteCategoryTabs() {
         ensureTwodRuntimeState();
         ensureTwodPageStylesOverride();
         const page = document.getElementById("page-twod");
+        const twodPageHead = page.querySelector(".page-head");
+        if (twodPageHead) twodPageHead.style.display = "none";
         const appRoot = document.getElementById("twodAppRoot");
         const pageTools = document.getElementById("twodPageTools");
         if (!page || !appRoot) return;
