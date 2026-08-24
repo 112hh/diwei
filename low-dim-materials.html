@@ -21677,7 +21677,8 @@
       selectedCatalystId: "CAT-PT-111-001",
       selectedCatalystTool: "site",
       catalystCompareChart: "bar",
-      selectedCatalystRecordId: "cat-rec-01",
+      selectedCatalystRecordId: "cat-rec-01",
+      catalystShareTab: `external`,
       catalystUploadStep: 1,
       catalystUploadProgress: 0,
       catalystUploadDraft: null,
@@ -66131,6 +66132,125 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           display: grid;
           gap: 16px;
         }
+        .catalyst-import-form {
+          max-width: 100%;
+        }
+        .catalyst-import-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+        .catalyst-import-grid-3col {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .catalyst-import-field {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .catalyst-import-field > span {
+          font-size: 13px;
+          color: #617695;
+        }
+        .catalyst-import-hint {
+          font-size: 12px;
+          color: #8a9bb5;
+          margin-top: 2px;
+        }
+        .twod-detail-tabs {
+          display: flex;
+          gap: 0;
+          border-bottom: 1px solid #e0e6ef;
+          margin-bottom: 16px;
+        }
+        .twod-detail-tab {
+          padding: 10px 20px;
+          font-size: 13px;
+          color: #617695;
+          background: none;
+          border: none;
+          border-bottom: 2px solid transparent;
+          cursor: pointer;
+          transition: all .2s;
+        }
+        .twod-detail-tab:hover {
+          color: #1a2a4a;
+          background: #f0f4ff;
+        }
+        .twod-detail-tab.active {
+          color: #2d4abf;
+          border-bottom-color: #2d4abf;
+          font-weight: 600;
+        }
+        .catalyst-import-preview {
+          border: 1px dashed #d0d7e3;
+          border-radius: 8px;
+          padding: 16px;
+          background: #f8faff;
+          min-height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .catalyst-guide-layout {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+        .catalyst-guide-card {
+          background: #f8faff;
+          border: 1px solid #e0e6ef;
+          border-radius: 8px;
+          padding: 20px;
+        }
+        .catalyst-guide-card h5 {
+          font-size: 15px;
+          color: #1a2a4a;
+          margin: 0 0 10px;
+        }
+        .catalyst-guide-card > p {
+          font-size: 13px;
+          color: #617695;
+          line-height: 22px;
+          margin: 0 0 16px;
+        }
+        .catalyst-guide-steps {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .catalyst-guide-step {
+          display: flex;
+          gap: 12px;
+          align-items: flex-start;
+        }
+        .catalyst-guide-step-num {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: #2d4abf;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          font-weight: 600;
+          flex-shrink: 0;
+        }
+        .catalyst-guide-step > div strong {
+          font-size: 13px;
+          color: #1a2a4a;
+          display: block;
+          margin-bottom: 2px;
+        }
+        .catalyst-guide-step > div p {
+          font-size: 12px;
+          color: #617695;
+          margin: 0;
+        }
+        .required-star {
+          color: #e74c3c;
+        }
         .catalyst-external-note {
           margin: 0;
           color: #617695;
@@ -66585,13 +66705,39 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
     function renderCatalystExternalInfoPage(material) {
       const externalData = buildCatalystExternalAssociationData(material);
+      const tabItems = [
+        { key: "external", label: "外部信息关联" },
+        { key: "import", label: "催化材料数据用户导入" },
+        { key: "guide", label: "用户引导" }
+      ];
+      const activeTab = state.catalystShareTab || "external";
       return `
         <div class="twod-detail-page-head">
           <div>
-            <h4>外部信息关联</h4>
-            <p>汇集当前催化材料的第三方数据库与论文数据链接，便于快速横向比对不同数据库中的结构与性质信息。</p>
+            <h4>催化材料数据共享</h4>
+            <p>汇集当前催化材料的外部数据关联、用户数据导入及操作引导。</p>
           </div>
         </div>
+        <div class="twod-detail-tabs">
+          ${tabItems.map((tab) => `
+            <button class="twod-detail-tab${activeTab === tab.key ? " active" : ""}" type="button" onclick="return switchCatalystShareTab('${tab.key}')">${tab.label}</button>
+          `).join("")}
+        </div>
+        ${activeTab === "external" ? renderCatalystExternalTab(material, externalData) : ""}
+        ${activeTab === "import" ? renderCatalystImportTab(material) : ""}
+        ${activeTab === "guide" ? renderCatalystGuideTab() : ""}
+      `;
+    }
+
+    function switchCatalystShareTab(tab) {
+      state.catalystShareTab = tab;
+      const material = findCatalystMaterial(state.selectedCatalystId);
+      if (material) renderCatalystDetailPage(material);
+      return false;
+    }
+
+    function renderCatalystExternalTab(material, externalData) {
+      return `
         <section class="twod-detail-section-card catalyst-external-card">
           <p class="catalyst-external-note">${externalData.note}</p>
           <div class="catalyst-external-summary">
@@ -66638,12 +66784,145 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       `;
     }
 
-    function renderCatalystDetailTreeOverride() {
+    function renderCatalystImportTab(material) {
+      const catalystKinds = ["单原子催化剂", "二元合金", "晶界"];
+      const intermediateTypes = ["-H", "-CO", "-CHO", "-COOH", "-CH2OH", "-OCHO"];
+      return `
+        <section class="twod-detail-section-card">
+          <div class="detail-kv-stack catalyst-import-form">
+            <h5 class="twod-detail-basic-title" style="margin-bottom:12px;">基础信息</h5>
+            <div class="catalyst-import-grid">
+              <label class="catalyst-import-field">
+                <span>催化材料种类 <span class="required-star">*</span></span>
+                <select id="catalystImportKind" class="page-select">
+                  <option value="">请选择</option>
+                  ${catalystKinds.map(k => `<option value="${k}">${k}</option>`).join("")}
+                </select>
+              </label>
+              <label class="catalyst-import-field">
+                <span>材料成分（元素组成，如 Cu, Al）</span>
+                <input type="text" id="catalystImportComposition" class="page-input" placeholder="如 Cu, Al">
+              </label>
+              <label class="catalyst-import-field">
+                <span>表面参数（晶面指数，如 (100)、(111)）</span>
+                <input type="text" id="catalystImportSurface" class="page-input" placeholder="如 (111)">
+              </label>
+              <label class="catalyst-import-field">
+                <span>中间产物类型</span>
+                <select id="catalystImportIntermediate" class="page-select" multiple style="height:120px;">
+                  ${intermediateTypes.map(t => `<option value="${t}">${t}</option>`).join("")}
+                </select>
+              </label>
+            </div>
+
+            <h5 class="twod-detail-basic-title" style="margin:16px 0 12px;">结构文件上传</h5>
+            <div class="catalyst-import-grid">
+              <label class="catalyst-import-field">
+                <span>结构文件上传 <span class="required-star">*</span></span>
+                <input type="file" id="catalystImportFile" class="page-input" accept=".poscar,.xyz,.cif">
+                <span class="catalyst-import-hint">支持 POSCAR / XYZ / CIF 格式</span>
+              </label>
+              <label class="catalyst-import-field">
+                <span>文件解析预览</span>
+                <div class="catalyst-import-preview" id="catalystImportPreviewArea">
+                  <span class="catalyst-import-hint">上传后自动解析原子坐标、晶格参数</span>
+                </div>
+              </label>
+            </div>
+
+            <h5 class="twod-detail-basic-title" style="margin:16px 0 12px;">元素特征（可从文件自动填充，可手动修改）</h5>
+            <div class="catalyst-import-grid catalyst-import-grid-3col">
+              <label class="catalyst-import-field"><span>元素符号</span><input type="text" class="page-input" placeholder="如 Pt"></label>
+              <label class="catalyst-import-field"><span>电荷（原子序数）</span><input type="text" class="page-input" placeholder="如 78"></label>
+              <label class="catalyst-import-field"><span>第一电离能（kJ/mol）</span><input type="text" class="page-input" placeholder="如 870"></label>
+              <label class="catalyst-import-field"><span>电负性</span><input type="text" class="page-input" placeholder="如 2.28"></label>
+              <label class="catalyst-import-field"><span>价电子数</span><input type="text" class="page-input" placeholder="如 10"></label>
+              <label class="catalyst-import-field"><span>原子半径（pm）</span><input type="text" class="page-input" placeholder="如 138"></label>
+              <label class="catalyst-import-field"><span>d带中心（eV）</span><input type="text" class="page-input" placeholder="如 -2.45"></label>
+            </div>
+
+            <h5 class="twod-detail-basic-title" style="margin:16px 0 12px;">晶格与结构</h5>
+            <div class="catalyst-import-grid catalyst-import-grid-3col">
+              <label class="catalyst-import-field"><span>晶格常数 a（Å）</span><input type="text" class="page-input" placeholder="如 3.92"></label>
+              <label class="catalyst-import-field"><span>晶格常数 b（Å）</span><input type="text" class="page-input" placeholder="如 3.92"></label>
+              <label class="catalyst-import-field"><span>晶格常数 c（Å）</span><input type="text" class="page-input" placeholder="如 3.92"></label>
+              <label class="catalyst-import-field"><span>α（°）</span><input type="text" class="page-input" placeholder="如 90"></label>
+              <label class="catalyst-import-field"><span>β（°）</span><input type="text" class="page-input" placeholder="如 90"></label>
+              <label class="catalyst-import-field"><span>γ（°）</span><input type="text" class="page-input" placeholder="如 90"></label>
+              <label class="catalyst-import-field"><span>点群</span><input type="text" class="page-input" placeholder="如 Oh"></label>
+              <label class="catalyst-import-field"><span>空间群</span><input type="text" class="page-input" placeholder="如 Fm-3m"></label>
+              <label class="catalyst-import-field"><span>活性位点配位数（第一近邻）</span><input type="text" class="page-input" placeholder="如 5"></label>
+              <label class="catalyst-import-field"><span>活性位点配位数（第二近邻）</span><input type="text" class="page-input" placeholder="如 10"></label>
+            </div>
+
+            <h5 class="twod-detail-basic-title" style="margin:16px 0 12px;">体系特征</h5>
+            <div class="catalyst-import-grid">
+              <label class="catalyst-import-field"><span>费米面位置（eV）</span><input type="text" class="page-input" placeholder="如 -2.45"></label>
+              <label class="catalyst-import-field"><span>掺杂形成能/晶界能（eV/unit）</span><input type="text" class="page-input" placeholder="如 -0.85"></label>
+              <label class="catalyst-import-field"><span>体系磁矩（μB）</span><input type="text" class="page-input" placeholder="如 0.12"></label>
+            </div>
+
+            <h5 class="twod-detail-basic-title" style="margin:16px 0 12px;">催化性能</h5>
+            <div class="catalyst-import-grid">
+              <label class="catalyst-import-field"><span>生成物吸附能（eV）<span class="required-star">*</span></span><input type="text" class="page-input" placeholder="如 -0.85"></label>
+              <label class="catalyst-import-field"><span>吸附位点编号</span><input type="text" class="page-input" placeholder="如 Top-001"></label>
+            </div>
+
+            <h5 class="twod-detail-basic-title" style="margin:16px 0 12px;">计算与来源</h5>
+            <div class="catalyst-import-grid">
+              <label class="catalyst-import-field"><span>计算方法（泛函，如 DFT-PBE）</span><input type="text" class="page-input" placeholder="如 DFT-PBE"></label>
+              <label class="catalyst-import-field"><span>基组/平面波截断能</span><input type="text" class="page-input" placeholder="如 520 eV"></label>
+              <label class="catalyst-import-field"><span>计算软件（如 VASP、Gaussian）</span><input type="text" class="page-input" placeholder="如 VASP"></label>
+              <label class="catalyst-import-field"><span>数据来源/文献 DOI（选填）</span><input type="text" class="page-input" placeholder="如 10.xxxx"></label>
+              <label class="catalyst-import-field" style="grid-column:span 2;"><span>备注说明（选填）</span><textarea class="page-input" rows="3" placeholder="请输入备注说明"></textarea></label>
+            </div>
+
+            <div class="twod-detail-actions" style="margin-top:24px;justify-content:center;">
+              <button class="btn-primary" type="button" onclick="return submitCatalystImport()">提交</button>
+              <button class="btn" type="button" onclick="return switchCatalystShareTab('external')">取消</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCatalystGuideTab() {
+      return `
+        <section class="twod-detail-section-card">
+          <div class="catalyst-guide-layout">
+            <div class="catalyst-guide-card">
+              <h5>材料结构建模引导</h5>
+              <p>对于目前数据库中未收录的结构，数据库将引导用户前往材料建模软件（如Materials Studio、VESTA等），并提供相应的操作说明，指导用户按步骤进行建模操作，并在建模成功后为用户下载好相应的构型文件。</p>
+              <div class="catalyst-guide-steps">
+                <div class="catalyst-guide-step"><span class="catalyst-guide-step-num">1</span><div><strong>软件选择</strong><p>选择 Materials Studio 或 VESTA 等建模软件</p></div></div>
+                <div class="catalyst-guide-step"><span class="catalyst-guide-step-num">2</span><div><strong>分步操作</strong><p>按操作说明逐步完成材料建模</p></div></div>
+                <div class="catalyst-guide-step"><span class="catalyst-guide-step-num">3</span><div><strong>构型导出</strong><p>导出构型文件并导入数据库</p></div></div>
+              </div>
+            </div>
+            <div class="catalyst-guide-card">
+              <h5>材料信息计算引导</h5>
+              <p>对于数据库中暂无的催化材料相关计算数据，数据库将引导用户前往相应的材料计算软件完成第一性原理计算、分子动力学模拟、机器学习势生成等计算操作。数据库将为用户提供这些材料计算软件的相应使用文档，以及典型的计算输入文件模板。在用户顺利完成计算后，引导用户将计算结果导入至数据库完成反馈。</p>
+              <div class="catalyst-guide-steps">
+                <div class="catalyst-guide-step"><span class="catalyst-guide-step-num">1</span><div><strong>第一性原理计算</strong><p>使用 VASP / Quantum ESPRESSO 等软件完成计算</p></div></div>
+                <div class="catalyst-guide-step"><span class="catalyst-guide-step-num">2</span><div><strong>分子动力学模拟</strong><p>使用 LAMMPS / GROMACS 等软件完成模拟</p></div></div>
+                <div class="catalyst-guide-step"><span class="catalyst-guide-step-num">3</span><div><strong>机器学习势生成</strong><p>使用 DeePMD / MACE 等工具生成势函数</p></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function submitCatalystImport() {
+      showToast("催化材料数据导入", "数据已提交，请在我的导入记录中查看审核状态。");
+      return false;
+    }
+function renderCatalystDetailTreeOverride() {
       const wrap = document.getElementById("twodDetailTree");
       if (!wrap) return;
       const items = [
         { key: "basic", label: "基础信息" },
-        { key: "external", label: "外部信息关联" }
+        { key: "external", label: "催化材料数据共享" }
       ];
       wrap.innerHTML = items.map((item) => `
         <div class="twod-tree-item">
@@ -66739,6 +67018,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
     window.openCatalystDetailSection = openCatalystDetailSection;
     window.triggerCatalystDetailDownload = triggerCatalystDetailDownload;
+    window.switchCatalystShareTab = switchCatalystShareTab;
+    window.submitCatalystImport = submitCatalystImport;
 
     const catalystOverrideUpdateBreadcrumb = updateBreadcrumb;
     updateBreadcrumb = function (page) {
