@@ -86660,7 +86660,6 @@ function renderElectrolyteCategoryTabs() {
         const start = (state.optoCurrentPage - 1) * state.optoPageSize;
         const pageItems = resultList.slice(start, start + state.optoPageSize);
         page.innerHTML = `
-          <div class="page-head"><div><h2>有机光电材料应用</h2><p>面向有机光电材料的统一检索与数据查看平台。</p></div></div>
           ${renderModuleTabs("opto", state.optoTab)}
           <div class="twod-platform-shell">
             <section class="card twod-search-platform">
@@ -86717,7 +86716,6 @@ function renderElectrolyteCategoryTabs() {
         const start = (state.mlffPage - 1) * state.mlffPageSize;
         const pageRows = resultList.slice(start, start + state.mlffPageSize);
         page.innerHTML = `
-          <div class="page-head"><div><h2>机器学习力场应用</h2><p>围绕机器学习力场材料数据提供检索、详情查看、文件下载和术语表浏览能力。</p></div></div>
           ${renderModuleTabs("mlff", state.mlffTab)}
           <div class="twod-platform-shell">
             <section class="card twod-search-platform">
@@ -86764,9 +86762,6 @@ function renderElectrolyteCategoryTabs() {
         const hasApplied = true;
         const { totalPages, items } = getCatalystPagedPlatformResults(resultList);
         page.innerHTML = `
-          <div class="page-head">
-            <div><h2>催化材料应用</h2><p>围绕催化材料检索、位点分析、材料对比与催化构建形成完整业务链路。</p></div>
-          </div>
           ${renderModuleTabs("catalyst", state.catalystTab)}
           <div class="twod-platform-shell">
             <section class="card twod-search-platform">
