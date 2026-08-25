@@ -17,6 +17,7 @@
           sessionStorage.removeItem("lowdim-authenticated");
           sessionStorage.removeItem("lowdim-login-user");
           sessionStorage.removeItem("lowdim-login-target");
+          sessionStorage.removeItem("lowdim-login-role");
         }
       } catch (error) {
         hasAppSession = false;
@@ -18348,7 +18349,66 @@
     .modal,.dialog,.drawer{border-radius:8px!important;box-shadow:0 22px 70px rgba(40,74,118,.24)!important;}
   </style>
   <link rel="stylesheet" href="assets/ui-design-system.css">
-</head>
+  <style id="twod-reference-layout">
+    /* 二维材料检索页：参考数据检索图，压缩无效留白并统一操作控件。 */
+    .main-shell:has(#page-twod.active) { min-height:0 !important; }
+    #page-twod { margin:0 !important; }
+    #page-twod .module-tab-strip { display:flex !important; align-items:center !important; gap:8px !important; margin:0 0 12px !important; padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important; }
+    #page-twod .module-tab-btn { display:inline-flex !important; align-items:center !important; justify-content:center !important; box-sizing:border-box !important; min-width:96px !important; min-height:40px !important; height:40px !important; padding:0 20px !important; border:1px solid transparent !important; border-radius:4px !important; background:#eef3fb !important; color:#526276 !important; font-size:14px !important; font-weight:600 !important; line-height:38px !important; }
+    #page-twod .module-tab-btn.active { background:#1f63ff !important; border-color:#1f63ff !important; color:#fff !important; }
+    #page-twod .twod-search-platform { padding:14px 16px 16px !important; border:1px solid #d8e5f7 !important; border-radius:4px !important; background:#fff !important; box-shadow:none !important; }
+    #page-twod .twod-search-hero { margin:0 !important; padding:0 !important; border:0 !important; background:transparent !important; }
+    #page-twod .twod-mode-selector { display:flex !important; align-items:flex-end !important; gap:24px !important; min-height:40px !important; padding:0 0 8px !important; border-bottom:1px solid #e3ebf6 !important; background:transparent !important; }
+    #page-twod .twod-mode-btn { display:inline-flex !important; align-items:center !important; box-sizing:border-box !important; min-height:40px !important; height:40px !important; padding:0 !important; border:0 !important; border-bottom:2px solid transparent !important; border-radius:0 !important; background:transparent !important; color:#60718a !important; font-size:14px !important; font-weight:500 !important; line-height:38px !important; box-shadow:none !important; }
+    #page-twod .twod-mode-btn:hover { background:transparent !important; color:#1f63ff !important; }
+    #page-twod .twod-mode-btn.active { border-bottom-color:#1f63ff !important; background:transparent !important; color:#1f63ff !important; font-weight:600 !important; box-shadow:none !important; }
+    #page-twod .twod-mode-stage { padding-top:12px !important; }
+    #page-twod .twod-search-row.twod-elements-search-row { grid-template-columns:minmax(260px, 1fr) max-content max-content !important; column-gap:4px !important; }
+    #page-twod .twod-search-row .twod-search-submit { width:66px !important; min-width:66px !important; }
+    #page-twod .twod-mode-stage .btn, #page-twod .twod-mode-stage .btn-primary { display:inline-flex !important; align-items:center !important; justify-content:center !important; box-sizing:border-box !important; min-height:40px !important; height:40px !important; padding:0 18px !important; border-radius:4px !important; font-size:14px !important; line-height:38px !important; box-shadow:none !important; }
+    #page-twod .twod-mode-stage .btn { background:#f4f7fb !important; border-color:#edf1f7 !important; color:#526276 !important; }
+    #page-twod .twod-mode-stage .btn-primary { background:#1f63ff !important; border-color:#1f63ff !important; color:#fff !important; }
+    #page-twod .twod-search-results { margin-top:12px !important; padding:0 !important; border:1px solid #e3eaf4 !important; border-radius:4px !important; background:#fff !important; box-shadow:none !important; overflow:hidden !important; }
+    #page-twod .twod-search-results .twod-results-head { min-height:0 !important; padding:0 !important; }
+    #page-twod .twod-result-table thead th { padding:12px 16px !important; background:#f7f9fc !important; color:#405064 !important; font-size:13px !important; font-weight:700 !important; }
+    #page-twod .twod-result-table tbody td { padding:13px 16px !important; }
+    #page-twod .twod-search-results .twod-action-view { min-height:auto !important; height:auto !important; padding:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; color:#1f63ff !important; font-size:13px !important; line-height:20px !important; }
+    #page-twod .result-footer.twod-result-footer { min-height:52px !important; padding:10px 16px !important; border-top:1px solid #eef2f7 !important; background:#fff !important; }
+    #page-twod .result-footer.twod-result-footer .twod-pagination-btn, #page-twod .result-footer.twod-result-footer .pager button { min-width:32px !important; height:32px !important; border-radius:2px !important; }
+  </style>  <style id="dropdown-visibility-fix">
+    /* 检索列表的操作菜单需要越过卡片边界显示，避免被圆角容器裁切。 */
+    #page-twod .twod-search-results,
+    #page-electrolyte .electrolyte-workspace,
+    #page-opto .opto-result-card {
+      overflow: visible !important;
+    }
+
+    #page-twod .twod-result-toolbar,
+    #page-electrolyte .twod-result-toolbar,
+    #page-opto .cross-db-result-toolbar {
+      position: relative;
+      z-index: 100;
+    }
+
+    #page-twod .twod-toolbar-panel,
+    #page-electrolyte .twod-toolbar-panel,
+    #page-opto .cross-db-toolbar-panel {
+      left: 0 !important;
+      right: auto !important;
+      z-index: 1000 !important;
+      max-width: min(320px, calc(100vw - 32px));
+    }
+
+    @media (max-width: 900px) {
+      #page-twod .twod-toolbar-panel,
+      #page-electrolyte .twod-toolbar-panel,
+      #page-opto .cross-db-toolbar-panel {
+        left: 0 !important;
+        right: auto !important;
+        width: min(320px, calc(100vw - 32px)) !important;
+      }
+    }
+  </style></head>
 <body>
   <section class="login-shell" id="loginShell">
     <div class="login-shell-inner">
@@ -21591,7 +21651,7 @@
       page: "twod",
       isAuthenticated: false,
       loginUser: "",
-      loginRole: "admin",
+      loginRole: "researcher",
       loginCaptchaCode: "",
       registerCaptchaCode: "",
       authTab: "login",
@@ -37924,6 +37984,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
   <h1>${material.name} - ${currentLabel}</h1>
   <div>${chartMarkup}</div>
   <p>${currentVisual?.caption || ""}</p>
+
+
 </body>
 </html>`,
           mime: "text/html;charset=utf-8",
@@ -38418,7 +38480,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (mode === "elements") {
         workspace.innerHTML = `
           <div class="twod-mode-panel active">
-            <div class="twod-search-row">
+            <div class="twod-search-row twod-elements-search-row">
               <label class="twod-search-input" for="twodElements">
                 <input id="twodElements" type="text" value="${escapeTwodHtml(drafts.elements)}" aria-label="元素组成检索条件" placeholder="请输入材料名称、化学式或元素组成，如 Mo-S">
               </label>
@@ -44376,15 +44438,15 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 <div class="mlff-method-section mlff-method-analysis-section">
                   <div class="mlff-method-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> 方法分析</div>
                   <div class="mlff-method-analysis-content">
-                    <span class="mlff-method-pros">✓ 优势：${item.analysis.pros}</span>
-                    <span class="mlff-method-cons">✗ 不足：${item.analysis.cons}</span>
-                    <span class="mlff-method-apply">适用于：${item.analysis.apply}</span>
+                    <span class="mlff-method-pros">✓ 优势：${(item.analysis || {}).pros || "数据可信度高"}</span>
+                    <span class="mlff-method-cons">✗ 不足：${(item.analysis || {}).cons || "获取成本较高"}</span>
+                    <span class="mlff-method-apply">适用于：${(item.analysis || {}).apply || item.scope || "力场参数获取"}</span>
                   </div>
                 </div>
                 <div class="mlff-method-footer">
                   <div class="mlff-method-params">
                     <span class="mlff-method-params-label">关联参数：</span>
-                    ${item.params.map(p => '<span class="mlff-method-param-tag">' + p + '</span>').join('')}
+                    ${(item.params || ["力场参数"]).map(p => '<span class="mlff-method-param-tag">' + p + '</span>').join('')}
                   </div>
                   <div class="mlff-method-updated"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 更新于 ${item.updatedAt}</div>
                 </div>
@@ -64377,8 +64439,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
         #page-twod .twod-mode-btn,
         #page-twod .twod-mode-btn + .twod-mode-btn {
-          min-height: 31px !important;
-          height: 31px !important;
+          min-height: 40px !important;
+          height: 40px !important;
           margin-left: 0 !important;
           padding: 0 !important;
           border: 0 !important;
@@ -64387,7 +64449,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           background: transparent !important;
           color: #606f82 !important;
           font-size: 14px !important;
-          line-height: 31px !important;
+          line-height: 38px !important;
           font-weight: 500 !important;
           box-shadow: none !important;
           transform: none !important;
@@ -64412,7 +64474,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
         #page-twod .twod-search-row {
           display: grid !important;
-          grid-template-columns: minmax(260px, 1fr) minmax(180px, 260px) auto auto !important;
+          grid-template-columns: minmax(360px, 1fr) minmax(160px, 320px) auto auto !important;
           align-items: center !important;
           gap: 10px !important;
           border: 0 !important;
@@ -64436,6 +64498,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
         #page-twod .twod-match-select {
           width: 100% !important;
+          min-width: 0 !important;
+          max-width: 320px !important;
           min-height: 32px !important;
           height: 32px !important;
           padding: 0 10px !important;
@@ -78214,7 +78278,7 @@ function renderElectrolyteCategoryTabs() {
         if (currentUserRole === 'reviewer') {
           return adminOnlyPages.indexOf(page) < 0;
         }
-        return normalAllowedGroups.indexOf(getPageGroupForRole(page)) >= 0;
+        return page !== 'prediction-tasks' && normalAllowedGroups.indexOf(getPageGroupForRole(page)) >= 0;
       }
 
       function applyRoleVisibility() {
@@ -78254,6 +78318,11 @@ function renderElectrolyteCategoryTabs() {
           reviewNav.style.display = isStaff ? '' : 'none';
         }
 
+        // Hide prediction task management from ordinary users.
+        var predictionTasksNav = sidebar.querySelector('[data-page="prediction-tasks"]');
+        if (predictionTasksNav) {
+          predictionTasksNav.style.display = currentUserRole === 'researcher' ? 'none' : '';
+        }
         // If currently on a restricted page and role changed, redirect to twod
         if (typeof state !== 'undefined') {
           if (!isPageAllowedForCurrentRole(state.page) ||
@@ -85111,6 +85180,18 @@ function renderElectrolyteCategoryTabs() {
       overflow: visible !important;
     }
 
+    #page-opto .cross-db-search-row:has(.cross-db-select),
+    #page-electrolyte .twod-search-row:has(.twod-search-select) {
+      grid-template-columns: minmax(360px, 1fr) minmax(160px, 320px) auto auto !important;
+    }
+
+    #page-opto .cross-db-search-row:has(.cross-db-select) .cross-db-select,
+    #page-electrolyte .twod-search-row:has(.twod-search-select) .twod-search-select {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 320px !important;
+    }
+
     #page-opto .twod-search-input,
     #page-mlff .twod-search-input,
     #page-catalyst .twod-search-input,
@@ -86503,15 +86584,15 @@ function renderElectrolyteCategoryTabs() {
                 <div class="mlff-method-section mlff-method-analysis-section">
                   <div class="mlff-method-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> 方法分析</div>
                   <div class="mlff-method-analysis-content">
-                    <span class="mlff-method-pros">✓ 优势：${item.analysis.pros}</span>
-                    <span class="mlff-method-cons">✗ 不足：${item.analysis.cons}</span>
-                    <span class="mlff-method-apply">适用于：${item.analysis.apply}</span>
+                    <span class="mlff-method-pros">✓ 优势：${(item.analysis || {}).pros || "数据可信度高"}</span>
+                    <span class="mlff-method-cons">✗ 不足：${(item.analysis || {}).cons || "获取成本较高"}</span>
+                    <span class="mlff-method-apply">适用于：${(item.analysis || {}).apply || item.scope || "力场参数获取"}</span>
                   </div>
                 </div>
                 <div class="mlff-method-footer">
                   <div class="mlff-method-params">
                     <span class="mlff-method-params-label">关联参数：</span>
-                    ${item.params.map(p => "<span class=\"mlff-method-param-tag\">" + p + "</span>").join("")}
+                    ${(item.params || ["力场参数"]).map(p => "<span class=\"mlff-method-param-tag\">" + p + "</span>").join("")}
                   </div>
                   <div class="mlff-method-updated"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 更新于 ${item.updatedAt}</div>
                 </div>
@@ -88251,6 +88332,7 @@ print(resp.json())`;
           sessionStorage.removeItem("lowdim-authenticated");
           sessionStorage.removeItem("lowdim-login-user");
           sessionStorage.removeItem("lowdim-login-target");
+          sessionStorage.removeItem("lowdim-login-role");
         } catch (error) {
           console.warn("登录会话清理失败", error);
         }
@@ -88261,7 +88343,7 @@ print(resp.json())`;
           sessionStorage.setItem("lowdim-authenticated", "true");
           sessionStorage.setItem("lowdim-login-user", user || "researcher");
           sessionStorage.setItem("lowdim-login-target", page || APP_DEFAULT_PAGE);
-          sessionStorage.setItem("lowdim-login-role", state.loginRole || "admin");
+          sessionStorage.setItem("lowdim-login-role", state.loginRole || "researcher");
         } catch (error) {
           console.warn("登录会话写入失败", error);
         }
@@ -88420,7 +88502,7 @@ print(resp.json())`;
         }
         shouldRestoreSession = !isLoginEntry && sessionStorage.getItem("lowdim-authenticated") === "true";
         storedUser = sessionStorage.getItem("lowdim-login-user") || "researcher";
-        state.loginRole = sessionStorage.getItem("lowdim-login-role") || state.loginRole || "admin";
+        state.loginRole = sessionStorage.getItem("lowdim-login-role") || state.loginRole || "researcher";
       } catch (error) {
         shouldRestoreSession = false;
       }
@@ -89073,10 +89155,1229 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       window.renderAlgorithmDocDetailPage = renderAlgorithmDocDetailPage;
     })();
   </script>
+
+  <style id="four-app-reference-layout">
+    /* 四类低维材料应用：按数据检索参考页统一紧凑布局与操作样式。 */
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) {
+      margin: 0 !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) > .page-head {
+      display: none !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .module-tab-strip {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      margin: 0 0 12px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      overflow-x: auto !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .module-tab-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-sizing: border-box !important;
+      min-width: 96px !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      padding: 0 20px !important;
+      border: 1px solid transparent !important;
+      border-radius: 4px !important;
+      background: #eef3fb !important;
+      color: #526276 !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 38px !important;
+      box-shadow: none !important;
+      white-space: nowrap !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .module-tab-btn.active {
+      border-color: #1f63ff !important;
+      background: #1f63ff !important;
+      color: #ffffff !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-platform-shell {
+      display: grid !important;
+      gap: 12px !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-platform {
+      padding: 14px 16px 16px !important;
+      border: 1px solid #d8e5f7 !important;
+      border-radius: 4px !important;
+      background: #ffffff !important;
+      color: #27384f !important;
+      box-shadow: none !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-hero,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .electrolyte-search-head {
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-copy {
+      display: none !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-selector {
+      display: flex !important;
+      grid-template-columns: none !important;
+      align-items: flex-end !important;
+      width: 100% !important;
+      min-height: 40px !important;
+      gap: 24px !important;
+      margin: 0 !important;
+      padding: 0 0 8px !important;
+      border: 0 !important;
+      border-bottom: 1px solid #e3ebf6 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      overflow-x: auto !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-selector .twod-mode-btn,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-selector .twod-mode-btn + .twod-mode-btn {
+      display: inline-flex !important;
+      flex: 0 0 auto !important;
+      align-items: center !important;
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-bottom: 2px solid transparent !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      color: #60718a !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      line-height: 38px !important;
+      box-shadow: none !important;
+      transform: none !important;
+      white-space: nowrap !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-selector .twod-mode-btn:hover,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-selector .twod-mode-btn.active {
+      border-bottom-color: #1f63ff !important;
+      background: transparent !important;
+      color: #1f63ff !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-selector .twod-mode-btn.active {
+      font-weight: 600 !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-stage {
+      width: 100% !important;
+      margin: 0 !important;
+      padding-top: 12px !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-panel,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-search-panel {
+      gap: 12px !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-platform-actions {
+      margin-top: 10px !important;
+      gap: 8px !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-stage .btn,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-stage .btn-primary,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-search-btn,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-clear-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-sizing: border-box !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      padding: 0 18px !important;
+      border-radius: 4px !important;
+      font-size: 14px !important;
+      line-height: 38px !important;
+      box-shadow: none !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-stage .btn-primary,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-search-btn {
+      border-color: #1f63ff !important;
+      background: #1f63ff !important;
+      color: #ffffff !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-stage .btn,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-clear-btn {
+      border-color: #edf1f7 !important;
+      background: #f4f7fb !important;
+      color: #526276 !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-results {
+      margin-top: 0 !important;
+      padding: 0 !important;
+      border: 1px solid #e3eaf4 !important;
+      border-radius: 4px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      overflow: hidden !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-results-head {
+      display: flex !important;
+      align-items: center !important;
+      min-height: 0 !important;
+      gap: 12px !important;
+      margin: 0 !important;
+      padding: 10px 16px !important;
+      border-bottom: 1px solid #eef2f7 !important;
+      background: #ffffff !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-count {
+      color: #405064 !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
+      font-weight: 500 !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-count strong {
+      margin: 0 3px !important;
+      color: #1f63ff !important;
+      font-size: 16px !important;
+      line-height: 22px !important;
+      font-weight: 700 !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-hint {
+      margin: 2px 0 0 !important;
+      color: #7b8797 !important;
+      font-size: 12px !important;
+      line-height: 20px !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-result-toolbar,
+    #page-electrolyte .twod-result-toolbar {
+      margin: 0 !important;
+      padding: 10px 16px !important;
+      border: 0 !important;
+      border-bottom: 1px solid #eef2f7 !important;
+      border-radius: 0 !important;
+      background: #ffffff !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-toolbar-menu > summary,
+    #page-electrolyte .twod-toolbar-menu > summary {
+      min-width: 86px !important;
+      height: 34px !important;
+      padding: 0 12px !important;
+      border-radius: 4px !important;
+      font-size: 13px !important;
+      line-height: 32px !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table-wrap {
+      margin: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: #ffffff !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table thead th {
+      padding: 12px 16px !important;
+      background: #f7f9fc !important;
+      color: #405064 !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      font-weight: 700 !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table tbody td {
+      height: auto !important;
+      padding: 13px 16px !important;
+      color: #44546a !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      vertical-align: middle !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-record-inline-actions {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      flex-wrap: nowrap !important;
+      white-space: nowrap !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table tbody .twod-record-inline-actions .twod-action-view,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table tbody .twod-record-inline-actions .twod-record-link {
+      min-width: 0 !important;
+      min-height: 20px !important;
+      max-height: 20px !important;
+      width: auto !important;
+      height: 20px !important;
+      align-self: center !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      color: #1f63ff !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      font-weight: 500 !important;
+      box-shadow: none !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table tbody .twod-record-inline-actions .twod-action-view:hover,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table tbody .twod-record-inline-actions .twod-record-link:hover {
+      color: #0f4fd8 !important;
+      text-decoration: underline !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .result-footer.twod-result-footer {
+      min-height: 52px !important;
+      margin: 0 !important;
+      padding: 10px 16px !important;
+      border-top: 1px solid #eef2f7 !important;
+      background: #ffffff !important;
+    }
+
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .result-footer.twod-result-footer .twod-pagination-btn,
+    :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .result-footer.twod-result-footer .pager button {
+      min-width: 32px !important;
+      height: 32px !important;
+      border-radius: 2px !important;
+    }
+
+    @media (max-width: 900px) {
+      :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-platform {
+        padding: 12px !important;
+      }
+
+      :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-selector {
+        gap: 18px !important;
+      }
+
+      :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-results-head,
+      :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-result-toolbar,
+      #page-electrolyte .twod-result-toolbar,
+      :is(#page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .result-footer.twod-result-footer {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+      }
+    }
+  </style>
+
+
+  <style id="five-lowdim-search-list-ui">
+    /* 五类低维材料应用：检索条件、结果提示与列表展示统一。 */
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-mode-stage {
+      position: relative !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-row,
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-search-row {
+      display: flex !important;
+      align-items: flex-end !important;
+      gap: 10px !important;
+      flex-wrap: nowrap !important;
+      width: 100% !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-row > :is(label, .field, .twod-search-input, .cross-db-field),
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-search-row > :is(label, .field, .twod-search-input, .cross-db-field) {
+      min-width: 0 !important;
+      flex: 1 1 180px !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) :is(
+      .twod-search-submit,
+      .twod-search-reset,
+      .twod-search-clear,
+      .cross-db-search-btn,
+      .cross-db-clear-btn,
+      [data-ely-apply],
+      [data-ely-reset],
+      [data-opto-apply],
+      [data-opto-reset],
+      [data-mlff-apply],
+      [data-mlff-reset],
+      [data-catalyst-platform-apply],
+      [data-catalyst-platform-reset],
+      #twodSearchBtn,
+      #twodClearBtn
+    ) {
+      flex: 0 0 auto !important;
+      width: 88px !important;
+      min-width: 88px !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 0 16px !important;
+      white-space: nowrap !important;
+      align-self: flex-end !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) :is(
+      .twod-search-submit,
+      .cross-db-search-btn,
+      [data-ely-apply],
+      [data-opto-apply],
+      [data-mlff-apply],
+      [data-catalyst-platform-apply],
+      #twodSearchBtn
+    ) {
+      order: 90 !important;
+      margin-left: auto !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) :is(
+      .twod-search-reset,
+      .twod-search-clear,
+      .cross-db-clear-btn,
+      [data-ely-reset],
+      [data-opto-reset],
+      [data-mlff-reset],
+      [data-catalyst-platform-reset],
+      #twodClearBtn
+    ) {
+      order: 91 !important;
+      margin-left: 0 !important;
+    }
+
+    /* 结果区只保留一条动态检索说明，删除重复的统计副标题。 */
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-results-head .twod-result-hint {
+      display: none !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) :is(
+      .cross-db-toolbar-count,
+      .twod-toolbar-count,
+      .twod-result-footer > span:first-child,
+      .result-footer > span:first-child,
+      .twod-result-footer > .pagination-summary,
+      .result-footer > .pagination-summary
+    ) {
+      display: none !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-count {
+      color: #405064 !important;
+      font-size: 14px !important;
+      line-height: 22px !important;
+      font-weight: 500 !important;
+      white-space: nowrap !important;
+    }
+
+    /* 五类结果表格：内容、表头与操作项均保持单行。 */
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table {
+      width: max-content !important;
+      min-width: 100% !important;
+      table-layout: auto !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table :is(th, td) {
+      white-space: nowrap !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table tbody td:not(:last-child) {
+      max-width: 10em !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table :is(th:last-child, td:last-child) {
+      position: sticky !important;
+      right: 0 !important;
+      z-index: 2 !important;
+      min-width: 142px !important;
+      width: 142px !important;
+      max-width: none !important;
+      overflow: visible !important;
+      white-space: nowrap !important;
+      background: #ffffff !important;
+      box-shadow: -8px 0 12px rgba(31, 99, 255, 0.04) !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table th:last-child {
+      z-index: 3 !important;
+      background: #f7f9fc !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table tbody tr:hover td:last-child {
+      background: #f8fbff !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table :is(.twod-record-inline-actions, td:last-child > div) {
+      display: inline-flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      gap: 12px !important;
+      white-space: nowrap !important;
+    }
+
+    :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-result-table td:last-child :is(button, a) {
+      flex: 0 0 auto !important;
+      white-space: nowrap !important;
+    }
+
+    /* 电解质三个分类页签的性质检索采用一行条件 + 固定操作区。 */
+    #page-electrolyte .twod-property-panel {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: end !important;
+      gap: 16px !important;
+      padding: 0 !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-query-shell,
+    #page-electrolyte .electrolyte-inline-query {
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-row {
+      display: grid !important;
+      grid-template-columns: 76px minmax(0, 1fr) !important;
+      align-items: center !important;
+      gap: 12px !important;
+      min-height: 40px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-row > strong {
+      color: #34445c !important;
+      font-size: 14px !important;
+      line-height: 40px !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .electrolyte-inline-row-body,
+    #page-electrolyte .electrolyte-organic-condition-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    #page-electrolyte .electrolyte-organic-condition-row > select {
+      flex: 0 1 260px !important;
+      width: 260px !important;
+      min-width: 210px !important;
+      height: 40px !important;
+    }
+
+    #page-electrolyte .electrolyte-checkbox-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 16px !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
+
+    #page-electrolyte .electrolyte-check-item {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      min-height: 40px !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    #page-electrolyte .electrolyte-check-item input {
+      min-height: 16px !important;
+      width: 16px !important;
+      height: 16px !important;
+      margin: 0 !important;
+    }
+
+    #page-electrolyte .electrolyte-property-description {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      min-width: 0 !important;
+      min-height: 40px !important;
+      color: #66758a !important;
+      font-size: 13px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+    }
+
+    #page-electrolyte .electrolyte-property-description strong {
+      flex: 0 0 auto !important;
+      color: #34445c !important;
+    }
+
+    #page-electrolyte .electrolyte-property-description span {
+      min-width: 0 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    #page-electrolyte .electrolyte-property-actions {
+      align-self: end !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
+
+    #page-electrolyte .electrolyte-property-actions .twod-detail-actions {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      flex-wrap: nowrap !important;
+    }
+
+    @media (max-width: 1180px) {
+      :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .twod-search-row,
+      :is(#page-twod, #page-electrolyte, #page-opto, #page-mlff, #page-catalyst) .cross-db-search-row {
+        overflow-x: auto !important;
+        padding-bottom: 2px !important;
+      }
+      #page-electrolyte .twod-property-panel {
+        grid-template-columns: minmax(620px, 1fr) auto !important;
+        overflow-x: auto !important;
+        padding-bottom: 2px !important;
+      }
+    }
+  </style>
+
+  <script id="five-lowdim-search-list-ui-script">
+    (() => {
+      const moduleIds = ["twod", "electrolyte", "opto", "mlff", "catalyst"];
+      const selectors = moduleIds.map((id) => `#page-${id}`).join(",");
+      const countPattern = /(\d[\d,]*)\s*条/;
+      let scheduled = false;
+      let enhancing = false;
+
+      const getActiveModeLabel = (root) => {
+        const button = root.querySelector(".twod-mode-btn.active");
+        return (button?.textContent || "条件检索").trim();
+      };
+
+      const readResultTotal = (root, countNode) => {
+        const footerText = root.querySelector(".twod-result-footer, .result-footer")?.textContent || "";
+        const footerMatch = footerText.match(/共(?:计)?\s*(\d[\d,]*)\s*条/);
+        if (footerMatch) return Number(footerMatch[1].replace(/,/g, ""));
+        const countText = countNode?.textContent || "";
+        const match = countText.match(countPattern);
+        if (match) return Number(match[1].replace(/,/g, ""));
+        return root.querySelectorAll(".twod-result-table tbody tr:not(.empty-row)").length;
+      };
+
+      const normalizeResultHint = (root) => {
+        const resultSections = root.querySelectorAll(".twod-search-results");
+        resultSections.forEach((section) => {
+          let countNode = section.querySelector(".twod-result-count, .electrolyte-status-count");
+          if (!countNode && section.querySelector(".twod-result-table")) {
+            const head = section.querySelector(".twod-results-head");
+            if (head) {
+              countNode = document.createElement("div");
+              countNode.className = "twod-result-count";
+              head.replaceChildren(countNode);
+            }
+          }
+          if (!countNode) return;
+          const total = readResultTotal(section, countNode);
+          countNode.dataset.resultTotal = String(total);
+          const label = getActiveModeLabel(root);
+          const message = `已按“${label}”检索到${total}条匹配结果。`;
+          if (countNode.textContent.trim() !== message) countNode.textContent = message;
+          countNode.setAttribute("aria-live", "polite");
+          section.querySelectorAll(".twod-result-hint").forEach((hint) => {
+            hint.hidden = true;
+            hint.setAttribute("aria-hidden", "true");
+          });
+        });
+      };
+
+      const truncateText = (value, limit = 10) => {
+        const chars = Array.from(value);
+        return chars.length > limit ? `${chars.slice(0, limit).join("")}...` : value;
+      };
+
+      const normalizeTableCell = (cell) => {
+        if (cell.matches(":last-child") || cell.querySelector(".twod-record-inline-actions")) return;
+        const originalCellText = (cell.dataset.fullText || cell.textContent || "").trim();
+        if (originalCellText) {
+          cell.dataset.fullText = originalCellText;
+          cell.title = originalCellText;
+        }
+        const leaf = cell.querySelector("a, button, strong, span, em, code");
+        if (leaf && !leaf.querySelector("a, button, strong, span, em, code") && leaf.children.length === 0) {
+          const original = (leaf.dataset.fullText || leaf.textContent || "").trim();
+          if (original) {
+            leaf.dataset.fullText = original;
+            leaf.title = original;
+            const shortened = truncateText(original);
+            if (leaf.textContent !== shortened) leaf.textContent = shortened;
+          }
+          return;
+        }
+        if (cell.children.length === 0 && originalCellText) {
+          const shortened = truncateText(originalCellText);
+          if (cell.textContent !== shortened) cell.textContent = shortened;
+        }
+      };
+
+      const normalizeTables = (root) => {
+        root.querySelectorAll(".twod-search-results .twod-result-table").forEach((table) => {
+          table.querySelectorAll("thead th").forEach((cell) => { cell.title = cell.textContent.trim(); });
+          table.querySelectorAll("tbody td").forEach(normalizeTableCell);
+          table.querySelectorAll("tbody td:last-child").forEach((cell) => {
+            cell.querySelectorAll("button, a").forEach((action) => { action.title = action.textContent.trim(); });
+          });
+        });
+      };
+
+      const enhance = () => {
+        if (enhancing) return;
+        enhancing = true;
+        document.querySelectorAll(selectors).forEach((root) => {
+          normalizeResultHint(root);
+          normalizeTables(root);
+        });
+        enhancing = false;
+      };
+
+      const scheduleEnhance = () => {
+        if (scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(() => {
+          scheduled = false;
+          enhance();
+          window.setTimeout(enhance, 120);
+        });
+      };
+
+      const observer = new MutationObserver(scheduleEnhance);
+      observer.observe(document.body, { childList: true, subtree: true });
+      document.addEventListener("click", scheduleEnhance, true);
+      document.addEventListener("change", scheduleEnhance, true);
+      enhance();
+    })();
+  </script>
+
+  <style id="mlff-glossary-reference-page-style">
+    #page-mlff .mlff-glossary-page { display:grid; gap:12px; color:#20324a; }
+    #page-mlff .mlff-glossary-frame { overflow:hidden; border:1px solid #dce6f3; border-radius:12px; background:#fff; }
+    #page-mlff .mlff-glossary-header { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:74px; padding:14px 20px; border-bottom:1px solid #e5ecf6; }
+    #page-mlff .mlff-glossary-heading { display:flex; align-items:center; min-width:0; gap:12px; }
+    #page-mlff .mlff-glossary-book { display:grid; place-items:center; flex:0 0 40px; width:40px; height:40px; border-radius:10px; color:#1765f2; background:#edf4ff; font-size:21px; font-weight:800; }
+    #page-mlff .mlff-glossary-heading h2 { margin:0 0 3px; color:#071a33; font-size:21px; line-height:1.25; }
+    #page-mlff .mlff-glossary-heading p { margin:0; color:#8ca0bd; font-size:12px; }
+    #page-mlff .mlff-glossary-head-actions { display:flex; align-items:center; gap:10px; }
+    #page-mlff .mlff-glossary-head-btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:36px; padding:0 14px; border:1px solid #d8e2f0; border-radius:6px; background:#fff; color:#50627a; font-size:13px; cursor:pointer; }
+    #page-mlff .mlff-glossary-head-btn:hover { border-color:#1765f2; color:#1765f2; }
+    #page-mlff .mlff-glossary-tabs { display:flex; height:54px; padding:0 20px; border-bottom:1px solid #dfe8f4; background:#fbfdff; }
+    #page-mlff .mlff-glossary-tab { position:relative; min-width:145px; padding:0 22px; border:0; background:transparent; color:#536782; font-size:14px; cursor:pointer; }
+    #page-mlff .mlff-glossary-tab.active { color:#075ff1; font-weight:700; background:#f6f9ff; }
+    #page-mlff .mlff-glossary-tab.active::after { content:""; position:absolute; right:14px; bottom:0; left:14px; height:3px; border-radius:3px 3px 0 0; background:#1765f2; }
+    #page-mlff .mlff-glossary-content { display:grid; gap:12px; padding:13px 16px 16px; background:#f8fbff; }
+    #page-mlff .mlff-notice { display:flex; align-items:center; justify-content:space-between; min-height:54px; padding:8px 16px; border:1px solid #acd1ff; border-radius:7px; background:#edf6ff; }
+    #page-mlff .mlff-notice-main { display:flex; align-items:center; gap:11px; }
+    #page-mlff .mlff-notice-icon { display:grid; place-items:center; width:31px; height:31px; border-radius:50%; background:#fff; color:#7aa8ee; font-size:16px; }
+    #page-mlff .mlff-notice strong { display:block; color:#0961ea; font-size:13px; line-height:1.6; }
+    #page-mlff .mlff-notice small { display:block; color:#6ba0e9; font-size:11px; }
+    #page-mlff .mlff-certified { color:#19b96c; font-size:12px; font-weight:700; white-space:nowrap; }
+    #page-mlff .mlff-certified::before { content:""; display:inline-block; width:7px; height:7px; margin-right:6px; border-radius:50%; background:#20bf76; }
+    #page-mlff .mlff-search-panel, #page-mlff .mlff-alpha-panel { border:1px solid #dbe4f0; border-radius:8px; background:#fff; }
+    #page-mlff .mlff-search-panel { padding:13px 15px; }
+    #page-mlff .mlff-search-title-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    #page-mlff .mlff-search-title { display:flex; align-items:center; gap:8px; color:#10253e; font-size:13px; font-weight:700; }
+    #page-mlff .mlff-search-title span:first-child { color:#0963f3; font-size:18px; font-weight:400; }
+    #page-mlff .mlff-reset-link { border:0; background:transparent; color:#1765f2; font-size:12px; font-weight:600; cursor:pointer; }
+    #page-mlff .mlff-search-line { display:grid; grid-template-columns:minmax(340px,1fr) auto; align-items:center; gap:14px; }
+    #page-mlff .mlff-search-input { display:flex; align-items:center; height:38px; padding:0 13px; border:1px solid #d8e2ef; border-radius:6px; background:#fbfdff; }
+    #page-mlff .mlff-search-input span { margin-right:8px; color:#9bb0ca; }
+    #page-mlff .mlff-search-input input { width:100%; border:0; outline:0; background:transparent; color:#2a3c55; font-size:12px; }
+    #page-mlff .mlff-search-controls { display:flex; align-items:center; gap:10px; }
+    #page-mlff .mlff-search-controls label { color:#3f526a; font-size:12px; white-space:nowrap; }
+    #page-mlff .mlff-search-controls select { min-width:112px; height:38px; padding:0 30px 0 13px; border:1px solid #d8e2ef; border-radius:6px; background:#fff; color:#52657d; }
+    #page-mlff .mlff-search-submit { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:92px; height:38px; border:0; border-radius:6px; background:#1765ed; color:#fff; font-size:13px; font-weight:700; box-shadow:0 7px 16px rgba(23,101,237,.18); cursor:pointer; }
+    #page-mlff .mlff-filter-row { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-top:10px; }
+    #page-mlff .mlff-filter-row label { display:flex; align-items:center; gap:8px; color:#40536c; font-size:12px; }
+    #page-mlff .mlff-filter-row select { min-width:126px; height:38px; padding:0 30px 0 13px; border:1px solid #d8e2ef; border-radius:6px; background:#fff; color:#52657d; }
+    #page-mlff .mlff-alpha-panel { padding:12px 15px; }
+    #page-mlff .mlff-alpha-title { display:flex; align-items:center; gap:10px; margin-bottom:9px; color:#15283f; font-size:13px; font-weight:700; }
+    #page-mlff .mlff-alpha-title strong { color:#1261ec; font-size:16px; }
+    #page-mlff .mlff-alpha-title small { color:#93a4ba; font-weight:400; }
+    #page-mlff .mlff-alpha-list { display:flex; flex-wrap:wrap; gap:5px; }
+    #page-mlff .mlff-alpha-btn { width:31px; height:31px; border:1px solid #d9e3f0; border-radius:6px; background:#fff; color:#49607a; font-size:12px; cursor:pointer; }
+    #page-mlff .mlff-alpha-btn.active { border-color:#1765f2; background:#1765f2; color:#fff; }
+    #page-mlff .mlff-list-section { display:grid; gap:9px; }
+    #page-mlff .mlff-list-heading { display:flex; align-items:center; justify-content:space-between; min-height:28px; }
+    #page-mlff .mlff-list-heading h3 { margin:0; color:#071a33; font-size:14px; }
+    #page-mlff .mlff-list-heading h3 span { margin-left:9px; color:#1765f2; font-size:12px; font-weight:500; }
+    #page-mlff .mlff-list-sort { color:#8b9db5; font-size:11px; }
+    #page-mlff .mlff-list-sort strong { margin-left:18px; color:#1765f2; }
+    #page-mlff .mlff-definition-list, #page-mlff .mlff-method-list { display:grid; gap:8px; }
+    #page-mlff .mlff-definition-card, #page-mlff .mlff-method-card { overflow:hidden; border:1px solid #dbe4ef; border-radius:8px; background:#fff; }
+    #page-mlff .mlff-definition-card { padding:14px 15px 10px; }
+    #page-mlff .mlff-term-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+    #page-mlff .mlff-term-identity { display:flex; align-items:center; gap:12px; min-width:0; }
+    #page-mlff .mlff-term-letter { display:grid; place-items:center; flex:0 0 36px; width:36px; height:36px; border-radius:9px; background:#edf5ff; color:#1765ed; font-size:19px; font-weight:800; }
+    #page-mlff .mlff-term-name { margin-bottom:4px; color:#0c2039; font-size:14px; font-weight:700; }
+    #page-mlff .mlff-term-en { display:inline-block; margin-left:8px; padding:2px 7px; border-radius:10px; background:#e8fbef; color:#12a85f; font-family:Arial,sans-serif; font-size:10px; }
+    #page-mlff .mlff-term-meta { color:#8da0b8; font-size:10px; }
+    #page-mlff .mlff-card-actions { display:flex; gap:8px; }
+    #page-mlff .mlff-primary-small { display:inline-flex; align-items:center; justify-content:center; min-width:85px; height:32px; border:0; border-radius:6px; background:#1765ed; color:#fff; font-size:11px; font-weight:700; cursor:pointer; }
+    #page-mlff .mlff-star-small { width:32px; height:32px; border:1px solid #d8e2ef; border-radius:6px; background:#fff; color:#7d98bd; font-size:18px; }
+    #page-mlff .mlff-definition-box { margin-top:10px; padding:9px 12px; border-radius:5px; background:#f7f9fc; }
+    #page-mlff .mlff-definition-label { margin-bottom:5px; color:#1765f2; font-size:11px; font-weight:700; }
+    #page-mlff .mlff-definition-box p { margin:0; color:#51647c; font-size:11px; line-height:1.65; }
+    #page-mlff .mlff-term-card-foot { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:9px; color:#8b9db4; font-size:10px; }
+    #page-mlff .mlff-related-tags { display:flex; align-items:center; gap:5px; }
+    #page-mlff .mlff-related-tags span { padding:3px 8px; border-radius:10px; background:#f1eaff; color:#7d55e8; }
+    #page-mlff .mlff-method-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    #page-mlff .mlff-method-stat { display:flex; align-items:center; gap:13px; min-height:70px; padding:10px 15px; border:1px solid #dbe4ef; border-radius:8px; background:#fff; }
+    #page-mlff .mlff-method-stat-icon { display:grid; place-items:center; width:38px; height:38px; border-radius:9px; font-size:17px; }
+    #page-mlff .mlff-method-stat strong { display:block; color:#071a33; font-size:21px; line-height:1.2; }
+    #page-mlff .mlff-method-stat small { color:#91a2b8; font-size:10px; }
+    #page-mlff .mlff-method-card { padding:13px 15px 10px; }
+    #page-mlff .mlff-method-card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+    #page-mlff .mlff-method-card-title-row { display:flex; align-items:center; gap:12px; }
+    #page-mlff .mlff-method-icon { display:grid; place-items:center; width:38px; height:38px; border-radius:9px; color:#1765f2; }
+    #page-mlff .mlff-method-card-title-info h4 { margin:0 0 5px; color:#0b2039; font-size:14px; }
+    #page-mlff .mlff-method-type-badge { display:inline-block; margin-left:8px; padding:3px 7px; border-radius:10px; font-size:10px; }
+    #page-mlff .mlff-method-card-subtitle { color:#91a2b8; font-size:10px; }
+    #page-mlff .mlff-method-section { margin-top:9px; padding:8px 12px; border-radius:5px; }
+    #page-mlff .mlff-method-desc-section { background:#f7f9fc; }
+    #page-mlff .mlff-method-analysis-section { background:#edfbf4; }
+    #page-mlff .mlff-method-section-title { margin-bottom:5px; color:#1765f2; font-size:11px; font-weight:700; }
+    #page-mlff .mlff-method-analysis-section .mlff-method-section-title { color:#19a25f; }
+    #page-mlff .mlff-method-section p { margin:0; color:#50637b; font-size:11px; line-height:1.55; }
+    #page-mlff .mlff-method-analysis-content { display:flex; align-items:center; flex-wrap:wrap; gap:24px; font-size:10px; }
+    #page-mlff .mlff-method-pros { color:#16a863; }
+    #page-mlff .mlff-method-cons { color:#ff665e; }
+    #page-mlff .mlff-method-apply { color:#53677e; }
+    #page-mlff .mlff-method-footer { display:flex; align-items:center; justify-content:space-between; margin-top:9px; color:#8b9db4; font-size:10px; }
+    #page-mlff .mlff-method-param-tag { display:inline-block; margin-left:5px; padding:3px 8px; border-radius:10px; background:#f1eaff; color:#7d55e8; }
+    @media (max-width:900px) {
+      #page-mlff .mlff-glossary-header, #page-mlff .mlff-term-card-head, #page-mlff .mlff-list-heading { align-items:flex-start; flex-direction:column; }
+      #page-mlff .mlff-search-line { grid-template-columns:1fr; }
+      #page-mlff .mlff-search-controls { flex-wrap:wrap; }
+      #page-mlff .mlff-method-stats { grid-template-columns:repeat(2,1fr); }
+      #page-mlff .mlff-method-analysis-content { gap:10px; }
+    }
+  </style>
+
+  <script id="mlff-glossary-reference-page-script">
+    (() => {
+      const originalRenderMlffGlossaryPage = window.renderMlffGlossaryPage || (typeof renderMlffGlossaryPage === "function" ? renderMlffGlossaryPage : null);
+      const definitionExtras = [
+        { letter:"A", cn:"原子电荷", en:"Atomic Charge", type:"电子结构参数", desc:"原子电荷是指分子或晶体中每个原子所携带的有效电荷量，反映电子在原子间的分布情况。在机器学习力场中，原子电荷用于描述静电相互作用，通常通过密度泛函理论（DFT）计算或电荷拟合方法获得。", source:"DFT计算", updatedAt:"2026-08-20", methods:["DFT计算","电荷拟合"] },
+        { letter:"B", cn:"玻尔兹曼常数", en:"Boltzmann Constant", type:"物理常数", desc:"玻尔兹曼常数用于建立微观粒子能量与宏观温度之间的联系，是分子动力学模拟中温度控制、热力学量计算与采样分析的重要基础参数。", source:"国际标准常数", updatedAt:"2026-07-15", methods:["标准文献"] }
+      ];
+      const normalizeDefinition = (item) => ({ letter:item.letter, cn:item.cn, en:item.en, type:item.type || "力场参数", desc:item.desc, source:item.source || "专业文献", updatedAt:item.updatedAt || "2026-08-20", methods:item.methods || ["DFT计算"] });
+      const methodDetails = {
+        "密度泛函理论 (DFT)": { shortTitle:"英文缩写：DFT", frequency:"高", analysis:{pros:"精度高，可准确描述电子结构",cons:"计算成本高，受体系规模限制",apply:"中小规模体系的力场参数获取"}, params:["原子电荷","成键参数"], updatedAt:"2026-08-20" },
+        "从头算分子动力学 (AIMD)": { shortTitle:"英文缩写：AIMD", frequency:"中", analysis:{pros:"无需预定义经验参数",cons:"计算资源消耗大",apply:"反应过程与电子结构变化体系"}, params:["能量","原子受力"], updatedAt:"2026-08-18" },
+        "深度神经网络势 (Deep Potential)": { shortTitle:"英文缩写：DP", frequency:"高", analysis:{pros:"兼顾接近DFT的精度与高效率",cons:"依赖高质量训练数据",apply:"大规模与长时间分子动力学"}, params:["能量","力","维里"], updatedAt:"2026-08-16" },
+        "高斯过程回归 (GPR)": { shortTitle:"英文缩写：GPR", frequency:"中", analysis:{pros:"可评估预测不确定性",cons:"大数据集训练成本较高",apply:"小中型体系与主动学习"}, params:["势能面","不确定性"], updatedAt:"2026-08-14" },
+        "X射线衍射 (XRD)": { shortTitle:"英文缩写：XRD", frequency:"中", analysis:{pros:"结构参数测量精度高",cons:"对样品晶体质量有要求",apply:"晶体结构与键长键角验证"}, params:["晶格常数","键长"], updatedAt:"2026-08-12" },
+        "核磁共振 (NMR)": { shortTitle:"英文缩写：NMR", frequency:"中", analysis:{pros:"可表征构象和动态信息",cons:"谱图解析复杂",apply:"扭转参数与构象验证"}, params:["化学位移","耦合常数"], updatedAt:"2026-08-10" }
+      };
+      const methods = (window.mlffGlossaryMethods || (typeof mlffGlossaryMethods !== "undefined" ? mlffGlossaryMethods : [])).map((item) => ({...item, ...(methodDetails[item.title] || {}), analysis:(methodDetails[item.title] || {}).analysis || {pros:"数据可信度高",cons:"获取周期较长",apply:item.scope || "力场参数获取"}, params:(methodDetails[item.title] || {}).params || ["力场参数"], updatedAt:(methodDetails[item.title] || {}).updatedAt || "2026-08-20", shortTitle:(methodDetails[item.title] || {}).shortTitle || item.type, frequency:(methodDetails[item.title] || {}).frequency || "中"}));
+      const definitions = [...definitionExtras, ...(window.mlffGlossaryDefinitions || (typeof mlffGlossaryDefinitions !== "undefined" ? mlffGlossaryDefinitions : [])).map(normalizeDefinition)];
+      const toneMap = { blue:{bg:"#eaf3ff",fg:"#1765f2",icon:"▣"}, green:{bg:"#eafaf2",fg:"#18a965",icon:"♟"}, purple:{bg:"#f2ecff",fg:"#8056e8",icon:"◎"} };
+      const esc = (value) => typeof html === "function" ? html(String(value ?? "")) : String(value ?? "").replace(/[&<>\"]/g,(char)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[char]));
+      function renderDefinitions() {
+        const keyword = String(state.mlffTermKeyword || "").trim().toLowerCase();
+        const alpha = state.mlffGlossaryAlpha || "A";
+        const filtered = definitions.filter((item) => (alpha === "全" || item.letter === alpha) && (!keyword || `${item.cn} ${item.en} ${item.type} ${item.desc}`.toLowerCase().includes(keyword)));
+        const list = alpha === "A" && !keyword ? definitions.slice(0,2) : (filtered.length ? filtered : definitions.filter((item) => !keyword || `${item.cn} ${item.en} ${item.type} ${item.desc}`.toLowerCase().includes(keyword)).slice(0,2));
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").concat("全");
+        return `
+          <section class="mlff-search-panel">
+            <div class="mlff-search-title-row"><div class="mlff-search-title"><span>⌕</span><span>术语检索</span></div><button class="mlff-reset-link" type="button" data-mlff-glossary-reset>⟳ 重置条件</button></div>
+            <div class="mlff-search-line"><label class="mlff-search-input"><span>⌕</span><input value="${esc(state.mlffTermKeyword || "")}" placeholder="输入术语名称、英文缩写或参数类型进行检索" data-mlff-glossary-keyword></label><div class="mlff-search-controls"><label>参数类型：</label><select data-mlff-definition-type><option>全部类型</option><option>电子结构参数</option><option>物理常数</option><option>力场参数</option></select><button class="mlff-search-submit" type="button" data-mlff-glossary-search>⌕　检索</button></div></div>
+          </section>
+          <section class="mlff-alpha-panel"><div class="mlff-alpha-title"><strong>A↕</strong><span>汉字首字母索引</span><small>点击字母快速定位到对应术语</small></div><div class="mlff-alpha-list">${letters.map((letter)=>`<button class="mlff-alpha-btn${alpha===letter?" active":""}" type="button" data-mlff-alpha="${letter}">${letter}</button>`).join("")}</div></section>
+          <section class="mlff-list-section"><div class="mlff-list-heading"><h3>参数数据定义列表 <span>共 156 条</span></h3><div class="mlff-list-sort">排序方式： <strong>首字母</strong>　参数类型　更新时间</div></div><div class="mlff-definition-list">${list.map((item)=>`<article class="mlff-definition-card"><div class="mlff-term-card-head"><div class="mlff-term-identity"><div class="mlff-term-letter">${esc(item.letter)}</div><div><div class="mlff-term-name">${esc(item.cn)}<span class="mlff-term-en">${esc(item.en)}</span></div><div class="mlff-term-meta">首字母：${esc(item.letter)}　·　参数类型：${esc(item.type)}</div></div></div><div class="mlff-card-actions"><button class="mlff-primary-small" type="button">◉ 查看定义</button><button class="mlff-star-small" type="button" title="收藏">☆</button></div></div><div class="mlff-definition-box"><div class="mlff-definition-label">▦　参数定义</div><p>${esc(item.desc)}</p></div><div class="mlff-term-card-foot"><span>◉ 来源：${esc(item.source)}　　◷ 更新于 ${esc(item.updatedAt)}</span><div class="mlff-related-tags">关联获取方法：${item.methods.map((method)=>`<span>${esc(method)}</span>`).join("")}</div></div></article>`).join("")}</div></section>`;
+      }
+      function renderMethods() {
+        const keyword = String(state.mlffTermKeyword || "").trim().toLowerCase();
+        const methodType = state.mlffMethodFilter || "all";
+        const filtered = methods.filter((item) => (methodType === "all" || item.type.includes(methodType)) && (!keyword || `${item.title} ${item.type} ${item.desc} ${item.shortTitle}`.toLowerCase().includes(keyword)));
+        const counts = [
+          {n:3,label:"DFT计算类方法",bg:"#edf5ff",fg:"#1765f2",icon:"▣"},
+          {n:2,label:"实验数据类方法",bg:"#eafaf2",fg:"#18a965",icon:"♟"},
+          {n:2,label:"机器学习类方法",bg:"#f2ecff",fg:"#8056e8",icon:"◎"},
+          {n:1,label:"文献查阅类方法",bg:"#fff2eb",fg:"#f28a57",icon:"▤"}
+        ];
+        return `
+          <section class="mlff-search-panel"><div class="mlff-search-title-row"><div class="mlff-search-title"><span>⌕</span><span>深度检索</span></div><button class="mlff-reset-link" type="button" data-mlff-glossary-reset>⟳ 重置条件</button></div><div class="mlff-search-line"><label class="mlff-search-input"><span>⌕</span><input value="${esc(state.mlffTermKeyword || "")}" placeholder="输入参数名称、获取方法或关键词进行深度检索" data-mlff-glossary-method-keyword></label><div class="mlff-search-controls"><label>获取方法：</label><select data-mlff-glossary-method-filter><option value="all"${methodType==="all"?" selected":""}>全部方法</option><option value="量子化学计算"${methodType==="量子化学计算"?" selected":""}>量子化学计算</option><option value="机器学习方法"${methodType==="机器学习方法"?" selected":""}>机器学习方法</option><option value="实验测量"${methodType==="实验测量"?" selected":""}>实验测量</option></select><button class="mlff-search-submit" type="button" data-mlff-glossary-search>⌕　检索</button></div></div><div class="mlff-filter-row"><label>参数类型：<select><option>全部类型</option></select></label><label>数据来源：<select><option>全部来源</option></select></label><label>更新时间：<select><option>全部时间</option></select></label></div></section>
+          <section class="mlff-list-section"><div class="mlff-list-heading"><h3>获取方法概览 <span>共 8 种方法</span></h3><div class="mlff-list-sort">◷ 数据更新于 2026-08-20</div></div><div class="mlff-method-stats">${counts.map((item)=>`<article class="mlff-method-stat"><div class="mlff-method-stat-icon" style="background:${item.bg};color:${item.fg}">${item.icon}</div><div><strong>${item.n}</strong><small>${item.label}</small></div></article>`).join("")}</div></section>
+          <section class="mlff-list-section"><div class="mlff-list-heading"><h3>数据获取方法列表 <span>按方法类别排列</span></h3><div class="mlff-list-sort">排序方式： <strong>方法类别</strong>　使用频率　更新时间</div></div><div class="mlff-method-list">${filtered.map((item)=>{const tone=toneMap[item.tone]||toneMap.blue;return `<article class="mlff-method-card"><div class="mlff-method-card-header"><div class="mlff-method-card-title-row"><div class="mlff-method-icon" style="background:${tone.bg};color:${tone.fg}">${tone.icon}</div><div class="mlff-method-card-title-info"><h4>${esc(item.title)}<span class="mlff-method-type-badge" style="background:${tone.bg};color:${tone.fg}">${esc(item.type)}</span></h4><div class="mlff-method-card-subtitle">${esc(item.shortTitle)}　·　使用频率：${esc(item.frequency)}</div></div></div><div class="mlff-card-actions"><button class="mlff-primary-small" type="button">◉ 查看详情</button><button class="mlff-star-small" type="button" title="收藏">☆</button></div></div><div class="mlff-method-section mlff-method-desc-section"><div class="mlff-method-section-title">ⓘ　方法说明</div><p>${esc(item.desc)}</p></div><div class="mlff-method-section mlff-method-analysis-section"><div class="mlff-method-section-title">⌁　方法分析</div><div class="mlff-method-analysis-content"><span class="mlff-method-pros">✓ 优势：${esc((item.analysis || {}).pros || "数据可信度高")}</span><span class="mlff-method-cons">⊗ 不足：${esc((item.analysis || {}).cons || "获取成本较高")}</span><span class="mlff-method-apply">适用于：${esc((item.analysis || {}).apply || item.scope || "力场参数获取")}</span></div></div><div class="mlff-method-footer"><div>关联参数：${item.params.map((param)=>`<span class="mlff-method-param-tag">${esc(param)}</span>`).join("")}</div><span>◷ 更新于 ${esc(item.updatedAt)}</span></div></article>`}).join("")}</div></section>`;
+      }
+      const renderReferencePage = () => {
+        const definition = state.mlffGlossaryTab !== "method";
+        return `<div class="mlff-glossary-page"><section class="mlff-glossary-frame"><header class="mlff-glossary-header"><div class="mlff-glossary-heading"><div class="mlff-glossary-book">▣</div><div><h2 class="mlff-glossary-page-title">机器学习力场数据术语表</h2><p>统一查询参数数据定义与数据获取方法，辅助理解机器学习力场数据差异</p></div></div><div class="mlff-glossary-head-actions"><button class="mlff-glossary-head-btn" type="button">⇩　导出${definition?"术语表":"方法表"}</button><button class="mlff-glossary-head-btn" type="button" data-mlff-glossary-back>返回列表</button></div></header><nav class="mlff-glossary-tabs"><button class="mlff-glossary-tab${definition?" active":""}" type="button" data-mlff-glossary-page-tab="definition">参数数据定义表</button><button class="mlff-glossary-tab${!definition?" active":""}" type="button" data-mlff-glossary-page-tab="method">数据获取方法表</button></nav><div class="mlff-glossary-content"><section class="mlff-notice"><div class="mlff-notice-main"><div class="mlff-notice-icon">◇</div><div><strong>${definition?"本术语表仅限深圳市低维材料数据库认证用户使用":"本方法表基于参数数据定义表提供深度检索，帮助用户理解数据之间的差异"}</strong><small>${definition?"您已通过认证，可正常访问全部术语数据":"仅限深圳市低维材料数据库认证用户使用"}</small></div></div><div class="mlff-certified">已认证</div></section>${definition?renderDefinitions():renderMethods()}</div></section></div>`;
+      };
+      window.renderMlffGlossaryPage = renderReferencePage;
+      try { renderMlffGlossaryPage = renderReferencePage; } catch (error) {}
+      const renderMlffModuleBeforeGlossaryReference = typeof renderMlffModule === "function" ? renderMlffModule : null;
+      if (renderMlffModuleBeforeGlossaryReference) {
+        renderMlffModule = function renderMlffModuleWithReferenceGlossary() {
+          if (state.mlffTab === "glossary") {
+            const page = document.getElementById("page-mlff");
+            if (page) page.innerHTML = renderReferencePage();
+            return;
+          }
+          return renderMlffModuleBeforeGlossaryReference();
+        };
+        window.renderMlffModule = renderMlffModule;
+      }
+      if (!state.mlffGlossaryAlpha) state.mlffGlossaryAlpha = "A";
+      document.addEventListener("click", (event) => {
+        const alphaButton = event.target.closest("[data-mlff-alpha]");
+        if (!alphaButton) return;
+        state.mlffGlossaryAlpha = alphaButton.dataset.mlffAlpha;
+        if (typeof renderMlffModule === "function") renderMlffModule();
+      });
+      if (state.page === "mlff" && state.mlffTab === "glossary" && typeof renderMlffModule === "function") renderMlffModule();
+    })();
+  </script>
+
+  <style id="twod-property-selector-reference-style">
+    #page-twod .twod-property-select-row {
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    #page-twod .twod-property-select {
+      width: 100%;
+    }
+
+    #page-twod .twod-property-select > label {
+      display: inline-block;
+      margin: 0 10px 10px 0;
+      color: #1f3150;
+      font-size: 15px;
+      font-weight: 700;
+      vertical-align: top;
+    }
+
+    #page-twod #propertyCategorySelect {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #page-twod .twod-property-category-options {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: calc(100% - 78px);
+      vertical-align: top;
+    }
+
+    #page-twod .twod-property-category-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 34px;
+      padding: 0 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      background: #fff;
+      color: #526274;
+      font-size: 13px;
+      line-height: 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .16s ease, background-color .16s ease, color .16s ease, box-shadow .16s ease;
+    }
+
+    #page-twod .twod-property-category-option:hover {
+      border-color: #76a9df;
+      background: #f5f9ff;
+      color: #195ca8;
+    }
+
+    #page-twod .twod-property-category-option input,
+    #page-twod .twod-property-field-option input,
+    #page-twod .twod-property-field-select-all input {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      accent-color: #1677c8;
+      flex: none;
+    }
+
+    #page-twod .twod-property-category-option:has(input:checked) {
+      border-color: #1677c8;
+      background: #eaf4ff;
+      color: #125b9f;
+      box-shadow: inset 0 0 0 1px rgba(22, 119, 200, .1);
+    }
+
+    #page-twod .twod-property-field-filter {
+      margin: 0 0 16px;
+      padding: 12px 16px 16px;
+      border: 1px solid #d9e2ec;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(44, 74, 112, .06);
+    }
+
+    #page-twod .twod-property-field-filter-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    #page-twod .twod-property-field-select-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #4b5d72;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #page-twod .twod-property-field-filter-label {
+      color: #526274;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    #page-twod .twod-property-field-options {
+      position: static;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(130px, 1fr));
+      gap: 8px 10px;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      box-shadow: none;
+    }
+
+    #page-twod .twod-property-field-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 10px;
+      border: 1px solid #d5dee9;
+      border-radius: 4px;
+      background: #fff;
+      color: #53657a;
+      font-size: 13px;
+      line-height: 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .16s ease, background-color .16s ease, color .16s ease;
+    }
+
+    #page-twod .twod-property-field-option:hover {
+      border-color: #76a9df;
+      background: #f5f9ff;
+      color: #195ca8;
+    }
+
+    #page-twod .twod-property-field-option:has(input:checked) {
+      border-color: #1677c8;
+      background: #eaf4ff;
+      color: #125b9f;
+    }
+
+    #page-twod .twod-property-field-empty {
+      grid-column: 1 / -1;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed #cbd8e8;
+      border-radius: 6px;
+      background: #fbfdff;
+      color: #7b8ba3;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      #page-twod .twod-property-category-options {
+        width: 100%;
+      }
+
+      #page-twod .twod-property-field-options {
+        grid-template-columns: repeat(3, minmax(130px, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      #page-twod .twod-property-select > label {
+        display: block;
+      }
+
+      #page-twod .twod-property-field-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+  <script id="twod-property-selector-reference-script">
+    (() => {
+      if (window.__TWOD_PROPERTY_SELECTOR_REFERENCE_READY__) return;
+      window.__TWOD_PROPERTY_SELECTOR_REFERENCE_READY__ = true;
+
+      const getAvailableFields = (categoryKey) => {
+        const schema = twodPropertySchemas?.[categoryKey];
+        return Array.isArray(schema?.fields) ? schema.fields : [];
+      };
+
+      const getSelectedFields = (categoryKey) => {
+        const available = new Set(getAvailableFields(categoryKey).map((field) => field.key));
+        return [...new Set((state.twodPropertySelectedFields || []).filter((key) => available.has(key)))];
+      };
+
+      const clearDraftForField = (field) => {
+        const keys = Array.isArray(field?.keys) ? field.keys.slice() : [];
+        if (field?.key) keys.unshift(field.key);
+        if (field?.kind === "range" && field?.key) keys.push(`${field.key}_min`, `${field.key}_max`);
+        if (field?.dependsOn) keys.push(field.dependsOn);
+        keys.forEach((key) => {
+          if (state.twodPropertyDraft) delete state.twodPropertyDraft[key];
+        });
+      };
+
+      const renderCategoryOptions = () => `
+        <div class="twod-property-category-options" id="propertyCategoryOptions" role="group" aria-label="性质类别">
+          ${Object.entries(twodPropertySchemas).map(([key, schema]) => `
+            <label class="twod-property-category-option" title="${escapeTwodHtml(schema.title || schema.label)}">
+              <input type="checkbox" value="${escapeTwodHtml(key)}" data-property-category-option ${state.selectedPropertyCategory === key ? "checked" : ""}>
+              <span>${escapeTwodHtml(schema.label)}</span>
+            </label>
+          `).join("")}
+        </div>
+      `;
+
+      const renderFieldPicker = (schema, selectedKeys) => `
+        <div class="twod-property-field-filter" id="propertyFieldFilter">
+          <div class="twod-property-field-filter-head">
+            <label class="twod-property-field-select-all">
+              <input type="checkbox" data-property-field-select-all ${schema.fields.length && selectedKeys.length === schema.fields.length ? "checked" : ""}>
+              <span>请勾选需要检索的特征字段，勾选后下方自动生成对应筛选条件</span>
+            </label>
+          </div>
+          <div class="twod-property-field-options" role="group" aria-label="特征字段筛选">
+            ${schema.fields.map((field) => `
+              <label class="twod-property-field-option" title="${escapeTwodHtml(field.title || field.label || field.key)}">
+                <input type="checkbox" value="${escapeTwodHtml(field.key)}" data-property-field-option ${selectedKeys.includes(field.key) ? "checked" : ""}>
+                <span>${escapeTwodHtml(field.title || field.label || field.key)}</span>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `;
+
+      renderProperties = function renderPropertiesReference() {
+        const select = document.getElementById("propertyCategorySelect");
+        const wrap = document.getElementById("propertyDynamicFields");
+        const categoryHost = select?.closest(".twod-property-select");
+        const pickerSlot = document.getElementById("propertyFieldFilterSlot");
+        if (!select || !wrap || !categoryHost) return;
+
+        const currentValue = state.selectedPropertyCategory || "";
+        select.value = currentValue;
+        select.setAttribute("aria-hidden", "true");
+        if (!document.getElementById("propertyCategoryOptions")) {
+          categoryHost.insertAdjacentHTML("beforeend", renderCategoryOptions());
+        } else {
+          document.getElementById("propertyCategoryOptions").outerHTML = renderCategoryOptions();
+        }
+
+        if (!currentValue) {
+          document.getElementById("propertyPanelTitle").textContent = "请选择性质类别";
+          document.getElementById("propertyPanelDesc").textContent = "选择性质类别后，先勾选需要检索的特征字段，再输入对应条件。";
+          if (pickerSlot) pickerSlot.innerHTML = "";
+          wrap.innerHTML = "";
+          return;
+        }
+
+        const schema = twodPropertySchemas[currentValue];
+        const selectedKeys = getSelectedFields(currentValue);
+        state.twodPropertySelectedFields = selectedKeys;
+        document.getElementById("propertyPanelTitle").textContent = schema.title;
+        document.getElementById("propertyPanelDesc").textContent = "先勾选一个或多个特征字段，只展示已选字段的检索条件。";
+        if (pickerSlot) pickerSlot.innerHTML = renderFieldPicker(schema, selectedKeys);
+        wrap.innerHTML = schema.fields.filter((field) => selectedKeys.includes(field.key)).map((field) => buildPropertyFieldCard(field)).join("") || `<div class="twod-property-field-empty">请先在上方勾选一个或多个检索字段</div>`;
+
+        pickerSlot?.querySelector("[data-property-field-select-all]")?.addEventListener("change", (event) => {
+          const nextKeys = event.target.checked ? schema.fields.map((field) => field.key) : [];
+          state.twodPropertySelectedFields = nextKeys;
+          if (!event.target.checked) schema.fields.forEach(clearDraftForField);
+          renderProperties();
+        });
+
+        pickerSlot?.querySelectorAll("[data-property-field-option]").forEach((checkbox) => {
+          checkbox.addEventListener("change", () => {
+            const nextKeys = getSelectedFields(currentValue).filter((key) => key !== checkbox.value);
+            if (checkbox.checked) nextKeys.push(checkbox.value);
+            schema.fields.forEach((field) => {
+              if (!nextKeys.includes(field.key)) clearDraftForField(field);
+            });
+            state.twodPropertySelectedFields = [...new Set(nextKeys)];
+            state.twodHasSearched = false;
+            renderProperties();
+          });
+        });
+
+
+      };
+
+      document.body.addEventListener("change", (event) => {
+        const checkbox = event.target.closest("[data-property-category-option]");
+        if (!checkbox) return;
+        state.selectedPropertyCategory = checkbox.checked ? checkbox.value : "";
+        state.twodPropertyDraft = {};
+        state.twodAppliedPropertyCategory = "";
+        state.twodPropertyApplied = {};
+        state.twodPropertySelectedFields = [];
+        state.twodHasSearched = false;
+        renderProperties();
+      });
+
+      renderProperties();
+    })();
+  </script>
 </body>
 </html>
-
-
-
 
 
