@@ -21677,7 +21677,8 @@
       selectedCatalystId: "CAT-PT-111-001",
       selectedCatalystTool: "site",
       catalystCompareChart: "bar",
-      selectedCatalystRecordId: "cat-rec-01",
+      selectedCatalystRecordId: "cat-rec-01",
+
       catalystShareTab: `external`,
       catalystUploadStep: 1,
       catalystUploadProgress: 0,
@@ -30079,128 +30080,60 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function renderElectrolyteResultTable(list) {
+      const category = state.electrolyteCategory;
+      const isSolidOrganic = category === "solidOrganic";
+      const isSolidInorganic = category === "solidInorganic";
+      const columns = isSolidOrganic
+        ? ["材料编号", "中文名称", "英文简称", "分子式", "燃点", "摩尔体积", "密度", "数据来源", "操作"]
+        : isSolidInorganic
+          ? ["材料编号", "中文名称", "英文简称", "分子式", "带隙", "密度", "形成能", "数据来源", "操作"]
+          : ["材料名称", "分子式", "CAS号", "电解质类型", "电导率", "安全等级", "操作"];
+      const valueOrDash = (value) => value == null || value === "" ? "—" : value;
+      const detailValue = (item, labels) => valueOrDash(findElectrolyteDetailValue(item, labels));
+      const rows = list.length ? list.map((item) => {
+        const operation = `<div class="table-actions">
+          <button class="electrolyte-link-btn" type="button" data-open-material="electrolyte:${item.id}" onclick="return handleMaterialDetailOpen('electrolyte:${item.id}')">查看详情</button>
+          <button class="electrolyte-link-btn" type="button" data-algo-predict-material="${item.id}">发起预测</button>
+        </div>`;
+        if (isSolidOrganic) return `<tr>
+          <td>${valueOrDash(item.code || item.id)}</td>
+          <td><strong>${valueOrDash(item.name)}</strong></td>
+          <td>${valueOrDash(item.alias)}</td>
+          <td>${valueOrDash(item.formula)}</td>
+          <td>${valueOrDash(item.ignitionPoint || item.firePoint || findElectrolyteDetailValue(item, ["燃点", "闪点"]))}</td>
+          <td>${valueOrDash(item.molarVolume || findElectrolyteDetailValue(item, ["摩尔体积"]))}</td>
+          <td>${valueOrDash(item.density || findElectrolyteDetailValue(item, ["密度"]))}</td>
+          <td>${valueOrDash(item.source)}</td>
+          <td>${operation}</td>
+        </tr>`;
+        if (isSolidInorganic) return `<tr>
+          <td>${valueOrDash(item.code || item.id)}</td>
+          <td><strong>${valueOrDash(item.name)}</strong></td>
+          <td>${valueOrDash(item.alias)}</td>
+          <td>${valueOrDash(item.formula)}</td>
+          <td>${valueOrDash(item.bandGapValue || findElectrolyteDetailValue(item, ["带隙"]))}</td>
+          <td>${valueOrDash(item.density || findElectrolyteDetailValue(item, ["密度"]))}</td>
+          <td>${valueOrDash(item.formationEnergy || findElectrolyteDetailValue(item, ["形成能"]))}</td>
+          <td>${valueOrDash(item.source)}</td>
+          <td>${operation}</td>
+        </tr>`;
+        return `<tr>
+          <td><div class="electrolyte-name-cell"><strong>${item.name}</strong><span>${item.alias}</span></div></td>
+          <td>${item.formula}</td><td>${item.cas}</td>
+          <td><span class="${getElectrolyteTypeTagClass(item.typeTag)}">${item.typeTag}</span></td>
+          <td>${item.conductivityLabel}</td>
+          <td><span class="${getElectrolyteSafetyTagClass(item.safety)}">${item.safety}</span></td>
+          <td>${operation}</td>
+        </tr>`;
+      }).join("") : `<tr><td colspan="${columns.length}" class="table-empty">暂无符合条件的数据</td></tr>`;
       return `
         <div class="card table-card electrolyte-result-card">
-          <div class="table-head">
-            <div>
-              <h3>检索结果</h3>
-              <p class="section-subtitle" style="margin:10px 0 0;">基于您的检索条件显示的电解质数据</p>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>分子名称</th>
-                  <th>分子式</th>
-                  <th>CAS号</th>
-                  <th>电解质类型</th>
-                  <th>电导率 (S/CM)</th>
-                  <th>安全性</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${list.map((item) => `
-                  <tr>
-                    <td><div class="electrolyte-name-cell"><strong>${item.name}</strong><span>${item.alias}</span></div></td>
-                    <td>${item.formula}</td>
-                    <td>${item.cas}</td>
-                    <td><span class="${getElectrolyteTypeTagClass(item.typeTag)}">${item.typeTag}</span></td>
-                    <td>${item.conductivityLabel}</td>
-                    <td><span class="${getElectrolyteSafetyTagClass(item.safety)}">${item.safety}</span></td>
-                    <td>
-                      <div class="table-actions">
-                        <button class="electrolyte-link-btn" type="button" data-open-material="electrolyte:${item.id}" onclick="return handleMaterialDetailOpen('electrolyte:${item.id}')">◉ 查看</button>
-                        <button class="electrolyte-link-btn" type="button" data-download-material="electrolyte:${item.id}">⬇ 下载</button>
-                      </div>
-                    </td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-          </div>
-          <div class="result-footer">
-            <span>显示第 1 到 ${list.length} 条，共 1,248 条结果</span>
-            <div class="pagination">
-              <div class="pager">
-                <button type="button">上一页</button>
-                <button type="button" class="active">1</button>
-                <button type="button">2</button>
-                <button type="button">3</button>
-                <button type="button">25</button>
-                <button type="button">下一页</button>
-              </div>
-            </div>
-          </div>
+          <div class="table-head"><div><h3>检索结果</h3><p class="section-subtitle" style="margin:10px 0 0;">基于当前检索条件返回对应电解质材料数据。</p></div></div>
+          <div class="table-wrap"><table><thead><tr>${columns.map((column) => `<th>${column}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
+          <div class="result-footer"><span>显示 1 - ${list.length || 0} 条，共 ${list.length} 条结果</span><div class="pagination"><div class="pager"><button type="button">上一页</button><button type="button" class="active">1</button><button type="button">下一页</button></div></div></div>
         </div>
       `;
     }
-
-    function renderOrganicPropertyPanel(filters) {
-      return `
-        <div class="electrolyte-inline-meta">
-          <div>当前电解质类型：<strong>有机电解液</strong></div>
-          <div>请在下方的检索表单中输入相关检索要求，系统将为您显示详细的分子性质信息。</div>
-        </div>
-        <div class="electrolyte-filter-card">
-          <h4>有机电解液图谱信息</h4>
-          <div class="electrolyte-checkbox-row">
-            <label><input type="checkbox" data-ely-prop-check="ir" ${filters.spectra.includes("ir") ? "checked" : ""}> 气相红外光谱</label>
-            <label><input type="checkbox" data-ely-prop-check="raman" ${filters.spectra.includes("raman") ? "checked" : ""}> 拉曼光谱</label>
-            <label><input type="checkbox" data-ely-prop-check="nmr" ${filters.spectra.includes("nmr") ? "checked" : ""}> 核磁共振光谱</label>
-          </div>
-        </div>
-        <div class="electrolyte-filter-card">
-          <h4>有机电解液计算信息</h4>
-          <div class="electrolyte-range-grid">
-            ${buildElectrolyteRangeField("HOMO能量范围 (eV)", "elyProp_homoMin", "elyProp_homoMax", filters.homoMin, filters.homoMax)}
-            ${buildElectrolyteRangeField("LUMO能量范围 (eV)", "elyProp_lumoMin", "elyProp_lumoMax", filters.lumoMin, filters.lumoMax)}
-            ${buildElectrolyteRangeField("偶极矩范围 (D)", "elyProp_dipoleMin", "elyProp_dipoleMax", filters.dipoleMin, filters.dipoleMax)}
-            ${buildElectrolyteRangeField("生成焓范围 (kJ/mol)", "elyProp_heatMin", "elyProp_heatMax", filters.heatMin, filters.heatMax)}
-            ${buildElectrolyteRangeField("生成吉布斯自由能范围 (kJ/mol)", "elyProp_gibbsMin", "elyProp_gibbsMax", filters.gibbsMin, filters.gibbsMax)}
-            ${buildElectrolyteRangeField("溶剂化自由能范围 (kJ/mol)", "elyProp_solvationMin", "elyProp_solvationMax", filters.solvationMin, filters.solvationMax)}
-          </div>
-        </div>
-        <div class="electrolyte-filter-card">
-          <h4>安全信息</h4>
-          <div class="electrolyte-search-grid three">
-            <div class="field">
-              <label>危险性等级</label>
-              <select id="elyProp_hazard">
-                <option ${filters.hazard === "不限" ? "selected" : ""}>不限</option>
-                <option ${filters.hazard === "低风险" ? "selected" : ""}>低风险</option>
-                <option ${filters.hazard === "中等风险" ? "selected" : ""}>中等风险</option>
-                <option ${filters.hazard === "高风险" ? "selected" : ""}>高风险</option>
-              </select>
-            </div>
-            <div class="field" style="grid-column: span 2;">
-              <label>GHS危险性说明</label>
-              <input id="elyProp_ghs" type="text" value="${filters.ghs}" placeholder="如: H225, H319">
-            </div>
-          </div>
-        </div>
-        <div class="electrolyte-filter-card">
-          <h4>相似分子推荐</h4>
-          <div class="electrolyte-search-grid two">
-            <div class="field">
-              <label>参考分子</label>
-              <input id="elyProp_reference" type="text" value="${filters.reference}" placeholder="输入参考分子名称或CAS号">
-            </div>
-            <div class="field">
-              <label>关注性质变化趋势</label>
-              <select id="elyProp_trend">
-                <option value="" ${filters.trend === "" ? "selected" : ""}>请选择</option>
-                <option ${filters.trend === "极性相近" ? "selected" : ""}>极性相近</option>
-                <option ${filters.trend === "锂盐相近" ? "selected" : ""}>锂盐相近</option>
-                <option ${filters.trend === "低黏度相近" ? "selected" : ""}>低黏度相近</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
     function buildElectrolyteRangeField(label, minId, maxId, minValue, maxValue) {
       return `
         <div class="field">
@@ -30749,65 +30682,60 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function renderElectrolyteResultTable(list) {
-      const rows = list.length ? list.map((item) => `
-        <tr>
+      const category = state.electrolyteCategory;
+      const isSolidOrganic = category === "solidOrganic";
+      const isSolidInorganic = category === "solidInorganic";
+      const columns = isSolidOrganic
+        ? ["材料编号", "中文名称", "英文简称", "分子式", "燃点", "摩尔体积", "密度", "数据来源", "操作"]
+        : isSolidInorganic
+          ? ["材料编号", "中文名称", "英文简称", "分子式", "带隙", "密度", "形成能", "数据来源", "操作"]
+          : ["材料名称", "分子式", "CAS号", "电解质类型", "电导率", "安全等级", "操作"];
+      const valueOrDash = (value) => value == null || value === "" ? "—" : value;
+      const detailValue = (item, labels) => valueOrDash(findElectrolyteDetailValue(item, labels));
+      const rows = list.length ? list.map((item) => {
+        const operation = `<div class="table-actions">
+          <button class="electrolyte-link-btn" type="button" data-open-material="electrolyte:${item.id}" onclick="return handleMaterialDetailOpen('electrolyte:${item.id}')">查看详情</button>
+          <button class="electrolyte-link-btn" type="button" data-algo-predict-material="${item.id}">发起预测</button>
+        </div>`;
+        if (isSolidOrganic) return `<tr>
+          <td>${valueOrDash(item.code || item.id)}</td>
+          <td><strong>${valueOrDash(item.name)}</strong></td>
+          <td>${valueOrDash(item.alias)}</td>
+          <td>${valueOrDash(item.formula)}</td>
+          <td>${valueOrDash(item.ignitionPoint || item.firePoint || findElectrolyteDetailValue(item, ["燃点", "闪点"]))}</td>
+          <td>${valueOrDash(item.molarVolume || findElectrolyteDetailValue(item, ["摩尔体积"]))}</td>
+          <td>${valueOrDash(item.density || findElectrolyteDetailValue(item, ["密度"]))}</td>
+          <td>${valueOrDash(item.source)}</td>
+          <td>${operation}</td>
+        </tr>`;
+        if (isSolidInorganic) return `<tr>
+          <td>${valueOrDash(item.code || item.id)}</td>
+          <td><strong>${valueOrDash(item.name)}</strong></td>
+          <td>${valueOrDash(item.alias)}</td>
+          <td>${valueOrDash(item.formula)}</td>
+          <td>${valueOrDash(item.bandGapValue || findElectrolyteDetailValue(item, ["带隙"]))}</td>
+          <td>${valueOrDash(item.density || findElectrolyteDetailValue(item, ["密度"]))}</td>
+          <td>${valueOrDash(item.formationEnergy || findElectrolyteDetailValue(item, ["形成能"]))}</td>
+          <td>${valueOrDash(item.source)}</td>
+          <td>${operation}</td>
+        </tr>`;
+        return `<tr>
           <td><div class="electrolyte-name-cell"><strong>${item.name}</strong><span>${item.alias}</span></div></td>
-          <td>${item.formula}</td>
-          <td>${item.cas}</td>
+          <td>${item.formula}</td><td>${item.cas}</td>
           <td><span class="${getElectrolyteTypeTagClass(item.typeTag)}">${item.typeTag}</span></td>
           <td>${item.conductivityLabel}</td>
           <td><span class="${getElectrolyteSafetyTagClass(item.safety)}">${item.safety}</span></td>
-          <td>
-            <div class="table-actions">
-              <button class="electrolyte-link-btn" type="button" data-open-material="electrolyte:${item.id}" onclick="return handleMaterialDetailOpen('electrolyte:${item.id}')">查看</button>
-              <button class="electrolyte-link-btn" type="button" data-download-material="electrolyte:${item.id}">下载</button>
-            </div>
-          </td>
-        </tr>
-      `).join("") : `
-        <tr>
-          <td colspan="7" class="table-empty">暂无符合条件的数据</td>
-        </tr>
-      `;
-
+          <td>${operation}</td>
+        </tr>`;
+      }).join("") : `<tr><td colspan="${columns.length}" class="table-empty">暂无符合条件的数据</td></tr>`;
       return `
         <div class="card table-card electrolyte-result-card">
-          <div class="table-head">
-            <div>
-              <h3>检索结果</h3>
-              <p class="section-subtitle" style="margin:10px 0 0;">基于当前检索条件返回对应电解质材料数据。</p>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>材料名称</th>
-                  <th>分子式</th>
-                  <th>CAS号</th>
-                  <th>电解质类型</th>
-                  <th>电导率</th>
-                  <th>安全等级</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-          <div class="result-footer">
-            <span>显示 1 - ${list.length || 0} 条，共 ${list.length} 条结果</span>
-            <div class="pagination">
-              <div class="pager">
-                <button type="button">上一页</button>
-                <button type="button" class="active">1</button>
-                <button type="button">下一页</button>
-              </div>
-            </div>
-          </div>
+          <div class="table-head"><div><h3>检索结果</h3><p class="section-subtitle" style="margin:10px 0 0;">基于当前检索条件返回对应电解质材料数据。</p></div></div>
+          <div class="table-wrap"><table><thead><tr>${columns.map((column) => `<th>${column}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
+          <div class="result-footer"><span>显示 1 - ${list.length || 0} 条，共 ${list.length} 条结果</span><div class="pagination"><div class="pager"><button type="button">上一页</button><button type="button" class="active">1</button><button type="button">下一页</button></div></div></div>
         </div>
       `;
     }
-
     function buildElectrolyteRangeField(label, minId, maxId, minValue, maxValue) {
       return `
         <div class="field">
@@ -40556,7 +40484,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           columns: [
             { key: "physicalState", label: "性状", width: "120px" },
             { key: "meltingPoint", label: "熔点", width: "110px" },
-            { key: "boilingPoint", label: "沸点", width: "110px" }
+            { key: "boilingPoint", label: "沸点", width: "110px" },
+            { key: "safetyLevel", label: "安全等级", width: "120px" }
           ]
         },
         {
@@ -40583,6 +40512,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           group: "物性数据",
           columns: [
             { key: "molarVolume", label: "摩尔体积", width: "130px" },
+            { key: "ignitionPoint", label: "燃点", width: "110px" },
             { key: "density", label: "密度", width: "110px" },
             { key: "glassTransitionTemp", label: "玻璃化转变温度", width: "170px" },
             { key: "conductivity", label: "电导率", width: "140px" },
@@ -40689,10 +40619,14 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       ]
     };
 
-    function getElectrolyteDefaultVisibleColumns() {
-      return ELECTROLYTE_RESULT_COLUMNS.filter((column) => !column.fixed).map((column) => column.key);
+    function getElectrolyteDefaultVisibleColumns(category = state.electrolyteCategory) {
+      const categoryDefaults = {
+        organicLiquid: ["physicalState", "meltingPoint", "boilingPoint", "safetyLevel"],
+        solidOrganic: ["ignitionPoint", "molarVolume", "density"],
+        solidInorganic: ["bandGapValue", "density", "formationEnergy"]
+      };
+      return categoryDefaults[category] || categoryDefaults.organicLiquid;
     }
-
     function getElectrolyteResultExtraColumnGroups(category = state.electrolyteCategory) {
       return ELECTROLYTE_RESULT_EXTRA_COLUMN_GROUPS[category] || ELECTROLYTE_RESULT_EXTRA_COLUMN_GROUPS.organicLiquid;
     }
@@ -40711,7 +40645,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
     function getElectrolyteVisibleResultColumns() {
       ensureElectrolyteRuntimeState();
-      const selected = new Set(state.electrolyteVisibleColumns || getElectrolyteDefaultVisibleColumns());
+      const selected = new Set(state.electrolyteVisibleColumns || getElectrolyteDefaultVisibleColumns(state.electrolyteCategory));
       const extraMap = getElectrolyteExtraColumnMap();
       const baseColumns = ELECTROLYTE_RESULT_COLUMNS.filter((column) => column.key !== "actions" && (column.fixed || selected.has(column.key)));
       const extraColumns = [...selected].filter((key) => extraMap[key]).map((key) => extraMap[key]);
@@ -40744,6 +40678,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (key === "physicalState") return formatElectrolyteValue(item.typeTag || findElectrolyteDetailValue(item, ["性状"], ["basic"]));
       if (key === "meltingPoint") return formatElectrolyteValue(findElectrolyteDetailValue(item, ["熔点"], ["basic"]));
       if (key === "boilingPoint") return formatElectrolyteValue(findElectrolyteDetailValue(item, ["沸点"], ["basic"]));
+      if (key === "safetyLevel") return formatElectrolyteValue(item.safety || item.hazardLevel || findElectrolyteDetailValue(item, ["安全等级", "安全性"], ["basic"]));
+      if (key === "ignitionPoint") return formatElectrolyteValue(findElectrolyteDetailValue(item, ["燃点"], ["basic"]));
       if (key === "homoLumoEnergy") {
         const homoValue = formatElectrolyteMetric(item.homo, "eV");
         const lumoValue = formatElectrolyteMetric(item.lumo, "eV");
@@ -63392,6 +63328,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function renderMlffDetailBasicPage(material) {
+      const dataType = state.mlffDetailDataType || "monomer";
       return `
         <div class="twod-detail-page-head">
           <div>
@@ -63403,9 +63340,20 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           </div>
         </div>
         ${buildMlffSectionFactCards(material)}
+        <div class="mlff-data-type-tabs" style="margin:16px 0;display:flex;gap:8px;border-bottom:2px solid #e9ecef;padding-bottom:0;">
+          <button class="mlff-data-type-tab ${dataType === 'monomer' ? 'active' : ''}" type="button" onclick="state.mlffDetailDataType='monomer';renderMlffDetailPage(getCanonicalMaterialBySource('mlff',state.selectedMaterialId))" style="padding:10px 20px;background:${dataType === 'monomer' ? '#165DFF' : '#f8f9fa'};color:${dataType === 'monomer' ? '#fff' : '#495057'};border:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:14px;font-weight:600;">单分子</button>
+          <button class="mlff-data-type-tab ${dataType === 'dimer' ? 'active' : ''}" type="button" onclick="state.mlffDetailDataType='dimer';renderMlffDetailPage(getCanonicalMaterialBySource('mlff',state.selectedMaterialId))" style="padding:10px 20px;background:${dataType === 'dimer' ? '#165DFF' : '#f8f9fa'};color:${dataType === 'dimer' ? '#fff' : '#495057'};border:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:14px;font-weight:600;">双分子</button>
+          <button class="mlff-data-type-tab ${dataType === 'cluster' ? 'active' : ''}" type="button" onclick="state.mlffDetailDataType='cluster';renderMlffDetailPage(getCanonicalMaterialBySource('mlff',state.selectedMaterialId))" style="padding:10px 20px;background:${dataType === 'cluster' ? '#165DFF' : '#f8f9fa'};color:${dataType === 'cluster' ? '#fff' : '#495057'};border:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:14px;font-weight:600;">多分子团簇</button>
+        </div>
+        ${dataType === 'monomer' ? renderMlffMonomerPage(material) : dataType === 'dimer' ? renderMlffDimerPage(material) : renderMlffClusterPage(material)}
+      `;
+    }
+
+    function renderMlffMonomerPage(material) {
+      return `
         <div class="twod-basic-card-grid">
           <section class="twod-detail-table-card">
-            <h5 class="twod-detail-material-title">基础信息</h5>
+            <h5 class="twod-detail-material-title">单分子信息</h5>
             <table class="twod-detail-info-table">
               <tbody>
                 <tr><th colspan="2">材料基本信息</th></tr>
@@ -63413,12 +63361,19 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 <tr><td class="is-row-head">化学名称</td><td>${material.name}</td></tr>
                 <tr><td class="is-row-head">英文名称</td><td>${material.english}</td></tr>
                 <tr><td class="is-row-head">分子式</td><td>${material.formula}</td></tr>
-                <tr><td class="is-row-head">PubChem</td><td>${material.pubchem}</td></tr>
-                <tr><td class="is-row-head">力场类型</td><td>${material.forceField}</td></tr>
-                <tr><td class="is-row-head">计算方法</td><td>${material.method}</td></tr>
-                <tr><td class="is-row-head">核心参数项</td><td>${material.parameterName}</td></tr>
-                <tr><td class="is-row-head">参数值</td><td>${material.parameterValue}</td></tr>
-                <tr><td class="is-row-head">更新时间</td><td>${material.updatedAt}</td></tr>
+                <tr><td class="is-row-head">单分子能量</td><td>${material.energy || '/'} kcal/mol</td></tr>
+                <tr><td class="is-row-head">原子受力</td><td>${material.atomicForce || '/'}</td></tr>
+              </tbody>
+            </table>
+            <table class="twod-detail-info-table" style="margin-top:14px;">
+              <tbody>
+                <tr><th colspan="2">原子性质</th></tr>
+                <tr><td class="is-row-head">电荷</td><td>${material.charge || '/'}</td></tr>
+                <tr><td class="is-row-head">偶极矩</td><td>${material.dipole || '/'} D</td></tr>
+                <tr><td class="is-row-head">四级矩</td><td>${material.quadrupole || '/'}</td></tr>
+                <tr><td class="is-row-head">多级矩</td><td>${material.multipole || '/'}</td></tr>
+                <tr><td class="is-row-head">极化率</td><td>${material.polarizability || '/'}</td></tr>
+                <tr><td class="is-row-head">色散系数</td><td>${material.dispersion || '/'}</td></tr>
               </tbody>
             </table>
             <table class="twod-detail-info-table" style="margin-top:14px;">
@@ -63450,9 +63405,111 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="chart-caption">${buildMlffScene(material, "molecule").caption}</div>
             </div>
             <div class="twod-structure-meta">
-              <article class="twod-structure-meta-item"><span>能量</span><strong>${material.energy} kcal/mol</strong></article>
-              <article class="twod-structure-meta-item"><span>偶极矩</span><strong>${material.dipole} D</strong></article>
+              <article class="twod-structure-meta-item"><span>能量</span><strong>${material.energy || '/'} kcal/mol</strong></article>
+              <article class="twod-structure-meta-item"><span>偶极矩</span><strong>${material.dipole || '/'} D</strong></article>
               <article class="twod-structure-meta-item"><span>数据来源</span><strong>${material.source}</strong></article>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function renderMlffDimerPage(material) {
+      return `
+        <div class="twod-basic-card-grid">
+          <section class="twod-detail-table-card">
+            <h5 class="twod-detail-material-title">双分子信息</h5>
+            <table class="twod-detail-info-table">
+              <tbody>
+                <tr><th colspan="2">能量信息</th></tr>
+                <tr><td class="is-row-head">单分子能量</td><td>${material.monomerEnergy || material.energy || '/'} kcal/mol</td></tr>
+                <tr><td class="is-row-head">双分子能量</td><td>${material.dimerEnergy || '/'} kcal/mol</td></tr>
+                <tr><td class="is-row-head">分子间相互作用能量</td><td>${material.interactionEnergy || '/'} kcal/mol</td></tr>
+              </tbody>
+            </table>
+            <table class="twod-detail-info-table" style="margin-top:14px;">
+              <tbody>
+                <tr><th colspan="2">文件下载</th></tr>
+                <tr>
+                  <td class="is-row-head">参数力场文件下载</td>
+                  <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('package')">下载</button><span>包含分子结构PDB文件和力场XML文件</span></div></td>
+                </tr>
+                <tr>
+                  <td class="is-row-head">PDB结构文件下载</td>
+                  <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('pdb')">下载</button><span>包含原子种类和原子三维坐标</span></div></td>
+                </tr>
+                <tr>
+                  <td class="is-row-head">XML力场文件下载</td>
+                  <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('xml')">下载</button><span>包含力场参数映射和结构节点信息</span></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="twod-detail-visual-card">
+            <h5>双分子结构预览</h5>
+            <div class="mlff-structure-stage">
+              <div class="material-atom-cluster mlff-scene" data-mlff-scene-size="${buildMlffScene(material, "dimer").size}">${renderMlffSceneMarkup(buildMlffScene(material, "dimer"))}</div>
+              <div class="material-legend">${buildMlffScene(material, "dimer").legend.map((item) => {
+                const border = String(item.color).toLowerCase() === "#ffffff" || String(item.color).toLowerCase() === "#fff" || String(item.color).toLowerCase() === "#edf2fb" ? "border:1px solid #c7d5eb;" : "";
+                return `<span><i class="legend-dot" style="background:${item.color}; ${border}"></i>${item.label}</span>`;
+              }).join("")}</div>
+              <div class="chart-caption">${buildMlffScene(material, "dimer").caption}</div>
+            </div>
+            <div class="twod-structure-meta">
+              <article class="twod-structure-meta-item"><span>单分子能量</span><strong>${material.monomerEnergy || material.energy || '/'} kcal/mol</strong></article>
+              <article class="twod-structure-meta-item"><span>双分子能量</span><strong>${material.dimerEnergy || '/'} kcal/mol</strong></article>
+              <article class="twod-structure-meta-item"><span>相互作用能</span><strong>${material.interactionEnergy || '/'} kcal/mol</strong></article>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function renderMlffClusterPage(material) {
+      return `
+        <div class="twod-basic-card-grid">
+          <section class="twod-detail-table-card">
+            <h5 class="twod-detail-material-title">多分子团簇信息</h5>
+            <table class="twod-detail-info-table">
+              <tbody>
+                <tr><th colspan="2">能量信息</th></tr>
+                <tr><td class="is-row-head">单分子能量</td><td>${material.monomerEnergy || material.energy || '/'} kcal/mol</td></tr>
+                <tr><td class="is-row-head">双分子能量</td><td>${material.dimerEnergy || '/'} kcal/mol</td></tr>
+                <tr><td class="is-row-head">分子间相互作用能量</td><td>${material.interactionEnergy || '/'} kcal/mol</td></tr>
+              </tbody>
+            </table>
+            <table class="twod-detail-info-table" style="margin-top:14px;">
+              <tbody>
+                <tr><th colspan="2">文件下载</th></tr>
+                <tr>
+                  <td class="is-row-head">参数力场文件下载</td>
+                  <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('package')">下载</button><span>包含分子结构PDB文件和力场XML文件</span></div></td>
+                </tr>
+                <tr>
+                  <td class="is-row-head">PDB结构文件下载</td>
+                  <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('pdb')">下载</button><span>包含原子种类和原子三维坐标</span></div></td>
+                </tr>
+                <tr>
+                  <td class="is-row-head">XML力场文件下载</td>
+                  <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('xml')">下载</button><span>包含力场参数映射和结构节点信息</span></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="twod-detail-visual-card">
+            <h5>多分子团簇结构预览</h5>
+            <div class="mlff-structure-stage">
+              <div class="material-atom-cluster mlff-scene" data-mlff-scene-size="${buildMlffScene(material, "cluster").size}">${renderMlffSceneMarkup(buildMlffScene(material, "cluster"))}</div>
+              <div class="material-legend">${buildMlffScene(material, "cluster").legend.map((item) => {
+                const border = String(item.color).toLowerCase() === "#ffffff" || String(item.color).toLowerCase() === "#fff" || String(item.color).toLowerCase() === "#edf2fb" ? "border:1px solid #c7d5eb;" : "";
+                return `<span><i class="legend-dot" style="background:${item.color}; ${border}"></i>${item.label}</span>`;
+              }).join("")}</div>
+              <div class="chart-caption">${buildMlffScene(material, "cluster").caption}</div>
+            </div>
+            <div class="twod-structure-meta">
+              <article class="twod-structure-meta-item"><span>单分子能量</span><strong>${material.monomerEnergy || material.energy || '/'} kcal/mol</strong></article>
+              <article class="twod-structure-meta-item"><span>双分子能量</span><strong>${material.dimerEnergy || '/'} kcal/mol</strong></article>
+              <article class="twod-structure-meta-item"><span>相互作用能</span><strong>${material.interactionEnergy || '/'} kcal/mol</strong></article>
             </div>
           </section>
         </div>
@@ -64931,6 +64988,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (category === "solidOrganic") {
         return [
           { key: "basic", label: "基础信息" },
+          { key: "property", label: "物性信息" },
           { key: "compute", label: "计算信息" },
           { key: "solvent", label: "溶解溶剂推荐" },
           { key: "recommend", label: "相似分子推荐" }
@@ -65142,6 +65200,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const safetyRows = [
         { label: "风险等级", value: material.hazardLevel || material.safety },
         { label: "GHS 提示", value: material.ghs || "/" },
+        { label: "毒理学数据", value: material.toxicology || findElectrolyteDetailValue(material, ["毒理学", "毒性"]) || "待评估" },
+        { label: "生态毒性", value: material.ecotoxicity || findElectrolyteDetailValue(material, ["生态毒性", "生态"]) || "待评估" },
+        { label: "安全标识", value: material.safetyIdentification || material.safetyLabel || material.ghs || "未记录" },
         { label: "安全提示", value: getElectrolyteHazardNotice(material) }
       ];
       return `
@@ -65278,9 +65339,11 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         { label: "对应单体信息", value: material.alias === "PEO" ? "乙烯氧化物重复单元" : "/" }
       ];
       const propertyRows = [
-        { label: "摩尔体积", value: "/" },
-        { label: "密度", value: (material.detailTabs?.basic || []).find((item) => item.label.includes("密度"))?.value || "/" },
-        { label: "玻璃化转变温度", value: (material.infoFields || []).find((item) => item.label.includes("玻璃化"))?.value || "/" },
+        { label: "燃点", value: material.ignitionPoint || material.firePoint || findElectrolyteDetailValue(material, ["燃点", "闪点"]) || "待评估" },
+        { label: "摩尔体积", value: material.molarVolume || findElectrolyteDetailValue(material, ["摩尔体积"]) || "/" },
+        { label: "密度", value: material.density || (material.detailTabs?.basic || []).find((item) => item.label.includes("密度"))?.value || "/" },
+        { label: "熔点", value: material.meltingPoint || findElectrolyteDetailValue(material, ["熔点"]) || "/" },
+        { label: "玻璃化转变温度", value: material.glassTransitionTemperature || (material.infoFields || []).find((item) => item.label.includes("玻璃化"))?.value || "/" },
         { label: "电导率", value: material.conductivityLabel ? `${material.conductivityLabel} S/cm` : "/" },
         { label: "机械性能", value: (material.detailTabs?.basic || []).find((item) => item.label.includes("机械"))?.value || "/" },
         ...((material.detailTabs?.basic || []).map((item) => ({ label: item.label, value: item.value })))
@@ -65304,6 +65367,33 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           </section>
           ${renderElectrolyteStructureCard(material, "3D晶体结构")}
         </div>
+      `;
+    }
+
+    function renderElectrolyteSolidOrganicPropertyPage(material) {
+      const rows = [
+        { label: "燃点", value: material.ignitionPoint || material.firePoint || findElectrolyteDetailValue(material, ["燃点", "闪点"]) || "待评估" },
+        { label: "摩尔体积", value: material.molarVolume || findElectrolyteDetailValue(material, ["摩尔体积"]) || "/" },
+        { label: "密度", value: material.density || findElectrolyteDetailValue(material, ["密度"]) || "/" },
+        { label: "熔点", value: material.meltingPoint || findElectrolyteDetailValue(material, ["熔点"]) || "/" },
+        { label: "玻璃化转变温度", value: material.glassTransitionTemperature || findElectrolyteDetailValue(material, ["玻璃化"]) || "/" },
+        { label: "离子电导率", value: material.conductivityLabel ? `${material.conductivityLabel} S/cm` : "/" },
+        { label: "机械性能", value: findElectrolyteDetailValue(material, ["机械性能", "杨氏模量", "弹性模量"]) || "/" }
+      ];
+      return `
+        <div class="twod-detail-page-head">
+          <div>
+            <h4>物性信息</h4>
+            <p>展示当前固态有机电解质的燃点、摩尔体积、密度及热学、力学和电化学物性。</p>
+          </div>
+          <div class="twod-detail-page-action">
+            <button class="btn-primary" type="button" onclick="return triggerElectrolyteDetailDownload('section', 'property')">物性信息下载</button>
+          </div>
+        </div>
+        <section class="twod-detail-section-card">
+          <h5>物性信息</h5>
+          ${renderElectrolyteInfoTable("物性信息", rows)}
+        </section>
       `;
     }
 
@@ -65782,6 +65872,10 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         return;
       }
       if (material.electrolyteCategory === "solidOrganic") {
+        if (state.selectedTwodDetailSection === "property") {
+          content.innerHTML = renderElectrolyteSolidOrganicPropertyPage(material);
+          return;
+        }
         if (state.selectedTwodDetailSection === "compute") {
           content.innerHTML = renderElectrolyteSolidOrganicComputePage(material);
           return;
@@ -86258,7 +86352,7 @@ function renderElectrolyteCategoryTabs() {
       };
 
       renderCatalystPlatformRows = function renderCatalystPlatformRowsUnified(list) {
-        if (!list.length) return `<tr><td colspan="12" class="opto-table-empty">未检索到符合条件的催化材料数据，请调整检索条件后重试。</td></tr>`;
+        if (!list.length) return `<tr><td colspan="13" class="opto-table-empty">未检索到符合条件的催化材料数据，请调整检索条件后重试。</td></tr>`;
         const start = ((state.catalystPage || 1) - 1) * (state.catalystPageSize || 5);
         return list.map((item, index) => `
           <tr>
@@ -86269,6 +86363,7 @@ function renderElectrolyteCategoryTabs() {
             ${cell(item.catalystCategory)}
             ${cell(item.composition || (item.elements || []).join(", "))}
             ${cell(item.intermediate)}
+            ${cell(item.structureFeature || item.systemFeature || item.atomicStructure || "/")}
             ${cell(item.surface)}
             ${cell(item.activationEnergy, { numeric: true, digits: 2, suffix: " eV" })}
             ${cell(item.reactant || item.reactionReactant || item.routeReactant)}
@@ -86298,7 +86393,7 @@ function renderElectrolyteCategoryTabs() {
         catalyst: {
           sorts: ["默认排序", "能垒升序", "选择性降序", "TOF降序", "更新时间"],
           filters: ["自有数据集", "公开数据集", "金属单晶", "单原子催化剂", "ORR", "OER", "CO2RR"],
-          columns: ["序号", "材料编号", "材料名称", "化学式", "催化剂种类", "材料成分", "中间产物", "材料表面", "活化能", "反应物", "生成物", "操作"],
+          columns: ["序号", "材料编号", "材料名称", "化学式", "催化剂种类", "材料成分", "中间产物", "材料描述", "材料表面", "活化能", "反应物", "生成物", "操作"],
           leadingActions: [
             { label: "活性位点分析", attribute: 'data-catalyst-workbench="site"' },
             { label: "材料对比", attribute: 'data-catalyst-workbench="compare"' },
@@ -86368,7 +86463,7 @@ function renderElectrolyteCategoryTabs() {
         const methodItems = mlffGlossaryMethods.filter((item) => {
           const keyword = String(state.mlffTermKeyword || "").trim().toLowerCase();
           const typeMatch = state.mlffMethodFilter === "all" || item.type.includes(state.mlffMethodFilter);
-          const keywordMatch = !keyword || `${item.title} ${item.type} ${item.desc} ${item.scope}`.toLowerCase().includes(keyword);
+          const keywordMatch = !keyword || `${item.title} ${item.type} ${item.desc} ${item.shortTitle}`.toLowerCase().includes(keyword);
           return typeMatch && keywordMatch;
         });
         const definitionBody = `
@@ -86380,18 +86475,51 @@ function renderElectrolyteCategoryTabs() {
           </section>
         `;
         const methodBody = `
-          <section class="card table-card">
-            <div class="table-head"><div><h3>数据获取方法概览</h3><p class="section-subtitle">提供数据来源方法、适用范围、计算成本和数据质量说明。</p></div></div>
-            <div class="mlff-platform-kpis">
-              <article class="mlff-kpi-card"><strong>${methodItems.filter((item) => item.type === "量子化学计算").length}</strong><span>DFT计算类方法</span></article>
-              <article class="mlff-kpi-card"><strong>${methodItems.filter((item) => item.type === "实验测量").length}</strong><span>实验数据类方法</span></article>
-              <article class="mlff-kpi-card"><strong>${methodItems.filter((item) => item.type === "机器学习方法").length}</strong><span>机器学习类方法</span></article>
-            </div>
-            <div class="mlff-method-grid">
-              ${methodItems.map((item) => `<article class="mlff-method-card"><h4>${html(item.title)}</h4><p>${html(item.desc)}</p><div class="mlff-method-meta"><span>方法类别：${html(item.type)}</span><span>适用范围：${html(item.scope)}</span><span>计算成本：${html(item.cost)}</span><span>数据质量：${html(item.quality)}</span></div></article>`).join("") || `<div class="opto-table-empty">暂无匹配方法</div>`}
-            </div>
-          </section>
-        `;
+        <div class="mlff-method-list">
+          ${methodItems.map((item) => {
+            const toneColors = { blue: { bg: "#e8f0fe", fg: "#1660ff" }, purple: { bg: "#f3e8ff", fg: "#8c46ff" }, green: { bg: "#e8f8f0", fg: "#21a65d" }, orange: { bg: "#fff3e0", fg: "#e87722" } };
+            const tc = toneColors[item.tone] || toneColors.blue;
+            const iconMap = { dft: "🔬", mlp: "🤖", expfit: "", fffit: "⚙️", lit: "" };
+            const icon = iconMap[item.id] || "📋";
+            return `
+              <article class="mlff-method-card">
+                <div class="mlff-method-card-header">
+                  <div class="mlff-method-card-title-row">
+                    <div class="mlff-method-icon" style="background:${tc.bg};font-size:20px;">${icon}</div>
+                    <div class="mlff-method-card-title-info">
+                      <h4>${item.title} <span class="mlff-method-type-badge" style="background:${tc.bg};color:${tc.fg};">${item.type}</span></h4>
+                      <div class="mlff-method-card-subtitle">${item.shortTitle} · 使用频率：${item.frequency}</div>
+                    </div>
+                  </div>
+                  <div class="mlff-method-card-actions">
+                    <button class="mlff-detail-btn" type="button">查看详情</button>
+                    <button class="mlff-fav-btn" type="button" title="收藏">☆</button>
+                  </div>
+                </div>
+                <div class="mlff-method-section mlff-method-desc-section">
+                  <div class="mlff-method-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> 方法说明</div>
+                  <p>${item.desc}</p>
+                </div>
+                <div class="mlff-method-section mlff-method-analysis-section">
+                  <div class="mlff-method-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> 方法分析</div>
+                  <div class="mlff-method-analysis-content">
+                    <span class="mlff-method-pros">✓ 优势：${item.analysis.pros}</span>
+                    <span class="mlff-method-cons">✗ 不足：${item.analysis.cons}</span>
+                    <span class="mlff-method-apply">适用于：${item.analysis.apply}</span>
+                  </div>
+                </div>
+                <div class="mlff-method-footer">
+                  <div class="mlff-method-params">
+                    <span class="mlff-method-params-label">关联参数：</span>
+                    ${item.params.map(p => "<span class=\"mlff-method-param-tag\">" + p + "</span>").join("")}
+                  </div>
+                  <div class="mlff-method-updated"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 更新于 ${item.updatedAt}</div>
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      `;
         return `
           <div class="page-head"><div><h2>机器学习力场数据术语表</h2><p>提供机器学习力场参数数据定义与数据获取方法，支持检索和分类查看。</p></div></div>
           <div class="twod-platform-shell">
@@ -86780,7 +86908,7 @@ function renderElectrolyteCategoryTabs() {
                 ${renderCrossDatabaseToolbar(total, resultToolbars.catalyst)}
                 <div class="table-wrap twod-result-table-wrap">
                   <table class="twod-result-table">
-                    <thead><tr><th>序号</th><th>材料编号</th><th>材料名称</th><th>化学式</th><th>催化剂种类</th><th>材料成分</th><th>中间产物</th><th>材料表面</th><th>活化能</th><th>反应物</th><th>生成物</th><th>操作</th></tr></thead>
+                    <thead><tr><th>序号</th><th>材料编号</th><th>材料名称</th><th>化学式</th><th>催化剂种类</th><th>材料成分</th><th>中间产物</th><th>材料描述</th><th>材料表面</th><th>活化能</th><th>反应物</th><th>生成物</th><th>操作</th></tr></thead>
                     <tbody>${renderCatalystPlatformRows(items)}</tbody>
                   </table>
                 </div>

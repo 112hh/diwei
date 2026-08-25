@@ -4,7 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>机器学习力场应用 - 低维材料主题库</title>
-  <script>window.location.replace("low-dim-materials.html?entry=app&page=mlff");</script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var entry = params.get("entry") === "login" ? "login" : "app";
+      var targetPage = params.get("page") || params.get("target") || "mlff";
+      var nextParams = new URLSearchParams();
+      nextParams.set("entry", entry);
+      nextParams.set("page", targetPage);
+      window.location.replace("low-dim-materials.html?" + nextParams.toString());
+    })();
+  </script>
 </head>
 <body></body>
 </html>
