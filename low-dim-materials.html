@@ -75663,31 +75663,48 @@ function renderElectrolyteCategoryTabs() {
                   <p>${config.desc}</p>
                 </div>
               </div>
+
               <div class="material-convert-grid">
-                <div class="material-convert-drop ${isTwodConvert ? "is-upload" : ""}">
-                  <strong>${draft.fileName || (isTwodConvert ? "请先上传结构文件、计算数据或可视化源数据" : "当前模块暂无可转换文件")}</strong>
-                  <span>${sourceText}</span>
-                  ${isTwodConvert ? `
-                    <button class="material-convert-upload-btn" type="button" data-material-convert-upload="${moduleKey}">选择文件</button>
-                    <input type="file" hidden data-material-convert-file="${moduleKey}" accept=".cif,.vasp,.poscar,.contcar,.xyz,.pdb,.csv,.json,.yaml,.yml,.hdf5,.h5,.npz,.xlsx,.xls,.dat,.txt,.png,.jpg,.jpeg,.svg,.tif,.tiff">
-                  ` : ""}
-                </div>
-                <div>
-                  <div class="material-convert-type-row">
-                    ${["结构文件", "计算数据", "可视化文件"].map((type) => `
-                      <button class="material-convert-type${draft.fileType === type ? " active" : ""}" type="button" data-material-convert-type="${type}" data-module="${moduleKey}">${type}</button>
-                    `).join("")}
+                ${isTwodConvert ? `
+                  <div style="display:grid;gap:14px;align-content:start;">
+                    <div class="material-convert-type-row">
+                      ${["结构文件", "计算数据", "可视化文件"].map((type) => `
+                        <button class="material-convert-type${draft.fileType === type ? " active" : ""}" type="button" data-material-convert-type="${type}" data-module="${moduleKey}">${type}</button>
+                      `).join("")}
+                    </div>
+                    <div class="material-convert-drop is-upload">
+                      <strong>${draft.fileName || "请先上传结构文件、计算数据或可视化源数据"}</strong>
+                      <span>${sourceText}</span>
+                      <button class="material-convert-upload-btn" type="button" data-material-convert-upload="${moduleKey}">选择文件</button>
+                      <input type="file" hidden data-material-convert-file="${moduleKey}" accept=".cif,.vasp,.poscar,.contcar,.xyz,.pdb,.csv,.json,.yaml,.yml,.hdf5,.h5,.npz,.xlsx,.xls,.dat,.txt,.png,.jpg,.jpeg,.svg,.tif,.tiff">
+                    </div>
                   </div>
+                ` : `
+                  <div class="material-convert-drop">
+                    <strong>${draft.fileName || "当前模块暂无可转换文件"}</strong>
+                    <span>${sourceText}</span>
+                  </div>
+                `}
+                <div>
+                  ${isTwodConvert ? "" : `
+                    <div class="material-convert-type-row">
+                      ${["结构文件", "计算数据", "可视化文件"].map((type) => `
+                        <button class="material-convert-type${draft.fileType === type ? " active" : ""}" type="button" data-material-convert-type="${type}" data-module="${moduleKey}">${type}</button>
+                      `).join("")}
+                    </div>
+                  `}
                   <p class="material-convert-type-note">${materialConversionTypeDescriptions[draft.fileType]}</p>
                   <div class="material-convert-form" style="margin-top:14px;">
                     <div class="field">
-                      <label>${config.materialLabel}</label>
-                      <select data-material-convert-field="materialId" data-module="${moduleKey}">
-                        ${options.map((item) => `<option value="${item.id}"${draft.materialId === item.id ? " selected" : ""}>${item.label}</option>`).join("")}
-                      </select>
+                      <label>${isTwodConvert ? "源文件格式" : config.materialLabel}</label>
+                      ${isTwodConvert
+                        ? `<input type="text" value="${draft.sourceFormat || "自动识别"}" readonly aria-readonly="true" data-material-convert-source-format="${moduleKey}">`
+                        : `<select data-material-convert-field="materialId" data-module="${moduleKey}">
+                            ${options.map((item) => `<option value="${item.id}"${draft.materialId === item.id ? " selected" : ""}>${item.label}</option>`).join("")}
+                          </select>`}
                     </div>
                     <div class="field">
-                      <label>目标格式</label>
+                      <label>${isTwodConvert ? "目标文件格式" : "目标格式"}</label>
                       <select data-material-convert-field="targetFormat" data-module="${moduleKey}">
                         ${targetFormats.map((format) => `<option value="${format}"${draft.targetFormat === format ? " selected" : ""}>${format}</option>`).join("")}
                       </select>
@@ -75696,8 +75713,8 @@ function renderElectrolyteCategoryTabs() {
                   ${buildMaterialConvertSummary([
                     { label: "转换类型", value: draft.fileType },
                     { label: "源文件", value: draft.fileName || "待上传" },
-                    { label: "源格式", value: draft.sourceFormat || "自动识别" },
-                    { label: "目标格式", value: draft.targetFormat || "-" }
+                    { label: isTwodConvert ? "源文件格式" : "源格式", value: draft.sourceFormat || "自动识别" },
+                    { label: isTwodConvert ? "目标文件格式" : "目标格式", value: draft.targetFormat || "-" }
                   ])}
                   <div class="twod-convert-actions" style="margin-top:16px;">
                     <button class="btn-primary" type="button" data-material-convert-start="${moduleKey}" ${draft.fileName ? "" : "disabled"}>开始转换</button>
@@ -86849,7 +86866,7 @@ function renderElectrolyteCategoryTabs() {
       const renderModuleTabs = (module, active) => `
         <div class="module-tab-strip">
           <button class="module-tab-btn${active === "search" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="search">数据检索</button>
-          <button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="convert">文件转换</button>
+          ${["opto", "catalyst"].includes(module) ? "" : `<button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="convert">文件转换</button>`}
         </div>
       `;
 
@@ -86858,6 +86875,7 @@ function renderElectrolyteCategoryTabs() {
         ensureOptoRuntimeState();
         const page = document.getElementById("page-opto");
         if (!page) return;
+        if (state.optoTab === "convert") state.optoTab = "search";
         if (state.optoTab === "convert") {
           page.innerHTML = `
             <div class="page-head"><div><h2>有机光电材料应用</h2><p>面向有机光电材料的统一检索与文件转换平台。</p></div></div>
@@ -86962,6 +86980,7 @@ function renderElectrolyteCategoryTabs() {
         if (typeof ensureCatalystPageStylesOverride === "function") ensureCatalystPageStylesOverride();
         const page = document.getElementById("page-catalyst");
         if (!page) return;
+        if (state.catalystTab === "convert") state.catalystTab = "search";
         if (state.catalystTab === "convert") {
         page.innerHTML = `
           <div class="page-head">
