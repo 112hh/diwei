@@ -18375,6 +18375,39 @@
     #page-twod .twod-search-results .twod-action-view { min-height:auto !important; height:auto !important; padding:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; color:#1f63ff !important; font-size:13px !important; line-height:20px !important; }
     #page-twod .result-footer.twod-result-footer { min-height:52px !important; padding:10px 16px !important; border-top:1px solid #eef2f7 !important; background:#fff !important; }
     #page-twod .result-footer.twod-result-footer .twod-pagination-btn, #page-twod .result-footer.twod-result-footer .pager button { min-width:32px !important; height:32px !important; border-radius:2px !important; }
+  <style id="mlff-inline-search-row-fix-20260826">
+    /* 机器学习力场：输入、匹配方式、检索和清空条件保持同一行。 */
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) 132px 88px 112px !important;
+      align-items: end !important;
+      gap: 12px !important;
+      flex-wrap: nowrap !important;
+      width: 100% !important;
+    }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-input,
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .mlff-match-mode-select,
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-submit,
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-reset {
+      min-width: 0 !important;
+      width: auto !important;
+      max-width: none !important;
+      flex: none !important;
+      align-self: end !important;
+      box-sizing: border-box !important;
+    }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-input { grid-column: 1; }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .mlff-match-mode-select { grid-column: 2; }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-submit { grid-column: 3; }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-reset { grid-column: 4; }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-input input { width: 100% !important; }
+    @media (max-width: 760px) {
+      #page-mlff .twod-search-row:has(.mlff-match-mode-select) {
+        grid-template-columns: minmax(0, 1fr) 112px !important;
+      }
+      #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-submit { grid-column: 1; }
+      #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-reset { grid-column: 2; }
+    }
   </style>  <style id="dropdown-visibility-fix">
     /* 检索列表的操作菜单需要越过卡片边界显示，避免被圆角容器裁切。 */
     #page-twod .twod-search-results,
@@ -86825,14 +86858,7 @@ function renderElectrolyteCategoryTabs() {
         document.body.dataset.mlffFieldUpdateBound = "true";
         document.body.addEventListener("click", (event) => {
           const updateButton = event.target.closest("[data-mlff-field-update]");
-          if (updateButton) {
-            ensureMlffFieldUpdateState();
-            state.mlffFieldUpdateOpen = true;
-            state.mlffFieldUpdateView = "list";
-            state.mlffFieldUpdateSelectedId = updateButton.dataset.mlffFieldUpdate;
-            renderMlffModule();
-            return;
-          }
+          if (updateButton) { state.mlffFieldUpdateOpen = false; state.mlffFieldUpdateSelectedId = updateButton.dataset.mlffFieldUpdate || ""; state.page = "data-submit"; document.querySelectorAll(".page").forEach((node) => node.classList.toggle("active", node.id === "page-data-submit")); document.querySelectorAll(".nav-btn").forEach((node) => node.classList.toggle("active", node.dataset.page === "data-submit")); if (typeof syncPageMeta === "function") syncPageMeta("data-submit"); setDataSubmitMaterialType("机器学习力场"); return; }
           if (state.mlffFieldUpdateOpen && event.target.closest("[data-mlff-field-store]")) {
             renderMlffFieldStoreModal();
             return;
@@ -88573,7 +88599,7 @@ print(resp.json())`;
     })();
   </script>
   <div class="overlay" id="predictionTaskModal">
-    <div class="modal modal-xl">
+    <div class="modal modal-xl prediction-task-modal">
       <div class="modal-header">
         <div>
           <h3>发起预测任务</h3>
@@ -88665,13 +88691,18 @@ print(resp.json())`;
         const formula = material?.formula || material?.chemicalFormula || "-";
 
         return `
-          <div class="form-grid">
-            <label class="field form-full">
+          <div class="prediction-task-overview">
+            <div class="prediction-task-overview-copy">
+              <span class="prediction-task-eyebrow">${esc(materialTypeLabel?.[source] || "材料预测")}</span>
+              <strong>${esc(material?.name || materialId)}</strong>
+              <span>${esc(formula)} · ${esc(materialId)}</span>
+            </div>
+            <label class="field prediction-task-name-field">
               <span>任务名称 <span class="required">*</span></span>
               <input type="text" value="${esc(draft.taskName)}" placeholder="请输入预测任务名称" data-prediction-task-name>
             </label>
           </div>
-          <section class="twod-detail-section-card">
+          <section class="twod-detail-section-card prediction-task-section">
             <div class="twod-results-head">
               <div><h4>选中材料列表预览</h4><p class="twod-result-hint">展示本次要计算的材料 ID 和化学式，可移除单条材料。</p></div>
             </div>
@@ -88688,7 +88719,7 @@ print(resp.json())`;
               </table>
             </div>
           </section>
-          <div class="form-grid">
+          <div class="prediction-task-algorithm-row">
             <label class="field">
               <span>选择算法</span>
               <select data-prediction-algorithm-type>
@@ -88696,8 +88727,8 @@ print(resp.json())`;
               </select>
             </label>
           </div>
-          <section class="twod-detail-section-card">
-            <h4>供用户选择子算法</h4>
+          <section class="twod-detail-section-card prediction-task-section">
+            <h4>选择子算法</h4>
             <div class="form-grid">
               ${subOptions.map(([key, label]) => `<label class="field"><span><input type="checkbox" value="${key}" data-prediction-subalgorithm${checked(key)}> ${esc(label)}</span></label>`).join("")}
             </div>
@@ -88709,7 +88740,7 @@ print(resp.json())`;
               </div>
             ` : ""}
           </section>
-          <section class="twod-detail-section-card">
+          <section class="twod-detail-section-card prediction-task-section">
             <h4>算法核心参数配置</h4>
             ${isTwod ? `
               <div class="form-grid">
@@ -88724,7 +88755,7 @@ print(resp.json())`;
               </div>
             ` : `<div class="twod-result-hint">当前材料库支持调用对应的${esc(options.types[0])}。</div>`}
           </section>
-          <section class="twod-detail-section-card">
+          <section class="twod-detail-section-card prediction-task-section">
             <div class="twod-results-head">
               <div><h4>输入资源确认</h4><p class="twod-result-hint">输入来源：平台数据库内置标准化结构（默认）或本地上传自定义 POSCAR 补充文件（可选，高级用户）。</p></div>
             </div>
@@ -90456,7 +90487,181 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       line-height: 21px;
     }
   </style>
-</body>
+
+  <style id="prediction-modal-layout-20260826">
+    #predictionTaskModal {
+      padding: 28px;
+      background: rgba(15, 31, 61, .58);
+      backdrop-filter: blur(3px);
+    }
+    #predictionTaskModal .prediction-task-modal {
+      width: min(1180px, calc(100vw - 56px)) !important;
+      max-width: calc(100vw - 56px);
+      max-height: min(900px, calc(100vh - 56px));
+      border: 1px solid #d8e4f5;
+      border-radius: 22px;
+      box-shadow: 0 24px 70px rgba(18, 42, 86, .22);
+    }
+    #predictionTaskModal .modal-header {
+      padding: 22px 28px;
+      background: linear-gradient(135deg, #f7faff 0%, #eef5ff 100%);
+      border-bottom: 1px solid #dce7f7;
+    }
+    #predictionTaskModal .modal-header h3 { color: #173b76; letter-spacing: .01em; }
+    #predictionTaskModal .modal-header p { color: #6680a3; }
+    #predictionTaskModal .modal-close { color: #54709a; }
+    #predictionTaskModal .modal-close:hover { background: #e5efff; color: #2451c6; }
+    #predictionTaskModal .modal-body { padding: 24px 28px 28px; background: #f8fbff; }
+    #predictionTaskModal .modal-scroll { max-height: calc(100vh - 196px); }
+    #predictionTaskModal .prediction-task-overview {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 420px); gap: 20px; align-items: end;
+      padding: 18px 20px; margin-bottom: 16px; border: 1px solid #d8e5f7; border-radius: 16px;
+      background: #fff; box-shadow: 0 6px 18px rgba(41, 76, 132, .05);
+    }
+    #predictionTaskModal .prediction-task-overview-copy { display: grid; gap: 4px; min-width: 0; }
+    #predictionTaskModal .prediction-task-overview-copy strong { color: #193966; font-size: 18px; line-height: 26px; }
+    #predictionTaskModal .prediction-task-overview-copy > span:last-child { color: #7890ad; font-size: 13px; line-height: 20px; }
+    #predictionTaskModal .prediction-task-eyebrow { color: #2b64c8; font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+    #predictionTaskModal .prediction-task-name-field { gap: 7px; }
+    #predictionTaskModal .prediction-task-section { margin: 0 0 16px; padding: 18px 20px; border-radius: 16px; background: #fff; }
+    #predictionTaskModal .prediction-task-section:last-child { margin-bottom: 0; }
+    #predictionTaskModal .prediction-task-section h4 { margin-bottom: 14px; color: #25456f; font-size: 15px; }
+    #predictionTaskModal .prediction-task-section .twod-results-head { margin-bottom: 12px; }
+    #predictionTaskModal .prediction-task-section .form-grid { gap: 14px 16px; }
+    #predictionTaskModal .prediction-task-algorithm-row { display: grid; grid-template-columns: minmax(260px, 420px); margin-bottom: 16px; }
+    #predictionTaskModal .field > span { color: #3f5b7e; font-weight: 700; }
+    #predictionTaskModal .modal-footer { padding: 16px 28px 22px; background: #fff; }
+    #predictionTaskModal .modal-footer .btn-primary { min-width: 150px; }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) {
+      display: grid !important; grid-template-columns: minmax(0, 1fr) 132px auto !important;
+      align-items: end !important; flex-wrap: nowrap !important; gap: 12px !important;
+    }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-input { min-width: 0 !important; width: auto !important; flex: none !important; }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .mlff-match-mode-select { width: 132px !important; min-width: 132px !important; }
+    #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-submit { min-width: 88px !important; white-space: nowrap !important; }
+    @media (max-width: 760px) {
+      #predictionTaskModal { padding: 12px; }
+      #predictionTaskModal .prediction-task-modal { max-height: calc(100vh - 24px); border-radius: 16px; }
+      #predictionTaskModal .modal-header, #predictionTaskModal .modal-body, #predictionTaskModal .modal-footer { padding-left: 16px; padding-right: 16px; }
+      #predictionTaskModal .prediction-task-overview { grid-template-columns: 1fr; gap: 14px; }
+      #predictionTaskModal .prediction-task-algorithm-row { grid-template-columns: 1fr; }
+      #predictionTaskModal .modal-footer { flex-wrap: wrap; }
+      #predictionTaskModal .modal-footer button { flex: 1 1 140px; }
+      #page-mlff .twod-search-row:has(.mlff-match-mode-select) { grid-template-columns: minmax(0, 1fr) 112px !important; }
+      #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-submit { grid-column: 1 / -1; }
+    }
+  </style>
+  <script id="mlff-application-request-override-20260826">
+    (() => {
+      const esc = (value) => typeof escapeLowDimHtml === "function" ? escapeLowDimHtml(value == null ? "" : String(value)) : String(value ?? "");
+      const normalize = (value) => String(value ?? "").trim().toLowerCase().replace(/[\s·•_-]+/g, "");
+      const normalizeFormula = (value) => normalize(value).replace(/[（）()\[\]{}]/g, "");
+      const ensure = () => {
+        ensureMlffRuntimeState();
+        state.mlffSearchDraft ||= {};
+        state.mlffSearchDraft.nameMatchMode ||= "fuzzy";
+        state.mlffSearchDraft.formulaMatchMode ||= "fuzzy";
+        state.mlffAppliedSearch ||= { mode: "", filters: null };
+      };
+      const nameLabel = (mode) => mode === "exact" ? "准确检索" : "模糊检索";
+      const formulaLabel = (mode) => ({ exact: "全结构检索", substructure: "子结构检索", fuzzy: "模糊结构检索" }[mode] || "模糊结构检索");
+
+      const originalGetMlffResultList = getMlffResultList;
+      getMlffResultList = function () {
+        ensure();
+        const applied = state.mlffAppliedSearch || {};
+        if (!applied.mode || !applied.filters || !String(applied.filters.keyword || "").trim()) return originalGetMlffResultList();
+        const keyword = applied.mode === "formula" ? normalizeFormula(applied.filters.keyword) : normalize(applied.filters.keyword);
+        if (applied.mode === "name") return mlffMaterials.filter((item) => {
+          const values = [item.name, item.english].map(normalize);
+          return applied.filters.matchMode === "exact" ? values.some((value) => value === keyword) : values.some((value) => value.includes(keyword));
+        });
+        if (applied.mode === "formula") return mlffMaterials.filter((item) => {
+          const formula = normalizeFormula(item.formula);
+          if (applied.filters.matchMode === "exact") return formula === keyword;
+          if (applied.filters.matchMode === "substructure") return formula.includes(keyword);
+          return formula.includes(keyword) || keyword.includes(formula);
+        });
+        return originalGetMlffResultList();
+      };
+
+      applyMlffSearch = function () {
+        ensure();
+        const mode = state.mlffSearchMode;
+        if (mode === "name") state.mlffAppliedSearch = { mode, filters: { keyword: state.mlffSearchDraft.name || "", matchMode: state.mlffSearchDraft.nameMatchMode } };
+        else if (mode === "formula") state.mlffAppliedSearch = { mode, filters: { keyword: state.mlffSearchDraft.formula || "", matchMode: state.mlffSearchDraft.formulaMatchMode } };
+        else state.mlffAppliedSearch = { mode, filters: { field: state.mlffSearchDraft.propertyField, keyword: state.mlffSearchDraft.propertyKeyword || "" } };
+        state.mlffPage = 1;
+      };
+
+      renderMlffModeWorkspace = function () {
+        ensure();
+        const mode = state.mlffSearchMode || "name";
+        if (mode === "property") { const field = state.mlffSearchDraft.propertyField || MLFF_PROPERTY_FIELDS[0].key; const canApply = Boolean(String(state.mlffSearchDraft.propertyKeyword || "").trim()); return `<div class="twod-mode-panel active"><div class="twod-property-panel"><div class="search-grid two"><div class="field"><label>性质数据</label><select id="mlffPropertyField">${MLFF_PROPERTY_FIELDS.map((item) => `<option value="${esc(item.key)}" ${field === item.key ? "selected" : ""}>${esc(item.label)}</option>`).join("")}</select></div><div class="field"><label>输入内容</label><input id="mlffPropertyKeyword" type="text" value="${esc(state.mlffSearchDraft.propertyKeyword || "")}" placeholder="${esc(MLFF_PROPERTY_PLACEHOLDERS[field] || "请输入对应内容")}"></div></div><div class="twod-platform-actions"><div class="twod-detail-actions"><button class="btn twod-search-reset" type="button" data-mlff-reset>清空条件</button><button class="btn-primary" type="button" data-mlff-apply ${canApply ? "" : "disabled"}>检索</button></div></div></div></div>`; }
+        const isName = mode === "name";
+        const value = isName ? state.mlffSearchDraft.name : state.mlffSearchDraft.formula;
+        const matchMode = isName ? state.mlffSearchDraft.nameMatchMode : state.mlffSearchDraft.formulaMatchMode;
+        const options = isName
+          ? `<option value="exact" ${matchMode === "exact" ? "selected" : ""}>准确检索</option><option value="fuzzy" ${matchMode === "fuzzy" ? "selected" : ""}>模糊检索</option>`
+          : `<option value="exact" ${matchMode === "exact" ? "selected" : ""}>全结构检索</option><option value="substructure" ${matchMode === "substructure" ? "selected" : ""}>子结构检索</option><option value="fuzzy" ${matchMode === "fuzzy" ? "selected" : ""}>模糊结构检索</option>`;
+        return `<div class="twod-mode-panel active"><div class="twod-search-row"><label class="twod-search-input"><span>检</span><input type="text" data-mlff-mode-input="${mode}" value="${esc(value || "")}" placeholder="${isName ? "请输入化学名称，如 Water、Methanol" : "请输入分子式，如 H2O、CH3OH、C6H6"}"></label><select class="cross-db-select mlff-match-mode-select" data-mlff-${isName ? "name" : "formula"}-match-mode aria-label="${isName ? "化学名称检索方式" : "分子式检索方式"}">${options}</select><button class="btn-primary twod-search-submit" type="button" data-mlff-apply>检索</button><button class="btn twod-search-reset" type="button" data-mlff-reset>清空条件</button></div><div class="mlff-search-guide"><span>${isName ? "化学名称支持准确检索和模糊检索。" : "分子式支持全结构、子结构和模糊结构检索。"}</span></div></div>`;
+      };
+
+      const originalHint = getMlffResultHint;
+      getMlffResultHint = function (list) {
+        ensure();
+        const applied = state.mlffAppliedSearch || {};
+        if (!applied.mode || !applied.filters?.keyword) return originalHint(list);
+        const label = applied.mode === "name" ? nameLabel(applied.filters.matchMode) : applied.mode === "formula" ? formulaLabel(applied.filters.matchMode) : "性质筛选";
+        return `已按“${getMlffDisplayModeLabel(applied.mode)} / ${label}”检索到 ${list.length} 条匹配数据。`;
+      };
+
+      document.body.addEventListener("change", (event) => {
+        ensure();
+        if (event.target.matches("[data-mlff-name-match-mode]")) state.mlffSearchDraft.nameMatchMode = event.target.value;
+        if (event.target.matches("[data-mlff-formula-match-mode]")) state.mlffSearchDraft.formulaMatchMode = event.target.value;
+      });
+      if (!document.getElementById("mlff-application-layout-override-20260826")) {
+        const style = document.createElement("style");
+        style.id = "mlff-application-layout-override-20260826";
+        style.textContent = `
+          #page-mlff .mlff-match-mode-select { flex: 0 0 132px; width: 132px; min-width: 132px; }          #page-mlff .twod-search-row:has(.mlff-match-mode-select) {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) 132px auto !important;
+            align-items: end !important;
+            flex-wrap: nowrap !important;
+            overflow: visible !important;
+          }
+          #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-input {
+            width: auto !important;
+            min-width: 0 !important;
+            flex: none !important;
+          }
+          #page-mlff .twod-search-row:has(.mlff-match-mode-select) .mlff-match-mode-select {
+            width: 132px !important;
+            min-width: 132px !important;
+            max-width: 132px !important;
+            flex: none !important;
+          }
+          #page-mlff .twod-search-row:has(.mlff-match-mode-select) .twod-search-submit {
+            width: auto !important;
+            min-width: 88px !important;
+            flex: none !important;
+            white-space: nowrap !important;
+          }
+          #page-mlff .twod-search-input { flex: 1 1 auto; min-width: 0; }
+          #page-mlff .twod-search-input input { width: 100%; }
+          #page-mlff .mlff-match-mode-select + .twod-search-submit { flex: 0 0 auto; }
+        `;
+        document.head.appendChild(style);
+      }
+      const originalRender = renderMlffModule;
+      renderMlffModule = function () { ensure(); originalRender(); };
+      window.renderMlffModule = renderMlffModule;
+      if (state.page === "mlff") renderMlffModule();
+    })();
+  </script></body>
 </html>
+
 
 
