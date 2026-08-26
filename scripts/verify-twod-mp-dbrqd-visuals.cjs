@@ -40,7 +40,13 @@ const expected = [
       const result = await image.evaluate((node) => ({ src: node.getAttribute('src'), naturalWidth: node.naturalWidth, naturalHeight: node.naturalHeight }));
       assert.ok(result.src.endsWith(`/assets/twod-visualizations/${filename}`) || result.src.endsWith(`assets/twod-visualizations/${filename}`), `${key} 应显示 ${filename}，实际为 ${result.src}`);
       assert.ok(result.naturalWidth > 0 && result.naturalHeight > 0, `${filename} 应成功加载`);
+      const clipping = await image.evaluate((node) => {
+        const frame = node.closest('.line-chart');
+        return { imageBottom: node.getBoundingClientRect().bottom, frameBottom: frame.getBoundingClientRect().bottom };
+      });
+      assert.ok(clipping.frameBottom + 1 >= clipping.imageBottom, `${filename} 不应被图表容器裁切`);
     }
     console.log('mp-dbrqd 12张物理性质可视化图片验证通过');
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error.stack || error); process.exitCode = 1; });
+

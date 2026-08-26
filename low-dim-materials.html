@@ -35574,6 +35574,10 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function renderAlgorithmDocModal(algorithmId) {
+      if (typeof window.renderUnifiedAlgorithmDocModal === "function") {
+        window.renderUnifiedAlgorithmDocModal(algorithmId);
+        return;
+      }
       const algorithm = findAlgorithmById(algorithmId);
       if (!algorithm) return;
       state.activeAlgorithmResourceId = algorithm.id;
@@ -87173,6 +87177,41 @@ function renderElectrolyteCategoryTabs() {
       color: #172033;
     }
 
+    #page-algorithm-doc-detail .page-head {
+      display: none;
+    }
+
+    #page-algorithm-doc-detail .algorithm-reference-toolbar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    #page-algorithm-doc-detail .algorithm-reference-page {
+      overflow: hidden;
+      border: 1px solid rgba(226, 232, 243, 0.96);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 12px 32px rgba(35, 74, 139, 0.08);
+    }
+
+    #page-algorithm-doc-detail .algorithm-reference-doc {
+      padding: 28px 28px 34px;
+    }
+
+    #page-algorithm-doc-detail .algorithm-reference-hero {
+      padding: 0 0 26px;
+      border: 0;
+      border-bottom: 1px solid #edf1f7;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    #page-algorithm-doc-detail .algorithm-reference-section {
+      margin-top: 28px;
+    }
+
     .algorithm-reference-crumb {
       display: flex;
       flex-wrap: wrap;
@@ -87607,15 +87646,9 @@ print(resp.json())`;
 
       function renderUnifiedAlgorithmDoc(algorithm, path) {
         const requestRows = getRequestRows(algorithm);
-        const outputRows = getOutputRows(algorithm);
-        const endpoint = normalizeEndpoint(algorithm.endpoint);
-        const statusText = typeof getAlgorithmStatusText === "function" ? getAlgorithmStatusText(algorithm.status) : algorithm.status;
         const apiCode = buildAlgorithmApiCode(algorithm, path, requestRows);
         return `
           <div class="algorithm-reference-doc">
-            <div class="algorithm-reference-crumb">
-              <span>算法中心</span><span>/</span><span>${html(path.category.title)}</span><span>/</span><strong>${html(path.subcategory.title)}</strong>
-            </div>
             <section class="algorithm-reference-hero">
               <h3>${html(algorithm.title)}</h3>
               <p>${html(algorithm.desc || "该算法用于低维材料数据库分析预测任务，支持通过 API 调用完成批量计算、数据处理和结果回写。")}</p>
@@ -87626,20 +87659,9 @@ print(resp.json())`;
             </section>
 
             <section class="algorithm-reference-section">
-              <div class="algorithm-reference-grid">
-                <div class="algorithm-reference-info"><span>算法类型</span><strong title="${html(path.category.title)}">${html(path.category.title)}</strong></div>
-                <div class="algorithm-reference-info"><span>算法分类</span><strong title="${html(path.subcategory.title)}">${html(path.subcategory.title)}</strong></div>
-                <div class="algorithm-reference-info"><span>算法状态</span><strong>${html(statusText)}</strong></div>
-                <div class="algorithm-reference-info"><span>算法版本/大小</span><strong>${html(algorithm.version || "v1.0")} / ${html(algorithm.packageSize || "-")}</strong></div>
-                <div class="algorithm-reference-info"><span>更新时间</span><strong>${html(algorithm.updatedAt || "-")}</strong></div>
-                <div class="algorithm-reference-info"><span>接口地址</span><strong title="${html(endpoint.path)}">${html(endpoint.method)} ${html(endpoint.path)}</strong></div>
-              </div>
-            </section>
-
-            <section class="algorithm-reference-section">
               <div class="algorithm-reference-section-head">
                 <h4>API 调用示例</h4>
-                <button class="algorithm-reference-copy" type="button" data-algorithm-copy-code>复制代码</button>
+                <button class="algorithm-reference-copy" type="button" data-algorithm-copy-code aria-label="复制 API 调用示例">复制代码</button>
               </div>
               <pre class="algorithm-reference-code" id="algorithmReferenceCode">${html(apiCode)}</pre>
             </section>
@@ -87653,21 +87675,18 @@ print(resp.json())`;
                 </table>
               </div>
             </section>
-
-            <section class="algorithm-reference-section">
-              <div class="algorithm-reference-section-head"><h4>输出结果</h4></div>
-              <div class="algorithm-reference-table-wrap">
-                <table class="algorithm-reference-table">
-                  <thead><tr><th style="width:24%;">字段名</th><th style="width:18%;">类型</th><th>说明</th></tr></thead>
-                  <tbody>${renderRows(outputRows, "output")}</tbody>
-                </table>
-              </div>
-            </section>
           </div>
         `;
       }
 
-      window.renderAlgorithmDocModal = function renderAlgorithmDocModalUnifiedReference(algorithmId) {
+      window.renderUnifiedAlgorithmDocPage = function renderUnifiedAlgorithmDocPage(algorithmId) {
+        const path = getAlgorithmPath(algorithmId);
+        const algorithm = path?.algorithm || (typeof findAlgorithmById === "function" ? findAlgorithmById(algorithmId) : null);
+        if (!algorithm || !path) return "";
+        return renderUnifiedAlgorithmDoc(algorithm, path);
+      };
+
+      window.renderUnifiedAlgorithmDocModal = function renderAlgorithmDocModalUnifiedReference(algorithmId) {
         const path = getAlgorithmPath(algorithmId);
         const algorithm = path?.algorithm || (typeof findAlgorithmById === "function" ? findAlgorithmById(algorithmId) : null);
         if (!algorithm || !path) return;
@@ -89057,31 +89076,17 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       function renderAlgorithmDocDetailPage(algorithmId) {
         const page = document.getElementById("page-algorithm-doc-detail");
         const algorithm = typeof findAlgorithmById === "function" ? findAlgorithmById(algorithmId) : null;
-        if (!page || !algorithm) return;
+        const detailMarkup = typeof window.renderUnifiedAlgorithmDocPage === "function"
+          ? window.renderUnifiedAlgorithmDocPage(algorithmId)
+          : "";
+        if (!page || !algorithm || !detailMarkup) return;
         state.activeAlgorithmResourceId = algorithm.id;
-        const isNonmagnetic = algorithm.id === "twod-relax-nonmagnetic";
-        page.innerHTML = `
-          <div class="page-head">
-            <div><h2>${escapeTaskHtml(algorithm.title)} - 算法详情</h2><p>${escapeTaskHtml(algorithm.enTitle || "数据应用算法详情")}</p></div>
-            <div class="page-tools"><button class="btn" type="button" data-algorithm-detail-back>返回算法列表</button></div>
-          </div>
-          <section class="card pad algorithm-detail-card">
-            ${isNonmagnetic ? renderNonmagneticRelaxationDoc(algorithm) : `
-              <div class="algorithm-item-head"><div><h3>${escapeTaskHtml(algorithm.title)}</h3><p>${escapeTaskHtml(algorithm.desc || "该算法用于低维材料数据库分析预测任务。")}</p></div><span class="algorithm-status-pill ${algorithm.status}">${escapeTaskHtml(getAlgorithmStatusText(algorithm.status))}</span></div>
-              <div class="algorithm-info-grid">
-                <div class="algorithm-info-item"><span>分类</span><strong>${escapeTaskHtml(algorithm.subcategoryTitle || algorithm.type || "-")}</strong></div>
-                <div class="algorithm-info-item"><span>版本</span><strong>${escapeTaskHtml(algorithm.version || "-")}</strong></div>
-                <div class="algorithm-info-item"><span>更新时间</span><strong>${escapeTaskHtml(algorithm.updatedAt || "-")}</strong></div>
-                <div class="algorithm-info-item"><span>接口地址</span><strong>${escapeTaskHtml(algorithm.endpoint || "-")}</strong></div>
-              </div>
-              <div class="algorithm-endpoint-list">
-                <div class="endpoint-card"><strong>输入参数</strong><p>${escapeTaskHtml(algorithm.input || "-")}</p></div>
-                <div class="endpoint-card"><strong>输出结果</strong><p>${escapeTaskHtml(algorithm.output || "-")}</p></div>
-              </div>
-            `}
-          </section>
-        `;
+        page.innerHTML = `<div class="algorithm-reference-toolbar"><button class="btn" type="button" data-algorithm-detail-back>← 返回数据应用算法</button></div><div class="algorithm-reference-page">${detailMarkup}</div>`;
         switchPage("algorithm-doc-detail");
+        const breadcrumb = document.getElementById("breadcrumb");
+        if (breadcrumb) {
+          breadcrumb.innerHTML = `<span>低维材料数据库分析预测</span><span>/</span><span>数据应用算法</span><span>/</span><strong>${escapeTaskHtml(algorithm.title)}</strong>`;
+        }
       }
 
       const originalSwitchPageForPredictionTasks = switchPage;
@@ -89090,7 +89095,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         if (page === "prediction-tasks") renderPredictionTaskManagementPage();
         if (page === "algorithm-doc-detail") {
           const algorithm = typeof findAlgorithmById === "function" ? findAlgorithmById(state.activeAlgorithmResourceId) : null;
-          if (algorithm && !document.querySelector("#page-algorithm-doc-detail .algorithm-detail-card")) renderAlgorithmDocDetailPage(algorithm.id);
+          if (algorithm && !document.querySelector("#page-algorithm-doc-detail .algorithm-reference-page")) renderAlgorithmDocDetailPage(algorithm.id);
         }
       };
       window.switchPage = switchPage;
@@ -90377,6 +90382,61 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       renderProperties();
     })();
   </script>
+
+  <script id="twod-mp-dbrqd-visual-samples">
+  (() => {
+    const SAMPLE_MATERIAL_IDS = new Set(["2d:mp-dbrqd", "mp-dbrqd"]);
+    const SAMPLE_VISUALS = {
+      bandStructure: ["01_MoS2_band_structure.png", "单层 MoS₂ 能带结构图，包含 Mo-d / S-p 轨道投影。"],
+      dosPlot: ["02_MoS2_projected_DOS.png", "单层 MoS₂ 总态密度与投影态密度图。"],
+      magneticGroundState: ["03_CrI3_magnetic_ground_state.png", "单层 CrI₃ 铁磁基态构型图，显示 Cr 原子自旋排列。"],
+      phononDispersion: ["04_graphene_phonon_dispersion.png", "单层石墨烯声子谱图，显示无虚频的稳定声子分支。"],
+      phononDOS: ["05_MoS2_phonon_DOS.png", "单层 MoS₂ 声子态密度图，区分 Mo 和 S 的振动贡献。"],
+      dielectricFunction: ["06_hBN_dielectric_function.png", "单层 h-BN 介电函数实部与虚部。"],
+      opticalAbsorption: ["07_MoS2_absorption_coefficient.png", "单层 MoS₂ 光吸收系数谱，标注可见光区吸收峰。"],
+      reflectance: ["08_WS2_reflectivity.png", "单层 WS₂ 反射率谱。"],
+      refractiveIndex: ["09_MoS2_refractive_index.png", "单层 MoS₂ 折射率谱。"],
+      extinctionCoefficient: ["10_WS2_extinction_coefficient.png", "单层 WS₂ 消光系数谱。"],
+      defectFormationEnergy: ["11_hBN_defect_formation_energy.png", "单层 h-BN 中典型缺陷形成能对比图。"],
+      defectStructure: ["12_hBN_N_vacancy_structure.png", "单层 h-BN 氮空位 V_N 缺陷结构图。"]
+    };
+
+    const originalBuildTwodVisuals = buildTwodVisuals;
+    buildTwodVisuals = function buildTwodVisualsWithMpDbrqdSamples(material) {
+      const visuals = originalBuildTwodVisuals(material);
+      const materialIds = [material?.id, material?.trueMaterialId, material?.materialId, material?.name];
+      if (!materialIds.some((id) => SAMPLE_MATERIAL_IDS.has(String(id || "")))) return visuals;
+      Object.entries(SAMPLE_VISUALS).forEach(([key, [filename, caption]]) => {
+        visuals[key] = {
+          type: "image",
+          src: `assets/twod-visualizations/`,
+          alt: caption,
+          caption
+        };
+        visuals[key].src = `assets/twod-visualizations/` + filename;
+      });
+      return visuals;
+    };
+  })();
+  </script>
+  <style id="twod-mp-dbrqd-visual-samples-style">
+    #page-twod-detail .twod-detail-chart-card .line-chart:has(.twod-visual-image-frame) {
+      height: auto;
+      max-height: none;
+      overflow: visible;
+    }
+    #page-twod-detail .twod-detail-chart-card .twod-visual-image-frame img {
+      width: 100%;
+      max-height: 680px;
+      object-fit: contain;
+      background: #ffffff;
+    }
+    #page-twod-detail .twod-detail-chart-card .twod-visual-image-frame figcaption {
+      color: #526276;
+      font-size: 13px;
+      line-height: 21px;
+    }
+  </style>
 </body>
 </html>
 
