@@ -21,7 +21,10 @@ const { pathToFileURL } = require('node:url');
       const body = page.locator('#predictionTaskModalBody');
       assert.equal(await body.locator('.prediction-task-overview').count(), 1, `${source} 应有任务概览区`);
       assert.equal(await body.locator('.prediction-task-section').count(), 4, `${source} 应有四个分组区块`);
-      if (source === 'mlff') assert.equal(await body.locator('.prediction-task-algorithm-row').count(), 1, '机器学习力场应用算法条件应单行');
+      assert.deepEqual(await body.locator('.prediction-task-material-table th').allTextContents(), ['材料 ID', '化学名称', '化学式'], `${source} 的材料表应仅展示材料 ID、化学名称和化学式`);
+      assert.equal(await body.locator('.prediction-task-algorithm-selection').count(), 1, `${source} 的算法与子算法应使用同一选择区`);
+      assert.equal(await body.locator('.prediction-task-algorithm-selection [data-prediction-algorithm-type]').count(), 1, `${source} 应保留算法选择`);
+      assert.ok(await body.locator('.prediction-task-algorithm-selection [data-prediction-subalgorithm]').count() >= 1, `${source} 应展示对应子算法`);
       await page.locator('#predictionTaskModal .modal-close').click();
     }
     console.log('发起预测弹窗布局验证通过');
