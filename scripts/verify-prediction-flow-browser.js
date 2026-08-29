@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+(async()=>{
+ const b=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
+ const p=await b.newPage({viewport:{width:1440,height:1000}});
+ const errors=[]; p.on('pageerror',e=>errors.push(e.message));
+ await p.goto('file:///C:/Users/Windows/Desktop/diwei/low-dim-materials.html?entry=app'); await p.waitForTimeout(900);
+ await p.evaluate(()=>window.handleMaterialDetailOpen('twod:2d:mp-dbrqd','prediction')); await p.waitForTimeout(250);
+ await p.locator('[data-prediction-task-name]').fill('MoS2 非磁单层结构弛豫预测');
+ await p.locator('[data-prediction-task-description]').fill('验证材料结构弛豫和预测结果展示流程。');
+ await p.locator('[data-prediction-submit-pending]').click(); await p.waitForTimeout(500);
+ const pendingVisible=await p.locator('#page-prediction-pending').isVisible();
+ const pendingText=await p.locator('#page-prediction-pending').innerText();
+ await p.screenshot({path:'artifacts/prediction-pending-verify.png',fullPage:true});
+ await p.locator('[data-prediction-pending-result]').click(); await p.waitForTimeout(700);
+ const resultPage=await p.locator('.page:visible').getAttribute('id');
+ const resultText=(await p.locator('.page:visible').innerText()).slice(0,300);
+ await p.locator('[data-prediction-pending-back]').count().catch(()=>0);
+ console.log(JSON.stringify({pendingVisible,resultPage,resultText,hasWaitCopy:pendingText.includes('请耐心等待几分钟'),hasResultButton:pendingText.includes('查看预测结果'),errors},null,2));
+ await b.close();
+})();

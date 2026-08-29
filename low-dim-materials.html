@@ -18821,8 +18821,8 @@
         <div class="twod-detail-page-shell">
           <div class="twod-detail-toolbar">
             <div class="twod-detail-toolbar-main">
-              <h2>预测任务已提交</h2>
-              <p>算法任务已进入队列，完成后可查看预测结果。</p>
+              <h2>正在调用算法预测结果</h2>
+              <p>正在调用算法预测结果，请耐心等待几分钟。</p>
             </div>
             <div class="twod-detail-toolbar-actions">
               <button class="btn" type="button" data-prediction-pending-back>返回应用</button>
@@ -18832,9 +18832,9 @@
             <div class="twod-results-head">
               <div>
                 <h3 id="predictionPendingTaskName">预测任务</h3>
-                <p class="twod-result-hint" id="predictionPendingSummary">任务已创建，正在等待算法处理。</p>
+                <p class="twod-result-hint" id="predictionPendingSummary">任务已提交，算法正在处理中，请耐心等待几分钟。</p>
               </div>
-              <span class="status-badge info">计算中</span>
+              <span class="status-badge info prediction-pending-status"><span class="prediction-pending-dot"></span>算法计算中</span>
             </div>
             <div class="twod-detail-property-grid">
               <article class="twod-detail-property-item"><span>任务状态</span><strong>等待算法运行</strong></article>
@@ -18843,7 +18843,7 @@
               <article class="twod-detail-property-item"><span>提交时间</span><strong>2026-08-21 14:32</strong></article>
             </div>
             <div class="twod-platform-actions">
-              <div class="twod-status-text">当前为示例等待页面，算法完成后可进入现有预测详情页查看结果。</div>
+              <div class="prediction-pending-message"><span class="prediction-pending-spinner" aria-hidden="true"></span><div><strong>预测任务正在处理中</strong><span>系统正在调用算法分析材料数据，预计需要 5-10 分钟，请耐心等待。</span></div></div>
               <div class="twod-record-inline-actions">
                 <button class="btn-primary" type="button" data-prediction-pending-result>查看预测结果</button>
                 <button class="btn" type="button" data-prediction-pending-back>返回列表</button>
@@ -63904,7 +63904,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       ];
       wrap.innerHTML = items.map((item) => `
         <div class="twod-tree-item">
-          <button class="twod-tree-node${state.selectedTwodDetailSection === item.key ? " active" : ""}" type="button" onclick="return openMlffDetailSection('${item.key}')">${item.label}</button>
+          <button class="twod-tree-node${item.key === "smallSystem" ? " mlff-red-field" : ""}${state.selectedTwodDetailSection === item.key ? " active" : ""}" type="button" onclick="return openMlffDetailSection('${item.key}')">${item.label}</button>
         </div>
       `).join("");
     }
@@ -88532,17 +88532,19 @@ print(resp.json())`;
   <div class="overlay" id="predictionTaskModal">
     <div class="modal modal-xl prediction-task-modal">
       <div class="modal-header">
-        <div>
-          <h3>发起预测任务</h3>
-          <p>配置任务名称、算法和计算参数后提交预测。</p>
+        <div class="prediction-task-title-wrap">
+          <span class="prediction-task-title-icon" aria-hidden="true">⚡</span>
+          <div>
+            <h3>发起预测任务</h3>
+            <p>配置任务名称、算法和计算参数后提交预测。</p>
+          </div>
         </div>
         <button class="modal-close" type="button" data-close-modal="predictionTaskModal">×</button>
       </div>
       <div class="modal-body modal-scroll" id="predictionTaskModalBody"></div>
       <div class="modal-footer">
         <button class="btn" type="button" data-close-modal="predictionTaskModal">取消</button>
-        <button class="btn" type="button" data-prediction-submit-pending>提交任务</button>
-        <button class="btn-primary" type="button" data-prediction-submit-result>提交并查看结果</button>
+        <button class="btn-primary" type="button" data-prediction-submit-pending>确认发起</button>
       </div>
     </div>
   </div>
@@ -88561,7 +88563,8 @@ print(resp.json())`;
           spinPolarized: false,
           functional: "GGA-PBE",
           kpointMode: "auto",
-          vdW: false
+          vdW: false,
+          taskDescription: ""
         },
         task: null
       };
@@ -88614,94 +88617,35 @@ print(resp.json())`;
         const draft = predictionTaskState.draft;
         const material = getPredictionTaskMaterial();
         const source = draft.source || "twod";
-        const options = getPredictionTaskOptions(source);
-        const subOptions = options.subAlgorithms[draft.algorithmType] || [];
         const isTwod = source === "twod";
-        const checked = (key) => draft.subAlgorithms.includes(key) ? " checked" : "";
-        const materialId = material?.id || draft.materialId || "-";
+        const allMaterials = typeof twodMaterials !== "undefined" ? twodMaterials : [];
+        const selectedId = material?.id || draft.materialId || allMaterials[0]?.id || "";
         const formula = material?.formula || material?.chemicalFormula || "-";
-
+        const algorithmCatalog = isTwod ? [
+          ["nonmagnetic", "非磁单层材料结构弛豫", "针对非磁性二维单层材料的结构优化算法，通过 API 调用返回优化后的晶格参数与原子位置信息。", "可用", "v1.0"],
+          ["magnetic", "磁性单层材料结构弛豫", "针对磁性二维单层材料的结构优化算法，考虑自旋极化效应并返回稳定自洽结构结果。", "维护中", "v1.1"],
+          ["defect", "缺陷单层材料结构弛豫", "针对含空位、间隙和替位缺陷的二维材料进行结构优化，返回缺陷构型与几何参数。", "可用", "v1.0"],
+          ["multilayer", "多层材料结构弛豫", "针对二维多层材料的结构优化，优化层间距离和堆垛方式，并通过 API 返回结果。", "可用", "v1.0"],
+          ["band", "能带结构计算", "计算材料能带结构、带隙与高对称路径上的电子态信息。", "可用", "v1.0"],
+          ["dos", "态密度计算", "计算总态密度与分波态密度，辅助分析材料电子结构。", "可用", "v1.0"],
+          ["phonon", "声子谱计算", "计算声子色散与动力学稳定性，识别虚频与软模。", "可用", "v1.0"]
+        ] : (getPredictionTaskOptions(source).subAlgorithms[getPredictionTaskOptions(source).types[0]] || []).map(([key, label]) => [key, label, "调用对应材料数据库算法完成标准化预测计算。", "可用", "v1.0"]);
+        const selectedAlgorithm = draft.subAlgorithms[0] || algorithmCatalog[0]?.[0];
+        const checked = (key) => draft.subAlgorithms.includes(key) ? " checked" : "";
         return `
-          <div class="prediction-task-overview">
-            <div class="prediction-task-overview-copy">
-              <span class="prediction-task-eyebrow">${esc(materialTypeLabel?.[source] || "材料预测")}</span>
-              <strong>预测任务配置</strong>
-              <span>请确认材料信息并选择算法后提交。</span>
-            </div>
-            <label class="field prediction-task-name-field">
-              <span>任务名称 <span class="required">*</span></span>
-              <input type="text" value="${esc(draft.taskName)}" placeholder="请输入预测任务名称" data-prediction-task-name>
-            </label>
+          <div class="prediction-modal-material-picker">
+            <div class="prediction-modal-section-title"><span class="prediction-info-icon">i</span><div><strong>待预测材料</strong><small>选择本次任务要进行预测的材料</small></div></div>
+            <label class="prediction-material-select"><span>选择材料</span><select data-prediction-material>${allMaterials.map((item) => `<option value="${esc(item.id)}"${item.id === selectedId ? " selected" : ""}>${esc(item.name || item.formula || item.id)} · ${esc(item.formula || "")}</option>`).join("")}</select><b>⌄</b></label>
+            <div class="prediction-material-summary"><span>材料名称：<strong>${esc(material?.name || "-   ")}</strong></span><span>材料编号：<a>${esc(material?.id || "-")}</a></span><span>化学式：<strong>${esc(formula)}</strong></span></div>
           </div>
-          <section class="twod-detail-section-card prediction-task-section">
-            <div class="twod-results-head">
-              <div><h4>材料信息</h4><p class="twod-result-hint">本次预测仅使用以下材料基础信息。</p></div>
-            </div>
-            <div class="table-wrap">
-              <table class="twod-result-table prediction-task-material-table">
-                <thead><tr><th>材料 ID</th><th>化学名称</th><th>化学式</th></tr></thead>
-                <tbody>
-                  <tr>
-                    <td>${esc(materialId)}</td>
-                    <td>${esc(material?.name || "-")}</td>
-                    <td>${esc(formula)}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-          <section class="twod-detail-section-card prediction-task-section prediction-task-algorithm-selection">
-            <div class="prediction-task-section-heading">
-              <div><h4>算法选择</h4><p class="twod-result-hint">选择算法后，在右侧同步显示可用子算法。</p></div>
-            </div>
-            <div class="prediction-task-algorithm-grid">
-              <label class="field prediction-task-algorithm-control">
-                <span>选择算法</span>
-                <select data-prediction-algorithm-type>
-                  ${options.types.map((item) => `<option${item === draft.algorithmType ? " selected" : ""}>${esc(item)}</option>`).join("")}
-                </select>
-              </label>
-              <div class="field prediction-task-subalgorithm-control">
-                <span>对应子算法</span>
-                <div class="prediction-task-subalgorithm-list">
-                  ${subOptions.map(([key, label]) => `<label class="prediction-task-subalgorithm-option"><input type="checkbox" value="${key}" data-prediction-subalgorithm${checked(key)}><span>${esc(label)}</span></label>`).join("")}
-                </div>
-              </div>
-            </div>
-            ${isTwod && draft.algorithmType === "晶体结构弛豫算法" ? `
-              <div class="form-grid">
-                ${draft.subAlgorithms.includes("magnetic") ? `<label class="field"><span>磁性计算配置</span><select data-prediction-magnetic-config><option>GGA+U</option><option>HSE06</option></select></label>` : ""}
-                ${draft.subAlgorithms.includes("defect") ? `<label class="field"><span>缺陷类型</span><select data-prediction-defect-type><option>空位</option><option>反位缺陷</option></select></label>` : ""}
-                ${draft.subAlgorithms.includes("multilayer") ? `<label class="field"><span>堆垛方式</span><select data-prediction-stacking><option>AA</option><option>AB</option><option>ABC</option></select></label>` : ""}
-              </div>
-            ` : ""}
-          </section>
-          <section class="twod-detail-section-card prediction-task-section">
-            <h4>算法核心参数配置</h4>
-            ${isTwod ? `
-              <div class="form-grid">
-                <label class="field"><span>计算软件</span><input type="text" value="VASP" disabled></label>
-                <label class="field"><span>计算模式</span><span><input type="checkbox" data-prediction-spin${draft.spinPolarized ? " checked" : ""}> 自旋极化</span></label>
-                <label class="field"><span>泛函选择</span><select data-prediction-functional><option${draft.functional === "GGA-PBE" ? " selected" : ""}>GGA-PBE</option><option${draft.functional === "HSE06" ? " selected" : ""}>HSE06</option></select></label>
-                ${draft.subAlgorithms.includes("magnetic") ? `<label class="field"><span>U 值（3d 金属）</span><input type="number" step="0.1" placeholder="如 3.0" data-prediction-u-value></label>` : ""}
-                <label class="field"><span>k 点取样设置</span><select data-prediction-kpoint-mode><option${draft.kpointMode === "auto" ? " selected" : ""}>自动生成</option><option${draft.kpointMode === "manual" ? " selected" : ""}>手动输入 KPOINTS 参数</option></select></label>
-                <label class="field"><span>范德华修正</span><span><input type="checkbox" data-prediction-vdw${draft.vdW ? " checked" : ""}> DFT-D3</span></label>
-                <label class="field"><span>能量收敛</span><input type="text" value="1E-5 eV" data-prediction-energy-convergence></label>
-                <label class="field"><span>受力收敛</span><input type="text" value="0.01 eV/Å" data-prediction-force-convergence></label>
-              </div>
-            ` : `<div class="twod-result-hint">当前材料库支持调用对应的${esc(options.types[0])}。</div>`}
-          </section>
-          <section class="twod-detail-section-card prediction-task-section">
-            <div class="twod-results-head">
-              <div><h4>输入资源确认</h4><p class="twod-result-hint">输入来源：平台数据库内置标准化结构（默认）或本地上传自定义 POSCAR 补充文件（可选，高级用户）。</p></div>
-            </div>
-            <div class="form-grid">
-              <label class="field"><span>输入来源</span><select data-prediction-source-mode><option value="database"${draft.sourceMode === "database" ? " selected" : ""}>平台数据库内置标准化结构（默认）</option><option value="upload"${draft.sourceMode === "upload" ? " selected" : ""}>本地上传自定义 POSCAR 补充文件（可选）</option></select></label>
-              <div class="field"><span>文件预览</span><div class="twod-record-inline-actions"><button class="btn" type="button" data-prediction-preview-file>POSCAR 在线预览</button><button class="btn" type="button" data-prediction-preview-pdb>PDB 在线预览</button></div></div>
-            </div>
-          </section>
+          <label class="prediction-modal-task-name"><span>预测任务名称 <i>*</i></span><input type="text" value="${esc(draft.taskName)}" placeholder="请输入任务名称" data-prediction-task-name><small>请输入任务名称，便于后续查找和管理，最多50个字符</small></label>
+          <section class="prediction-modal-algorithm-section"><div class="prediction-modal-field-title"><span>算法分类 <i>*</i></span><div class="prediction-algorithm-categories"><button type="button" class="active" data-prediction-algorithm-category="twod">二维材料数据库应用算法</button><button type="button" data-prediction-algorithm-category="lowdim">低维材料数据库应用算法</button><button type="button" data-prediction-algorithm-category="mlff">机器学习力场算法</button></div></div><div class="prediction-algorithm-heading"><span>选择算法 <i>*</i></span><a href="#" onclick="return false">查看全部算法 ↗</a></div><div class="prediction-algorithm-list">${algorithmCatalog.map(([key, label, desc, availability, version]) => `<label class="prediction-algorithm-card${key === selectedAlgorithm ? " selected" : ""}"><input type="checkbox" value="${key}" data-prediction-subalgorithm${checked(key)}><span class="prediction-algorithm-radio"></span><div><strong>${esc(label)}</strong><em class="${availability === "维护中" ? "maintenance" : "available"}">${availability}</em><small>${version}</small><p>${esc(desc)}</p></div><b>晶体结构弛豫</b></label>`).join("")}</div></section>
+          <section class="prediction-modal-config-section"><h4>计算参数配置 <em>选填</em></h4><div class="prediction-modal-config-grid"><label><span>收敛精度</span><select><option>中等精度 (1e-3 eV/Å)</option><option>高精度 (1e-5 eV/Å)</option></select></label><label><span>最大迭代步数</span><input type="number" value="100"></label></div><small class="prediction-config-hint">ⓘ 如不填写将使用算法默认参数，您可在任务详情中查看完整参数配置</small></section>
+          <section class="prediction-modal-description"><h4>任务描述 <em>选填</em></h4><textarea rows="3" placeholder="请输入任务描述信息，便于后续回顾任务" data-prediction-task-description>${esc(draft.taskDescription || "")}</textarea></section>
+          <select class="prediction-hidden-control" data-prediction-algorithm-type>${getPredictionTaskOptions(source).types.map((item) => `<option${item === draft.algorithmType ? " selected" : ""}>${esc(item)}</option>`).join("")}</select>
         `;
       }
+
 
       function renderPredictionTaskModal() {
         const body = document.getElementById("predictionTaskModalBody");
@@ -88709,8 +88653,11 @@ print(resp.json())`;
       }
 
       function openPredictionTaskModal(source, materialId) {
+        const defaultMaterialId = !materialId && source === "twod" && typeof twodMaterials !== "undefined"
+          ? (twodMaterials.find((item) => /MoS2|MoS₂/i.test(`${item.name || ""}${item.formula || ""}`))?.id || twodMaterials[0]?.id)
+          : materialId;
         const material = typeof getCanonicalMaterialBySource === "function"
-          ? getCanonicalMaterialBySource(source, materialId)
+          ? getCanonicalMaterialBySource(source, defaultMaterialId)
           : null;
         if (!material) return false;
         const options = getPredictionTaskOptions(source);
@@ -88724,7 +88671,8 @@ print(resp.json())`;
           spinPolarized: source === "twod" && /磁|Fe|Co|Ni|Mn/i.test(`${material.name || ""}${material.formula || ""}`),
           functional: "GGA-PBE",
           kpointMode: "auto",
-          vdW: false
+          vdW: false,
+          taskDescription: ""
         };
         renderPredictionTaskModal();
         openModal("predictionTaskModal");
@@ -88743,6 +88691,7 @@ print(resp.json())`;
         draft.functional = body.querySelector("[data-prediction-functional]")?.value || draft.functional;
         draft.kpointMode = body.querySelector("[data-prediction-kpoint-mode]")?.value === "手动输入 KPOINTS 参数" ? "manual" : "auto";
         draft.vdW = !!body.querySelector("[data-prediction-vdw]")?.checked;
+        draft.taskDescription = body.querySelector("[data-prediction-task-description]")?.value || draft.taskDescription;
       }
 
       function showPredictionPendingPage() {
@@ -88753,7 +88702,7 @@ print(resp.json())`;
         page.querySelector("#predictionPendingTaskName").textContent = draft.taskName || "预测任务";
         page.querySelector("#predictionPendingMaterial").textContent = `${material?.id || "-"} · ${material?.formula || "-"}`;
         page.querySelector("#predictionPendingAlgorithm").textContent = `${draft.algorithmType} · ${draft.subAlgorithms.join("、") || "未选择"}`;
-        page.querySelector("#predictionPendingSummary").textContent = `已提交 ${material?.name || "当前材料"} 的预测任务，正在等待算法运行。`;
+        page.querySelector("#predictionPendingSummary").textContent = `已提交 ${material?.name || "当前材料"} 的预测任务，算法正在处理中，请耐心等待几分钟。`;
         switchPage("prediction-pending");
       }
 
@@ -88774,11 +88723,7 @@ print(resp.json())`;
         }
         predictionTaskState.task = { ...draft, id: `pred-${Date.now()}`, status: "pending" };
         closeModal("predictionTaskModal");
-        if (mode === "result") {
-          openPredictionPage(draft.source, draft.materialId);
-        } else {
-          showPredictionPendingPage();
-        }
+        showPredictionPendingPage();
       }
 
       const previousPredictionDetailOpen = handleMaterialDetailOpen;
@@ -88797,6 +88742,11 @@ print(resp.json())`;
       document.body.addEventListener("change", (event) => {
         if (!event.target.closest("#predictionTaskModalBody")) return;
         syncPredictionTaskDraftFromDom();
+        if (event.target.matches("[data-prediction-material]")) {
+          predictionTaskState.draft.materialId = event.target.value;
+          renderPredictionTaskModal();
+          return;
+        }
         if (event.target.matches("[data-prediction-algorithm-type]")) {
           const options = getPredictionTaskOptions(predictionTaskState.draft.source);
           const next = options.subAlgorithms[predictionTaskState.draft.algorithmType] || [];
@@ -88806,8 +88756,18 @@ print(resp.json())`;
         if (event.target.matches("[data-prediction-subalgorithm]")) renderPredictionTaskModal();
       });
       document.body.addEventListener("click", (event) => {
+        if (event.target.closest("[data-prediction-create]")) {
+          openPredictionTaskModal("twod", "");
+          return;
+        }
+        const category = event.target.closest("[data-prediction-algorithm-category]");
+        if (category) {
+          predictionTaskState.draft.algorithmType = category.dataset.predictionAlgorithmCategory === "twod" ? "晶体结构弛豫算法" : "材料性质计算算法";
+          renderPredictionTaskModal();
+          return;
+        }
         if (event.target.closest("[data-prediction-submit-pending]")) return submitPredictionTask("pending");
-        if (event.target.closest("[data-prediction-submit-result]")) return submitPredictionTask("result");
+
         if (event.target.closest("[data-prediction-remove-material]")) {
           predictionTaskState.draft.materialId = "";
           renderPredictionTaskModal();
@@ -89012,52 +88972,36 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       function renderPredictionTaskManagementPage() {
         const page = document.getElementById("page-prediction-tasks");
         if (!page) return;
+        document.querySelectorAll(".page").forEach((node) => node.classList.toggle("active", node.id === "page-prediction-tasks"));
         const rows = filterPredictionTaskRows();
+        const isDefaultView = !predictionTaskFilters.name && predictionTaskFilters.source === "全部" && predictionTaskFilters.status === "全部" && !predictionTaskFilters.start && !predictionTaskFilters.end;
+        const extraRow = { id: "PT-20260819-004", name: "石墨烯缺陷结构预测测试", source: "二维材料数据库", createdAt: "2026-08-19 15:48", stage: "结果归档", status: "已取消", progress: 0, materialSource: "twod", materialId: "2D-Graphene-001", algorithm: "缺陷单层材料结构弛豫" };
+        const referenceRows = isDefaultView ? [
+          { ...rows[0], name: "MoS₂ 非磁单层结构弛豫预测", algorithm: "非磁单层材料结构弛豫算法", status: "弛豫计算中", materialId: "2D-MoS2-001", createdAt: "2024-01-15 14:32:18" },
+          { ...rows[1], name: "WS₂ 多层材料结构优化计算", algorithm: "多层材料结构弛豫算法", status: "运行成功", materialId: "2D-WS2-001", createdAt: "2024-01-15 10:15:42" },
+          { ...rows[0], id: "PT-20260821-003", name: "WSe₂ 缺陷结构弛豫预测", algorithm: "缺陷单层材料结构弛豫算法", status: "排队中", materialId: "2D-WSe2-001", createdAt: "2024-01-15 14:45:00" },
+          { ...rows[3], name: "MoSe₂ 磁性单层结构预测", algorithm: "磁性单层材料结构弛豫算法", status: "运行失败", materialId: "2D-MoSe2-001", createdAt: "2024-01-14 16:22:08" },
+          { ...rows[2], id: "PT-20260814-007", name: "Ba₂Ti₃O₈ 晶体结构预测计算", algorithm: "非磁单层材料结构弛豫算法", status: "运行成功", materialId: "2D-Ba2Ti3O8-001", createdAt: "2024-01-14 09:30:15" },
+          extraRow
+        ] : rows;
+        const displayRows = referenceRows;
+        const statusIcon = (status) => status === "运行成功" ? "✓" : status === "运行失败" ? "×" : status === "已取消" ? "⊙" : "◷";
+        const statusLabel = (status) => status === "运行成功" ? "已完成" : status === "运行失败" ? "失败" : status === "已取消" ? "已取消" : status === "排队中" ? "排队中" : "运行中";
+        const statusClass = (status) => status === "运行成功" ? "success" : status === "运行失败" ? "danger" : status === "已取消" ? "muted" : status === "排队中" ? "queued" : "running";
+        const author = (task, index) => task.status === "运行成功" ? ["李博士", "#f0ddff", "李"] : task.status === "运行失败" ? ["王工", "#d5f8e6", "王"] : task.status === "已取消" ? ["赵教授", "#ffe9c7", "赵"] : ["张研究员", "#d9e9ff", "张"];
+        const algorithmName = (task) => task.algorithm || "非磁单层材料结构弛豫算法";
+        const materialName = (task) => task.name.includes("WS2") ? "WS₂" : task.name.includes("WSe₂") ? "WSe₂" : task.name.includes("Ba₂Ti₃O₈") ? "Ba₂Ti₃O₈" : task.name.includes("石墨烯") ? "Graphene" : task.name.includes("Nb2C") ? "Nb₂C" : "MoS₂";
         page.innerHTML = `
-          <div class="page-head">
-            <div>
-              <h2>预测任务管理</h2>
-              <p>统一查看低维材料数据库分析预测任务的调度状态、运行进度和结果入口。</p>
-            </div>
-          </div>
-          <section class="card pad filter-card">
-            <div class="filter-row">
-              <label class="field"><span>任务名称</span><input type="text" value="${escapeTaskHtml(predictionTaskFilters.name)}" placeholder="请输入任务名称" data-prediction-filter="name"></label>
-              <label class="field"><span>子库类型</span><select data-prediction-filter="source"><option>全部</option><option${predictionTaskFilters.source === "二维材料数据库" ? " selected" : ""}>二维材料数据库</option><option${predictionTaskFilters.source === "电解质材料数据库" ? " selected" : ""}>电解质材料数据库</option><option${predictionTaskFilters.source === "有机光电材料数据库" ? " selected" : ""}>有机光电材料数据库</option><option${predictionTaskFilters.source === "机器学习力场数据库" ? " selected" : ""}>机器学习力场数据库</option><option${predictionTaskFilters.source === "催化材料数据库" ? " selected" : ""}>催化材料数据库</option></select></label>
-              <label class="field"><span>任务状态</span><select data-prediction-filter="status"><option>全部</option>${["排队中", "弛豫计算中", "性质计算中", "运行成功", "运行失败", "已取消"].map((item) => `<option${predictionTaskFilters.status === item ? " selected" : ""}>${item}</option>`).join("")}</select></label>
-              <label class="field"><span>开始时间</span><input type="date" value="${predictionTaskFilters.start}" data-prediction-filter="start"></label>
-              <label class="field"><span>结束时间</span><input type="date" value="${predictionTaskFilters.end}" data-prediction-filter="end"></label>
-              <div class="field"><span>&nbsp;</span><div class="twod-record-inline-actions"><button class="btn-primary" type="button" data-prediction-filter-submit>查询</button><button class="btn" type="button" data-prediction-filter-reset>重置</button></div></div>
-            </div>
-          </section>
-          <section class="card pad table-card">
-            <div class="table-head"><div><h3>预测任务列表</h3><p class="section-subtitle">共 ${rows.length} 条任务记录</p></div></div>
-            <div class="table-wrap">
-              <table class="twod-result-table">
-                <thead><tr><th>任务 ID</th><th>任务名称</th><th>所属材料子库</th><th>创建时间</th><th>当前阶段</th><th>任务状态</th><th>进度百分比</th><th>操作</th></tr></thead>
-                <tbody>${rows.length ? rows.map((task) => `
-                  <tr>
-                    <td title="${escapeTaskHtml(task.id)}">${escapeTaskHtml(task.id)}</td>
-                    <td title="${escapeTaskHtml(task.name)}">${escapeTaskHtml(task.name)}</td>
-                    <td>${escapeTaskHtml(task.source)}</td>
-                    <td>${escapeTaskHtml(task.createdAt)}</td>
-                    <td>${escapeTaskHtml(task.stage)}</td>
-                    <td><span class="status-badge ${getPredictionTaskStatusClass(task.status)}">${escapeTaskHtml(task.status)}</span></td>
-                    <td>${task.progress}%</td>
-                    <td><div class="twod-record-inline-actions">
-                      <button class="twod-action-view" type="button" data-prediction-task-result="${escapeTaskHtml(task.id)}"${task.status === "运行成功" ? "" : " disabled"}>查看结果</button>
-                      <button class="twod-record-link" type="button" data-prediction-task-log="${escapeTaskHtml(task.id)}">查看日志</button>
-                      <button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}"${task.status === "运行失败" ? "" : " disabled"}>重试任务</button>
-                      <button class="twod-record-link" type="button" data-prediction-task-cancel="${escapeTaskHtml(task.id)}"${["排队中", "弛豫计算中", "性质计算中"].includes(task.status) ? "" : " disabled"}>取消任务</button>
-                    </div></td>
-                  </tr>
-                `).join("") : `<tr><td colspan="8" class="opto-table-empty">暂无符合条件的预测任务。</td></tr>`}</tbody>
-              </table>
-            </div>
-            <div class="result-footer"><span>共 ${rows.length} 条任务记录</span></div>
-          </section>
+          <div class="prediction-task-breadcrumb"><span>低维材料数据库分析预测</span><b>/</b><strong>预测任务管理</strong></div>
+          <div class="prediction-task-hero"><div class="prediction-task-title-wrap"><div class="prediction-task-title-icon">✓</div><div><h2>预测任务管理</h2><p>管理所有材料预测任务，查看任务状态与计算结果</p></div></div><button class="prediction-create-btn" type="button" data-prediction-create><span>＋</span>新建预测任务</button></div>
+          <section class="prediction-stat-grid" aria-label="任务统计"><article class="prediction-stat-card"><div><span class="prediction-stat-label">全部任务</span><strong>128</strong><em class="stat-up">↑ 较上周 +12%</em></div><div class="stat-icon blue">▤</div></article><article class="prediction-stat-card"><div><span class="prediction-stat-label">运行中</span><strong class="orange-text">7</strong><em class="stat-warn">◷ 3 个排队中</em></div><div class="stat-icon orange">▶</div></article><article class="prediction-stat-card"><div><span class="prediction-stat-label">已完成</span><strong class="green-text">112</strong><em class="stat-up">↑ 成功率 95.7%</em></div><div class="stat-icon green">✓</div></article><article class="prediction-stat-card"><div><span class="prediction-stat-label">失败/已取消</span><strong class="red-text">9</strong><em class="stat-down">↓ 失败率 4.3%</em></div><div class="stat-icon red">×</div></article></section>
+          <section class="prediction-filter-card"><div class="prediction-filter-row"><label class="prediction-search-field"><span class="search-glyph">⌕</span><input type="text" value="${escapeTaskHtml(predictionTaskFilters.name)}" placeholder="搜索任务名称、材料名称..." data-prediction-filter="name"></label><label class="prediction-select-field"><select data-prediction-filter="status"><option>全部状态</option>${["排队中", "弛豫计算中", "性质计算中", "运行成功", "运行失败", "已取消"].map((item) => `<option${predictionTaskFilters.status === item ? " selected" : ""}>${item}</option>`).join("")}</select><span>⌄</span></label><label class="prediction-select-field"><select data-prediction-filter="source"><option>全部算法分类</option><option${predictionTaskFilters.source === "二维材料数据库" ? " selected" : ""}>二维材料数据库</option><option${predictionTaskFilters.source === "电解质材料数据库" ? " selected" : ""}>电解质材料数据库</option><option${predictionTaskFilters.source === "有机光电材料数据库" ? " selected" : ""}>有机光电材料数据库</option><option${predictionTaskFilters.source === "机器学习力场数据库" ? " selected" : ""}>机器学习力场数据库</option><option${predictionTaskFilters.source === "催化材料数据库" ? " selected" : ""}>催化材料数据库</option></select><span>⌄</span></label><label class="prediction-date-field"><input type="text" value="" placeholder="选择创建时间范围" onfocus="this.type='date'" onblur="if(!this.value)this.type='text'" data-prediction-filter="start"><span>▣</span></label><button class="prediction-query-btn" type="button" data-prediction-filter-submit>查询</button><button class="prediction-reset-btn" type="button" data-prediction-filter-reset>重置</button></div><div class="prediction-quick-filter"><span>快速筛选:</span><button class="quick-chip active" type="button" data-prediction-quick="全部">全部</button><button class="quick-chip" type="button" data-prediction-quick="运行中">运行中</button><button class="quick-chip" type="button" data-prediction-quick="已完成">已完成</button><button class="quick-chip" type="button" data-prediction-quick="排队中">排队中</button><button class="quick-chip" type="button" data-prediction-quick="失败">失败</button><button class="quick-chip" type="button" data-prediction-quick="我的任务">我的任务</button></div></section>
+          <section class="prediction-table-card"><div class="prediction-table-head"><div><h3>任务列表 <span>共 128 条</span></h3></div><div class="prediction-table-tools"><button type="button" aria-label="刷新任务列表">⟳</button><button type="button" aria-label="导出任务">⇩ 导出</button><button type="button" aria-label="列表设置">⚙</button></div></div><div class="prediction-table-wrap"><table class="prediction-task-table"><thead><tr><th><input type="checkbox" aria-label="选择全部任务"></th><th>任务名称</th><th>材料信息</th><th>算法名称</th><th>状态</th><th>创建人</th><th>创建时间</th><th>耗时</th><th>操作</th></tr></thead><tbody>${displayRows.length ? displayRows.map((task, index) => { const person = author(task, index); return `<tr><td><input type="checkbox" aria-label="选择 ${escapeTaskHtml(task.name)}"></td><td><div class="task-name-cell"><a href="#" onclick="return false">${escapeTaskHtml(task.name)}</a><small>${escapeTaskHtml(task.id.replace("PT-", "TASK-").replaceAll("-", ""))}</small></div></td><td><div class="material-cell"><strong>${materialName(task)}</strong><small>mp-${escapeTaskHtml(task.materialId.replace(/[^0-9]/g, "").slice(-7) || "1018134")}</small></div></td><td><div class="algorithm-cell">${escapeTaskHtml(algorithmName(task))}<small>v1.0 · 二维材料</small></div></td><td><span class="prediction-status ${statusClass(task.status)}"><i>${statusIcon(task.status)}</i>${statusLabel(task.status)}</span></td><td><div class="creator-cell"><b style="background:${person[1]}">${person[2]}</b><span>${person[0]}</span></div></td><td>${escapeTaskHtml(task.createdAt)}</td><td class="duration-cell">${task.status === "运行成功" ? "12分36秒" : task.status === "运行失败" ? "03分15秒" : task.status === "已取消" ? "01分20秒" : index === 0 ? "--" : "06分42秒"}</td><td><div class="prediction-actions"><button class="twod-action-view" type="button" data-prediction-task-result="${escapeTaskHtml(task.id)}"${task.status === "运行成功" ? "" : " disabled"}>查看结果</button>${task.status === "运行失败" ? `<button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}">重试</button>` : task.status === "已取消" ? `<button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}">重新提交</button>` : task.status === "运行成功" ? `<button class="twod-record-link" type="button" data-prediction-task-log="${escapeTaskHtml(task.id)}">下载</button>` : `<button class="twod-record-link" type="button" data-prediction-task-cancel="${escapeTaskHtml(task.id)}">终止</button>`}</div></td></tr>`; }).join("") : `<tr><td colspan="9" class="opto-table-empty">暂无符合条件的预测任务。</td></tr>`}</tbody></table></div><div class="prediction-table-footer"><span>共 128 条记录，第 1 / 22 页</span><div class="prediction-pagination"><button type="button">‹</button><button type="button" class="active">1</button><button type="button">2</button><button type="button">3</button><button type="button">4</button><button type="button">5</button><span>...</span><button type="button">22</button><button type="button">›</button><label>10条/页　⌄</label></div></div></section>
         `;
+        page.querySelectorAll("[data-prediction-quick]").forEach((button) => button.addEventListener("click", () => { const value = button.dataset.predictionQuick; if (value === "全部") Object.assign(predictionTaskFilters, { name: "", source: "全部", status: "全部", start: "", end: "" }); else if (value === "失败") predictionTaskFilters.status = "运行失败"; else if (value === "排队中") predictionTaskFilters.status = "排队中"; else if (value === "已完成") predictionTaskFilters.status = "运行成功"; else if (value === "运行中") predictionTaskFilters.status = "性质计算中"; renderPredictionTaskManagementPage(); }));
+        page.querySelectorAll("[data-prediction-filter]").forEach((field) => field.addEventListener("change", () => { predictionTaskFilters[field.dataset.predictionFilter] = field.value === "全部状态" || field.value === "全部算法分类" ? "全部" : field.value; }));
       }
+
 
       function renderAlgorithmDocDetailPage(algorithmId) {
         const page = document.getElementById("page-algorithm-doc-detail");
@@ -89078,7 +89022,11 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       const originalSwitchPageForPredictionTasks = switchPage;
       switchPage = function predictionTaskAwareSwitchPage(page) {
         originalSwitchPageForPredictionTasks(page);
-        if (page === "prediction-tasks") renderPredictionTaskManagementPage();
+        if (page === "prediction-tasks") {
+          document.querySelectorAll(".page").forEach((node) => node.classList.toggle("active", node.id === "page-prediction-tasks"));
+          state.page = page;
+          renderPredictionTaskManagementPage();
+        }
         if (page === "algorithm-doc-detail") {
           const algorithm = typeof findAlgorithmById === "function" ? findAlgorithmById(state.activeAlgorithmResourceId) : null;
           if (algorithm && !document.querySelector("#page-algorithm-doc-detail .algorithm-reference-page")) renderAlgorithmDocDetailPage(algorithm.id);
@@ -90672,6 +90620,16 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     #page-twod-detail .missing-field-red,
     #page-twod-detail .missing-field-red * { color: #e53935 !important; }
   </style>
+  <style id="mlff-red-fields-20260829-style">
+    #page-twod-detail[data-source="mlff"] .mlff-red-field,
+    #page-twod-detail[data-source="mlff"] .mlff-red-field *,
+    #page-twod-detail[data-source="mlff"] .mlff-red-heading,
+    #page-twod-detail[data-source="mlff"] .mlff-red-heading *,
+    #page-twod-detail[data-source="mlff"] .mlff-red-section-card .mlff-red-heading,
+    #page-twod-detail[data-source="mlff"] .mlff-red-structure-card .mlff-red-heading {
+      color: #d12f2f !important;
+    }
+  </style>
   <style id="mlff-detail-layout-20260829-style">
     #page-twod-detail[data-source="mlff"] .mlff-request-layout {
       display: grid;
@@ -90906,8 +90864,19 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
           <div class="mlff-image-meta">以上展示前 ${rows.length} 个原子坐标；完整坐标请下载 PDB 文件。多分子团簇的独立分子坐标在当前数据条目中未记录。</div>`;
       }
 
+      const MLFF_RED_LABELS = new Set([
+        "色散系数", "色散率", "相关文件下载", "参数力场文件包", "PDB 结构文件", "PDB 结构文件下载",
+        "XML 力场文件", "XML 力场文件下载", "完整结构图像", "大体系结构数据", "3D分子结构图",
+        "多分子团簇分子坐标", "分子间相互作用能", "分子坐标", "小体系结构"
+      ]);
+
+      function mlffRedClass(label) {
+        return MLFF_RED_LABELS.has(String(label || "").replace(/<[^>]*>/g, "").trim()) ? " mlff-red-field" : "";
+      }
+
       function renderRows(rows, options = {}) {
-        return renderDetailKvSection(options.title || "", rows.map((row) => ({ label: row.label, value: row.value })), { fallback: "未记录" });
+        const redLabels = options.redLabels || MLFF_RED_LABELS;
+        return renderDetailKvSection(options.title || "", rows.map((row) => ({ label: row.label, value: row.value })), { fallback: "未记录", redLabels });
       }
 
       function renderScene(material, kind, title) {
@@ -90916,8 +90885,8 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         const realViewer = useRealViewer ? renderLowDimRealViewer("mlff", material) : "";
         const scene = realViewer ? null : buildMlffScene(material, kind);
         return `
-          <section class="mlff-request-card twod-detail-visual-card">
-            <h5>${esc(title)}</h5>
+          <section class="mlff-request-card twod-detail-visual-card mlff-red-structure-card">
+            <h5 class="mlff-red-field mlff-red-heading">${esc(title)}</h5>
             <div class="mlff-structure-stage mlff-request-stage">
               ${realViewer || `<div class="material-atom-cluster mlff-scene" data-mlff-scene-size="${scene.size}">${renderMlffSceneMarkup(scene)}</div>`}
             </div>
@@ -90926,7 +90895,8 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       }
 
       function renderDownloadRow(title, description, kind, buttonText = "下载") {
-        return `<div class="mlff-download-row"><div><strong>${esc(title)}</strong><span>${esc(description)}</span></div><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('${kind}')">${esc(buttonText)}</button></div>`;
+        const redClass = mlffRedClass(title);
+        return `<div class="mlff-download-row"><div><strong class="${redClass.trim()} mlff-red-field">${esc(title)}</strong><span>${esc(description)}</span></div><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('${kind}')">${esc(buttonText)}</button></div>`;
       }
 
       function renderParameterGrid(rows) {
@@ -90969,7 +90939,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
             <section class="mlff-request-card"><h5>基础信息</h5>${renderRows(rows)}</section>
             <div class="mlff-request-right">
               ${renderScene(material, "molecule", "3D分子结构图")}
-              <section class="mlff-request-card"><h5>相关文件下载</h5><div class="mlff-download-list">
+              <section class="mlff-request-card"><h5 class="mlff-red-field mlff-red-heading">相关文件下载</h5><div class="mlff-download-list">
                 ${renderDownloadRow("参数力场文件包", "包含结构 PDB 与力场 XML 等关联文件", "package")}
                 ${renderDownloadRow("PDB 结构文件", "包含原子类型与三维坐标", "pdb")}
                 ${renderDownloadRow("XML 力场文件", "包含力场参数映射与结构节点信息", "xml")}
@@ -90994,7 +90964,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
           return `
             <div class="twod-detail-page-head"><div><h4>${esc(titleText)}</h4><p>${esc(descText)}</p></div></div>
             <div class="mlff-request-layout">
-              <section class="mlff-request-card"><h5>分子体系信息</h5>${renderRows(moleculeRows)}<h5 style="margin-top:18px;">分子坐标</h5>${renderCoordinates(material, record)}</section>
+              <section class="mlff-request-card"><h5>分子体系信息</h5>${renderRows(moleculeRows)}<h5 class="mlff-red-field mlff-red-heading" style="margin-top:18px;">分子坐标</h5>${renderCoordinates(material, record)}</section>
               <div class="mlff-request-right">
                 ${renderScene(material, "molecule", "3D分子结构图")}
                 <section class="mlff-request-card"><h5>PDB 格式文件</h5><div class="mlff-download-list">${renderDownloadRow("PDB 结构文件", "提供完整原子类型和三维坐标，可导入第三方分子可视化工具", "pdb", "下载 PDB")}</div></section>
@@ -91025,10 +90995,10 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         return `
           <div class="twod-detail-page-head"><div><h4>${esc(titleText)}</h4><p>${esc(descText)}</p></div></div>
           <div class="mlff-request-layout">
-            <section class="mlff-request-card"><h5>${isSmall ? "团簇信息" : "大体系信息"}</h5>${renderRows(leftRows)}</section>
+            <section class="mlff-request-card mlff-red-section-card"><h5 class="mlff-red-field mlff-red-heading">${isSmall ? "团簇信息" : "大体系信息"}</h5>${renderRows(leftRows)}</section>
             <div class="mlff-request-right">
               ${renderScene(material, tabKey, `${titleText}图`)}
-              <section class="mlff-request-card"><h5>结构参数及原子组成</h5>${renderParameterGrid(parameterRows)}
+              <section class="mlff-request-card mlff-red-structure-card"><h5 class="mlff-red-field mlff-red-heading">结构参数及原子组成</h5>${renderParameterGrid(parameterRows)}
                 ${isSmall ? "" : `<div class="mlff-image-meta"><strong>完整结构描述：</strong>${esc(material.name)} 的扩展多分子体系结构，用于展示周期复制、拓扑扩展与多分子排布。<br><strong>图片名称：</strong>${esc(imageName)}<br><strong>图片格式：</strong>SVG 矢量图</div><div class="mlff-download-list" style="margin-top:12px;"><div class="mlff-download-row"><div><strong>完整结构图像</strong><span>${esc(imageName)} · SVG</span></div><button class="twod-detail-link-btn" type="button" onclick="return downloadMlffStructureImage('largeSystem')">下载图像</button></div>${renderDownloadRow("大体系结构数据", "完整结构参数与原子组成数据", "largeSystem")}</div>`}
               </section>
             </div>
@@ -91054,5 +91024,99 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         return false;
       };
     })();
-  </script>  </body>
-</html>\n
+  </script>    <style id="prediction-flow-polish-20260829">
+    #predictionTaskModal .prediction-task-title-wrap { display: flex; align-items: center; gap: 12px; }
+    #predictionTaskModal .prediction-task-title-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: #eaf3ff; color: #2563eb; font-size: 20px; box-shadow: inset 0 0 0 1px #d5e6ff; }
+    #predictionTaskModal .prediction-task-title-wrap h3 { margin: 0 0 4px; }
+    #predictionTaskModal .prediction-task-title-wrap p { margin: 0; }
+    #predictionTaskModal .prediction-task-section { border: 1px solid #e2ebf6; box-shadow: 0 5px 16px rgba(32, 76, 132, .04); }
+    #predictionTaskModal .prediction-task-material-table th { color: #7190b4; font-weight: 700; background: #f8fbff; }
+    #predictionTaskModal .prediction-task-material-table td { color: #29415f; font-weight: 600; }
+    #predictionTaskModal .prediction-task-section h4 { display: flex; align-items: center; gap: 8px; }
+    #predictionTaskModal .prediction-task-optional-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 5px; background: #f1f5f9; color: #8ba0b8; font-size: 11px; font-weight: 600; }
+    #predictionTaskModal textarea { width: 100%; min-height: 96px; padding: 12px 14px; border: 1px solid #d8e4f1; border-radius: 10px; resize: vertical; color: #29415f; font: inherit; outline: none; }
+    #predictionTaskModal textarea:focus, #predictionTaskModal input:focus, #predictionTaskModal select:focus { border-color: #4d86ed; box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+    #page-prediction-pending .twod-detail-page-shell { min-height: calc(100vh - 120px); }
+    #page-prediction-pending .twod-detail-section-card { max-width: 920px; margin: 34px auto; padding: 34px; border: 1px solid #dce8f7; border-radius: 20px; background: linear-gradient(180deg, #fff 0%, #f9fbff 100%); box-shadow: 0 18px 45px rgba(29, 67, 117, .09); }
+    #page-prediction-pending .twod-results-head { align-items: flex-start; }
+    #page-prediction-pending .twod-results-head h3 { font-size: 22px; color: #1d3e72; }
+    #page-prediction-pending .prediction-pending-status { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; }
+    #page-prediction-pending .prediction-pending-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, .12); animation: prediction-pulse 1.6s ease-in-out infinite; }
+    #page-prediction-pending .prediction-pending-message { display: flex; align-items: center; gap: 14px; margin: 28px 0; padding: 18px 20px; border: 1px solid #d6e7ff; border-radius: 13px; background: #eef6ff; color: #426184; }
+    #page-prediction-pending .prediction-pending-message strong, #page-prediction-pending .prediction-pending-message span { display: block; }
+    #page-prediction-pending .prediction-pending-message strong { margin-bottom: 4px; color: #2458a5; }
+    #page-prediction-pending .prediction-pending-spinner { flex: 0 0 auto; width: 30px; height: 30px; border: 3px solid #c9ddfb; border-top-color: #2f73df; border-radius: 50%; animation: prediction-spin .9s linear infinite; }
+    @keyframes prediction-spin { to { transform: rotate(360deg); } }
+    @keyframes prediction-pulse { 50% { opacity: .45; transform: scale(.82); } }
+    @media (max-width: 760px) { #page-prediction-pending .twod-detail-section-card { margin: 18px 0; padding: 22px 18px; } #page-prediction-pending .prediction-pending-message { align-items: flex-start; } }
+    @media (prefers-reduced-motion: reduce) { #page-prediction-pending .prediction-pending-dot, #page-prediction-pending .prediction-pending-spinner { animation: none; } }
+  </style></body>
+</html>
+  <style id="prediction-task-reference-layout">
+    #page-prediction-tasks { margin: 0 !important; padding: 0 0 22px !important; color: #24344d; }
+    #page-prediction-tasks .prediction-task-breadcrumb { display:flex; align-items:center; gap:10px; color:#8090a5; font-size:13px; margin:0 0 18px; }
+    #page-prediction-tasks .prediction-task-breadcrumb strong { color:#52647d; font-weight:600; }
+    #page-prediction-tasks .prediction-task-breadcrumb b { color:#b4c0cf; font-weight:400; }
+    #page-prediction-tasks .prediction-task-hero { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+    #page-prediction-tasks .prediction-task-title-wrap { display:flex; align-items:center; gap:14px; }
+    #page-prediction-tasks .prediction-task-title-icon { width:42px; height:42px; display:grid; place-items:center; color:#2563eb; background:#e6f0ff; border-radius:11px; font-size:25px; font-weight:700; }
+    #page-prediction-tasks .prediction-task-hero h2 { margin:0; font-size:25px; line-height:1.2; color:#1d2b42; letter-spacing:-.02em; }
+    #page-prediction-tasks .prediction-task-hero p { margin:6px 0 0; color:#8b9bb0; font-size:13px; }
+    #page-prediction-tasks .prediction-create-btn { height:40px; padding:0 18px; border:0; border-radius:7px; background:#2864ed; color:#fff; font-size:14px; font-weight:600; box-shadow:0 5px 12px rgba(40,100,237,.18); cursor:pointer; }
+    #page-prediction-tasks .prediction-create-btn span { margin-right:8px; font-size:18px; vertical-align:-1px; }
+    #page-prediction-tasks .prediction-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; margin-bottom:22px; }
+    #page-prediction-tasks .prediction-stat-card { min-height:120px; padding:20px 19px; display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e3eaf3; border-radius:10px; box-shadow:0 3px 10px rgba(29,48,76,.035); }
+    #page-prediction-tasks .prediction-stat-label { display:block; margin-bottom:7px; color:#8797ab; font-size:13px; }
+    #page-prediction-tasks .prediction-stat-card strong { display:block; color:#26354c; font-size:29px; line-height:1; letter-spacing:-.02em; }
+    #page-prediction-tasks .prediction-stat-card em { display:block; margin-top:9px; font-size:11px; font-style:normal; font-weight:600; }
+    #page-prediction-tasks .stat-up { color:#31ae72; } #page-prediction-tasks .stat-warn { color:#f4a51c; } #page-prediction-tasks .stat-down { color:#f05b5c; }
+    #page-prediction-tasks .orange-text { color:#ec9e13 !important; } #page-prediction-tasks .green-text { color:#19a65b !important; } #page-prediction-tasks .red-text { color:#ed4e53 !important; }
+    #page-prediction-tasks .stat-icon { width:46px; height:46px; display:grid; place-items:center; border-radius:11px; font-size:23px; font-weight:700; }
+    #page-prediction-tasks .stat-icon.blue { color:#3b82f6; background:#eef5ff; } #page-prediction-tasks .stat-icon.orange { color:#f4a10a; background:#fff8e8; } #page-prediction-tasks .stat-icon.green { color:#1db66d; background:#edfbf3; } #page-prediction-tasks .stat-icon.red { color:#ff5a5f; background:#fff0f0; }
+    #page-prediction-tasks .prediction-filter-card, #page-prediction-tasks .prediction-table-card { background:#fff; border:1px solid #e2e9f2; border-radius:10px; box-shadow:0 3px 10px rgba(29,48,76,.03); }
+    #page-prediction-tasks .prediction-filter-card { padding:17px 18px 14px; margin-bottom:16px; }
+    #page-prediction-tasks .prediction-filter-row { display:grid; grid-template-columns:1.65fr 1fr 1.15fr 1.25fr auto auto; gap:12px; align-items:center; }
+    #page-prediction-tasks .prediction-search-field, #page-prediction-tasks .prediction-select-field, #page-prediction-tasks .prediction-date-field { height:36px; position:relative; display:flex; align-items:center; border:1px solid #dbe4ef; border-radius:6px; background:#fff; }
+    #page-prediction-tasks .prediction-search-field input, #page-prediction-tasks .prediction-date-field input, #page-prediction-tasks .prediction-select-field select { width:100%; height:100%; border:0; outline:0; background:transparent; color:#5e7089; font:inherit; font-size:13px; }
+    #page-prediction-tasks .prediction-search-field input { padding:0 12px 0 35px; } #page-prediction-tasks .prediction-search-field input::placeholder, #page-prediction-tasks .prediction-date-field input::placeholder { color:#9aa9bc; }
+    #page-prediction-tasks .search-glyph { position:absolute; left:12px; color:#9baabd; font-size:24px; line-height:1; transform:rotate(-20deg); }
+    #page-prediction-tasks .prediction-select-field select { appearance:none; padding:0 31px 0 12px; cursor:pointer; } #page-prediction-tasks .prediction-select-field > span, #page-prediction-tasks .prediction-date-field > span { position:absolute; right:11px; color:#93a3b7; pointer-events:none; }
+    #page-prediction-tasks .prediction-date-field input { padding:0 32px 0 12px; }
+    #page-prediction-tasks .prediction-query-btn, #page-prediction-tasks .prediction-reset-btn { height:36px; padding:0 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+    #page-prediction-tasks .prediction-query-btn { border:1px solid #2864ed; background:#2864ed; color:#fff; } #page-prediction-tasks .prediction-reset-btn { border:1px solid #dce4ee; background:#fff; color:#60728a; }
+    #page-prediction-tasks .prediction-quick-filter { display:flex; align-items:center; gap:9px; margin-top:12px; color:#8493a8; font-size:12px; }
+    #page-prediction-tasks .quick-chip { height:25px; padding:0 12px; border:1px solid #e0e8f2; border-radius:13px; background:#fff; color:#75869e; font-size:12px; cursor:pointer; }
+    #page-prediction-tasks .quick-chip.active { border-color:#a6c8ff; background:#eef5ff; color:#3274e9; font-weight:600; }
+    #page-prediction-tasks .prediction-table-head { height:59px; padding:0 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e9eef5; }
+    #page-prediction-tasks .prediction-table-head h3 { margin:0; color:#2c3c54; font-size:16px; } #page-prediction-tasks .prediction-table-head h3 span { margin-left:7px; padding:3px 8px; border-radius:12px; background:#f1f5f9; color:#8090a4; font-size:11px; font-weight:500; }
+    #page-prediction-tasks .prediction-table-tools { display:flex; gap:8px; } #page-prediction-tasks .prediction-table-tools button { height:32px; padding:0 10px; border:1px solid #e1e8f1; border-radius:7px; background:#fff; color:#72839a; font-size:13px; cursor:pointer; }
+    #page-prediction-tasks .prediction-table-wrap { overflow-x:auto; } #page-prediction-tasks .prediction-task-table { width:100%; min-width:1040px; border-collapse:collapse; table-layout:fixed; }
+    #page-prediction-tasks .prediction-task-table th { height:39px; background:#f8fafc; color:#718299; font-size:12px; font-weight:600; text-align:left; white-space:nowrap; } #page-prediction-tasks .prediction-task-table td { padding:12px 10px; border-bottom:1px solid #edf1f6; color:#718199; font-size:12px; vertical-align:middle; } #page-prediction-tasks .prediction-task-table th:first-child, #page-prediction-tasks .prediction-task-table td:first-child { width:48px; padding-left:18px; } #page-prediction-tasks .prediction-task-table th:nth-child(2) { width:145px; } #page-prediction-tasks .prediction-task-table th:nth-child(3) { width:145px; } #page-prediction-tasks .prediction-task-table th:nth-child(4) { width:190px; } #page-prediction-tasks .prediction-task-table th:nth-child(5) { width:105px; } #page-prediction-tasks .prediction-task-table th:nth-child(6) { width:90px; } #page-prediction-tasks .prediction-task-table th:nth-child(7) { width:150px; } #page-prediction-tasks .prediction-task-table th:nth-child(8) { width:90px; } #page-prediction-tasks .prediction-task-table th:nth-child(9) { width:165px; }
+    #page-prediction-tasks .prediction-task-table input[type="checkbox"] { width:16px; height:16px; accent-color:#2864ed; }
+    #page-prediction-tasks .task-name-cell a { display:block; color:#2b6bea; font-size:13px; font-weight:600; line-height:1.3; text-decoration:none; } #page-prediction-tasks .task-name-cell small, #page-prediction-tasks .material-cell small, #page-prediction-tasks .algorithm-cell small { display:block; margin-top:5px; color:#9aa9bb; font-size:11px; line-height:1.2; } #page-prediction-tasks .material-cell strong { color:#43536b; font-size:13px; font-weight:500; } #page-prediction-tasks .algorithm-cell { color:#506078; line-height:1.25; } #page-prediction-tasks .creator-cell { display:flex; align-items:center; gap:7px; color:#65768d; } #page-prediction-tasks .creator-cell b { width:22px; height:22px; display:grid; place-items:center; border-radius:50%; color:#4381dd; font-size:11px; font-weight:600; } #page-prediction-tasks .duration-cell { color:#f2a014 !important; font-weight:600; }
+    #page-prediction-tasks .prediction-status { display:inline-flex; align-items:center; gap:6px; padding:6px 9px; border:1px solid; border-radius:5px; font-size:11px; white-space:nowrap; } #page-prediction-tasks .prediction-status i { font-style:normal; font-weight:700; } #page-prediction-tasks .prediction-status.running { color:#e99a0c; border-color:#ffd775; background:#fffaf0; } #page-prediction-tasks .prediction-status.success { color:#19a45b; border-color:#9ee8bd; background:#effcf4; } #page-prediction-tasks .prediction-status.danger { color:#ef5659; border-color:#ffb5b6; background:#fff2f2; } #page-prediction-tasks .prediction-status.queued { color:#6583aa; border-color:#cad9ec; background:#f4f8fd; } #page-prediction-tasks .prediction-status.muted { color:#7d91aa; border-color:#dbe4ee; background:#f5f8fb; }
+    #page-prediction-tasks .prediction-actions { display:flex; align-items:center; gap:10px; white-space:nowrap; } #page-prediction-tasks .prediction-actions button { padding:0; border:0; background:transparent; color:#2b6bea; font-size:12px; cursor:pointer; } #page-prediction-tasks .prediction-actions button:disabled { color:#a8b5c6; cursor:not-allowed; } #page-prediction-tasks .prediction-actions button:last-child { color:#8da0b8; }
+    #page-prediction-tasks .prediction-table-footer { min-height:57px; padding:0 18px; display:flex; align-items:center; justify-content:space-between; color:#7d8ea4; font-size:12px; } #page-prediction-tasks .prediction-pagination { display:flex; align-items:center; gap:5px; } #page-prediction-tasks .prediction-pagination button { min-width:30px; height:30px; padding:0 7px; border:1px solid #e0e7f0; border-radius:5px; background:#fff; color:#75869b; cursor:pointer; } #page-prediction-tasks .prediction-pagination button.active { border-color:#2864ed; background:#2864ed; color:#fff; } #page-prediction-tasks .prediction-pagination span { padding:0 4px; color:#9aa9ba; } #page-prediction-tasks .prediction-pagination label { margin-left:8px; color:#7c8ca1; }
+    #page-prediction-tasks button:focus-visible, #page-prediction-tasks input:focus-visible, #page-prediction-tasks select:focus-visible { outline:3px solid rgba(40,100,237,.22); outline-offset:2px; }
+    @media (max-width: 1100px) { #page-prediction-tasks .prediction-filter-row { grid-template-columns:repeat(3,minmax(0,1fr)); } #page-prediction-tasks .prediction-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 680px) { #page-prediction-tasks .prediction-task-hero { align-items:flex-start; gap:16px; flex-direction:column; } #page-prediction-tasks .prediction-filter-row { grid-template-columns:1fr; } #page-prediction-tasks .prediction-stat-grid { grid-template-columns:1fr; } #page-prediction-tasks .prediction-quick-filter { flex-wrap:wrap; } #page-prediction-tasks .prediction-table-footer { align-items:flex-start; gap:12px; flex-direction:column; padding:14px 18px; } }
+  </style>
+  <style id="prediction-modal-reference-layout">
+    #predictionTaskModal .prediction-task-modal { width:min(680px, calc(100vw - 32px)); max-height:calc(100vh - 28px); border-radius:10px; }
+    #predictionTaskModal .modal-header { padding:18px 22px; } #predictionTaskModal .modal-body { padding:0 22px 18px; }
+    #predictionTaskModal .modal-footer { padding:14px 22px; }
+    #predictionTaskModal .modal-header .prediction-task-title-wrap { display:flex; align-items:center; gap:12px; } #predictionTaskModal .prediction-task-title-icon { width:34px; height:34px; display:grid; place-items:center; color:#2769ed; background:#edf4ff; border-radius:9px; font-size:20px; font-weight:700; }
+    #predictionTaskModal .modal-header h3 { margin:0; color:#253750; font-size:18px; } #predictionTaskModal .modal-header p { margin:4px 0 0; color:#8c9caf; font-size:12px; }
+    #predictionTaskModal .prediction-modal-material-picker { margin:0 0 20px; padding:15px; border:1px solid #cfe0fa; border-radius:9px; background:#eff6ff; }
+    #predictionTaskModal .prediction-modal-section-title { display:flex; align-items:center; gap:9px; color:#2769ed; font-size:13px; } #predictionTaskModal .prediction-modal-section-title small { display:block; margin-top:4px; color:#7890ad; font-size:11px; font-weight:400; }
+    #predictionTaskModal .prediction-info-icon { width:15px; height:15px; display:grid; place-items:center; border:1px solid #5b91eb; border-radius:50%; font-size:10px; font-weight:700; }
+    #predictionTaskModal .prediction-material-select { display:flex; align-items:center; gap:8px; margin-top:14px; color:#6d7f96; font-size:12px; } #predictionTaskModal .prediction-material-select span { flex:0 0 auto; } #predictionTaskModal .prediction-material-select select { min-width:0; flex:1; height:34px; padding:0 30px 0 10px; appearance:none; border:1px solid #cbdcf1; border-radius:6px; background:#fff; color:#40536d; font:inherit; outline:none; } #predictionTaskModal .prediction-material-select b { margin-left:-28px; color:#8ca1ba; pointer-events:none; }
+    #predictionTaskModal .prediction-material-summary { display:flex; flex-wrap:wrap; gap:18px; margin-top:11px; color:#8b9bb0; font-size:12px; } #predictionTaskModal .prediction-material-summary strong { margin-left:5px; color:#40516a; font-weight:600; } #predictionTaskModal .prediction-material-summary a { margin-left:5px; color:#2e70ed; font-weight:600; }
+    #predictionTaskModal .prediction-modal-task-name { display:block; margin-bottom:19px; } #predictionTaskModal .prediction-modal-task-name > span, #predictionTaskModal .prediction-modal-field-title > span, #predictionTaskModal .prediction-algorithm-heading > span { display:block; margin-bottom:9px; color:#5b6e87; font-size:13px; font-weight:600; } #predictionTaskModal i { color:#ef6468; font-style:normal; } #predictionTaskModal .prediction-modal-task-name input { width:100%; height:38px; padding:0 11px; border:1px solid #d8e3ef; border-radius:6px; color:#3f506a; font:inherit; outline:none; } #predictionTaskModal .prediction-modal-task-name small { display:block; margin-top:6px; color:#9aaabd; font-size:11px; }
+    #predictionTaskModal .prediction-modal-algorithm-section { margin-bottom:19px; } #predictionTaskModal .prediction-algorithm-categories { display:flex; gap:9px; } #predictionTaskModal .prediction-algorithm-categories button { flex:1; min-height:39px; padding:0 10px; border:1px solid #dce6f1; border-radius:7px; background:#fff; color:#6b7d94; font:inherit; font-size:12px; cursor:pointer; } #predictionTaskModal .prediction-algorithm-categories button.active { border-color:#3679ef; background:#eef5ff; color:#2d70ea; font-weight:600; }
+    #predictionTaskModal .prediction-algorithm-heading { display:flex; justify-content:space-between; align-items:center; margin-top:18px; } #predictionTaskModal .prediction-algorithm-heading a { color:#3b78e7; font-size:12px; text-decoration:none; }
+    #predictionTaskModal .prediction-algorithm-list { overflow:hidden; border:1px solid #dce6f1; border-radius:8px; } #predictionTaskModal .prediction-algorithm-card { display:flex; align-items:flex-start; gap:10px; padding:12px 12px; border-bottom:1px solid #e7edf5; background:#fff; cursor:pointer; } #predictionTaskModal .prediction-algorithm-card:last-child { border-bottom:0; } #predictionTaskModal .prediction-algorithm-card.selected { background:#eef6ff; } #predictionTaskModal .prediction-algorithm-card input { position:absolute; opacity:0; pointer-events:none; } #predictionTaskModal .prediction-algorithm-radio { width:15px; height:15px; flex:0 0 15px; margin-top:2px; border:2px solid #d3dfed; border-radius:50%; background:#fff; } #predictionTaskModal .prediction-algorithm-card.selected .prediction-algorithm-radio { border:4px solid #2e70ed; } #predictionTaskModal .prediction-algorithm-card > div { min-width:0; flex:1; } #predictionTaskModal .prediction-algorithm-card strong { color:#3a4b63; font-size:13px; } #predictionTaskModal .prediction-algorithm-card em, #predictionTaskModal .prediction-algorithm-card small { display:inline-block; margin-left:8px; padding:3px 6px; border-radius:4px; background:#e5f8ea; color:#22a259; font-size:10px; font-style:normal; } #predictionTaskModal .prediction-algorithm-card em.maintenance { background:#fff0dc; color:#ef9226; } #predictionTaskModal .prediction-algorithm-card small { background:#f1f4f8; color:#7b8ca2; } #predictionTaskModal .prediction-algorithm-card p { margin:5px 0 0; color:#8a9aad; font-size:11px; line-height:1.45; } #predictionTaskModal .prediction-algorithm-card > b { flex:0 0 auto; padding:5px 7px; border:1px solid #dce6f1; border-radius:4px; color:#8292a8; background:#f8fafc; font-size:10px; font-weight:500; }
+    #predictionTaskModal .prediction-modal-config-section, #predictionTaskModal .prediction-modal-description { margin-top:18px; } #predictionTaskModal .prediction-modal-config-section h4, #predictionTaskModal .prediction-modal-description h4 { margin:0 0 11px; color:#5b6e87; font-size:13px; } #predictionTaskModal h4 em { margin-left:6px; padding:3px 6px; border-radius:4px; background:#f1f4f8; color:#8a9bad; font-size:10px; font-style:normal; font-weight:400; } #predictionTaskModal .prediction-modal-config-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; } #predictionTaskModal .prediction-modal-config-grid label { display:block; } #predictionTaskModal .prediction-modal-config-grid label span { display:block; margin-bottom:7px; color:#8090a5; font-size:12px; } #predictionTaskModal .prediction-modal-config-grid input, #predictionTaskModal .prediction-modal-config-grid select, #predictionTaskModal .prediction-modal-description textarea { width:100%; min-height:36px; padding:0 10px; border:1px solid #d8e3ef; border-radius:6px; background:#fff; color:#40516a; font:inherit; font-size:12px; } #predictionTaskModal .prediction-modal-description textarea { padding:10px; resize:vertical; } #predictionTaskModal .prediction-config-hint { display:block; margin-top:8px; color:#a0adbc; font-size:11px; }
+    #predictionTaskModal .prediction-hidden-control { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+    @media (max-width:640px) { #predictionTaskModal .prediction-algorithm-categories { flex-direction:column; } #predictionTaskModal .prediction-modal-config-grid { grid-template-columns:1fr; } #predictionTaskModal .prediction-material-summary { gap:8px 14px; } #predictionTaskModal .prediction-algorithm-card > b { display:none; } }
+  </style>
