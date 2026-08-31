@@ -16188,7 +16188,6 @@
       }
     }
 
-    body[data-user-role="researcher"] .portal-link[data-portal="workflow"],
     body[data-user-role="researcher"] .portal-link[data-portal="system"] {
       display: none !important;
     }
@@ -18441,6 +18440,38 @@
         width: min(320px, calc(100vw - 32px)) !important;
       }
     }
+  </style>  <style id="tool-reference-page-style">
+    #page-tools .algorithm-reference-toolbar { display:flex; align-items:center; margin-bottom:12px; }
+    #page-tools .algorithm-reference-page { overflow:hidden; border:1px solid rgba(226,232,243,.96); border-radius:8px; background:rgba(255,255,255,.96); box-shadow:0 12px 32px rgba(35,74,139,.08); }
+    #page-tools .algorithm-reference-doc { padding:28px 28px 34px; color:#172033; }
+    #page-tools .algorithm-reference-hero { padding:0 0 26px; border:0; border-bottom:1px solid #edf1f7; border-radius:0; background:transparent; box-shadow:none; }
+    #page-tools .algorithm-reference-hero h3 { margin:0; font-size:22px; line-height:1.35; color:#121a2c; font-weight:700; }
+    #page-tools .algorithm-reference-hero p { margin:10px 0 0; color:#5e6a7d; font-size:14px; line-height:1.75; }
+    #page-tools .algorithm-reference-tags { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    #page-tools .algorithm-reference-tag { display:inline-flex; align-items:center; min-height:32px; padding:6px 12px; border:1px solid #edf1f8; border-radius:6px; background:#fbfcff; color:#26344d; font-size:13px; line-height:1.35; }
+    #page-tools .algorithm-reference-tag span { margin-right:8px; color:#7a8699; }
+    #page-tools .algorithm-reference-section { margin-top:28px; }
+    #page-tools .algorithm-reference-section-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; }
+    #page-tools .algorithm-reference-section h4 { margin:0; color:#121a2c; font-size:17px; line-height:1.4; font-weight:700; }
+    #page-tools .algorithm-reference-copy { display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:0 14px; border:1px solid #dbe4f3; border-radius:6px; background:#fff; color:#283449; font-size:13px; cursor:pointer; }
+    #page-tools .algorithm-reference-copy:hover { border-color:#2f5bea; background:#f5f8ff; color:#244bd6; }
+    #page-tools .algorithm-reference-code { margin:0; max-height:450px; overflow:auto; padding:22px 20px; border-radius:7px; background:#1f2430; color:#eef3ff; font:13px/1.75 "Consolas","SFMono-Regular","Menlo",monospace; white-space:pre; }
+    #page-tools .algorithm-reference-table-wrap { overflow-x:auto; border:1px solid #e8edf7; border-radius:8px; background:#fff; }
+    #page-tools .algorithm-reference-table { width:100%; border-collapse:collapse; min-width:720px; table-layout:fixed; }
+    #page-tools .algorithm-reference-table th,#page-tools .algorithm-reference-table td { padding:13px 14px; border-bottom:1px solid #eef2f8; color:#344158; font-size:13px; line-height:1.55; text-align:left; vertical-align:top; }
+    #page-tools .algorithm-reference-table th { background:#f8faff; color:#26344d; font-weight:600; white-space:nowrap; }
+    #page-tools .algorithm-reference-table tr:last-child th,#page-tools .algorithm-reference-table tr:last-child td { border-bottom:0; }
+    #page-tools .algorithm-reference-table code,#page-tools .algorithm-reference-required { display:inline-flex; align-items:center; min-height:24px; padding:2px 8px; border-radius:4px; background:#eef3ff; color:#2f5bea; font-family:inherit; font-size:12px; font-weight:600; white-space:nowrap; }
+    #page-tools .algorithm-reference-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    #page-tools .algorithm-reference-info { min-width:0; padding:14px 16px; border:1px solid #e8edf7; border-radius:8px; background:#fff; }
+    #page-tools .algorithm-reference-info span { display:block; margin-bottom:6px; color:#7a8699; font-size:12px; }
+    #page-tools .algorithm-reference-info strong { display:block; color:#26344d; font-size:14px; line-height:1.5; }
+    #page-tools .tool-reference-columns { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    #page-tools .tool-reference-columns > div { padding:16px 18px; border:1px solid #e8edf7; border-radius:8px; background:#fbfcff; }
+    #page-tools .tool-reference-columns h5 { margin:0 0 10px; color:#26344d; font-size:14px; }
+    #page-tools .tool-reference-columns ol,#page-tools .tool-reference-columns ul { margin:0; padding-left:22px; color:#526078; font-size:13px; line-height:1.7; }
+    #page-tools .tool-reference-columns li + li { margin-top:7px; }
+    @media (max-width: 760px) { #page-tools .algorithm-reference-doc { padding:20px 16px 24px; } #page-tools .algorithm-reference-grid,#page-tools .tool-reference-columns { grid-template-columns:1fr; } #page-tools .algorithm-reference-tag { white-space:normal; } }
   </style></head>
 <body>
   <section class="login-shell" id="loginShell">
@@ -18653,8 +18684,8 @@
         </button>
         <div class="nav">
           <button class="nav-btn" data-group="analysis" data-page="algorithms" data-label="数据应用算法"><span class="nav-icon">AL</span><span>数据应用算法</span></button>
-          <button class="nav-btn" data-group="analysis" data-page="prediction-tasks" data-label="预测任务管理"><span class="nav-icon">PT</span><span>预测任务管理</span></button>
           <button class="nav-btn" data-group="analysis" data-page="tools" data-label="数据工具开发"><span class="nav-icon">TL</span><span>数据工具开发</span></button>
+          <button class="nav-btn" data-group="analysis" data-page="prediction-tasks" data-label="预测任务管理"><span class="nav-icon">PT</span><span>预测任务管理</span></button>
         </div>
       </div>
       <div class="sidebar-group" data-group="workflow">
@@ -32306,6 +32337,16 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       select.innerHTML = mlffUpdateRecords.map((record) => `<option value="${record.id}">${record.fileName}</option>`).join("");
     }
 
+    function openMlffMethodDetail(trigger) {
+      const card = trigger?.closest(".mlff-method-card");
+      const body = document.getElementById("mlffGlossaryModalBody");
+      if (!card || !body) return;
+      const detailCard = card.cloneNode(true);
+      detailCard.querySelectorAll("[data-mlff-method-detail], .mlff-fav-btn, .mlff-star-small").forEach((node) => node.remove());
+      body.innerHTML = `<article class="mlff-method-card mlff-method-detail-card">${detailCard.innerHTML}</article>`;
+      openModal("mlffGlossaryModal");
+    }
+
     function bindMlffInteractions() {
       const page = document.getElementById("page-mlff");
       if (!page) return;
@@ -32324,7 +32365,12 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const openRecord = event.target.closest("[data-open-mlff-record]");
         const downloadRecord = event.target.closest("[data-download-mlff-record]");
         const exportGlossary = event.target.closest("[data-mlff-export-glossary]");
+        const methodDetail = event.target.closest("[data-mlff-method-detail]");
 
+        if (methodDetail) {
+          openMlffMethodDetail(methodDetail);
+          return;
+        }
         if (tabTrigger) {
           state.mlffTab = tabTrigger.dataset.mlffTab;
           renderMlffModule();
@@ -33203,6 +33249,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                     <th>选择性 (%)</th>
                     <th>TOF (s⁻¹)</th>
                     <th>活性位点</th>
+                    <th>数据来源</th>
                     <th>操作</th>
                   </tr>
                 </thead>
@@ -33223,6 +33270,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                       <td>${item.selectivity}</td>
                       <td>${item.tof.toFixed(1)}</td>
                       <td>${item.site}</td>
+                      <td>${renderCatalystDatasetSource(item)}</td>
                       <td>
                         <div class="catalyst-link-actions">
                           <button class="catalyst-link-btn" type="button" data-open-catalyst="${item.id}">查看</button>
@@ -44487,7 +44535,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                     </div>
                   </div>
                   <div class="mlff-method-card-actions">
-                    <button class="mlff-detail-btn" type="button">查看详情</button>
+                    <button class="mlff-detail-btn" type="button" data-mlff-method-detail>查看详情</button>
                     <button class="mlff-fav-btn" type="button" title="收藏">☆</button>
                   </div>
                 </div>
@@ -47547,6 +47595,20 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       return renderSharedPaginationButtons(totalPages, current, "data-catalyst-platform-page");
     }
 
+    function getCatalystDatasetSourceLabel(item) {
+      const source = String(item?.dataSource || item?.source || "").trim();
+      const normalized = source.toLowerCase();
+      const internalHints = ["自研", "自有", "项目组", "内部", "平台", "用户提交", "上传", "实验测量", "实验计算", "本地", "训练集"];
+      const publicHints = ["公开", "materials project", "materials cloud", "api", "文献", "外部", "第三方", "catalysis-hub", "database", "hub"];
+      if (internalHints.some((hint) => source.includes(hint))) return "自研数据集";
+      if (publicHints.some((hint) => normalized.includes(hint) || source.includes(hint))) return "公开数据集";
+      return getLowDimDatasetSourceLabel(item).replace("自有数据集", "自研数据集");
+    }
+
+    function renderCatalystDatasetSource(item) {
+      return `<div class="twod-source-stack"><span class="twod-source-pill">${escapeHtml(getCatalystDatasetSourceLabel(item))}</span></div>`;
+    }
+
     function getCatalystPerformanceSummary(item) {
       if (isLowDimRealCase("catalyst", item)) {
         const emtEnergy = item.adsorptionEnergyEstimate ?? item.singlePointEnergy ?? item.emtSinglePointEnergy ?? item.totalEnergy ?? item.energy;
@@ -47568,7 +47630,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <td>${(item.elements || []).join(", ") || "未记录"}</td>
           <td>${formatLowDimValue(item.surface)}</td>
           <td>${getCatalystPerformanceSummary(item)}</td>
-          <td>${renderLowDimDatasetSource(item, "catalyst")}</td>
+          <td>${renderCatalystDatasetSource(item)}</td>
           <td>${formatLowDimValue(item.updatedAt)}</td>
           <td>
             <div class="twod-record-inline-actions">
@@ -51828,95 +51890,125 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       `;
     }
 
+        function buildToolApiCode(tool, row, category) {
+      const endpoint = `/api/v1/tools/${row.id}`;
+      const params = {
+        tool_id: row.id,
+        input_file: "sample_material_data.zip",
+        output_format: "standard",
+        config: `${category}默认配置`
+      };
+      return `# ${tool.name}：按数据工具开发接口调用
+import json
+import requests
+
+url = "https://api.lowdim-materials.local${endpoint}"
+params = ${JSON.stringify(params, null, 4).replace(/^/gm, "    ")}
+
+with open("sample_material_data.zip", "rb") as file:
+    resp = requests.post(
+        url,
+        files={"file": file},
+        data={"params": json.dumps(params, ensure_ascii=False)}
+    )
+
+print(resp.json())`;
+    }
+
+    function renderToolReferenceDoc(tool, row, category) {
+      const requestRows = [
+        { name: "tool_id", type: "string", required: true, desc: "工具唯一标识" },
+        { name: "input_file", type: "file", required: true, desc: "待处理的结构或数据文件" },
+        { name: "output_format", type: "string", required: false, desc: "输出文件格式，默认 standard" },
+        { name: "config", type: "object", required: false, desc: "工具运行配置与参数" }
+      ];
+      const responseRows = [
+        { name: "status", type: "string", desc: "任务执行状态" },
+        { name: "task_id", type: "string", desc: "本次工具调用任务编号" },
+        { name: "output_files", type: "array", desc: "处理完成后的结果文件列表" },
+        { name: "report", type: "object", desc: "工具运行摘要与质量检查报告" }
+      ];
+      const code = buildToolApiCode(tool, row, category);
+      const operation = tool.operation || [];
+      const notice = tool.notice || [];
+      const effect = tool.effect || [];
+      return `
+        <div class="algorithm-reference-doc tool-reference-doc">
+          <section class="algorithm-reference-hero">
+            <h3>${escapeHtml(tool.name)}</h3>
+            <p>${escapeHtml(effect[0] || category.desc || "该工具面向低维材料数据处理与科研分析场景，支持通过标准接口完成工具调用和结果输出。")} </p>
+            <div class="algorithm-reference-tags">
+              <div class="algorithm-reference-tag"><span>功能特点</span>${escapeHtml(effect.slice(0, 3).join("、") || category.desc)}</div>
+              <div class="algorithm-reference-tag"><span>适用场景</span>${escapeHtml(category.scenario)}</div>
+            </div>
+          </section>
+
+          <section class="algorithm-reference-section">
+            <div class="algorithm-reference-section-head">
+              <h4>API 调用示例</h4>
+              <button class="algorithm-reference-copy" type="button" data-tool-copy-code aria-label="复制 API 调用示例">复制代码</button>
+            </div>
+            <pre class="algorithm-reference-code" id="toolReferenceCode">${escapeHtml(code)}</pre>
+          </section>
+
+          <section class="algorithm-reference-section">
+            <div class="algorithm-reference-section-head"><h4>请求参数</h4></div>
+            <div class="algorithm-reference-table-wrap">
+              <table class="algorithm-reference-table">
+                <thead><tr><th style="width:24%;">参数名</th><th style="width:16%;">类型</th><th style="width:12%;">必填</th><th>说明</th></tr></thead>
+                <tbody>${requestRows.map((item) => `<tr><td><code>${escapeHtml(item.name)}</code></td><td>${escapeHtml(item.type)}</td><td>${item.required ? '<span class="algorithm-reference-required">必填</span>' : "否"}</td><td>${escapeHtml(item.desc)}</td></tr>`).join("")}</tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="algorithm-reference-section">
+            <div class="algorithm-reference-section-head"><h4>返回结果</h4></div>
+            <div class="algorithm-reference-table-wrap">
+              <table class="algorithm-reference-table">
+                <thead><tr><th style="width:24%;">字段名</th><th style="width:20%;">类型</th><th>说明</th></tr></thead>
+                <tbody>${responseRows.map((item) => `<tr><td><code>${escapeHtml(item.name)}</code></td><td>${escapeHtml(item.type)}</td><td>${escapeHtml(item.desc)}</td></tr>`).join("")}</tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="algorithm-reference-section tool-reference-info-section">
+            <div class="algorithm-reference-section-head"><h4>使用说明</h4></div>
+            <div class="tool-reference-columns">
+              <div><h5>操作流程</h5><ol>${operation.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || `<li>${escapeHtml(category.scenario)}</li>`}</ol></div>
+              <div><h5>注意事项</h5><ul>${notice.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>请按照使用手册准备输入数据并校验本地运行环境。</li>"}</ul></div>
+            </div>
+          </section>
+
+          <section class="algorithm-reference-section">
+            <div class="algorithm-reference-section-head"><h4>资源信息</h4></div>
+            <div class="algorithm-reference-grid">
+              <div class="algorithm-reference-info"><span>工具分类</span><strong>${escapeHtml(row.category)}</strong></div>
+              <div class="algorithm-reference-info"><span>调用方式</span><strong>POST</strong></div>
+              <div class="algorithm-reference-info"><span>资源类型</span><strong>ZIP 代码包 / 使用手册</strong></div>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
     function renderToolDetailPage() {
       const mount = document.getElementById("toolPageMount");
       const category = toolCategoryConfigs[state.selectedToolCategory];
       const currentRow = getSelectedToolRow();
       const currentTool = currentRow ? (toolSubmoduleData[currentRow.id] || toolDetailData[currentRow.id]) : null;
-      const rows = getToolRowsByCategory(state.selectedToolCategory);
-      const firstToolId = rows[0]?.id || "";
       if (!mount || !category || !currentRow || !currentTool) return;
       mount.innerHTML = `
-        <section class="card algorithm-detail-shell-v2">
-          <div class="algorithm-detail-topbar">
-            <button class="btn" type="button" data-tool-back>返回</button>
-            <div class="algorithm-detail-heading">
-              <h3>${state.selectedToolCategory}详情</h3>
-              <p>${category.summary}</p>
-            </div>
-          </div>
-          <div class="algorithm-detail-layout-v2">
-            <aside class="algorithm-detail-sidebar-v2">
-              <div class="algorithm-detail-sidebar-head">
-                <h4>工具列表</h4>
-                <span>${rows.length} 项</span>
-              </div>
-              <div class="algorithm-detail-sidebar-list">
-                ${rows.map((item) => {
-                  const isEnabled = item.id === firstToolId;
-                  const itemClass = [
-                    "algorithm-parent-item",
-                    state.selectedToolItem === item.id && isEnabled ? "active" : "",
-                    !isEnabled ? "is-disabled" : ""
-                  ].filter(Boolean).join(" ");
-                  return `
-                  <button class="${itemClass}" type="button" data-tool-item="${item.id}"${isEnabled ? "" : ' disabled title="当前仅保留首个工具可选"'}>
-                    <strong>${item.name}</strong>
-                    <span>${item.parent === "-" ? "独立工具" : item.parent}</span>
-                  </button>
-                `;
-                }).join("")}
-              </div>
-            </aside>
-            <section class="algorithm-detail-content-v2">
-              <div class="algorithm-detail-panel">
-                <div class="algorithm-detail-panel-head">
-                  <div>
-                    <span class="algorithm-detail-kicker">${state.selectedToolCategory}</span>
-                    <h4>${currentRow.name}</h4>
-                    <p>${category.scenario}</p>
-                  </div>
-                </div>
-                <div class="algorithm-detail-summary-grid">
-                  <article class="algorithm-detail-summary-card">
-                    <span>工具说明</span>
-                    <strong>${currentRow.name}</strong>
-                    <p>${currentTool.effect?.[0] || "当前工具说明后续可继续扩展。"}</p>
-                  </article>
-                  <article class="algorithm-detail-summary-card">
-                    <span>适用场景</span>
-                    <strong>${currentRow.parent === "-" ? "独立工具模块" : currentRow.parent}</strong>
-                    <p>${category.desc}</p>
-                  </article>
-                </div>
-              </div>
-              <div class="algorithm-detail-panel">
-                <div class="algorithm-detail-panel-head">
-                  <div>
-                    <span class="algorithm-detail-kicker">资源下载</span>
-                    <h4>说明与代码资源</h4>
-                    <p>当前工具支持查看功能简介、使用手册和代码包下载，后续可继续扩展具体工具详情预览内容。</p>
-                  </div>
-                </div>
-                <div class="algorithm-detail-actions-v2">
-                  <button class="btn" type="button" data-tool-action="detail" data-tool-id="${currentRow.id}">查看详情</button>
-                  <button class="btn" type="button" data-tool-action="guide" data-tool-id="${currentRow.id}">使用手册下载</button>
-                  <button class="btn-primary" type="button" data-tool-action="code" data-tool-id="${currentRow.id}">代码包下载</button>
-                </div>
-              </div>
-            </section>
-          </div>
-        </section>
+        <div class="algorithm-reference-toolbar tool-reference-toolbar">
+          <button class="btn" type="button" data-tool-back>← 返回数据工具开发</button>
+        </div>
+        <div class="algorithm-reference-page">
+          ${renderToolReferenceDoc(currentTool, currentRow, category)}
+        </div>
       `;
     }
 
     function renderToolsPage() {
       ensureToolSelection();
-      const rows = getToolRowsByCategory(state.selectedToolCategory);
-      const firstToolId = rows[0]?.id || "";
-      if (state.toolPageView === "detail" && firstToolId && state.selectedToolItem !== firstToolId) {
-        state.selectedToolItem = firstToolId;
-      }
       if (state.toolPageView === "detail") {
         renderToolDetailPage();
         updateBreadcrumb("tools");
@@ -51934,6 +52026,18 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         renderToolsPage();
       });
       document.body.addEventListener("click", (event) => {
+        const copyTrigger = event.target.closest("[data-tool-copy-code]");
+        if (copyTrigger) {
+          const code = document.getElementById("toolReferenceCode")?.textContent || "";
+          const done = () => {
+            copyTrigger.textContent = "已复制";
+            window.setTimeout(() => { copyTrigger.textContent = "复制代码"; }, 1600);
+            if (typeof showToast === "function") showToast("工具详情", "API 调用示例已复制。");
+          };
+          if (navigator.clipboard?.writeText) navigator.clipboard.writeText(code).then(done).catch(done);
+          else done();
+          return;
+        }
         const tabTrigger = event.target.closest("[data-tool-tab]");
         if (tabTrigger) {
           state.toolPageView = "overview";
@@ -51960,8 +52064,6 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         }
         const itemTrigger = event.target.closest("[data-tool-item]");
         if (itemTrigger) {
-          const firstToolId = getToolRowsByCategory(state.selectedToolCategory)[0]?.id || "";
-          if (itemTrigger.dataset.toolItem !== firstToolId) return;
           state.selectedToolItem = itemTrigger.dataset.toolItem;
           renderToolsPage();
           return;
@@ -51972,7 +52074,14 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const action = trigger.dataset.toolAction;
         if (action === "guide") tdOpenGuide(toolId);
         if (action === "code") tdDownloadCode(toolId);
-        if (action === "detail") tdOpenDetail(toolId, "effect");
+        if (action === "detail") {
+          const row = toolListRows.find((item) => item.id === toolId);
+          if (!row) return;
+          state.toolPageView = "detail";
+          state.selectedToolCategory = row.category;
+          state.selectedToolItem = row.id;
+          renderToolsPage();
+        }
       });
     }
 
@@ -62034,20 +62143,6 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               ${realViewer || `<div class="material-atom-cluster">${renderMaterialStructureMarkup(structure)}</div><div class="material-legend">${(structure.legend || []).map((item) => `<span><i class="legend-dot" style="background:${item.color};"></i>${item.label}</span>`).join("")}</div>`}
               <div class="chart-caption">${realViewer ? "真实分子坐标，可拖拽旋转、滚轮缩放并切换显示样式。" : structure.caption}</div>
             </div>
-            <div class="twod-structure-meta">
-              <article class="twod-structure-meta-item">
-                <span>应用类型</span>
-                <strong>${formatLowDimValue(material.application)}</strong>
-              </article>
-              <article class="twod-structure-meta-item">
-                <span>数据来源</span>
-                <strong>${formatLowDimValue(material.source)}</strong>
-              </article>
-              <article class="twod-structure-meta-item">
-                <span>更新时间</span>
-                <strong>${formatLowDimValue(material.updatedAt)}</strong>
-              </article>
-            </div>
           </section>
         </div>
       `;
@@ -63278,6 +63373,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                     <th>英文名称</th>
                     <th>化学式</th>
                     <th>数据集类型</th>
+                    <th>数据来源</th>
                     <th>体系规模</th>
                     <th>体系类型</th>
                     <th>电荷</th>
@@ -65099,11 +65195,6 @@ if (state.selectedTwodDetailSection === "molecule") {
           <div class="twod-detail-structure-stage">
             ${realViewer || `<div class="material-atom-cluster">${renderMaterialStructureMarkup(structure)}</div><div class="material-legend">${(structure.legend || []).map((item) => `<span><i class="legend-dot" style="background:${item.color};"></i>${item.label}</span>`).join("")}</div>`}
             <div class="chart-caption">${realViewer ? "真实结构坐标，可拖拽旋转、滚轮缩放并切换显示样式。" : (structure.caption || "当前暂无结构说明。")}</div>
-          </div>
-          <div class="twod-structure-meta">
-            <article class="twod-structure-meta-item"><span>数据来源</span><strong>${formatElectrolyteValue(material.source)}</strong></article>
-            <article class="twod-structure-meta-item"><span>更新时间</span><strong>${formatElectrolyteValue(material.updatedAt)}</strong></article>
-            <article class="twod-structure-meta-item"><span>数据质量</span><strong>${formatElectrolyteValue(material.quality)}</strong></article>
           </div>
         </section>
       `;
@@ -78327,8 +78418,8 @@ function renderElectrolyteCategoryTabs() {
       var adminOnlyPages = ['dashboard','data-resource-catalog','sys-permission','sys-user','sys-role',
         'sys-menu','sys-dict','sys-algorithm','sys-api','system-config','sys-log'];
       var reviewerPages = ['twod-review'];
-      var normalAllowedGroups = ['applications','analysis'];
-      var normalAllowedPortals = ['applications','algorithms','tools'];
+      var normalAllowedGroups = ['applications','analysis','workflow'];
+      var normalAllowedPortals = ['applications','algorithms','tools','workflow'];
 
       function getPageGroupForRole(page) {
         if (typeof resolvePageMeta === 'function') {
@@ -78344,7 +78435,7 @@ function renderElectrolyteCategoryTabs() {
         if (currentUserRole === 'reviewer') {
           return adminOnlyPages.indexOf(page) < 0;
         }
-        return page !== 'prediction-tasks' && normalAllowedGroups.indexOf(getPageGroupForRole(page)) >= 0;
+        return normalAllowedGroups.indexOf(getPageGroupForRole(page)) >= 0;
       }
 
       function applyRoleVisibility() {
@@ -78387,7 +78478,7 @@ function renderElectrolyteCategoryTabs() {
         // Hide prediction task management from ordinary users.
         var predictionTasksNav = sidebar.querySelector('[data-page="prediction-tasks"]');
         if (predictionTasksNav) {
-          predictionTasksNav.style.display = currentUserRole === 'researcher' ? 'none' : '';
+          predictionTasksNav.style.display = '';
         }
         // If currently on a restricted page and role changed, redirect to twod
         if (typeof state !== 'undefined') {
@@ -86376,9 +86467,31 @@ function renderElectrolyteCategoryTabs() {
         return item.dispersionCoefficient != null ? String(item.dispersionCoefficient) : LOW_DIM_NO_PROPERTY_TEXT;
       }
 
+      const MLFF_DATASET_TYPE_SAMPLES = [
+        "单分子数据集", "双分子数据集", "多分子团簇数据集", "醚类有机小分子数据集",
+        "酰胺类有机小分子数据集", "高分子片段机器学习力场数据集", "蛋白质机器学习力场数据集"
+      ];
+
       function getMlffDatasetTypeSummary(item) {
-        return item.datasetType || item.dataSetType || (item.dataSource === "internal" ? "自有数据集" : "公开数据集");
+        if (item.datasetType || item.dataSetType) return item.datasetType || item.dataSetType;
+        const index = Math.max(0, mlffMaterials.indexOf(item));
+        return MLFF_DATASET_TYPE_SAMPLES[index % MLFF_DATASET_TYPE_SAMPLES.length];
       }
+
+      function getMlffDatasetSourceLabel(item) {
+        if (item.dataSource === "internal" || item.datasetSource === "internal") return "自研数据集";
+        if (item.dataSource === "public" || item.datasetSource === "public") return "公开数据集";
+        const datasetType = getMlffDatasetTypeSummary(item);
+        if (datasetType.includes("高分子片段") || datasetType.includes("蛋白质")) return "自研数据集";
+        return getLowDimDatasetSourceLabel(item).replace("自有数据集", "自研数据集");
+      }
+
+      function renderMlffDatasetSource(item) {
+        return `<div class="twod-source-stack"><span class="twod-source-pill">${html(getMlffDatasetSourceLabel(item))}</span></div>`;
+      }
+
+      // 详情页增强脚本在外层作用域运行，显式暴露数据来源格式化函数供其复用。
+      window.getMlffDatasetSourceLabel = getMlffDatasetSourceLabel;
 
       function getMlffSystemScaleSummary(item) {
         if (item.systemScale) return String(item.systemScale);
@@ -86391,7 +86504,7 @@ function renderElectrolyteCategoryTabs() {
       }
 
       renderMlffResultRows = function renderMlffResultRowsUnified(list) {
-        if (!list.length) return `<tr><td colspan="12" class="opto-table-empty">未检索到符合条件的机器学习力场数据，请调整检索条件后重试。</td></tr>`;
+        if (!list.length) return `<tr><td colspan="13" class="opto-table-empty">未检索到符合条件的机器学习力场数据，请调整检索条件后重试。</td></tr>`;
         const start = ((state.mlffPage || 1) - 1) * (state.mlffPageSize || 5);
         return list.map((item, index) => `
           <tr>
@@ -86400,6 +86513,7 @@ function renderElectrolyteCategoryTabs() {
             ${cell(item.english)}
             <td title="${html(valueText(item.formula))}"><em>${valueText(item.formula)}</em></td>
             ${cell(getMlffDatasetTypeSummary(item))}
+            <td>${renderMlffDatasetSource(item)}</td>
             ${cell(getMlffSystemScaleSummary(item))}
             ${cell(getMlffSystemTypeSummary(item))}
             ${cell(getMlffChargeSummary(item))}
@@ -86431,6 +86545,7 @@ function renderElectrolyteCategoryTabs() {
             ${cell(item.intermediate)}
             ${cell(item.structureFeature || item.systemFeature || item.atomicStructure || "/")}
             ${cell(item.surface)}
+            <td>${renderCatalystDatasetSource(item)}</td>
             ${cell(item.activationEnergy, { numeric: true, digits: 2, suffix: " eV" })}
             ${cell(item.reactant || item.reactionReactant || item.routeReactant, { red: true })}
             ${cell(item.product || item.reactionProduct || item.routeProduct, { red: true })}
@@ -86459,7 +86574,7 @@ function renderElectrolyteCategoryTabs() {
         catalyst: {
           sorts: ["默认排序", "能垒升序", "选择性降序", "TOF降序", "更新时间"],
           filters: ["自有数据集", "公开数据集", "金属单晶", "单原子催化剂", "ORR", "OER", "CO2RR"],
-          columns: ["序号", "材料编号", "材料名称", "化学式", "催化剂种类", "材料成分", "中间产物", "材料描述", "材料表面", "活化能", "反应物", "生成物", "操作"],
+          columns: ["序号", "材料编号", "材料名称", "化学式", "催化剂种类", "材料成分", "中间产物", "材料描述", "材料表面", "数据来源", "活化能", "反应物", "生成物", "操作"],
           leadingActions: [
             { label: "活性位点分析", attribute: 'data-catalyst-workbench="site"' },
             { label: "材料对比", attribute: 'data-catalyst-workbench="compare"' },
@@ -86558,7 +86673,7 @@ function renderElectrolyteCategoryTabs() {
                     </div>
                   </div>
                   <div class="mlff-method-card-actions">
-                    <button class="mlff-detail-btn" type="button">查看详情</button>
+                    <button class="mlff-detail-btn" type="button" data-mlff-method-detail>查看详情</button>
                     <button class="mlff-fav-btn" type="button" title="收藏">☆</button>
                   </div>
                 </div>
@@ -86920,7 +87035,7 @@ function renderElectrolyteCategoryTabs() {
                 ${renderCrossDatabaseToolbar(total, resultToolbars.mlff)}
                 <div class="table-wrap twod-result-table-wrap">
                   <table class="twod-result-table">
-                    <thead><tr><th>材料编号</th><th>中文名称</th><th>英文名称</th><th>化学式</th><th>数据集类型</th><th>体系规模</th><th>体系类型</th><th>电荷</th><th>多极矩</th><th>极化率</th><th>色散系数</th><th>操作</th></tr></thead>
+                    <thead><tr><th>材料编号</th><th>中文名称</th><th>英文名称</th><th>化学式</th><th>数据集类型</th><th>数据来源</th><th>体系规模</th><th>体系类型</th><th>电荷</th><th>多极矩</th><th>极化率</th><th>色散系数</th><th>操作</th></tr></thead>
                     <tbody>${renderMlffResultRows(pageRows)}</tbody>
                   </table>
                 </div>
@@ -86969,7 +87084,7 @@ function renderElectrolyteCategoryTabs() {
                 ${renderCrossDatabaseToolbar(total, resultToolbars.catalyst)}
                 <div class="table-wrap twod-result-table-wrap">
                   <table class="twod-result-table">
-                    <thead><tr><th>序号</th><th>材料编号</th><th>材料名称</th><th>化学式</th><th>催化剂种类</th><th>材料成分</th><th>中间产物</th><th>材料描述</th><th>材料表面</th><th>活化能</th><th>反应物</th><th>生成物</th><th>操作</th></tr></thead>
+                    <thead><tr><th>序号</th><th>材料编号</th><th>材料名称</th><th>化学式</th><th>催化剂种类</th><th>材料成分</th><th>中间产物</th><th>材料描述</th><th>材料表面</th><th>数据来源</th><th>活化能</th><th>反应物</th><th>生成物</th><th>操作</th></tr></thead>
                     <tbody>${renderCatalystPlatformRows(items)}</tbody>
                   </table>
                 </div>
@@ -88419,7 +88534,8 @@ print(resp.json())`;
         event.preventDefault();
         const selectedRole = state.loginRole === "researcher" ? "researcher" : "admin";
         const account = selectedRole === "admin" ? "admin" : "researcher";
-        const targetPage = readLoginTargetPage();
+        const requestedTargetPage = readLoginTargetPage();
+        const targetPage = selectedRole === "researcher" && requestedTargetPage === "twod" ? "data-submit" : requestedTargetPage;
         state.isAuthenticated = true;
         state.loginUser = account;
         state.loginRole = selectedRole;
@@ -89980,7 +90096,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         return `
           <section class="mlff-search-panel"><div class="mlff-search-title-row"><div class="mlff-search-title"><span>⌕</span><span>深度检索</span></div><button class="mlff-reset-link" type="button" data-mlff-glossary-reset>⟳ 重置条件</button></div><div class="mlff-search-line"><label class="mlff-search-input"><span>⌕</span><input value="${esc(state.mlffTermKeyword || "")}" placeholder="输入参数名称、获取方法或关键词进行深度检索" data-mlff-glossary-method-keyword></label><div class="mlff-search-controls"><label>获取方法：</label><select data-mlff-glossary-method-filter><option value="all"${methodType==="all"?" selected":""}>全部方法</option><option value="量子化学计算"${methodType==="量子化学计算"?" selected":""}>量子化学计算</option><option value="机器学习方法"${methodType==="机器学习方法"?" selected":""}>机器学习方法</option><option value="实验测量"${methodType==="实验测量"?" selected":""}>实验测量</option></select><button class="mlff-search-submit" type="button" data-mlff-glossary-search>⌕　检索</button></div></div><div class="mlff-filter-row"><label>参数类型：<select><option>全部类型</option></select></label><label>数据来源：<select><option>全部来源</option></select></label><label>更新时间：<select><option>全部时间</option></select></label></div></section>
           <section class="mlff-list-section"><div class="mlff-list-heading"><h3>获取方法概览 <span>共 8 种方法</span></h3><div class="mlff-list-sort">◷ 数据更新于 2026-08-20</div></div><div class="mlff-method-stats">${counts.map((item)=>`<article class="mlff-method-stat"><div class="mlff-method-stat-icon" style="background:${item.bg};color:${item.fg}">${item.icon}</div><div><strong>${item.n}</strong><small>${item.label}</small></div></article>`).join("")}</div></section>
-          <section class="mlff-list-section"><div class="mlff-list-heading"><h3>数据获取方法列表 <span>按方法类别排列</span></h3><div class="mlff-list-sort">排序方式： <strong>方法类别</strong>　使用频率　更新时间</div></div><div class="mlff-method-list">${filtered.map((item)=>{const tone=toneMap[item.tone]||toneMap.blue;return `<article class="mlff-method-card"><div class="mlff-method-card-header"><div class="mlff-method-card-title-row"><div class="mlff-method-icon" style="background:${tone.bg};color:${tone.fg}">${tone.icon}</div><div class="mlff-method-card-title-info"><h4>${esc(item.title)}<span class="mlff-method-type-badge" style="background:${tone.bg};color:${tone.fg}">${esc(item.type)}</span></h4><div class="mlff-method-card-subtitle">${esc(item.shortTitle)}　·　使用频率：${esc(item.frequency)}</div></div></div><div class="mlff-card-actions"><button class="mlff-primary-small" type="button">◉ 查看详情</button><button class="mlff-star-small" type="button" title="收藏">☆</button></div></div><div class="mlff-method-section mlff-method-desc-section"><div class="mlff-method-section-title">ⓘ　方法说明</div><p>${esc(item.desc)}</p></div><div class="mlff-method-section mlff-method-analysis-section"><div class="mlff-method-section-title">⌁　方法分析</div><div class="mlff-method-analysis-content"><span class="mlff-method-pros">✓ 优势：${esc((item.analysis || {}).pros || "数据可信度高")}</span><span class="mlff-method-cons">⊗ 不足：${esc((item.analysis || {}).cons || "获取成本较高")}</span><span class="mlff-method-apply">适用于：${esc((item.analysis || {}).apply || item.scope || "力场参数获取")}</span></div></div><div class="mlff-method-footer"><div>关联参数：${item.params.map((param)=>`<span class="mlff-method-param-tag">${esc(param)}</span>`).join("")}</div><span>◷ 更新于 ${esc(item.updatedAt)}</span></div></article>`}).join("")}</div></section>`;
+          <section class="mlff-list-section"><div class="mlff-list-heading"><h3>数据获取方法列表 <span>按方法类别排列</span></h3><div class="mlff-list-sort">排序方式： <strong>方法类别</strong>　使用频率　更新时间</div></div><div class="mlff-method-list">${filtered.map((item)=>{const tone=toneMap[item.tone]||toneMap.blue;return `<article class="mlff-method-card"><div class="mlff-method-card-header"><div class="mlff-method-card-title-row"><div class="mlff-method-icon" style="background:${tone.bg};color:${tone.fg}">${tone.icon}</div><div class="mlff-method-card-title-info"><h4>${esc(item.title)}<span class="mlff-method-type-badge" style="background:${tone.bg};color:${tone.fg}">${esc(item.type)}</span></h4><div class="mlff-method-card-subtitle">${esc(item.shortTitle)}　·　使用频率：${esc(item.frequency)}</div></div></div><div class="mlff-card-actions"><button class="mlff-primary-small" type="button" data-mlff-method-detail>◉ 查看详情</button><button class="mlff-star-small" type="button" title="收藏">☆</button></div></div><div class="mlff-method-section mlff-method-desc-section"><div class="mlff-method-section-title">ⓘ　方法说明</div><p>${esc(item.desc)}</p></div><div class="mlff-method-section mlff-method-analysis-section"><div class="mlff-method-section-title">⌁　方法分析</div><div class="mlff-method-analysis-content"><span class="mlff-method-pros">✓ 优势：${esc((item.analysis || {}).pros || "数据可信度高")}</span><span class="mlff-method-cons">⊗ 不足：${esc((item.analysis || {}).cons || "获取成本较高")}</span><span class="mlff-method-apply">适用于：${esc((item.analysis || {}).apply || item.scope || "力场参数获取")}</span></div></div><div class="mlff-method-footer"><div>关联参数：${item.params.map((param)=>`<span class="mlff-method-param-tag">${esc(param)}</span>`).join("")}</div><span>◷ 更新于 ${esc(item.updatedAt)}</span></div></article>`}).join("")}</div></section>`;
       }
       const renderReferencePage = () => {
         const definition = state.mlffGlossaryTab !== "method";
@@ -90002,6 +90118,12 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       }
       if (!state.mlffGlossaryAlpha) state.mlffGlossaryAlpha = "全";
       document.addEventListener("click", (event) => {
+        const methodDetail = event.target.closest("[data-mlff-method-detail]");
+        if (methodDetail) {
+          event.preventDefault();
+          openMlffMethodDetail(methodDetail);
+          return;
+        }
         const alphaButton = event.target.closest("[data-mlff-alpha]");
         if (!alphaButton) return;
         state.mlffGlossaryAlpha = alphaButton.dataset.mlffAlpha;
@@ -90926,6 +91048,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
           { label: "英文名称", value: esc(firstValue(material, fields, ["english", "nameEn", "name_en"], material.english || material.name)) },
           { label: "化学式", value: esc(material.formula) },
           { label: "数据集类型", value: esc(datasetType(material, provenance)) },
+          { label: "数据来源", value: esc(window.getMlffDatasetSourceLabel ? window.getMlffDatasetSourceLabel(material) : "未记录") },
           { label: "体系规模", value: esc(atomCount ? `${atomCount} 个原子；${retained} 个构型帧` : `${retained} 个构型帧`) },
           { label: "体系类型", value: esc(systemType(material, fields)) },
           { label: "电荷", value: esc(formatNetCharge(material, fields)) },
@@ -91120,3 +91243,4 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     #predictionTaskModal .prediction-hidden-control { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
     @media (max-width:640px) { #predictionTaskModal .prediction-algorithm-categories { flex-direction:column; } #predictionTaskModal .prediction-modal-config-grid { grid-template-columns:1fr; } #predictionTaskModal .prediction-material-summary { gap:8px 14px; } #predictionTaskModal .prediction-algorithm-card > b { display:none; } }
   </style>
+
