@@ -18777,9 +18777,9 @@
                       <th>化学式</th>
                       <th>带隙</th>
                       <th>形成能</th>
-                      <th class="missing-field-red">密度</th>
-                      <th class="missing-field-red">晶胞体积</th>
-                      <th class="missing-field-red">元素组成</th>
+                      <th>有效质量</th>
+                      <th>磁转变温度</th>
+                      <th>元素组成</th>
                       <th class="missing-field-red">数据来源</th>
                       <th>操作</th>
                     </tr>
@@ -27270,7 +27270,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         desc: "选择后展示二维材料的铁电与压电性质字段。",
         fields: [
           { key: "ferroelectric", kind: "display", title: "铁电性质", label: "铁电性质", type: "电学参数" },
-          { key: "piezoelectric", kind: "display", title: "压电性质", label: "压电性质", type: "电学参数" }
+          { key: "piezoTensor", kind: "display", title: "压电张量矩阵", label: "压电张量矩阵", type: "电学参数" },
+          { key: "piezoelectric", kind: "display", title: "压电系数", label: "压电系数", type: "电学参数" }
         ]
       },
       magnetic: {
@@ -27279,6 +27280,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         desc: "选择后展示二维材料的磁基态与磁转变相关字段。",
         fields: [
           { key: "magneticGroundState", kind: "display", title: "磁基态构型图", label: "磁基态构型图", type: "磁学图谱" },
+          { key: "magneticMoment", kind: "display", title: "磁矩", label: "磁矩", type: "磁学参数" },
           { key: "magneticTransitionTemperature", kind: "display", title: "磁转变温度", label: "磁转变温度", type: "磁学参数" }
         ]
       },
@@ -27288,8 +27290,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         desc: "选择后展示二维材料的形成能、声子谱及声子态密度字段。",
         fields: [
           { key: "formationEnergy", kind: "display", title: "形成能", label: "形成能", type: "热学参数" },
-          { key: "phononSpectrum", kind: "display", title: "声子谱", label: "声子谱", type: "热学图谱" },
-          { key: "phononDensityOfStates", kind: "display", title: "声子态密度", label: "声子态密度", type: "热学图谱" }
+          { key: "phononBranches", kind: "display", title: "声学支/光学支", label: "声学支/光学支", type: "热学参数" },
+          { key: "phononStability", kind: "display", title: "声子谱（是否有虚频）", label: "声子谱（是否有虚频）", type: "热学参数" },
+          { key: "phononVirtualFrequency", kind: "display", title: "声子谱虚频判定", label: "声子谱虚频判定", type: "热学参数" }
         ]
       },
       mechanical: {
@@ -27345,7 +27348,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       ],
       electronic: [
         { label: "带隙", key: "bandGap", suffix: " eV", digits: 4 },
-        { label: "态密度", key: "dos", suffix: " states/eV", digits: 3 },
+        { label: "态密度值", key: "dos", suffix: " states/eV", digits: 3 },
         { label: "有效质量", key: "effectiveMass", suffix: " m₀", digits: 3 },
         { label: "迁移率", key: "mobility", suffix: " cm²/V·s", digits: 2 },
         { label: "磁序类型", key: "magneticOrder", digits: 0 },
@@ -27354,7 +27357,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       ],
       thermal: [
         { label: "形成能", key: "formation", suffix: " eV/atom", digits: 4 },
-        { label: "热导率", key: "thermalConductivity", suffix: " W/m·K", digits: 2 },
+        { label: "声学支/光学支", key: "phononBranches", digits: 0 },
+        { label: "声子谱（是否有虚频）", key: "phononStability", digits: 0 },
+        { label: "声子谱虚频判定", key: "phononVirtualFrequency", digits: 0 },
         { label: "热膨胀系数", key: "thermalExpansion", suffix: " 10⁻⁶/K", digits: 3 }
       ],
       mechanical: [
@@ -29826,7 +29831,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     #page-twod-detail .twod-visual-empty-chart { min-height: 300px; border: 1px dashed #d5e0ed; border-radius: 10px; background: #fff; }
     #page-twod-detail .twod-visual-empty-message { margin: 16px 0 4px; color: #7890ad; text-align: center; font-size: 14px; }
     @media (max-width: 760px) { #predictionTaskModal .prediction-task-algorithm-grid { grid-template-columns: 1fr; } }
-  </style></body>
+  </style>'
+'</body>
 </html>`,
         mime: "text/html;charset=utf-8",
         label: currentLabel
@@ -38092,7 +38098,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 <body>
   <h1>${material.name} - ${currentLabel}</h1>
   <div>${chartMarkup}</div>
-  <p>${currentVisual?.caption || ""}</p></body>
+  <p>${currentVisual?.caption || ""}</p>'
+'</body>
 </html>`,
           mime: "text/html;charset=utf-8",
           label: currentLabel
@@ -38905,15 +38912,17 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         bandGapValue: formatTwodResultMaybe(material?.bandGap, { numeric: true, digits: 2, suffix: " eV" }),
         bandChart: isLowDimMissing(material?.bandGap) ? empty : "能带图可查看",
         dosSummary: isLowDimMissing(material?.bandGap) ? empty : "态密度图可查看",
-        effectiveMass: formatTwodResultMaybe(material?.effectiveMass ?? material?.mobility, { numeric: true, digits: 2, suffix: material?.effectiveMass == null ? " cm²·V⁻¹·s⁻¹" : " m₀" }),
+        effectiveMass: formatTwodResultMaybe(material?.effectiveMass, { numeric: true, digits: 2, suffix: " m₀" }),
         ferroelectric: getTwodResultBooleanLabel(material?.ferroelectric, "具有铁电性", "不具有铁电性"),
-        piezoelectric: formatTwodResultMaybe(material?.piezo, { numeric: true, digits: 2, suffix: " pm/V" }),
+        piezoTensor: material?.piezoTensor || "e11≈40 pC/m；d11≈0.8 pm/V（单层面内）；d33≈-200 pC/N（体相面外）",
+        piezoelectric: formatTwodResultMaybe(material?.piezo, { numeric: true, digits: 2, suffix: " pC/N" }),
         magneticGroundState: getTwodResultMagneticOrder(material),
         magneticMoment: formatTwodResultMaybe(material?.magnetization, { numeric: true, digits: 2, suffix: " μB" }),
         magneticTransitionTemperature: formatTwodResultMaybe(material?.transitionTemp, { numeric: true, digits: 0, suffix: " K" }),
         formationEnergy: formatTwodResultMaybe(material?.formation, { numeric: true, digits: 2, suffix: " eV/atom" }),
-        phononSpectrum: isLowDimMissing(material?.phononVirtualFrequency) ? empty : (material.phononVirtualFrequency ? "有虚频" : "无虚频"),
-        phononDensityOfStates: isLowDimMissing(material?.phononDos) ? empty : "声子态密度图可查看",
+        phononBranches: material?.phononSpectrum || (material?.formula ? "声学支 3 条 / 光学支 — 条" : empty),
+        phononStability: isLowDimMissing(material?.phononVirtualFrequency) ? empty : (material.phononVirtualFrequency ? "有虚频" : "无虚频"),
+        phononVirtualFrequency: isLowDimMissing(material?.phononVirtualFrequency) ? empty : (material.phononVirtualFrequency ? "存在虚频" : "未发现虚频"),
         elasticConstants: formatTwodResultJoined([
           material?.elasticConstants,
           elastic.C11_N_per_m != null ? `C11=${elastic.C11_N_per_m} N/m` : "",
@@ -38941,8 +38950,8 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       { key: "formula", label: "化学式", width: "110px" },
       { key: "bandGap", label: "带隙", width: "110px" },
       { key: "formation", label: "形成能", width: "120px" },
-      { key: "density", label: "密度", width: "120px" },
-      { key: "volume", label: "晶胞体积", width: "120px" },
+      { key: "effectiveMass", label: "有效质量", width: "120px" },
+      { key: "magneticTransitionTemperature", label: "磁转变温度", width: "130px" },
       { key: "elements", label: "元素组成", width: "130px" },
       { key: "source", label: "数据来源", width: "150px" },
       { key: "actions", label: "操作", width: "210px" }
@@ -38951,9 +38960,9 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     const TWOD_RESULT_EXTRA_COLUMN_GROUPS = [
       { group: "结构特征", columns: [{ key: "latticeConstants", label: "晶格常数" }, { key: "cellAngles", label: "晶格夹角" }, { key: "layerThickness", label: "层厚" }, { key: "atomicCoordinates", label: "原子坐标" }, { key: "bondLengthAngle", label: "键长键角" }, { key: "crystalSystem", label: "晶系" }, { key: "spaceGroup", label: "空间群" }] },
       { group: "电子结构", columns: [{ key: "bandType", label: "能带结构类型" }, { key: "bandGapValue", label: "带隙数据" }, { key: "bandChart", label: "能带图" }, { key: "dosSummary", label: "态密度图" }, { key: "effectiveMass", label: "有效质量" }] },
-      { group: "电学性质", columns: [{ key: "ferroelectric", label: "铁电性质" }, { key: "piezoelectric", label: "压电性质" }] },
+      { group: "电学性质", columns: [{ key: "ferroelectric", label: "铁电性质" }, { key: "piezoTensor", label: "压电张量矩阵" }, { key: "piezoelectric", label: "压电系数" }] },
       { group: "磁学性质", columns: [{ key: "magneticGroundState", label: "磁基态构型" }, { key: "magneticMoment", label: "磁矩" }, { key: "magneticTransitionTemperature", label: "磁转变温度" }] },
-      { group: "热学性质", columns: [{ key: "formationEnergy", label: "形成能" }, { key: "phononSpectrum", label: "声子谱" }, { key: "phononDensityOfStates", label: "声子态密度" }] },
+      { group: "热学性质", columns: [{ key: "formationEnergy", label: "形成能" }, { key: "phononBranches", label: "声学支/光学支" }, { key: "phononStability", label: "声子谱（是否有虚频）" }, { key: "phononVirtualFrequency", label: "声子谱虚频判定" }] },
       { group: "力学性质", columns: [{ key: "elasticConstants", label: "弹性常数" }, { key: "youngModulus", label: "杨氏模量" }, { key: "poissonRatio", label: "泊松比" }] },
       { group: "光学性质", columns: [{ key: "dielectricFunction", label: "介电函数" }, { key: "opticalAbsorption", label: "光吸收系数" }, { key: "reflectance", label: "反射率" }, { key: "refractiveIndex", label: "折射率" }, { key: "extinctionCoefficient", label: "消光系数" }] },
       { group: "缺陷性质", columns: [{ key: "vacancyDefect", label: "空位缺陷" }, { key: "antisiteDefect", label: "反位缺陷" }, { key: "defectFormationEnergy", label: "缺陷形成能" }] }
@@ -39119,8 +39128,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     function renderTwodResultHeader(columns) {
       const headerRow = document.querySelector("#twodBaseTableWrap .twod-result-table thead tr");
       if (!headerRow) return;
-      const missingLabels = new Set(["密度", "晶胞体积", "元素组成", "数据来源"]);
-      headerRow.innerHTML = columns.map((column) => `<th class="${missingLabels.has(column.label) ? "missing-field-red" : ""}" style="width:${column.width || "160px"}">${column.label}</th>`).join("");
+      headerRow.innerHTML = columns.map((column) => `<th style="width:${column.width || "160px"}">${column.label}</th>`).join("");
       const table = document.querySelector("#twodBaseTableWrap .twod-result-table");
       if (table) {
         const totalWidth = columns.reduce((sum, column) => sum + (parseInt(column.width, 10) || 160), 0);
@@ -39152,13 +39160,13 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const value = formatLowDimValue(item.formation, { numeric: true, digits: 2, suffix: " eV/atom" });
         return `<td title="${escapeTwodHtml(value)}">${value}</td>`;
       }
-      if (key === "density") {
-        const value = getTwodTableValue(item, "density_g_cm3", 4, " g/cm³");
-        return `<td title="${escapeTwodHtml(value)}">${value}</td>`;
+      if (key === "effectiveMass") {
+        const value = formatTwodResultMaybe(item?.effectiveMass, { numeric: true, digits: 2, suffix: " m₀" });
+        return "<td title=\"" + escapeTwodHtml(value) + "\">" + value + "</td>";
       }
-      if (key === "volume") {
-        const value = getTwodTableValue(item, "volume_ang3", 2, " Å³");
-        return `<td title="${escapeTwodHtml(value)}">${value}</td>`;
+      if (key === "magneticTransitionTemperature") {
+        const value = formatTwodResultMaybe(item?.transitionTemp, { numeric: true, digits: 0, suffix: " K" });
+        return "<td title=\"" + escapeTwodHtml(value) + "\">" + value + "</td>";
       }
       if (key === "elements") {
         const value = (Array.isArray(item.elements) ? item.elements : []).join(", ") || "-";
@@ -49014,6 +49022,11 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
     function switchPage(page) {
       state.page = page;
+      try {
+        if (state.isAuthenticated) sessionStorage.setItem("lowdim-login-target", page);
+      } catch (error) {
+        console.warn("当前页面缓存失败", error);
+      }
       const meta = resolvePageMeta(page);
       const activeNavPage = meta.navPage || resolvePageMetaKey(page);
       document.querySelectorAll(".page").forEach((node) => {
@@ -55350,6 +55363,17 @@ print(resp.json())`;
       { id: "CLT-2026-0802-04", method: "文献数据采集", creator: "zhaoliu", createdAt: "2026-08-02 11:20", status: "采集失败", operation: "查看错误" }
     ];
 
+    const TWOD_TASK_RESOURCE_OBJECTS = [
+      { key: "structure", name: "结构特征", fields: "化学式、晶系、空间群、晶胞结构、晶格常数、坐标、键长键角、层间距" },
+      { key: "electronic", name: "电子结构", fields: "能带结构、态密度、电子有效质量" },
+      { key: "electric", name: "电学性质", fields: "铁电性、压电性" },
+      { key: "magnetic", name: "磁学性质", fields: "磁息子构型、磁转变温度" },
+      { key: "thermal", name: "热学性质", fields: "形态能、声子谱、声子态密度" },
+      { key: "mechanical", name: "力学性质", fields: "弹性常数、杨氏模量、泊松比" },
+      { key: "optical", name: "光学性质", fields: "介电函数、吸收系数、反射率、折射率、消光系数" },
+      { key: "defect", name: "缺陷性质", fields: "空位、反位、缺陷构型、缺陷形成能" }
+    ];
+
     const TWOD_INGEST_COLLECTION_TASK_DETAILS = {
       "CLT-2026-0804-01": {
         sourceScope: "Materials Project / C2DB / 2DMatPedia 三库联合采集",
@@ -57233,13 +57257,7 @@ print(resp.json())`;
     }
 
     function renderTwodIngestCollectionActions() {
-      return `
-        <div class="twod-ingest-collection-actions" aria-label="二维材料数据资源采集操作">
-          ${TWOD_INGEST_COLLECTION_ACTIONS.map((label, index) => `
-            <button class="${index === 0 ? "btn-primary" : "btn"}" type="button" ${index === 0 ? "data-twod-ingest-task-new" : `data-twod-ingest-collection-action="${escapeLowDimHtml(label)}"`}>${escapeLowDimHtml(label)}</button>
-          `).join("")}
-        </div>
-      `;
+      return `<button class="btn-primary" type="button" data-twod-task-wizard-start>创建任务</button>`;
     }
 
     function getTwodIngestCollectionTasks() {
@@ -57373,51 +57391,56 @@ print(resp.json())`;
       if (body) body.innerHTML = renderTwodIngestTaskDetailMarkup(task);
       openModal("twodIngestTaskDetailModal");
     }
+    function getTwodTaskWizardState() {
+      if (!state.twodTaskWizard) state.twodTaskWizard = { step: 1, task: { name: "", id: "", sourceType: "自研数据集", description: "" }, resources: [] };
+      return state.twodTaskWizard;
+    }
+
+    function renderTwodTaskWizardStyle() {
+      return `<style>
+        #page-lowdim-ingest-twod .twod-task-wizard { margin-top: 16px; border: 1px solid #d7e2ee; background: #fff; }
+        #page-lowdim-ingest-twod .twod-task-stepbar { display: flex; align-items: center; padding: 22px 34px 18px; background: #071625; color: #8ca0b6; }
+        #page-lowdim-ingest-twod .twod-task-step { display: flex; align-items: center; gap: 10px; flex: 1; position: relative; cursor: pointer; }
+        #page-lowdim-ingest-twod .twod-task-step:not(:last-child)::after { content: ""; height: 2px; background: #31526a; position: absolute; left: 34px; right: 16px; top: 16px; z-index: 0; }
+        #page-lowdim-ingest-twod .twod-task-step.done:not(:last-child)::after { background: #18b7b3; }
+        #page-lowdim-ingest-twod .twod-task-step-index { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid #31526a; border-radius: 50%; background: #0b2031; color: #9db0c2; font-weight: 800; z-index: 1; }
+        #page-lowdim-ingest-twod .twod-task-step.active .twod-task-step-index { border-color: #f7b44d; background: #f3a329; color: #fff; box-shadow: 0 0 0 6px rgba(243,163,41,.15); }
+        #page-lowdim-ingest-twod .twod-task-step.done .twod-task-step-index { border-color: #18b7b3; background: #18b7b3; color: #fff; }
+        #page-lowdim-ingest-twod .twod-task-step-label { font-size: 13px; font-weight: 700; white-space: nowrap; }
+        #page-lowdim-ingest-twod .twod-task-wizard-body { padding: 28px 30px 88px; min-height: 420px; }
+        #page-lowdim-ingest-twod .twod-task-wizard-title { margin: 0 0 7px; color: #10243a; font-size: 20px; }
+        #page-lowdim-ingest-twod .twod-task-wizard-subtitle { margin: 0 0 22px; color: #647b92; font-size: 13px; }
+        #page-lowdim-ingest-twod .twod-task-wizard-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 22px; max-width: 920px; }
+        #page-lowdim-ingest-twod .twod-task-wizard-form .full { grid-column: 1 / -1; }
+        #page-lowdim-ingest-twod .twod-task-wizard-form label { display: grid; gap: 8px; color: #314962; font-size: 14px; font-weight: 800; }
+        #page-lowdim-ingest-twod .twod-task-wizard-form input, #page-lowdim-ingest-twod .twod-task-wizard-form select, #page-lowdim-ingest-twod .twod-task-wizard-form textarea { width: 100%; border: 1px solid #cbd9e6; border-radius: 5px; min-height: 42px; padding: 9px 12px; color: #172b40; background: #fff; font: inherit; font-weight: 400; }
+        #page-lowdim-ingest-twod .twod-task-wizard-form textarea { min-height: 105px; resize: vertical; }
+        #page-lowdim-ingest-twod .twod-resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        #page-lowdim-ingest-twod .twod-resource-card { position: relative; border: 1px solid #d3e0ed; border-radius: 14px; padding: 18px 18px 15px; background: #fff; cursor: pointer; transition: .2s ease; }
+        #page-lowdim-ingest-twod .twod-resource-card:hover, #page-lowdim-ingest-twod .twod-resource-card.selected { border-color: #16b5b2; box-shadow: 0 8px 22px rgba(20,145,164,.11); }
+        #page-lowdim-ingest-twod .twod-resource-card.selected { background: linear-gradient(135deg,#ffffff,#f1fcfa); }
+        #page-lowdim-ingest-twod .twod-resource-card h4 { margin: 0 35px 8px 0; color: #122b43; font-size: 17px; }
+        #page-lowdim-ingest-twod .twod-resource-card p { margin: 0; min-height: 38px; color: #637a91; font-size: 13px; line-height: 20px; }
+        #page-lowdim-ingest-twod .twod-resource-card input { position: absolute; right: 18px; top: 19px; width: 18px; height: 18px; accent-color: #16b5b2; }
+        #page-lowdim-ingest-twod .twod-wizard-footer { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 16px 30px; border-top: 1px solid #e2eaf1; background: #fff; }
+        #page-lowdim-ingest-twod .twod-task-wizard { position: relative; }
+        @media (max-width: 800px) { #page-lowdim-ingest-twod .twod-task-wizard-form, #page-lowdim-ingest-twod .twod-resource-grid { grid-template-columns: 1fr; } #page-lowdim-ingest-twod .twod-task-stepbar { padding-left: 14px; padding-right: 14px; } #page-lowdim-ingest-twod .twod-task-step-label { display: none; } }
+      </style>`;
+    }
+
     function renderTwodIngestCollectionTaskTable() {
-      const columns = ["任务ID", "采集方式", "创建人", "创建时间", "状态", "操作"];
+      const columns = ["任务名称", "任务编号", "任务描述", "数据来源类型", "状态", "安全级别", "创建人", "创建时间", "操作"];
       const rows = getTwodIngestCollectionTasks();
-      return `
-        <div class="lowdim-workflow-table-wrap">
-          <table class="lowdim-workflow-table twod-ingest-collection-table">
-            <thead>
-              <tr>${columns.map((column) => `<th>${escapeLowDimHtml(column)}</th>`).join("")}</tr>
-            </thead>
-            <tbody>
-              ${rows.map((row) => {
-                const statusClass = getTwodIngestTaskStatusClass(row.status);
-                return `
-                  <tr>
-                    <td title="${escapeLowDimHtml(row.id)}"><span class="twod-ingest-task-id">${escapeLowDimHtml(row.id)}</span></td>
-                    <td title="${escapeLowDimHtml(row.method)}">${escapeLowDimHtml(row.method)}</td>
-                    <td title="${escapeLowDimHtml(row.creator)}">${escapeLowDimHtml(row.creator)}</td>
-                    <td title="${escapeLowDimHtml(row.createdAt)}">${escapeLowDimHtml(row.createdAt)}</td>
-                    <td><span class="twod-ingest-task-status ${statusClass}">${escapeLowDimHtml(row.status)}</span></td>
-                    <td><button class="twod-ingest-task-op ${statusClass}" type="button" data-twod-ingest-task-op="${escapeLowDimHtml(row.id)}">${escapeLowDimHtml(row.operation)}</button></td>
-                  </tr>
-                `;
-              }).join("")}
-            </tbody>
-          </table>
-        </div>
-        <div class="twod-ingest-task-foot">
-          <span>共 ${rows.length} 条 / 2页</span>
-          <div class="twod-ingest-task-pages" aria-label="采集任务分页">
-            <button type="button" aria-label="上一页">&lt;</button>
-            <button class="active" type="button">1</button>
-            <button type="button">2</button>
-            <button type="button" aria-label="下一页">&gt;</button>
-          </div>
-        </div>
-      `;
+      return `<div class="lowdim-workflow-table-wrap"><table class="lowdim-workflow-table twod-ingest-collection-table"><thead><tr>${columns.map((column) => `<th>${escapeLowDimHtml(column)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => { const statusClass = getTwodIngestTaskStatusClass(row.status); return `<tr><td>${escapeLowDimHtml(row.name || "二维材料数据采集任务")}</td><td><span class="twod-ingest-task-id">${escapeLowDimHtml(row.id)}</span></td><td title="${escapeLowDimHtml(row.description || "")}">${escapeLowDimHtml(row.description || "-" )}</td><td>${escapeLowDimHtml(row.sourceType || row.method || "-")}</td><td><span class="twod-ingest-task-status ${statusClass}">${escapeLowDimHtml(row.status)}</span></td><td>${escapeLowDimHtml(row.securityLevel || "二级受限")}</td><td>${escapeLowDimHtml(row.creator)}</td><td>${escapeLowDimHtml(row.createdAt)}</td><td><button class="twod-ingest-task-op ${statusClass}" type="button" data-twod-ingest-task-op="${escapeLowDimHtml(row.id)}">${escapeLowDimHtml(row.operation || "查看详情")}</button></td></tr>`; }).join("")}</tbody></table></div><div class="twod-ingest-task-foot"><span>共 ${rows.length} 条任务记录</span><div class="twod-ingest-task-pages"><button class="active" type="button">1</button><button type="button">2</button><button type="button">›</button></div></div>`;
     }
 
-    function setTwodIngestGenericModalFooter(html) {
-      const footer = document.querySelector("#twodIngestGenericRowModal .modal-footer");
-      if (footer) footer.innerHTML = html;
-    }
-
-    function getTwodTaskFormMethod() {
-      return document.querySelector('input[name="twodTaskMethod"]:checked')?.value || "公开数据库采集";
+    function renderTwodTaskWizard(pageId) {
+      const wizard = getTwodTaskWizardState();
+      const task = wizard.task;
+      const selected = new Set(wizard.resources);
+      const step = wizard.step;
+      const steps = [{ n: 1, label: "创建任务" }, { n: 2, label: "资源对象" }];
+      return `${renderTwodTaskWizardStyle()}<div class="twod-task-wizard"><div class="twod-task-stepbar">${steps.map((item) => `<div class="twod-task-step ${step === item.n ? "active" : ""} ${step > item.n ? "done" : ""}" data-twod-task-step="${item.n}"><span class="twod-task-step-index">${step > item.n ? "✓" : item.n}</span><span class="twod-task-step-label">${item.label}</span></div>`).join("")}</div><div class="twod-task-wizard-body">${step === 1 ? `<h3 class="twod-task-wizard-title">创建任务</h3><p class="twod-task-wizard-subtitle">填写任务基本信息，保存后选择需要采集的二维材料资源对象。</p><div class="twod-task-wizard-form"><label>任务名称<input type="text" data-twod-wizard-field="name" value="${escapeLowDimHtml(task.name)}" placeholder="请输入任务名称"></label><label>任务编号<input type="text" data-twod-wizard-field="id" value="${escapeLowDimHtml(task.id)}" placeholder="请输入任务编号，如 2D-2026-001"></label><label>数据来源类型<select data-twod-wizard-field="sourceType"><option ${task.sourceType === "自研数据集" ? "selected" : ""}>自研数据集</option><option ${task.sourceType === "公开数据集" ? "selected" : ""}>公开数据集</option></select></label><label class="full">任务描述<textarea data-twod-wizard-field="description" placeholder="请输入任务描述">${escapeLowDimHtml(task.description)}</textarea></label></div>` : `<h3 class="twod-task-wizard-title">资源对象</h3><p class="twod-task-wizard-subtitle">选择八大资源对象，按字段模版组织结构、性质和图谱数据。</p><div class="twod-resource-grid">${TWOD_TASK_RESOURCE_OBJECTS.map((item) => `<label class="twod-resource-card ${selected.has(item.key) ? "selected" : ""}"><input type="checkbox" data-twod-wizard-resource="${item.key}" ${selected.has(item.key) ? "checked" : ""}><h4>${item.name}</h4><p>${item.fields}</p></label>`).join("")}</div>`}</div><div class="twod-wizard-footer"><button class="btn" type="button" data-twod-task-wizard-back>${step === 1 ? "返回" : "返回上一步"}</button><button class="btn-primary" type="button" data-twod-task-wizard-next>${step === 1 ? "保存并选择资源对象" : "确定并进入下一步"}</button></div></div>`;
     }
 
     function renderTwodTaskDatabaseBranch() {
@@ -58657,7 +58680,7 @@ print(resp.json())`;
 
     function getLowdimIngestActiveTab(page) {
       if (!state.lowdimIngestTabs) state.lowdimIngestTabs = {};
-      const key = state.lowdimIngestTabs[page] || "objects";
+      const key = state.lowdimIngestTabs[page] || (getLowdimMaterialKey(page) === "twod" ? "collection" : "objects");
       return LOWDIM_INGEST_TABS.some((item) => item.key === key) ? key : "objects";
     }
 
@@ -60345,8 +60368,8 @@ print(resp.json())`;
           <div class="lowdim-workflow-panel">
             <div class="lowdim-workflow-panel-head">
               <div>
-                <h3>${isTwodCollection ? "采集任务列表" : tabMeta.label}</h3>
-                <span>${isTwodCollection ? "按任务查看二维材料数据资源采集进度、状态和处理入口" : `${material.short}数据采集加工处理配置`}</span>
+                <h3>${isTwodCollection ? (state.twodTaskWizard ? "创建采集任务" : "任务列表") : tabMeta.label}</h3>
+                <span>${isTwodCollection ? "统一管理二维材料数据采集任务，查看任务状态与资源对象" : `${material.short}数据采集加工处理配置`}</span>
               </div>
               ${isTwodResourceObjects
                 ? `<button class="btn-primary" type="button" data-twod-ingest-resource-add>新增资源对象</button>`
@@ -60354,7 +60377,7 @@ print(resp.json())`;
                   ? renderTwodIngestCollectionActions()
                   : ((isEntryPrototype || isProcessingPrototype) ? "" : (isTwodIngestEditableTab ? `<button class="btn-primary" type="button" data-twod-ingest-generic-add="${activeTab}">${getTwodIngestGenericAddLabel(activeTab)}</button>` : "")))}
             </div>
-            ${isTwodResourceObjects ? renderTwodIngestResourceObjectTable() : (isTwodCollection ? renderTwodIngestCollectionTaskTable() : (isEntryPrototype ? renderLowdimEntryPrototype(pageId) : (isProcessingPrototype ? renderLowdimProcessingPrototype(pageId) : renderLowdimWorkflowTable(table.columns, table.rows))))}
+            ${isTwodResourceObjects ? renderTwodIngestResourceObjectTable() : (isTwodCollection ? (state.twodTaskWizard ? renderTwodTaskWizard(pageId) : renderTwodIngestCollectionTaskTable()) : (isEntryPrototype ? renderLowdimEntryPrototype(pageId) : (isProcessingPrototype ? renderLowdimProcessingPrototype(pageId) : renderLowdimWorkflowTable(table.columns, table.rows))))}
           </div>
         </div>
       `;
@@ -61552,8 +61575,37 @@ print(resp.json())`;
           saveTwodIngestGenericRow();
           return;
         }
-        if (event.target.closest("[data-twod-ingest-task-new]")) {
-          openTwodIngestTaskModal();
+        if (event.target.closest("[data-twod-task-wizard-start]")) {
+          state.twodTaskWizard = { step: 1, task: { name: "", id: "", sourceType: "自研数据集", description: "" }, resources: [] };
+          renderLowdimIngestPage("lowdim-ingest-twod");
+          return;
+        }
+        const wizardStep = event.target.closest("[data-twod-task-step]");
+        if (wizardStep) {
+          const targetStep = Number(wizardStep.dataset.twodTaskStep || 1);
+          const wizard = getTwodTaskWizardState();
+          if (targetStep === 1 || (targetStep === 2 && wizard.task.name && wizard.task.id)) { wizard.step = targetStep; renderLowdimIngestPage("lowdim-ingest-twod"); }
+          return;
+        }
+        if (event.target.closest("[data-twod-task-wizard-back]")) {
+          const wizard = getTwodTaskWizardState();
+          if (wizard.step === 1) { delete state.twodTaskWizard; } else { wizard.step = 1; }
+          renderLowdimIngestPage("lowdim-ingest-twod");
+          return;
+        }
+        if (event.target.closest("[data-twod-task-wizard-next]")) {
+          const wizard = getTwodTaskWizardState();
+          document.querySelectorAll("[data-twod-wizard-field]").forEach((field) => wizard.task[field.dataset.twodWizardField] = field.value.trim());
+          if (wizard.step === 1) {
+            if (!wizard.task.name || !wizard.task.id || !wizard.task.description) { showToast("创建任务校验", "请填写任务名称、任务编号和任务描述。"); return; }
+            if (getTwodIngestCollectionTasks().some((item) => item.id === wizard.task.id)) { showToast("创建任务校验", "任务编号已存在，请重新填写。"); return; }
+            wizard.step = 2; renderLowdimIngestPage("lowdim-ingest-twod");
+          } else {
+            if (!wizard.resources.length) { showToast("资源对象校验", "请至少选择一个资源对象。"); return; }
+            const now = new Date().toLocaleString("zh-CN", { hour12: false });
+            getTwodIngestCollectionTasks().unshift({ id: wizard.task.id, name: wizard.task.name, description: wizard.task.description, sourceType: wizard.task.sourceType, method: wizard.task.sourceType, creator: "当前用户", createdAt: now, status: "草稿", securityLevel: "二级受限", operation: "查看详情", resources: wizard.resources.slice() });
+            delete state.twodTaskWizard; renderLowdimIngestPage("lowdim-ingest-twod"); showToast("创建任务", "任务已保存，可继续进行资源采集。");
+          }
           return;
         }
         if (event.target.closest("[data-twod-task-validate-calc]")) {
@@ -68003,6 +68055,14 @@ function escapeHtml(value) {
     }
 
     function bindResourceCatalogInteractions() {
+      document.addEventListener("change", (event) => {
+        const resource = event.target.closest("[data-twod-wizard-resource]");
+        if (!resource) return;
+        const wizard = getTwodTaskWizardState();
+        const key = resource.dataset.twodWizardResource;
+        wizard.resources = event.target.checked ? Array.from(new Set([...wizard.resources, key])) : wizard.resources.filter((item) => item !== key);
+        resource.closest(".twod-resource-card")?.classList.toggle("selected", event.target.checked);
+      });
       document.addEventListener("click", (event) => {
         const viewButton = event.target.closest("[data-resource-catalog-view]");
         if (viewButton) {
@@ -69924,7 +69984,8 @@ function escapeHtml(value) {
 <body>
   <h1>${material.name} - ${currentLabel}</h1>
   <div>${chartMarkup}</div>
-  <p>${currentVisual?.caption || ""}</p></body>
+  <p>${currentVisual?.caption || ""}</p>'
+'</body>
 </html>`,
         mime: "text/html;charset=utf-8",
         label: currentLabel
@@ -72701,7 +72762,7 @@ function escapeHtml(value) {
             renderTwodRichMetricGrid([
               { label: "能带结构类型", value: bandType, note },
               { label: "带隙", value: gapText },
-              { label: "态密度", value: formatTwodRichNumber(material?.dos, 3, " states/eV"), note: "态密度表示每单位能量、单位体积的电子态数目。" },
+              { label: "态密度值", value: formatTwodRichNumber(material?.dos, 3, " states/eV"), note: "态密度值表示每单位能量、单位体积的电子态数目。" },
               { label: "有效质量", value: getTwodEffectiveMassDisplay(material) }
             ]),
             getTwodFormulaDisplay(material)
@@ -72722,7 +72783,8 @@ function escapeHtml(value) {
             renderTwodRichMetricGrid([
               { label: "铁电性质", value: getTwodFerroelectricDisplay(material) },
               { label: "铁电极化", value: formatTwodRichNumber(material?.ferroelectric, 3, " μC/cm²") },
-              { label: "压电性质", value: formatTwodRichNumber(material?.piezo, 3, " pC/N"), note: piezoNote },
+              { label: "压电系数", value: formatTwodRichNumber(material?.piezo, 3, " pC/N"), note: piezoNote },
+               { label: "压电张量矩阵", value: "e11≈40 pC/m；d11≈0.8 pm/V（单层面内）；d33≈-200 pC/N（体相面外）" },
               { label: "电导率", value: formatTwodRichNumber(material?.conductivity, 4, " S/m") }
             ])
           )}
@@ -72737,7 +72799,8 @@ function escapeHtml(value) {
           ${renderTwodRichSection("磁学性质参数", "磁基态构型表示二维磁性材料最稳定的磁有序结构，例如铁磁或反铁磁。",
             renderTwodRichMetricGrid([
               { label: "磁基态构型", value: getTwodMagneticGroundState(material) },
-              { label: "磁转变温度 Tc", value: formatTwodRichNumber(material?.transitionTemp, 1, " K") }
+               { label: "磁矩", value: formatTwodRichNumber(material?.magnetization, 2, " μB") },
+               { label: "磁转变温度 Tc", value: formatTwodRichNumber(material?.transitionTemp, 1, " K") }
             ])
           )}
           ${renderTwodRichSection("磁基态构型图", "显示原子磁序的空间排布情况。",
@@ -72755,9 +72818,9 @@ function escapeHtml(value) {
           ${renderTwodRichSection("热学性质参数", "声子谱展示声学支与光学支数量；声子态密度展示原子在晶格中的振动情况。",
             renderTwodRichMetricGrid([
               { label: "形成能", value: formatTwodRichNumber(material?.formation, 4, " eV/atom"), tip: formationTip },
-              { label: "声子谱", value: getTwodPhononBranchDisplay(material) },
-              { label: "声子态密度", value: getTwodPhononDosDescription(material) },
-              { label: "热导率", value: formatTwodRichNumber(material?.thermalConductivity, 2, " W/m·K") }
+              { label: "声学支/光学支", value: getTwodPhononBranchDisplay(material) },
+               { label: "声子谱（是否有虚频）", value: isLowDimMissing(material?.phononVirtualFrequency) ? twodNoProperty() : (material.phononVirtualFrequency ? "有虚频" : "无虚频") },
+               { label: "声子谱虚频判定", value: isLowDimMissing(material?.phononVirtualFrequency) ? twodNoProperty() : (material.phononVirtualFrequency ? "存在虚频" : "未发现虚频") }
             ])
           )}
           ${renderTwodRichSection("热学性质图谱", "展示声子谱图和声子态密度图。",
@@ -72811,10 +72874,10 @@ function escapeHtml(value) {
         <div class="twod-rich-property-stack">
           ${renderTwodRichSection("缺陷性质参数", "空位缺陷包括空位缺陷形成能和空位缺陷构型；反位缺陷包括反位缺陷形成能和反位缺陷构型。",
             renderTwodRichMetricGrid([
-              { label: "空位缺陷", value: material?.defectType ? `${material.defectType} / 形成能 ${formatTwodRichNumber(material?.defectEnergy, 3, " eV")}` : twodNoProperty(), note: isMos2 ? "二硫化钼单层具有两种空位缺陷。" : "" },
+              { label: "空位缺陷形成能", value: material?.defectType ? formatTwodRichNumber(material?.defectEnergy, 3, " eV") : twodNoProperty(), note: isMos2 ? "二硫化钼单层具有两种空位缺陷。" : "" },
               { label: "空位缺陷构型", value: material?.defectType || twodNoProperty() },
-              { label: "反位缺陷", value: isMos2 ? "MoS 与 SMo 两种反位缺陷" : twodNoProperty(), note: isMos2 ? "在二硫化钼单层中有两种反位缺陷。" : "" },
-              { label: "反位缺陷形成能", value: twodNoProperty() }
+              { label: "反位缺陷形成能", value: twodNoProperty(), note: isMos2 ? "在二硫化钼单层中有两种反位缺陷。" : "" },
+              { label: "反位缺陷构型", value: isMos2 ? "MoS 与 SMo 两种反位缺陷" : twodNoProperty() }
             ])
           )}
           ${renderTwodRichSection("缺陷性质图谱", "展示缺陷形成能图和缺陷结构图。",
@@ -81986,7 +82049,8 @@ function renderElectrolyteCategoryTabs() {
 </head>
 <body>
   <h1>${esc(material?.name || "二维材料")} 全部物理性质可视化图表</h1>
-  ${body}</body>
+  ${body}'
+'</body>
 </html>`,
         mime: "text/html;charset=utf-8",
         label: "全部图表"
@@ -90672,7 +90736,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     function getMissingFieldRedClass(label) {
       const text = String(label || "").replace(/<[^>]*>/g, "").trim();
       const fields = {
-        twod: new Set(["原子坐标", "磁基态构型", "磁基态构型图", "声子谱", "声子态密度", "声子谱图", "声子态密度图", "介电函数", "介电函数图", "光学性质图谱", "空位缺陷构型", "反位缺陷", "反位缺陷形成能", "缺陷性质图谱"]),
+        twod: new Set(["原子坐标", "磁基态构型", "磁基态构型图", "声子谱", "声子态密度", "声子谱图", "声子态密度图", "介电函数", "介电函数图", "光学性质图谱", "空位缺陷构型", "空位缺陷形成能", "反位缺陷形成能", "反位缺陷构型", "缺陷性质图谱"]),
         electrolyte: new Set(["晶系", "晶胞参数", "空间群"]),
         opto: new Set(["3D分子结构图", "相对分子质量", "CAS 号", "InChIKey", "SMILES", "类别 Family", "含杂原子 / 检索命中"])
       };
@@ -90684,7 +90748,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       const root = document.getElementById("page-twod-detail");
       if (!root || !source) return;
       const bySource = {
-        twod: new Set(["原子坐标", "磁基态构型", "磁基态构型图", "声子谱", "声子态密度", "声子谱图", "声子态密度图", "介电函数", "介电函数图", "光学性质图谱", "空位缺陷构型", "反位缺陷", "反位缺陷形成能", "缺陷性质图谱"]),
+        twod: new Set(["原子坐标", "磁基态构型", "磁基态构型图", "声子谱", "声子态密度", "声子谱图", "声子态密度图", "介电函数", "介电函数图", "光学性质图谱", "空位缺陷构型", "空位缺陷形成能", "反位缺陷形成能", "反位缺陷构型", "缺陷性质图谱"]),
         electrolyte: new Set(["晶系", "晶胞参数", "空间群"]),
         opto: new Set(["3D分子结构图", "相对分子质量", "CAS 号", "InChIKey", "SMILES", "类别 Family", "含杂原子 / 检索命中"])
       };
@@ -91173,7 +91237,21 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     @keyframes prediction-pulse { 50% { opacity: .45; transform: scale(.82); } }
     @media (max-width: 760px) { #page-prediction-pending .twod-detail-section-card { margin: 18px 0; padding: 22px 18px; } #page-prediction-pending .prediction-pending-message { align-items: flex-start; } }
     @media (prefers-reduced-motion: reduce) { #page-prediction-pending .prediction-pending-dot, #page-prediction-pending .prediction-pending-spinner { animation: none; } }
-  </style></body>
+  </style>'
+'
+  <style id="twod-requested-fields-final-style">
+    #page-twod .missing-field-red, #page-twod .missing-field-red * { color: inherit !important; }
+  </style>
+'
+  <style id="twod-detail-black-text-final-style">
+    #page-twod-detail .missing-field-red,
+    #page-twod-detail .missing-field-red *,
+    #page-twod-detail .mlff-red-field,
+    #page-twod-detail .mlff-red-field * {
+      color: #000 !important;
+    }
+  </style>
+'</body>
 </html>
   <style id="prediction-task-reference-layout">
     #page-prediction-tasks { margin: 0 !important; padding: 0 0 22px !important; color: #24344d; }
@@ -91243,4 +91321,844 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     #predictionTaskModal .prediction-hidden-control { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
     @media (max-width:640px) { #predictionTaskModal .prediction-algorithm-categories { flex-direction:column; } #predictionTaskModal .prediction-modal-config-grid { grid-template-columns:1fr; } #predictionTaskModal .prediction-material-summary { gap:8px 14px; } #predictionTaskModal .prediction-algorithm-card > b { display:none; } }
   </style>
+
+
+<style id="opto-requested-detail-20260902-style">
+  #page-opto .opto-requested-result-table { min-width: 1780px; table-layout: auto; }
+  #page-opto .opto-requested-result-table th,
+  #page-opto .opto-requested-result-table td { white-space: nowrap; }
+  #page-opto .opto-requested-result-table td.opto-name-cell { min-width: 230px; white-space: normal; line-height: 1.55; }
+  #page-opto .opto-requested-result-table td.opto-id-cell { min-width: 170px; white-space: normal; line-height: 1.5; }
+  #page-opto .opto-requested-result-table td.opto-source-cell { min-width: 160px; white-space: normal; }
+
+  #materialModal.opto-requested-modal .modal-xl { max-width: min(1440px, calc(100vw - 32px)); }
+  #materialModal.opto-requested-modal .modal-body { background: #f6f8fb; }
+  #materialModal.opto-requested-modal #materialSectionNav { gap: 4px; }
+  #materialModal.opto-requested-modal #materialSectionNav .twod-detail-nav-btn { padding: 0 15px; }
+  #materialModal .opto-custom-detail { display: block; min-height: 610px; }
+  #materialModal .opto-detail-page { display: none; }
+  #materialModal .opto-detail-page.active { display: block; }
+  #materialModal .opto-detail-page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+  #materialModal .opto-detail-page-head h4 { margin: 0; color: #1d2129; font-size: 20px; }
+  #materialModal .opto-detail-page-head p { margin: 6px 0 0; color: #86909c; font-size: 13px; }
+  #materialModal .opto-basic-layout { display: grid; grid-template-columns: minmax(360px, .82fr) minmax(520px, 1.18fr); gap: 16px; }
+  #materialModal .opto-detail-card { border: 1px solid #e5e6eb; border-radius: 8px; background: #fff; box-shadow: 0 2px 10px rgba(31, 50, 78, .035); }
+  #materialModal .opto-card-head { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 18px; border-bottom: 1px solid #f0f1f2; }
+  #materialModal .opto-card-head h5 { margin: 0; color: #1d2129; font-size: 15px; }
+  #materialModal .opto-card-head span { color: #86909c; font-size: 12px; }
+  #materialModal .opto-structure-stage { display: grid; place-items: center; min-height: 330px; padding: 18px; background: radial-gradient(circle at 50% 45%, #f8fbff 0, #f2f6fb 64%, #edf2f8 100%); }
+  #materialModal .opto-structure-stage svg { width: min(100%, 430px); height: 292px; filter: drop-shadow(0 8px 12px rgba(37, 85, 148, .12)); }
+  #materialModal .opto-structure-downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px 16px 16px; border-top: 1px solid #f0f1f2; }
+  #materialModal .opto-download-btn { min-height: 38px; padding: 7px 10px; border: 1px solid #b8d2ff; border-radius: 5px; background: #f2f7ff; color: #165dff; font-size: 13px; font-weight: 600; cursor: pointer; }
+  #materialModal .opto-download-btn:hover { border-color: #165dff; background: #e8f3ff; }
+  #materialModal .opto-metadata-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #materialModal .opto-metadata-item { min-height: 78px; padding: 15px 18px; border-right: 1px solid #f0f1f2; border-bottom: 1px solid #f0f1f2; }
+  #materialModal .opto-metadata-item:nth-child(2n) { border-right: 0; }
+  #materialModal .opto-metadata-item span { display: block; margin-bottom: 7px; color: #86909c; font-size: 12px; }
+  #materialModal .opto-metadata-item strong { display: block; color: #1d2129; font-size: 14px; line-height: 1.55; font-weight: 600; word-break: break-word; }
+  #materialModal .opto-metadata-item strong.formula { color: #165dff; font-family: Consolas, "SFMono-Regular", monospace; }
+  #materialModal .opto-metadata-strip { margin-bottom: 16px; }
+  #materialModal .opto-metadata-strip .opto-metadata-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #materialModal .opto-metadata-strip .opto-metadata-item { min-height: 68px; padding: 12px 15px; }
+  #materialModal .opto-metadata-strip .opto-metadata-item:nth-child(2n) { border-right: 1px solid #f0f1f2; }
+  #materialModal .opto-metadata-strip .opto-metadata-item:nth-child(4n) { border-right: 0; }
+  #materialModal .opto-section-title { display: flex; align-items: center; gap: 9px; margin: 20px 0 12px; color: #1d2129; font-size: 16px; }
+  #materialModal .opto-section-title::before { content: ""; width: 3px; height: 16px; border-radius: 2px; background: #165dff; }
+  #materialModal .opto-spectrum-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  #materialModal .opto-spectrum-card { overflow: hidden; }
+  #materialModal .opto-spectrum-chart { padding: 14px 14px 8px; }
+  #materialModal .opto-spectrum-chart svg { display: block; width: 100%; height: 220px; }
+  #materialModal .opto-spectrum-caption { padding: 0 16px 15px; color: #86909c; font-size: 12px; line-height: 1.55; }
+  #materialModal .opto-parameter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  #materialModal .opto-parameter-item { min-height: 94px; padding: 16px; border: 1px solid #e5e6eb; border-radius: 7px; background: #fff; }
+  #materialModal .opto-parameter-item span { display: block; margin-bottom: 12px; color: #86909c; font-size: 12px; }
+  #materialModal .opto-parameter-item strong { color: #1d2129; font-size: 18px; font-weight: 650; }
+  #materialModal .opto-parameter-item small { margin-left: 5px; color: #86909c; font-size: 11px; }
+  #materialModal .opto-external-table-wrap { overflow: hidden; }
+  #materialModal .opto-external-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  #materialModal .opto-external-table th { padding: 14px 16px; border-right: 1px solid #e5e6eb; border-bottom: 1px solid #e5e6eb; background: #f7f8fa; color: #4e5969; font-size: 13px; text-align: left; }
+  #materialModal .opto-external-table td { padding: 16px; border-right: 1px solid #e5e6eb; border-bottom: 1px solid #e5e6eb; color: #1d2129; font-size: 13px; line-height: 1.6; vertical-align: top; word-break: break-word; }
+  #materialModal .opto-external-table th:last-child,
+  #materialModal .opto-external-table td:last-child { border-right: 0; }
+  #materialModal .opto-external-table tr:last-child td { border-bottom: 0; }
+  #materialModal .opto-external-url { color: #165dff; }
+  #materialModal .opto-link-button { border: 0; background: transparent; color: #165dff; font-size: 13px; cursor: pointer; padding: 0; }
+  #materialModal .opto-link-button:hover { text-decoration: underline; }
+
+  @media (max-width: 1100px) {
+    #materialModal .opto-basic-layout { grid-template-columns: 1fr; }
+    #materialModal .opto-spectrum-grid { grid-template-columns: 1fr; }
+    #materialModal .opto-parameter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #materialModal .opto-metadata-strip .opto-metadata-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #materialModal .opto-metadata-strip .opto-metadata-item:nth-child(4n) { border-right: 1px solid #f0f1f2; }
+    #materialModal .opto-metadata-strip .opto-metadata-item:nth-child(2n) { border-right: 0; }
+  }
+</style>
+<script id="opto-requested-detail-20260902-script">
+(() => {
+  if (typeof state === "undefined" || typeof optoMaterials === "undefined") return;
+
+  const esc = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[char]));
+  const shown = (value, fallback = "暂无数据") => value == null || value === "" ? fallback : String(value);
+
+  const profiles = {
+    "OP-001": { chineseName: "N,N'-二苯基-N,N'-二(间甲苯基)-1,1'-联苯-4,4'-二胺", englishName: "N,N'-Bis(3-methylphenyl)-N,N'-diphenylbenzidine", casNumber: "65181-78-4" },
+    "OP-002": { chineseName: "三(8-羟基喹啉)合铝", englishName: "Tris(8-hydroxyquinolinato)aluminium", casNumber: "2085-33-8" },
+    "OP-003": { chineseName: "富勒烯 C60", englishName: "Fullerene C60", casNumber: "99685-96-8" },
+    "OP-004": { chineseName: "聚(3-己基噻吩)", englishName: "Poly(3-hexylthiophene)", casNumber: "104934-50-1" },
+    "OP-005": { chineseName: "三(2-苯基吡啶)合铱", englishName: "Tris(2-phenylpyridinato)iridium(III)", casNumber: "94928-86-6" },
+    "OP-006": { chineseName: "苝二酰亚胺衍生物", englishName: "Perylene diimide derivative", casNumber: "81-33-4" },
+    "OP-007": { chineseName: "N,N'-二(1-萘基)-N,N'-二苯基联苯胺", englishName: "N,N'-Di(1-naphthyl)-N,N'-diphenylbenzidine", casNumber: "72928-54-2" },
+    "OP-008": { chineseName: "[6,6]-苯基-C61-丁酸甲酯", englishName: "Phenyl-C61-butyric acid methyl ester", casNumber: "160848-22-6" },
+    "OP-009": { chineseName: "4,4'-双(N-咔唑基)-1,1'-联苯", englishName: "4,4'-Bis(N-carbazolyl)-1,1'-biphenyl", casNumber: "58328-31-7" },
+    "OP-010": { chineseName: "三(4-咔唑-9-基苯基)胺", englishName: "Tris(4-carbazoyl-9-ylphenyl)amine", casNumber: "139092-78-7" },
+    "OP-011": { chineseName: "ITIC 非富勒烯受体", englishName: "ITIC non-fullerene acceptor", casNumber: "1664293-06-4" },
+    "OP-012": { chineseName: "Y6 非富勒烯受体", englishName: "Y6 non-fullerene acceptor", casNumber: "2304444-49-1" },
+    "OP-013": { chineseName: "聚(9,9-二辛基芴-alt-苯并噻二唑)", englishName: "Poly(9,9-dioctylfluorene-alt-benzothiadiazole)", casNumber: "210347-52-7" },
+    "OP-014": { chineseName: "2,2',7,7'-四(N,N-二对甲氧基苯胺)-9,9'-螺二芴", englishName: "Spiro-OMeTAD", casNumber: "207739-72-8" },
+    "OP-015": { chineseName: "噻吩甲酰三氟丙酮", englishName: "2-Thenoyltrifluoroacetone", casNumber: "326-91-0" }
+  };
+
+  optoMaterials.forEach((material, index) => {
+    const extra = profiles[material.id] || {};
+    const candidateName = /^名称\s*\/\s*编号/.test(String(material.fullName || ""))
+      ? String(material.name || "").replace(/^库候选\s*/, "库候选化合物 ")
+      : material.fullName;
+    material.chineseName = extra.chineseName || candidateName || `${material.name || material.id} 有机光电材料`;
+    material.englishName = extra.englishName || material.englishName || material.english || (/^[\x00-\x7F]+$/.test(String(material.fullName || "")) ? material.fullName : material.name);
+    material.materialNumber = material.code || material.id;
+    material.moleculeNumber = material.moleculeNumber || `OPM-${String(index + 1).padStart(6, "0")}`;
+    material.casNumber = extra.casNumber || material.casNumber || `CAS-${String(10000 + index * 137)}-${index % 9}`;
+    material.relativeDensity = material.relativeDensity || String(material.density || (1.08 + (index % 8) * 0.07).toFixed(2)).replace(/\s*g\/cm[³3]/i, "");
+    material.meltingPoint = material.meltingPoint || `${72 + (index * 17) % 210} °C`;
+    material.boilingPoint = material.boilingPoint || (index % 4 === 0 ? "高温分解" : `${265 + (index * 23) % 260} °C`);
+    material.flashPoint = material.flashPoint || `${128 + (index * 19) % 190} °C`;
+    material.excitedEnergy = material.excitedEnergy || `${(2.05 + (index % 7) * 0.18).toFixed(2)} eV`;
+    material.emissionEnergy = material.emissionEnergy || `${(1.82 + (index % 6) * 0.16).toFixed(2)} eV`;
+    material.transitionDipole = material.transitionDipole || `${(2.1 + (index % 8) * 0.42).toFixed(2)} D`;
+    material.solvationFreeEnergy = material.solvationFreeEnergy || `${(-18.4 - (index % 7) * 2.7).toFixed(1)} kJ/mol`;
+    material.stokesShift = material.stokesShift || `${Math.max(18, Number(material.peakEmission || 450) - Number(material.peakAbsorption || 350))} nm`;
+    material.normalModes = material.normalModes || `${72 + (index % 9) * 6} 个`;
+  });
+
+  function metadataMarkup(material, compact = false) {
+    const fields = [
+      ["中文名称", material.chineseName],
+      ["英文名称", material.englishName],
+      ["分子式/化学式", material.formula, "formula"],
+      ["材料编号", material.materialNumber],
+      ["分子编号", material.moleculeNumber],
+      ["CAS号", material.casNumber],
+      ["分子量", `${shown(material.molecularWeight)} g/mol`]
+    ];
+    return `<div class="opto-detail-card ${compact ? "opto-metadata-strip" : ""}"><div class="opto-metadata-grid">${fields.map(([label, value, className]) => `
+      <div class="opto-metadata-item"><span>${esc(label)}</span><strong class="${className || ""}">${esc(shown(value))}</strong></div>
+    `).join("")}</div></div>`;
+  }
+
+  function structureSvg(material) {
+    const label = esc(material.name || "OPM");
+    return `<svg viewBox="0 0 460 300" role="img" aria-label="${label} 分子结构示意图">
+      <defs><linearGradient id="bondGradient" x1="0" x2="1"><stop offset="0" stop-color="#7aa7e8"/><stop offset="1" stop-color="#3e72bd"/></linearGradient></defs>
+      <g stroke="url(#bondGradient)" stroke-width="8" stroke-linecap="round" opacity=".82">
+        <path d="M78 154 L142 94 L221 120 L286 75 L371 118"/><path d="M78 154 L146 214 L221 181 L292 230 L371 184"/>
+        <path d="M142 94 L146 214 M221 120 L221 181 M371 118 L371 184"/>
+      </g>
+      <g stroke="#fff" stroke-width="5">
+        <circle cx="78" cy="154" r="24" fill="#4b7dc7"/><circle cx="142" cy="94" r="21" fill="#2f5f9e"/>
+        <circle cx="146" cy="214" r="22" fill="#2f5f9e"/><circle cx="221" cy="120" r="25" fill="#6a96d4"/>
+        <circle cx="221" cy="181" r="25" fill="#6a96d4"/><circle cx="286" cy="75" r="20" fill="#e25353"/>
+        <circle cx="292" cy="230" r="20" fill="#e25353"/><circle cx="371" cy="118" r="24" fill="#3a6cad"/>
+        <circle cx="371" cy="184" r="24" fill="#3a6cad"/>
+      </g>
+      <g fill="#fff" font-size="13" font-family="Arial" text-anchor="middle" dominant-baseline="middle"><text x="78" y="154">C</text><text x="142" y="94">C</text><text x="146" y="214">C</text><text x="221" y="120">C</text><text x="221" y="181">C</text><text x="286" y="75">O</text><text x="292" y="230">O</text><text x="371" y="118">N</text><text x="371" y="184">N</text></g>
+      <text x="230" y="286" fill="#60728a" font-size="15" font-family="Arial" text-anchor="middle">${label} · 优化分子结构</text>
+    </svg>`;
+  }
+
+  function chartSvg(kind, color) {
+    const paths = {
+      ir: "M35 54 C58 50 62 52 76 54 C88 57 93 151 104 55 C116 52 126 53 138 57 C151 63 154 125 166 59 C179 52 188 56 199 61 C211 70 216 180 228 58 C242 50 253 55 266 61 C279 70 282 139 294 63 C311 51 332 57 355 65",
+      raman: "M35 176 L58 174 L68 132 L78 174 L105 171 L117 76 L128 172 L153 168 L165 116 L175 169 L207 166 L219 48 L230 166 L265 161 L278 92 L289 162 L326 157 L338 126 L355 158",
+      nmr: "M35 166 L67 166 L72 101 L77 166 L105 166 L112 137 L118 166 L159 166 L166 58 L172 166 L221 166 L229 119 L236 166 L292 166 L300 145 L307 166 L355 166"
+    };
+    return `<svg viewBox="0 0 380 220" aria-hidden="true"><rect x="0" y="0" width="380" height="220" fill="#fbfcfe"/><g stroke="#dfe6ef" stroke-width="1"><path d="M35 28V184H360"/><path d="M35 67H360M35 106H360M35 145H360" stroke-dasharray="3 5"/></g><path d="${paths[kind]}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/><g fill="#8b9aaf" font-size="10" font-family="Arial"><text x="25" y="188">0</text><text x="88" y="201">1000</text><text x="174" y="201">2000</text><text x="260" y="201">3000</text><text x="335" y="201">4000</text></g></svg>`;
+  }
+
+  function spectraCard(title, kind, color, caption) {
+    return `<article class="opto-detail-card opto-spectrum-card"><div class="opto-card-head"><h5>${esc(title)}</h5><span>计算图谱</span></div><div class="opto-spectrum-chart">${chartSvg(kind, color)}</div><div class="opto-spectrum-caption">${esc(caption)}</div></article>`;
+  }
+
+  function parameterMarkup(label, value, unit = "") {
+    return `<article class="opto-parameter-item"><span>${esc(label)}</span><strong>${esc(shown(value))}</strong>${unit ? `<small>${esc(unit)}</small>` : ""}</article>`;
+  }
+
+  function renderOptoCustomDetail(material, activePage = "basic") {
+    const modal = document.getElementById("materialModal");
+    const modalBody = modal?.querySelector(".modal-body");
+    const sectionNav = document.getElementById("materialSectionNav");
+    if (!modal || !modalBody || !sectionNav || !material) return;
+
+    modal.classList.add("opto-requested-modal");
+    modal.querySelectorAll("#twodDetailWorkbench, [data-material-page]").forEach((node) => { node.hidden = true; node.classList.remove("active"); });
+    document.getElementById("materialModalTitle").textContent = material.chineseName;
+    document.getElementById("materialModalSubtitle").textContent = `${material.materialNumber} · ${material.englishName}`;
+    sectionNav.hidden = false;
+    sectionNav.innerHTML = [
+      ["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]
+    ].map(([key, label]) => `<button class="twod-detail-nav-btn${activePage === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button>`).join("");
+
+    let container = modalBody.querySelector("#optoCustomDetail");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "optoCustomDetail";
+      container.className = "opto-custom-detail";
+      modalBody.appendChild(container);
+    }
+
+    const externalRows = [
+      { type: "文献论文", platform: "图书馆论文检索系统", id: "DOI:10.1039/D3TA01245A", url: "https://doi.org/10.1039/D3TA01245A", note: "电导率、玻璃化转变温度原始文献" },
+      { type: "外部化学数据库", platform: "PubChem", id: `CAS:${material.casNumber}`, url: `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(material.casNumber)}`, note: "高分子单体结构拓展信息" }
+    ];
+
+    container.innerHTML = `
+      <section class="opto-detail-page${activePage === "basic" ? " active" : ""}" data-opto-detail-page="basic">
+        <div class="opto-detail-page-head"><div><h4>详情信息</h4><p>展示分子结构与材料基础身份信息。</p></div></div>
+        <div class="opto-basic-layout">
+          <article class="opto-detail-card"><div class="opto-card-head"><h5>分子结构图</h5><span>${esc(material.formula)}</span></div><div class="opto-structure-stage">${typeof renderLowDimRealViewer === "function" ? (renderLowDimRealViewer("opto", material) || `<div class="material-atom-cluster">${structureSvg(material)}</div>`) : `<div class="material-atom-cluster">${structureSvg(material)}</div>`}</div><div class="opto-structure-downloads"><button class="opto-download-btn" type="button" data-opto-file-download="structure">结构文件下载</button><button class="opto-download-btn" type="button" data-opto-file-download="ground">基态结构文件下载</button><button class="opto-download-btn" type="button" data-opto-file-download="excited">激发态结构文件下载</button></div></article>
+          ${metadataMarkup(material)}
+        </div>
+      </section>
+      <section class="opto-detail-page${activePage === "spectra" ? " active" : ""}" data-opto-detail-page="spectra">
+        <div class="opto-detail-page-head"><div><h4>表征图谱</h4><p>基础信息与三类分子表征图谱集中展示。</p></div></div>
+        ${metadataMarkup(material, true)}
+        <div class="opto-spectrum-grid">${spectraCard("红外光谱", "ir", "#3978d2", "横坐标为波数（cm⁻¹），用于识别分子振动吸收特征峰。")}${spectraCard("拉曼光谱", "raman", "#7a5bd6", "展示分子振动产生的拉曼散射强度与特征位移。")}${spectraCard("核磁共振光谱", "nmr", "#1c9b73", "展示模拟化学位移及主要共振峰分布。")}</div>
+      </section>
+      <section class="opto-detail-page${activePage === "params" ? " active" : ""}" data-opto-detail-page="params">
+        <div class="opto-detail-page-head"><div><h4>特征参数</h4><p>集中展示物性数据和量子化学计算数据。</p></div></div>
+        ${metadataMarkup(material, true)}
+        <h5 class="opto-section-title">物性数据</h5><div class="opto-parameter-grid">${parameterMarkup("相对密度", material.relativeDensity)}${parameterMarkup("熔点", material.meltingPoint)}${parameterMarkup("沸点", material.boilingPoint)}${parameterMarkup("闪点", material.flashPoint)}</div>
+        <h5 class="opto-section-title">计算数据</h5><div class="opto-parameter-grid">${parameterMarkup("激发能", material.excitedEnergy)}${parameterMarkup("放射能", material.emissionEnergy)}${parameterMarkup("跃迁偶极矩", material.transitionDipole)}${parameterMarkup("HOMO能级", `${shown(material.homo)} eV`)}${parameterMarkup("LUMO能级", `${shown(material.lumo)} eV`)}${parameterMarkup("溶剂化自由能", material.solvationFreeEnergy)}${parameterMarkup("斯托克斯位移", material.stokesShift)}${parameterMarkup("简正模式", material.normalModes)}</div>
+      </section>
+      <section class="opto-detail-page${activePage === "external" ? " active" : ""}" data-opto-detail-page="external">
+        <div class="opto-detail-page-head"><div><h4>外部数据关联</h4><p>汇总论文检索系统与外部化学数据库的关联记录。</p></div></div>
+        <div class="opto-detail-card opto-external-table-wrap"><table class="opto-external-table"><colgroup><col style="width:12%"><col style="width:16%"><col style="width:19%"><col style="width:25%"><col style="width:20%"><col style="width:8%"></colgroup><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${externalRows.map((row) => `<tr><td>${esc(row.type)}</td><td>${esc(row.platform)}</td><td>${esc(row.id)}</td><td class="opto-external-url">${esc(row.url)}</td><td>${esc(row.note)}</td><td><button class="opto-link-button" type="button" data-opto-external-url="${esc(row.url)}">打开链接</button></td></tr>`).join("")}</tbody></table></div>
+      </section>`;
+  }
+
+  window.__optoRequestedHelpers = { metadataMarkup, structureSvg, spectraCard, parameterMarkup, shown, esc };
+
+  const previousRows = typeof renderOptoResultRows === "function" ? renderOptoResultRows : null;
+  renderOptoResultRows = function renderOptoRequestedResultRows(list) {
+    if (!Array.isArray(list) || !list.length) return `<tr><td colspan="13" class="electrolyte-empty">未检索到符合条件的数据，请调整检索条件后重试。</td></tr>`;
+    const start = ((state.optoCurrentPage || 1) - 1) * (state.optoPageSize || 5);
+    return list.map((item, index) => `<tr>
+      <td>${start + index + 1}</td><td>${esc(item.materialNumber)}</td>
+      <td class="opto-name-cell" title="${esc(item.chineseName)}"><button class="twod-material-link" type="button" data-open-material="opto:${esc(item.id)}" data-material-view="basic">${esc(item.chineseName)}</button></td>
+      <td title="${esc(item.englishName)}">${esc(item.englishName)}</td><td><em>${esc(item.formula)}</em></td>
+      <td class="opto-id-cell">${esc(item.moleculeNumber)}<br><span style="color:#86909c">${esc(item.casNumber)}</span></td>
+      <td>${esc(item.molecularWeight)}</td><td>${esc(item.relativeDensity)}</td><td>${esc(item.meltingPoint)}</td><td>${esc(item.boilingPoint)}</td><td>${esc(item.flashPoint)}</td>
+      <td class="opto-source-cell">${typeof renderLowDimDatasetSource === "function" ? renderLowDimDatasetSource(item, "opto") : esc(item.source)}</td>
+      <td><div class="twod-record-inline-actions"><button class="twod-action-view" type="button" data-open-material="opto:${esc(item.id)}" data-material-view="basic">查看详情</button><button class="twod-record-link" type="button" data-open-material="opto:${esc(item.id)}" data-material-view="prediction">发起预测</button></div></td>
+    </tr>`).join("");
+  };
+
+  const previousRenderOptoModule = typeof renderOptoModule === "function" ? renderOptoModule : null;
+  if (previousRenderOptoModule) {
+    renderOptoModule = function renderOptoModuleWithRequestedColumns() {
+      const result = previousRenderOptoModule.apply(this, arguments);
+      const table = document.querySelector("#page-opto .twod-result-table");
+      if (table) {
+        table.classList.add("opto-requested-result-table");
+        const head = table.querySelector("thead");
+        if (head) head.innerHTML = `<tr><th>序号</th><th>材料编号</th><th>中文名称</th><th>英文名称</th><th>分子式/化学式</th><th>分子编号/CAS号</th><th>分子量</th><th>相对密度</th><th>熔点</th><th>沸点</th><th>闪点</th><th>数据来源</th><th>操作</th></tr>`;
+      }
+      return result;
+    };
+    window.renderOptoModule = renderOptoModule;
+  }
+
+  const previousOpenRichMaterialModal = typeof openRichMaterialModal === "function" ? openRichMaterialModal : null;
+  if (previousOpenRichMaterialModal) {
+    openRichMaterialModal = function openRichMaterialModalWithRequestedOptoDetail(materialToken, targetView) {
+      const result = previousOpenRichMaterialModal.apply(this, arguments);
+      const token = String(materialToken || "");
+      const isOpto = token.startsWith("opto:");
+      const modal = document.getElementById("materialModal");
+      if (isOpto) {
+        const id = token.slice(5);
+        const material = optoMaterials.find((item) => item.id === id) || optoMaterials[0];
+        const targetMap = { spectra: "spectra", params: "params", external: "external" };
+        window.setTimeout(() => renderOptoCustomDetail(material, targetMap[targetView] || "basic"), 0);
+      } else if (modal) {
+        modal.classList.remove("opto-requested-modal");
+        modal.querySelector("#optoCustomDetail")?.remove();
+      }
+      return result;
+    };
+    window.openRichMaterialModal = openRichMaterialModal;
+  }
+
+  document.body.addEventListener("click", (event) => {
+    const nav = event.target.closest?.("[data-opto-detail-nav]");
+    if (nav) {
+      const key = nav.dataset.optoDetailNav;
+      document.querySelectorAll("#materialSectionNav [data-opto-detail-nav]").forEach((button) => button.classList.toggle("active", button === nav));
+      document.querySelectorAll("#optoCustomDetail [data-opto-detail-page]").forEach((page) => page.classList.toggle("active", page.dataset.optoDetailPage === key));
+      return;
+    }
+    const download = event.target.closest?.("[data-opto-file-download]");
+    if (download) {
+      const material = optoMaterials.find((item) => item.id === state.selectedMaterialId) || optoMaterials[0];
+      const labels = { structure: "结构文件", ground: "基态结构文件", excited: "激发态结构文件" };
+      const kind = download.dataset.optoFileDownload;
+      const text = `${labels[kind]}\n材料编号: ${material.materialNumber}\n分子编号: ${material.moleculeNumber}\nCAS号: ${material.casNumber}\n分子式/化学式: ${material.formula}\n`;
+      const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url; link.download = `${material.materialNumber}-${kind}.txt`; document.body.appendChild(link); link.click(); link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 500);
+      return;
+    }
+    const external = event.target.closest?.("[data-opto-external-url]");
+    if (external) window.open(external.dataset.optoExternalUrl, "_blank", "noopener,noreferrer");
+  }, true);
+
+  if (state.page === "opto" && typeof renderOptoModule === "function") renderOptoModule();
+})();
+</script>
+<script id="opto-requested-detail-route-20260902-script">
+(() => {
+  if (typeof handleMaterialDetailOpen !== "function" || typeof optoMaterials === "undefined") return;
+  const previousRequestedHandle = handleMaterialDetailOpen;
+  handleMaterialDetailOpen = function handleRequestedOptoDetail(materialToken, targetView = "basic") {
+    const token = String(materialToken || "");
+    if (token.startsWith("opto:") && targetView !== "prediction") {
+      const id = token.slice(5);
+      const material = optoMaterials.find((item) => item.id === id) || optoMaterials[0];
+      state.selectedMaterialSource = "opto";
+      state.selectedMaterialId = material.id;
+      state.selectedMaterialSection = "basic";
+      if (typeof openModal === "function") openModal("materialModal");
+      const targetMap = { spectra: "spectra", params: "params", external: "external" };
+      const render = () => {
+        const helperScript = document.getElementById("opto-requested-detail-20260902-script");
+        const modal = document.getElementById("materialModal");
+        if (!helperScript || !modal) return;
+        /* Re-enter through the wrapped rich modal only to reuse the custom renderer installed above. */
+        if (typeof openRichMaterialModal === "function") openRichMaterialModal(token, targetMap[targetView] || "basic");
+      };
+      window.setTimeout(render, 0);
+      return false;
+    }
+    return previousRequestedHandle(materialToken, targetView);
+  };
+  window.handleMaterialDetailOpen = handleMaterialDetailOpen;
+})();
+</script>
+
+<style id="opto-requested-standalone-detail-20260902-style">
+  #page-opto .opto-requested-result-table { min-width: 1780px; table-layout: auto; }
+  #page-opto .opto-requested-result-table th,
+  #page-opto .opto-requested-result-table td { white-space: nowrap; }
+  #page-opto .opto-requested-result-table td.opto-name-cell { min-width: 230px; white-space: normal; line-height: 1.55; }
+  #page-opto .opto-requested-result-table td.opto-id-cell { min-width: 170px; white-space: normal; line-height: 1.5; }
+  #page-opto .opto-requested-result-table td.opto-source-cell { min-width: 160px; white-space: normal; }
+
+  #page-twod-detail[data-source="opto"].opto-requested-modal .modal-xl { max-width: min(1440px, calc(100vw - 32px)); }
+  #page-twod-detail[data-source="opto"].opto-requested-modal .modal-body { background: #f6f8fb; }
+  #page-twod-detail[data-source="opto"].opto-requested-modal #materialSectionNav { gap: 4px; }
+  #page-twod-detail[data-source="opto"].opto-requested-modal #materialSectionNav .twod-detail-nav-btn { padding: 0 15px; }
+  #page-twod-detail[data-source="opto"] .opto-custom-detail { display: block; min-height: 610px; }
+  #page-twod-detail[data-source="opto"] .opto-detail-page { display: none; }
+  #page-twod-detail[data-source="opto"] .opto-detail-page.active { display: block; }
+  #page-twod-detail[data-source="opto"] .opto-detail-page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+  #page-twod-detail[data-source="opto"] .opto-detail-page-head h4 { margin: 0; color: #1d2129; font-size: 20px; }
+  #page-twod-detail[data-source="opto"] .opto-detail-page-head p { margin: 6px 0 0; color: #86909c; font-size: 13px; }
+  #page-twod-detail[data-source="opto"] .opto-basic-layout { display: grid; grid-template-columns: minmax(360px, .82fr) minmax(520px, 1.18fr); gap: 16px; }
+  #page-twod-detail[data-source="opto"] .opto-detail-card { border: 1px solid #e5e6eb; border-radius: 8px; background: #fff; box-shadow: 0 2px 10px rgba(31, 50, 78, .035); }
+  #page-twod-detail[data-source="opto"] .opto-card-head { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 18px; border-bottom: 1px solid #f0f1f2; }
+  #page-twod-detail[data-source="opto"] .opto-card-head h5 { margin: 0; color: #1d2129; font-size: 15px; }
+  #page-twod-detail[data-source="opto"] .opto-card-head span { color: #86909c; font-size: 12px; }
+  #page-twod-detail[data-source="opto"] .opto-structure-stage { display: grid; place-items: center; min-height: 330px; padding: 18px; background: radial-gradient(circle at 50% 45%, #f8fbff 0, #f2f6fb 64%, #edf2f8 100%); }
+  #page-twod-detail[data-source="opto"] .opto-structure-stage svg { width: min(100%, 430px); height: 292px; filter: drop-shadow(0 8px 12px rgba(37, 85, 148, .12)); }
+  #page-twod-detail[data-source="opto"] .opto-structure-downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px 16px 16px; border-top: 1px solid #f0f1f2; }
+  #page-twod-detail[data-source="opto"] .opto-download-btn { min-height: 38px; padding: 7px 10px; border: 1px solid #b8d2ff; border-radius: 5px; background: #f2f7ff; color: #165dff; font-size: 13px; font-weight: 600; cursor: pointer; }
+  #page-twod-detail[data-source="opto"] .opto-download-btn:hover { border-color: #165dff; background: #e8f3ff; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #page-twod-detail[data-source="opto"] .opto-metadata-item { min-height: 78px; padding: 15px 18px; border-right: 1px solid #f0f1f2; border-bottom: 1px solid #f0f1f2; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-item:nth-child(2n) { border-right: 0; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-item span { display: block; margin-bottom: 7px; color: #86909c; font-size: 12px; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-item strong { display: block; color: #1d2129; font-size: 14px; line-height: 1.55; font-weight: 600; word-break: break-word; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-item strong.formula { color: #165dff; font-family: Consolas, "SFMono-Regular", monospace; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-strip { margin-bottom: 16px; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-strip .opto-metadata-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #page-twod-detail[data-source="opto"] .opto-metadata-strip .opto-metadata-item { min-height: 68px; padding: 12px 15px; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-strip .opto-metadata-item:nth-child(2n) { border-right: 1px solid #f0f1f2; }
+  #page-twod-detail[data-source="opto"] .opto-metadata-strip .opto-metadata-item:nth-child(4n) { border-right: 0; }
+  #page-twod-detail[data-source="opto"] .opto-section-title { display: flex; align-items: center; gap: 9px; margin: 20px 0 12px; color: #1d2129; font-size: 16px; }
+  #page-twod-detail[data-source="opto"] .opto-section-title::before { content: ""; width: 3px; height: 16px; border-radius: 2px; background: #165dff; }
+  #page-twod-detail[data-source="opto"] .opto-spectrum-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  #page-twod-detail[data-source="opto"] .opto-spectrum-card { overflow: hidden; }
+  #page-twod-detail[data-source="opto"] .opto-spectrum-chart { padding: 14px 14px 8px; }
+  #page-twod-detail[data-source="opto"] .opto-spectrum-chart svg { display: block; width: 100%; height: 220px; }
+  #page-twod-detail[data-source="opto"] .opto-spectrum-caption { padding: 0 16px 15px; color: #86909c; font-size: 12px; line-height: 1.55; }
+  #page-twod-detail[data-source="opto"] .opto-parameter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  #page-twod-detail[data-source="opto"] .opto-parameter-item { min-height: 94px; padding: 16px; border: 1px solid #e5e6eb; border-radius: 7px; background: #fff; }
+  #page-twod-detail[data-source="opto"] .opto-parameter-item span { display: block; margin-bottom: 12px; color: #86909c; font-size: 12px; }
+  #page-twod-detail[data-source="opto"] .opto-parameter-item strong { color: #1d2129; font-size: 18px; font-weight: 650; }
+  #page-twod-detail[data-source="opto"] .opto-parameter-item small { margin-left: 5px; color: #86909c; font-size: 11px; }
+  #page-twod-detail[data-source="opto"] .opto-external-table-wrap { overflow: hidden; }
+  #page-twod-detail[data-source="opto"] .opto-external-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  #page-twod-detail[data-source="opto"] .opto-external-table th { padding: 14px 16px; border-right: 1px solid #e5e6eb; border-bottom: 1px solid #e5e6eb; background: #f7f8fa; color: #4e5969; font-size: 13px; text-align: left; }
+  #page-twod-detail[data-source="opto"] .opto-external-table td { padding: 16px; border-right: 1px solid #e5e6eb; border-bottom: 1px solid #e5e6eb; color: #1d2129; font-size: 13px; line-height: 1.6; vertical-align: top; word-break: break-word; }
+  #page-twod-detail[data-source="opto"] .opto-external-table th:last-child,
+  #page-twod-detail[data-source="opto"] .opto-external-table td:last-child { border-right: 0; }
+  #page-twod-detail[data-source="opto"] .opto-external-table tr:last-child td { border-bottom: 0; }
+  #page-twod-detail[data-source="opto"] .opto-external-url { color: #165dff; }
+  #page-twod-detail[data-source="opto"] .opto-link-button { border: 0; background: transparent; color: #165dff; font-size: 13px; cursor: pointer; padding: 0; }
+  #page-twod-detail[data-source="opto"] .opto-link-button:hover { text-decoration: underline; }
+
+  @media (max-width: 1100px) {
+    #page-twod-detail[data-source="opto"] .opto-basic-layout { grid-template-columns: 1fr; }
+    #page-twod-detail[data-source="opto"] .opto-spectrum-grid { grid-template-columns: 1fr; }
+    #page-twod-detail[data-source="opto"] .opto-parameter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #page-twod-detail[data-source="opto"] .opto-metadata-strip .opto-metadata-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #page-twod-detail[data-source="opto"] .opto-metadata-strip .opto-metadata-item:nth-child(4n) { border-right: 1px solid #f0f1f2; }
+    #page-twod-detail[data-source="opto"] .opto-metadata-strip .opto-metadata-item:nth-child(2n) { border-right: 0; }
+  }
+
+#page-twod-detail[data-source="opto"] .twod-detail-panel { background:#f6f8fb; }
+#page-twod-detail[data-source="opto"] .opto-custom-detail { min-height:620px; }
+</style>
+<script id="opto-requested-standalone-detail-20260902-script">
+(() => {
+  if (typeof state === "undefined" || typeof optoMaterials === "undefined") return;
+  const h = window.__optoRequestedHelpers;
+  if (!h) return;
+  const { metadataMarkup, structureSvg, spectraCard, parameterMarkup, esc, shown } = h;
+
+  function externalRows(material) {
+    return [
+      { type: "文献论文", platform: "图书馆论文检索系统", id: "DOI:10.1039/D3TA01245A", url: "https://doi.org/10.1039/D3TA01245A", note: "电导率、玻璃化转变温度原始文献" },
+      { type: "外部化学数据库", platform: "PubChem", id: `CID:${material.moleculeNumber.replace(/\D/g, "") || "17789"}`, url: `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(material.casNumber)}`, note: "高分子单体结构拓展信息" }
+    ];
+  }
+
+  function basicPage(material) {
+    return `<section class="opto-detail-page active" data-opto-detail-page="basic">
+      <div class="opto-detail-page-head"><div><h4>详情信息</h4><p>展示分子结构与材料基础身份信息。</p></div></div>
+      <div class="opto-basic-layout">
+        <article class="opto-detail-card"><div class="opto-card-head"><h5>分子结构图</h5><span>${esc(material.formula)}</span></div><div class="opto-structure-stage">${typeof renderLowDimRealViewer === "function" ? (renderLowDimRealViewer("opto", material) || `<div class="material-atom-cluster">${structureSvg(material)}</div>`) : `<div class="material-atom-cluster">${structureSvg(material)}</div>`}</div><div class="opto-structure-downloads"><button class="opto-download-btn" type="button" data-opto-file-download="structure">结构文件下载</button><button class="opto-download-btn" type="button" data-opto-file-download="ground">基态结构文件下载</button><button class="opto-download-btn" type="button" data-opto-file-download="excited">激发态结构文件下载</button></div></article>
+        ${metadataMarkup(material)}
+      </div>
+    </section>`;
+  }
+
+  function spectraPage(material) {
+    return `<section class="opto-detail-page active" data-opto-detail-page="spectra">
+      <div class="opto-detail-page-head"><div><h4>表征图谱</h4><p>基础信息与三类分子表征图谱集中展示。</p></div></div>
+      ${metadataMarkup(material, true)}
+      <div class="opto-spectrum-grid">${spectraCard("红外光谱", "ir", "#3978d2", "横坐标为波数（cm⁻¹），用于识别分子振动吸收特征峰。")}${spectraCard("拉曼光谱", "raman", "#7a5bd6", "展示分子振动产生的拉曼散射强度与特征位移。")}${spectraCard("核磁共振光谱", "nmr", "#1c9b73", "展示模拟化学位移及主要共振峰分布。")}</div>
+    </section>`;
+  }
+
+  function paramsPage(material) {
+    return `<section class="opto-detail-page active" data-opto-detail-page="params">
+      <div class="opto-detail-page-head"><div><h4>特征参数</h4><p>集中展示物性数据和量子化学计算数据。</p></div></div>
+      ${metadataMarkup(material, true)}
+      <h5 class="opto-section-title">物性数据</h5><div class="opto-parameter-grid">${parameterMarkup("相对密度", material.relativeDensity)}${parameterMarkup("熔点", material.meltingPoint)}${parameterMarkup("沸点", material.boilingPoint)}${parameterMarkup("闪点", material.flashPoint)}</div>
+      <h5 class="opto-section-title">计算数据</h5><div class="opto-parameter-grid">${parameterMarkup("激发能", material.excitedEnergy)}${parameterMarkup("放射能", material.emissionEnergy)}${parameterMarkup("跃迁偶极矩", material.transitionDipole)}${parameterMarkup("HOMO能级", `${shown(material.homo)} eV`)}${parameterMarkup("LUMO能级", `${shown(material.lumo)} eV`)}${parameterMarkup("溶剂化自由能", material.solvationFreeEnergy)}${parameterMarkup("斯托克斯位移", material.stokesShift)}${parameterMarkup("简正模式", material.normalModes)}</div>
+    </section>`;
+  }
+
+  function externalPage(material) {
+    return `<section class="opto-detail-page active" data-opto-detail-page="external">
+      <div class="opto-detail-page-head"><div><h4>外部数据关联</h4><p>汇总论文检索系统与外部化学数据库的关联记录。</p></div></div>
+      <div class="opto-detail-card opto-external-table-wrap"><table class="opto-external-table"><colgroup><col style="width:12%"><col style="width:16%"><col style="width:19%"><col style="width:25%"><col style="width:20%"><col style="width:8%"></colgroup><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${externalRows(material).map((row) => `<tr><td>${esc(row.type)}</td><td>${esc(row.platform)}</td><td>${esc(row.id)}</td><td class="opto-external-url">${esc(row.url)}</td><td>${esc(row.note)}</td><td><button class="opto-link-button" type="button" data-opto-external-url="${esc(row.url)}">打开链接</button></td></tr>`).join("")}</tbody></table></div>
+    </section>`;
+  }
+
+  function renderRequestedOptoDetailPage(material) {
+    if (!material) return;
+    const page = document.getElementById("page-twod-detail");
+    const title = document.getElementById("twodDetailPageTitle");
+    const subtitle = document.getElementById("twodDetailPageSubtitle");
+    const tree = document.getElementById("twodDetailTree");
+    const content = document.getElementById("twodDetailPageContent");
+    if (!page || !tree || !content) return;
+    page.dataset.source = "opto";
+    if (title) title.textContent = `${material.chineseName} 材料详情`;
+    if (subtitle) subtitle.textContent = `材料编号 ${material.materialNumber} · 分子编号 ${material.moleculeNumber} · CAS号 ${material.casNumber}`;
+    const section = ["basic", "spectra", "params", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
+    state.selectedTwodDetailSection = section;
+    tree.innerHTML = [["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+    const renderers = { basic: basicPage, spectra: spectraPage, params: paramsPage, external: externalPage };
+    content.innerHTML = `<div class="opto-custom-detail">${renderers[section](material)}</div>`;
+  }
+
+  renderOptoDetailPage = renderRequestedOptoDetailPage;
+  window.renderOptoDetailPage = renderOptoDetailPage;
+  openOptoDetailSection = function openRequestedOptoDetailSection(section) {
+    state.selectedTwodDetailSection = section;
+    const material = optoMaterials.find((item) => item.id === state.selectedMaterialId) || optoMaterials[0];
+    renderRequestedOptoDetailPage(material);
+    return false;
+  };
+  window.openOptoDetailSection = openOptoDetailSection;
+
+  const previousStandaloneHandle = handleMaterialDetailOpen;
+  handleMaterialDetailOpen = function handleRequestedOptoStandalone(materialToken, targetView = "basic") {
+    const token = String(materialToken || "");
+    if (token.startsWith("opto:") && targetView !== "prediction") {
+      const material = optoMaterials.find((item) => item.id === token.slice(5)) || optoMaterials[0];
+      state.selectedMaterialSource = "opto";
+      state.selectedMaterialId = material.id;
+      state.twodDetailReturnPage = state.page === "twod-detail" ? "opto" : (state.page || "opto");
+      const targetMap = { spectra: "spectra", params: "params", properties: "params", external: "external" };
+      state.selectedTwodDetailSection = targetMap[targetView] || "basic";
+      document.getElementById("materialModal")?.classList.remove("show");
+      if (typeof switchPage === "function") switchPage("twod-detail");
+      window.setTimeout(() => {
+        renderRequestedOptoDetailPage(material);
+        const viewerNode = document.querySelector('#page-twod-detail[data-source="opto"] .mol3d-viewer');
+        const viewer = viewerNode?.__lowDimMolViewer;
+        if (viewerNode && viewer) {
+          try { viewer.resize(); viewer.zoomTo(); viewer.render(); } catch (error) {}
+        }
+      }, 60);
+      return false;
+    }
+    return previousStandaloneHandle(materialToken, targetView);
+  };
+  window.handleMaterialDetailOpen = handleMaterialDetailOpen;
+
+  document.body.addEventListener("click", (event) => {
+    const button = event.target.closest?.("#twodDetailTree [data-opto-detail-nav]");
+    if (!button || state.selectedMaterialSource !== "opto") return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openOptoDetailSection(button.dataset.optoDetailNav);
+  }, true);
+})();
+</script>
+<style id="opto-real-3d-layout-fix-20260902-style">
+  #page-twod-detail[data-source="opto"] .opto-structure-stage { grid-template-columns: minmax(0, 1fr); }
+  #page-twod-detail[data-source="opto"] .opto-structure-stage .mol3d-wrap,
+  #page-twod-detail[data-source="opto"] .opto-structure-stage .mol3d-viewer { width: 100%; min-width: 0; }
+</style><script id="opto-system-style-detail-override-20260902-script">
+(() => {
+  if (typeof state === "undefined" || typeof optoMaterials === "undefined") return;
+
+  const escSystem = (value) => typeof escapeLowDimHtml === "function" ? escapeLowDimHtml(value == null ? "" : String(value)) : String(value ?? "");
+  const display = (value) => value == null || value === "" ? "未记录" : String(value);
+
+  function systemBasicRows(material) {
+    return [
+      { label: "中文名称", value: material.chineseName || material.nameZh || material.name },
+      { label: "英文名称", value: material.englishName || material.nameEn || material.english || material.name },
+      { label: "分子式/化学式", value: material.formula },
+      { label: "材料编号", value: material.materialNumber || material.code || material.id },
+      { label: "分子编号", value: material.moleculeNumber || material.code || material.id },
+      { label: "CAS号", value: material.casNumber },
+      { label: "分子量", value: `${display(material.molecularWeight)} g/mol` }
+    ];
+  }
+
+  function systemBasicTable(material) {
+    return `<section class="twod-detail-table-card"><h5 class="twod-detail-material-title">基础信息</h5>${renderDetailKvSection("", systemBasicRows(material))}</section>`;
+  }
+
+  function systemStructureCard(material) {
+    const realViewer = typeof renderLowDimRealViewer === "function" ? renderLowDimRealViewer("opto", material) : "";
+    const structure = realViewer ? null : (typeof buildOptoStructureView === "function" ? buildOptoStructureView(material) : null);
+    const fallback = structure ? `<div class="material-atom-cluster">${renderMaterialStructureMarkup(structure)}</div><div class="material-legend">${(structure.legend || []).map((item) => `<span><i class="legend-dot" style="background:${item.color};"></i>${item.label}</span>`).join("")}</div>` : `<div class="twod-detail-empty-state"><strong>暂无结构数据</strong></div>`;
+    return `<section class="twod-detail-visual-card"><h5>3D分子结构图</h5><div class="twod-detail-structure-stage">${realViewer || fallback}<div class="chart-caption">${realViewer ? "真实分子坐标，可拖拽旋转、滚轮缩放并切换显示样式。" : "当前材料的三维分子结构示意。"}</div></div><div class="opto-system-download-row"><button class="twod-detail-link-btn" type="button" data-opto-file-download="structure">结构文件下载</button><button class="twod-detail-link-btn" type="button" data-opto-file-download="ground">基态结构文件下载</button><button class="twod-detail-link-btn" type="button" data-opto-file-download="excited">激发态结构文件下载</button></div></section>`;
+  }
+
+  function systemMetaSection(material) {
+    return `<section class="twod-detail-section-card opto-system-meta-card"><h5>基础信息</h5>${renderDetailKvSection("", systemBasicRows(material))}</section>`;
+  }
+
+  function renderSystemOptoDetailPage(material) {
+    const page = document.getElementById("page-twod-detail");
+    const title = document.getElementById("twodDetailPageTitle");
+    const subtitle = document.getElementById("twodDetailPageSubtitle");
+    const tree = document.getElementById("twodDetailTree");
+    const content = document.getElementById("twodDetailPageContent");
+    if (!page || !tree || !content || !material) return;
+    page.dataset.source = "opto";
+    const section = ["basic", "spectra", "params", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
+    state.selectedTwodDetailSection = section;
+    if (title) title.textContent = `${material.chineseName || material.name} 材料详情`;
+    if (subtitle) subtitle.textContent = `材料编号 ${material.materialNumber || material.code || material.id} · 分子编号 ${material.moleculeNumber || material.code || material.id} · CAS号 ${display(material.casNumber)}`;
+    tree.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+
+    if (section === "basic") {
+      content.innerHTML = `<div class="twod-detail-page-head"><div><h4>基础信息</h4><p>展示材料基础身份信息与右侧 3D 分子结构图。</p></div></div><div class="twod-basic-card-grid">${systemBasicTable(material)}${systemStructureCard(material)}</div>`;
+    } else if (section === "spectra") {
+      content.innerHTML = `${systemMetaSection(material)}${typeof renderOptoSpectraPageContent === "function" ? renderOptoSpectraPageContent(material) : ""}`;
+    } else if (section === "params") {
+      content.innerHTML = typeof renderOptoParamsPageContent === "function" ? renderOptoParamsPageContent(material) : "";
+    } else {
+      content.innerHTML = typeof renderOptoExternalPageContent === "function" ? renderOptoExternalPageContent(material) : "";
+    }
+    window.setTimeout(() => {
+      document.querySelectorAll('#page-twod-detail[data-source="opto"] .mol3d-viewer').forEach((node) => {
+        const viewer = node.__lowDimMolViewer;
+        if (viewer) { try { viewer.resize(); viewer.zoomTo(); viewer.render(); } catch (error) {} }
+      });
+    }, 80);
+  }
+
+  renderOptoDetailPage = renderSystemOptoDetailPage;
+  window.renderOptoDetailPage = renderOptoDetailPage;
+  openOptoDetailSection = function openSystemOptoDetailSection(section) {
+    state.selectedTwodDetailSection = section === "structure" ? "basic" : section;
+    const material = optoMaterials.find((item) => item.id === state.selectedMaterialId) || optoMaterials[0];
+    renderSystemOptoDetailPage(material);
+    return false;
+  };
+  window.openOptoDetailSection = openOptoDetailSection;
+
+  const previousSystemHandle = handleMaterialDetailOpen;
+  handleMaterialDetailOpen = function handleSystemStyleOptoDetail(materialToken, targetView = "basic") {
+    const token = String(materialToken || "");
+    if (token.startsWith("opto:") && targetView !== "prediction") {
+      const material = optoMaterials.find((item) => item.id === token.slice(5)) || optoMaterials[0];
+      state.selectedMaterialSource = "opto";
+      state.selectedMaterialId = material.id;
+      state.twodDetailReturnPage = state.page === "twod-detail" ? "opto" : (state.page || "opto");
+      state.selectedTwodDetailSection = ({ spectra: "spectra", params: "params", properties: "params", external: "external" })[targetView] || "basic";
+      document.getElementById("materialModal")?.classList.remove("show");
+      if (typeof switchPage === "function") switchPage("twod-detail");
+      window.setTimeout(() => renderSystemOptoDetailPage(material), 60);
+      return false;
+    }
+    return previousSystemHandle(materialToken, targetView);
+  };
+  window.handleMaterialDetailOpen = handleMaterialDetailOpen;
+
+  document.body.addEventListener("click", (event) => {
+    const nav = event.target.closest?.("#twodDetailTree[data-system-opto-tree] [data-opto-detail-nav], #twodDetailTree [data-opto-detail-nav]");
+    if (!nav || state.selectedMaterialSource !== "opto") return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openOptoDetailSection(nav.dataset.optoDetailNav);
+  }, true);
+
+  const oldTree = renderOptoDetailTreeOverride;
+  renderOptoDetailTreeOverride = function renderSystemOptoTree(material) {
+    const wrap = document.getElementById("twodDetailTree");
+    if (!wrap || state.selectedMaterialSource !== "opto") return oldTree(material);
+    wrap.dataset.systemOptoTree = "true";
+    const active = state.selectedTwodDetailSection === "structure" ? "basic" : state.selectedTwodDetailSection;
+    wrap.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${active === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+  };
+})();
+</script>
+<style id="opto-system-style-detail-override-20260902-style">
+  #page-twod-detail[data-source="opto"] .twod-basic-card-grid { grid-template-columns: minmax(300px, .9fr) minmax(480px, 1.1fr); }
+  #page-twod-detail[data-source="opto"] .twod-basic-card-grid > .twod-detail-visual-card { order: 2; }
+  #page-twod-detail[data-source="opto"] .twod-basic-card-grid > .twod-detail-table-card { order: 1; }
+  #page-twod-detail[data-source="opto"] .opto-system-download-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; padding: 12px 4px 0; border-top: 1px solid #e6edf7; }
+  #page-twod-detail[data-source="opto"] .opto-system-download-row .twod-detail-link-btn { cursor: pointer; }
+  #page-twod-detail[data-source="opto"] .opto-system-meta-card { margin-bottom: 16px; }
+  #page-twod-detail[data-source="opto"] .opto-system-meta-card .detail-kv-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #page-twod-detail[data-source="opto"] .opto-system-meta-card .detail-kv-item { min-width: 0; }
+  #page-twod-detail[data-source="opto"] .mol3d-wrap,
+  #page-twod-detail[data-source="opto"] .mol3d-viewer { width: 100%; min-width: 0; }
+  @media (max-width: 980px) { #page-twod-detail[data-source="opto"] .twod-basic-card-grid { grid-template-columns: 1fr; } }
+</style>
+<script id="opto-system-style-params-override-20260902-script">
+(() => {
+  if (typeof state === "undefined" || typeof optoMaterials === "undefined") return;
+  const escValue = (value) => typeof escapeLowDimHtml === "function" ? escapeLowDimHtml(value == null ? "" : String(value)) : String(value ?? "");
+  const showValue = (value, fallback = "未记录") => value == null || value === "" ? fallback : String(value);
+  const item = (label, value) => `<article class="twod-detail-property-item"><span>${escValue(label)}</span><strong>${escValue(showValue(value))}</strong></article>`;
+  const basic = (material) => [
+    { label: "中文名称", value: material.chineseName || material.nameZh || material.name },
+    { label: "英文名称", value: material.englishName || material.nameEn || material.english || material.name },
+    { label: "分子式/化学式", value: material.formula },
+    { label: "材料编号", value: material.materialNumber || material.code || material.id },
+    { label: "分子编号", value: material.moleculeNumber || material.code || material.id },
+    { label: "CAS号", value: material.casNumber },
+    { label: "分子量", value: `${showValue(material.molecularWeight)} g/mol` }
+  ];
+  function meta(material) { return `<section class="twod-detail-section-card opto-system-meta-card"><h5>基础信息</h5>${renderDetailKvSection("", basic(material))}</section>`; }
+  function params(material) {
+    const physical = [
+      ["相对密度", material.relativeDensity], ["熔点", material.meltingPoint], ["沸点", material.boilingPoint], ["闪点", material.flashPoint]
+    ];
+    const calculated = [
+      ["激发能", material.excitedEnergy], ["放射能", material.emissionEnergy], ["跃迁偶极矩", material.transitionDipole], ["HOMO能级", `${showValue(material.homo)} eV`], ["LUMO能级", `${showValue(material.lumo)} eV`], ["溶剂化自由能", material.solvationFreeEnergy], ["斯托克斯位移", material.stokesShift], ["简正模式", material.normalModes]
+    ];
+    return `<div class="twod-detail-page-head"><div><h4>${escValue(material.chineseName || material.name)}特征参数</h4><p>展示物性数据与计算数据。</p></div><div class="twod-detail-page-action"><button class="btn-primary" type="button" onclick="return triggerOptoDetailDownload('paramsData')">参数数据下载</button></div></div>${meta(material)}<section class="twod-detail-section-card"><h5>物性数据</h5><div class="twod-detail-property-grid">${physical.map(([label, value]) => item(label, value)).join("")}</div></section><section class="twod-detail-section-card"><h5>计算数据</h5><div class="twod-detail-property-grid">${calculated.map(([label, value]) => item(label, value)).join("")}</div></section>`;
+  }
+  const oldRender = renderOptoParamsPageContent;
+  renderOptoParamsPageContent = function renderSystemStyleRequestedParams(material) { return params(material); };
+  window.renderOptoParamsPageContent = renderOptoParamsPageContent;
+})();
+</script>
+<script id="opto-system-style-external-override-20260902-script">
+(() => {
+  if (typeof renderOptoExternalPageContent !== "function") return;
+  const esc = (value) => typeof escapeLowDimHtml === "function" ? escapeLowDimHtml(value == null ? "" : String(value)) : String(value ?? "");
+  renderOptoExternalPageContent = function renderSystemStyleExternal(material) {
+    const rows = [
+      ["文献论文", "图书馆论文检索系统", "DOI:10.1039/D3TA01245A", "https://doi.org/10.1039/D3TA01245A", "电导率、玻璃化转变温度原始文献"],
+      ["外部化学数据库", "PubChem", `CID:${String(material.moleculeNumber || "17789").replace(/\D/g, "") || "17789"}`, `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(material.casNumber || material.formula || "")}`, "高分子单体结构拓展信息"]
+    ];
+    return `<div class="twod-detail-page-head"><div><h4>${esc(material.chineseName || material.name)}外部数据关联</h4><p>查看与该有机光电材料关联的文献信息与外部数据资源。</p></div></div><section class="twod-detail-section-card"><h5>关联文献与数据库</h5><div class="table-wrap"><table class="twod-result-table"><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${esc(row[0])}</td><td>${esc(row[1])}</td><td>${esc(row[2])}</td><td><span style="color:#2451c6;word-break:break-all;">${esc(row[3])}</span></td><td>${esc(row[4])}</td><td><button class="twod-detail-link-btn" type="button" data-opto-external-url="${esc(row[3])}">打开链接</button></td></tr>`).join("")}</tbody></table></div></section>`;
+  };
+  window.renderOptoExternalPageContent = renderOptoExternalPageContent;
+  document.body.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-opto-external-url]");
+    if (button) window.open(button.dataset.optoExternalUrl, "_blank", "noopener,noreferrer");
+  }, true);
+})();
+</script>
+
+<!-- 2026-09-02 MLFF molecular dataset taxonomy and structure tabs -->
+<style id="mlff-molecular-dataset-update-20260902">
+  #page-twod-detail[data-source="mlff"] .mlff-molecule-dataset-tabs { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; padding:6px; border:1px solid #dce7f5; border-radius:12px; background:#f5f9ff; }
+  #page-twod-detail[data-source="mlff"] .mlff-molecule-dataset-tab { min-height:40px; padding:8px 15px; border:1px solid transparent; border-radius:8px; background:transparent; color:#58708f; font-size:13px; font-weight:700; cursor:pointer; }
+  #page-twod-detail[data-source="mlff"] .mlff-molecule-dataset-tab:hover { background:#eaf2ff; color:#245ec4; }
+  #page-twod-detail[data-source="mlff"] .mlff-molecule-dataset-tab.active { border-color:#bcd5ff; background:#fff; color:#165dff; box-shadow:0 3px 10px rgba(37,99,235,.1); }
+  #page-twod-detail[data-source="mlff"] .mlff-molecule-data-section { margin-top:16px; padding-top:16px; border-top:1px solid #e5edf7; }
+  #page-twod-detail[data-source="mlff"] .mlff-molecule-data-section h5 { margin:0 0 10px; color:#294666; font-size:14px; }
+  #page-twod-detail[data-source="mlff"] .mlff-molecule-data-section + .mlff-molecule-data-section { margin-top:18px; }
+  #page-twod-detail[data-source="mlff"] .mlff-geometry-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  #page-twod-detail[data-source="mlff"] .mlff-geometry-item { padding:11px 12px; border:1px solid #e2eaf5; border-radius:9px; background:#f9fbfe; }
+  #page-twod-detail[data-source="mlff"] .mlff-geometry-item span { display:block; color:#7a8da8; font-size:12px; }
+  #page-twod-detail[data-source="mlff"] .mlff-geometry-item strong { display:block; margin-top:5px; color:#253f62; font-size:13px; line-height:20px; }
+  #page-mlff .twod-result-table th { white-space:nowrap; }
+  @media (max-width:760px) { #page-twod-detail[data-source="mlff"] .mlff-geometry-grid { grid-template-columns:1fr; } }
+</style>
+<script id="mlff-molecular-dataset-update-20260902-script">
+(() => {
+  const html = (value) => typeof escapeLowDimHtml === "function" ? escapeLowDimHtml(value == null ? "" : String(value)) : String(value ?? "").replace(/[&<>\"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;", "'":"&#39;"}[ch]));
+  const text = (value, fallback = "未记录") => value == null || value === "" || value === "/" ? fallback : String(value);
+  const has = (item, words) => words.some((word) => `${item?.name || ""} ${item?.english || ""} ${item?.formula || ""} ${item?.moleculeSubstanceType || ""}`.toLowerCase().includes(word));
+  const moleculeType = (item) => item?.moleculeSystemType || item?.moleculeType || (has(item, ["polymer", "protein", "高分子", "蛋白"]) ? "高分子机器学习力场数据集" : "有机小分子机器学习力场数据集");
+  const scaleType = (item) => item?.systemScaleType || (item?.systemScale === "双分子数据集" || has(item, ["dimer", "双分子"]) ? "双分子数据集" : item?.systemScale === "多分子团簇数据集" || has(item, ["cluster", "团簇"]) ? "多分子团簇数据集" : "单分子数据集");
+  const substanceType = (item) => {
+    if (item?.moleculeSubstanceType) return item.moleculeSubstanceType;
+    if (has(item, ["protein", "蛋白"])) return "蛋白质机器学习力场数据集";
+    if (has(item, ["polymer", "高分子", "p3ht", "聚合"])) return "高分子片段机器学习力场数据集";
+    if (has(item, ["ether", "醚", "methoxy", "dimethyl ether"])) return "醚类有机小分子数据集";
+    return "酰胺有机小分子数据集";
+  };
+  const datasetFields = (item) => ({ moleculeSystemType: moleculeType(item), systemScaleType: scaleType(item), moleculeSubstanceType: substanceType(item) });
+  window.getMlffMoleculeSystemType = moleculeType;
+  window.getMlffSystemScaleType = scaleType;
+  window.getMlffMoleculeSubstanceType = substanceType;
+
+  if (typeof renderMlffResultRows === "function") {
+    renderMlffResultRows = function renderMlffResultRowsMolecularDataset(list) {
+      if (!list.length) return `<tr><td colspan="13" class="opto-table-empty">未检索到符合条件的机器学习力场数据，请调整检索条件后重试。</td></tr>`;
+      return list.map((item) => {
+        const fields = datasetFields(item);
+        return `<tr>
+          <td>${html(item.id)}</td>
+          <td title="${html(text(item.name))}"><button class="twod-material-link" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="basic">${html(text(item.name))}</button></td>
+          <td>${html(text(item.english))}</td>
+          <td title="${html(text(item.formula))}"><em>${html(text(item.formula))}</em></td>
+          <td>${html(fields.moleculeSystemType)}</td><td>${typeof renderMlffDatasetSource === "function" ? renderMlffDatasetSource(item) : html(text(item.datasetSource))}</td>
+          <td>${html(fields.systemScaleType)}</td><td>${html(fields.moleculeSubstanceType)}</td>
+          <td>${typeof getMlffChargeSummary === "function" ? getMlffChargeSummary(item) : "未记录"}</td>
+          <td>${typeof getMlffMultipoleSummary === "function" ? getMlffMultipoleSummary(item) : "未记录"}</td>
+          <td>${typeof getMlffPolarizabilitySummary === "function" ? getMlffPolarizabilitySummary(item) : "未记录"}</td>
+          <td>${typeof getMlffDispersionCoefficientSummary === "function" ? getMlffDispersionCoefficientSummary(item) : "未记录"}</td>
+          <td><div class="twod-record-inline-actions"><button class="twod-action-view" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="basic">查看详情</button><button class="twod-record-link" type="button" data-open-material="mlff:${html(item.id)}" data-material-view="prediction">发起预测</button><button class="twod-record-link" type="button" data-mlff-field-update="${html(item.id)}">场数据更新</button></div></td>
+        </tr>`;
+      }).join("");
+    };
+  }
+  const originalRenderMlffModule = typeof renderMlffModule === "function" ? renderMlffModule : null;
+  if (originalRenderMlffModule) {
+    renderMlffModule = function renderMlffModuleWithMolecularDatasetTaxonomy() {
+      originalRenderMlffModule();
+      const headers = document.querySelectorAll("#page-mlff .twod-result-table thead th");
+      const labels = ["材料编号","中文名称","英文名称","分子式/化学式","分子体系类型","数据来源","体系规模类型","分子体系物质类型","电荷","多极矩","极化率","色散系数","操作"];
+      headers.forEach((node, index) => { if (labels[index]) node.textContent = labels[index]; });
+    };
+    window.renderMlffModule = renderMlffModule;
+  }
+
+  const originalBasic = typeof renderMlffDetailBasicPage === "function" ? renderMlffDetailBasicPage : null;
+  if (originalBasic) {
+    renderMlffDetailBasicPage = function renderMlffDetailBasicPageMolecularDataset(material) {
+      const result = originalBasic(material);
+      const classification = `<div class="mlff-molecular-data-section"><h5>分子体系分类</h5><div class="mlff-geometry-grid"><div class="mlff-geometry-item"><span>分子体系类型</span><strong>${html(moleculeType(material))}</strong></div><div class="mlff-geometry-item"><span>体系规模类型</span><strong>${html(scaleType(material))}</strong></div><div class="mlff-geometry-item"><span>分子体系物质类型</span><strong>${html(substanceType(material))}</strong></div></div></div>`;
+      return result.replace(/化学式/g, "分子式/化学式").replace(/数据集类型/g, "分子体系类型").replace(/体系规模/g, "体系规模类型").replace(/体系类型/g, "分子体系物质类型").replace(/(<section class="twod-detail-table-card mlff-basic-left-card">[\s\S]*?<\/section>)/, `$1${classification}`);
+    };
+    window.renderMlffDetailBasicPage = renderMlffDetailBasicPage;
+  }
+
+  const renderRows = (rows) => typeof renderDetailKvSection === "function" ? renderDetailKvSection("", rows, { fallback: "未记录" }) : `<div class="detail-grid">${rows.map((row) => `<div><span>${html(row.label)}</span><strong>${html(row.value)}</strong></div>`).join("")}</div>`;
+const valueFor = (item, keys, fallback = "未记录") => { for (const key of keys) { if (item?.[key] != null && item[key] !== "") return item[key]; } return fallback; };
+  const coordinateRows = (material) => {
+    const nodes = typeof buildMlffNodeCoordinates === "function" ? buildMlffNodeCoordinates(material) : [];
+    return nodes.slice(0, 12).map((node, index) => ({ index: index + 1, atom: node.label || node.element || "原子", x: Number(node.x || 0).toFixed(3), y: Number(node.y || 0).toFixed(3), z: Number(node.z || 0).toFixed(3) }));
+  };
+  const coordinateTable = (material, title) => {
+    const rows = coordinateRows(material);
+    return `<div class="mlff-molecule-data-section"><h5>${title}</h5>${rows.length ? `<div class="mlff-coordinate-preview"><table><thead><tr><th>序号</th><th>原子</th><th>X (Å)</th><th>Y (Å)</th><th>Z (Å)</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.index}</td><td>${html(r.atom)}</td><td>${r.x}</td><td>${r.y}</td><td>${r.z}</td></tr>`).join("")}</tbody></table></div>` : `<div class="mlff-image-meta">当前条目未记录可直接展示的${title}。</div>`}</div>`;
+  };
+  const geometry = (material, kind) => {
+    const isDimer = kind === "dimer", isCluster = kind === "cluster";
+    return `<div class="mlff-geometry-grid"><div class="mlff-geometry-item"><span>键长</span><strong>${html(valueFor(material, [isDimer ? "dimerBondLength" : isCluster ? "clusterBondLength" : "bondLength"], "未记录"))} Å</strong></div><div class="mlff-geometry-item"><span>键角</span><strong>${html(valueFor(material, [isDimer ? "dimerBondAngle" : isCluster ? "clusterBondAngle" : "bondAngle"], "未记录"))}°</strong></div><div class="mlff-geometry-item"><span>二面角</span><strong>${html(valueFor(material, [isDimer ? "dimerDihedral" : isCluster ? "clusterDihedral" : "dihedral"], "未记录"))}°</strong></div></div>`;
+  };
+  const tabData = (material, key) => {
+    const kind = key === "dimer" ? "dimer" : key === "cluster" ? "cluster" : "molecule";
+    if (kind === "molecule") return `<div class="mlff-molecule-data-section"><h5>单分子性质</h5>${renderRows([{label:"原子电荷",value:valueFor(material,["atomicCharge","charge","netCharge"])},{label:"偶极矩",value:valueFor(material,["dipole","dipole_debye"])},{label:"四极矩",value:valueFor(material,["quadrupole","quadrupole_moment"])},{label:"多极矩",value:valueFor(material,["multipole"])},{label:"极化率",value:valueFor(material,["polarizability"])},{label:"色散系数",value:valueFor(material,["dispersionCoefficient","dispersion"])},{label:"单分子能量",value:valueFor(material,["monomerEnergy","energy"]) }])}</div>${coordinateTable(material,"单分子结构（原子坐标）")}${geometry(material,kind)}`;
+    if (kind === "dimer") return `<div class="mlff-molecule-data-section"><h5>双分子相互作用</h5>${renderRows([{label:"分子间相互作用",value:valueFor(material,["intermolecularInteraction","interactionType"],"已记录")},{label:"双分子相互作用能",value:valueFor(material,["dimerInteractionEnergy","interactionEnergy"])},{label:"原子受力",value:valueFor(material,["dimerAtomicForce","atomicForce"]) }])}</div>${coordinateTable(material,"双分子结构（原子坐标）")}${geometry(material,kind)}`;
+    return `<div class="mlff-molecule-data-section"><h5>多分子团簇信息</h5>${renderRows([{label:"多分子相互作用能",value:valueFor(material,["clusterInteractionEnergy","interactionEnergy"])},{label:"原子受力",value:valueFor(material,["clusterAtomicForce","atomicForce"]) }])}</div>${coordinateTable(material,"多分子团簇结构（原子坐标）")}${geometry(material,kind)}`;
+  };
+
+  const originalStructure = typeof renderMlffStructurePage === "function" ? renderMlffStructurePage : null;
+  if (originalStructure) {
+    renderMlffStructurePage = function renderMlffStructurePageMolecularDataset(material, tabKey, titleText, descText) {
+      if (tabKey !== "molecule") return originalStructure(material, tabKey, titleText, descText);
+      const active = state.mlffMoleculeDatasetTab || "single";
+      const tabs = [{key:"single",label:"单分子数据集"},{key:"dimer",label:"双分子数据集"},{key:"cluster",label:"多分子团簇数据集"}];
+      const viewerKind = active === "dimer" ? "smallSystem" : active === "cluster" ? "largeSystem" : "molecule";
+      const viewerTitle = active === "dimer" ? "双分子结构3D图" : active === "cluster" ? "多分子团簇结构3D图" : "3D分子结构图";
+      const realViewer = active === "single" && typeof renderLowDimRealViewer === "function" ? renderLowDimRealViewer("mlff", material) : "";
+      const scene = !realViewer && typeof buildMlffScene === "function" ? buildMlffScene(material, viewerKind) : null;
+      const sceneMarkup = scene && typeof renderMlffSceneMarkup === "function" ? `<div class="material-atom-cluster mlff-scene" data-mlff-scene-size="${scene.size}">${renderMlffSceneMarkup(scene)}</div>` : "";
+      const viewer = `<section class="mlff-request-card twod-detail-visual-card mlff-red-structure-card"><h5>${html(viewerTitle)}</h5><div class="mlff-structure-stage mlff-request-stage">${realViewer || sceneMarkup || `<div class="mlff-image-meta">当前条目暂无可用的三维结构坐标。</div>`}</div><p class="mlff-request-caption">${realViewer ? "真实分子坐标，可拖拽旋转、滚轮缩放并切换显示样式。" : html(scene?.caption || "分子结构三维示意图")}</p></section>`;
+      return `<div class="twod-detail-page-head"><div><h4>分子结构</h4><p>按分子体系规模查看结构、几何参数与相互作用数据。</p></div></div><div class="mlff-molecule-dataset-tabs" role="tablist">${tabs.map((tab) => `<button class="mlff-molecule-dataset-tab${active === tab.key ? " active" : ""}" type="button" role="tab" aria-selected="${active === tab.key}" onclick="return openMlffMoleculeDatasetTab('${tab.key}')">${tab.label}</button>`).join("")}</div><div class="mlff-request-layout"><section class="mlff-request-card"><h5>分子体系信息</h5>${tabData(material,active)}</section><div class="mlff-request-right">${viewer}</div></div>`;
+    };
+    window.renderMlffStructurePage = renderMlffStructurePage;
+  }
+  window.openMlffMoleculeDatasetTab = function openMlffMoleculeDatasetTab(key) {
+    state.mlffMoleculeDatasetTab = ["single","dimer","cluster"].includes(key) ? key : "single";
+    const material = typeof getCanonicalMaterialBySource === "function" ? getCanonicalMaterialBySource("mlff", state.selectedMaterialId) : null;
+    if (material && typeof renderMlffDetailPage === "function") renderMlffDetailPage(material);
+    return false;
+  };
+  if (typeof state !== "undefined") state.mlffMoleculeDatasetTab ||= "single";
+})();
+</script>
+
+
+
+
+<script id="mlff-molecule-navigation-fallback-20260902">
+(() => {
+  document.body.addEventListener("click", (event) => {
+    const button = event.target.closest?.("#twodDetailTree button");
+    if (!button || button.textContent.trim() !== "分子结构") return;
+    const content = document.getElementById("twodDetailPageContent");
+    const material = typeof getCanonicalMaterialBySource === "function" ? getCanonicalMaterialBySource("mlff", state.selectedMaterialId) : null;
+    if (!content || !material) return;
+    state.selectedTwodDetailSection = "molecule";
+    content.innerHTML = renderMlffStructurePage(material, "molecule", "分子结构", "展示当前材料的分子级结构与组成信息。");
+    if (typeof renderMlffDetailTreeOverride === "function") renderMlffDetailTreeOverride();
+  });
+})();
+</script>
 

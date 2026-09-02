@@ -1,0 +1,3 @@
+<!doctype html><body><pre id=o>starting</pre><script>
+const out=x=>o.textContent=x; const f=document.createElement('iframe');f.style.display='none';f.src='file:///C:/Users/Windows/Desktop/diwei/low-dim-materials.html';document.body.appendChild(f);f.onload=()=>setTimeout(()=>{const w=f.contentWindow,d=w.document;try{w.state.isAuthenticated=true;w.syncAuthView?.();w.renderMlffModule();w.openMlffDetailPage('ML-009','basic');setTimeout(()=>{w.openMlffDetailSection('molecule');setTimeout(()=>{const c=d.querySelector('#twodDetailPageContent');out('HAS='+['单分子数据集','双分子数据集','多分子团簇数据集','原子电荷','键长','3D分子结构图'].map(x=>x+':'+(c?.textContent.includes(x))).join('|')+'\nLEN='+(c?.innerHTML.length||0));},400)},400)}catch(e){out('ERR='+e.stack)}},1000);
+</script>

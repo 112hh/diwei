@@ -1,2 +1,3 @@
-2026/08/28-17:42:57.012 8b9c Creating DB C:\Users\Windows\Desktop\diwei\artifacts\chrome-profile-verify\Default\shared_proto_db since it was missing.
-2026/08/28-17:42:57.026 8b9c Reusing MANIFEST C:\Users\Windows\Desktop\diwei\artifacts\chrome-profile-verify\Default\shared_proto_db/MANIFEST-000001
+2026/09/02-17:46:19.562 7cb8 Reusing MANIFEST C:\Users\Windows\Desktop\diwei\artifacts\chrome-profile-verify\Default\shared_proto_db/MANIFEST-000001
+2026/09/02-17:46:19.563 7cb8 Recovering log #3
+2026/09/02-17:46:19.564 7cb8 Reusing old log C:\Users\Windows\Desktop\diwei\artifacts\chrome-profile-verify\Default\shared_proto_db/000003.log 

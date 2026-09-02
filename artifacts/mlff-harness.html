@@ -1,0 +1,11 @@
+<!doctype html><body><pre id=o>starting</pre><script>
+const out=(x)=>document.getElementById('o').textContent=x; const f=document.createElement('iframe');f.style.display='none';f.src='file:///C:/Users/Windows/Desktop/diwei/low-dim-materials.html';document.body.appendChild(f);
+f.onload=()=>setTimeout(()=>{const d=f.contentDocument; d.querySelector('[data-login-role="admin"]')?.click(); d.querySelector('[data-standard-login-submit]')?.click(); setTimeout(()=>{d.querySelector('[data-page="mlff"]')?.click(); setTimeout(()=>{const buttons=[...d.querySelectorAll('#page-mlff button')].map(x=>x.innerText).filter(Boolean); const b=d.querySelector('#page-mlff [data-open-material]'); b?.click(); setTimeout(()=>{out('FN='+typeof d.defaultView.openMlffDetailSection+'\nBEFORE='+(d.querySelector('#twodDetailPageContent')?.textContent||'').slice(0,200)); d.defaultView.openMlffDetailSection?.('molecule'); setTimeout(()=>{const detail=d.querySelector('#page-twod-detail');out('ACTIVE='+detail?.className+'\\nCONTENT_LEN='+(d.querySelector('#twodDetailPageContent')?.innerHTML.length||0)+'\\nTEXT='+(d.querySelector('#twodDetailPageContent')?.textContent||'none').slice(0,1500));},500);},1000);},500);},500)},500);
+</script>
+
+
+
+
+
+
+
