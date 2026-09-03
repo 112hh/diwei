@@ -35355,6 +35355,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                   <div class="algorithm-list-meta">
                     <span title="${algorithm.type || algorithm.subcategoryTitle}">${algorithm.type || algorithm.subcategoryTitle}</span>
                     <span>${algorithm.version} / ${algorithm.packageSize}</span>
+                    <span class="algorithm-status-pill ${algorithm.status}">${getAlgorithmStatusText(algorithm.status)}</span>
                   </div>
                 </div>
                 <div class="algorithm-list-actions">
@@ -35421,6 +35422,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                     <span>${algorithm.enTitle || algorithm.subcategoryTitle || ""}</span>
                     <span class="algorithm-supported-meta">
                       <span>${algorithm.subcategoryTitle || "算法资源"}</span>
+                      <span class="algorithm-status-pill ${algorithm.status}">${getAlgorithmStatusText(algorithm.status)}</span>
                     </span>
                   </button>
                 `).join("")}
@@ -51879,6 +51881,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                     <div class="algorithm-list-meta">
                       <span title="${activeCategory}">${activeCategory}</span>
                       <span>ZIP 代码包 / 使用手册</span>
+                      <span class="algorithm-status-pill available">可下载</span>
                     </div>
                   </div>
                   <div class="algorithm-list-actions">
