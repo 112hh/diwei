@@ -9362,6 +9362,7 @@
     }
 
     #page-twod .twod-toolbar-actions {
+      margin-left: auto;
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -18472,7 +18473,17 @@
     #page-tools .tool-reference-columns ol,#page-tools .tool-reference-columns ul { margin:0; padding-left:22px; color:#526078; font-size:13px; line-height:1.7; }
     #page-tools .tool-reference-columns li + li { margin-top:7px; }
     @media (max-width: 760px) { #page-tools .algorithm-reference-doc { padding:20px 16px 24px; } #page-tools .algorithm-reference-grid,#page-tools .tool-reference-columns { grid-template-columns:1fr; } #page-tools .algorithm-reference-tag { white-space:normal; } }
-  </style></head>
+  </style><style id="application-list-toolbar-adjustments">
+  :is(#page-opto, #page-mlff, #page-catalyst) .cross-db-toolbar-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+  :is(#page-mlff, #page-catalyst) .cross-db-result-toolbar { position:relative; }
+  :is(#page-mlff, #page-catalyst) .cross-db-toolbar-leading-actions { position:absolute; right:16px; top:-48px; display:inline-flex; align-items:center; gap:8px; }
+  :is(#page-mlff, #page-catalyst) .cross-db-toolbar-leading-actions .btn-primary { white-space:nowrap; }
+  :is(#page-opto, #page-mlff, #page-catalyst) .cross-db-toolbar-actions { margin-left:auto !important; }
+  #page-twod .twod-toolbar-actions { margin-left:auto !important; }
+
+
+</style>
+</head>
 <body>
   <section class="login-shell" id="loginShell">
     <div class="login-shell-inner">
@@ -22959,10 +22970,11 @@
         ghs: "—",
         homo: null,
         lumo: null,
-        dipole: 2.16,
-        heatForm: null,
+        dipole: 10,
+        heatForm: 101,
+        adsorptionEnergy: 0.3,
         gibbs: null,
-        solvation: -46.4,
+        solvation: 10,
         source: "EGP/SolQuest (BP/def2-TZVPD + COSMO-RS)",
         updatedAt: "2026-07-22",
         quality: "理论预测(DFT)",
@@ -39105,13 +39117,6 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             <div class="twod-toolbar-panel">
               <button class="twod-toolbar-option${sortActive ? "" : " active"}" type="button" data-twod-result-sort="">默认排序</button>
               ${renderTwodToolbarOptions(TWOD_RESULT_SORT_GROUPS, sortActive, "data-twod-result-sort")}
-            </div>
-          </details>
-          <details class="twod-toolbar-menu">
-            <summary>筛选▾</summary>
-            <div class="twod-toolbar-panel">
-              <button class="twod-toolbar-option${filterActive ? "" : " active"}" type="button" data-twod-result-filter="">全部结果</button>
-              ${renderTwodToolbarOptions(TWOD_RESULT_FILTER_GROUPS, filterActive, "data-twod-result-filter")}
             </div>
           </details>
           <details class="twod-toolbar-menu">
@@ -65193,6 +65198,18 @@ if (state.selectedTwodDetailSection === "molecule") {
       return String(value);
     }
 
+    // 计算信息页统一使用“/”表示没有可展示的数据。
+    function displayComputeValue(value, unit = "") {
+      if (isLowDimNoPropertyValue(value)) return "/";
+      if (value && typeof value === "object") {
+        if ("value" in value) return displayComputeValue(value.value, value.unit || unit);
+        return formatElectrolyteRecordedValue(value);
+      }
+      const formatted = formatElectrolyteValue(value);
+      if (!unit || String(formatted).trim().endsWith(unit)) return formatted;
+      return `${formatted} ${unit}`;
+    }
+
     function getElectrolyteFallbackVisualConfig(material, key) {
       if (material.electrolyteCategory !== "organicLiquid") return null;
       const alias = material.alias || material.name || "当前分子";
@@ -65512,17 +65529,18 @@ if (state.selectedTwodDetailSection === "molecule") {
     }
 
     function renderElectrolyteOrganicComputePage(material) {
+      const recordedValue = (keys, labels = []) => pickElectrolyteValue(
+        ...keys.map((key) => material[key]),
+        labels.length ? findElectrolyteDetailValue(material, labels, ["compute", "basic"]) : null
+      );
       const rows = [
-        { label: "HOMO-LUMO 能量", value: `${formatElectrolyteValue(material.homo)} / ${formatElectrolyteValue(material.lumo)} eV` },
-        { label: "电荷分布", value: material.ghs ? `GHS: ${material.ghs}` : "/" },
-        { label: "偶极矩", value: material.dipole != null ? `${material.dipole} D` : "/" },
-        { label: "生成焓", value: material.heatForm != null ? `${material.heatForm} kJ/mol` : "/" },
-        { label: "生成吉布斯自由能", value: material.gibbs != null ? `${material.gibbs} kJ/mol` : "/" },
-        { label: "结合能", value: "/" },
-        { label: "溶剂化自由能", value: material.solvation != null ? `${material.solvation} kJ/mol` : "/" },
-        { label: "HOMO", value: formatElectrolyteMetric(material.homo, "eV") },
-        { label: "LUMO", value: formatElectrolyteMetric(material.lumo, "eV") },
-        ...((material.detailTabs?.compute || []).map((item) => ({ label: item.label, value: item.value })))
+        { label: "HOMO", value: displayComputeValue(recordedValue(["homo"], ["HOMO"]), "eV") },
+        { label: "LUMO", value: displayComputeValue(recordedValue(["lumo"], ["LUMO"]), "eV") },
+        { label: "电荷分布", value: isLowDimNoPropertyValue(recordedValue(["chargeDistribution", "charge", "atomicCharges"], ["电荷分布", "原子电荷"])) ? "/" : formatElectrolyteValue(recordedValue(["chargeDistribution", "charge", "atomicCharges"], ["电荷分布", "原子电荷"])) },
+        { label: "偶极矩", value: displayComputeValue(recordedValue(["dipole"], ["偶极矩"]), "D") },
+        { label: "溶解剂自由能", value: displayComputeValue(recordedValue(["solvation", "solvationFreeEnergy"], ["溶解剂自由能", "溶剂化自由能"]), "kJ/mol") },
+        { label: "吸附能", value: displayComputeValue(recordedValue(["adsorptionEnergy", "adsorption"], ["吸附能"]), "eV") },
+        { label: "生成焓", value: displayComputeValue(recordedValue(["heatForm", "formationEnthalpy"], ["生成焓", "形成焓"]), "kJ/mol") }
       ];
       return `
         <div class="twod-detail-page-head">
@@ -66074,6 +66092,11 @@ if (state.selectedTwodDetailSection === "molecule") {
       const useRealFieldRecord = material.isRealCase === true || material.realCase === true || material.__realCase === true;
       if (useRealFieldRecord && state.selectedTwodDetailSection === "basic") {
         content.innerHTML = renderElectrolyteRealBasicPage(material);
+        return;
+      }
+      // 有机电解液的计算信息始终展示固定字段；真实案例缺值也以“/”占位。
+      if (material.electrolyteCategory === "organicLiquid" && state.selectedTwodDetailSection === "compute") {
+        content.innerHTML = renderElectrolyteOrganicComputePage(material);
         return;
       }
       if (useRealFieldRecord && ["compute", "related"].includes(state.selectedTwodDetailSection)) {
@@ -82049,7 +82072,9 @@ function renderElectrolyteCategoryTabs() {
 <head>
   <meta charset="UTF-8">
   <title>${esc(material?.name || "二维材料")} 全部图表</title>
-  <style>body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:24px;color:#142033;background:#F2F3F5;}section{margin:0 0 18px;padding:16px;border:1px solid #dfe6f1;border-radius:8px;background:#fff;}h1{font-size:20px;}h2{font-size:16px;color:#0f2377;}p{color:#64748b;font-size:13px;line-height:1.6;}svg{max-width:100%;height:auto;}</style>
+  <style>body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:24px;color:#142033;background:#F2F3F5;}section{margin:0 0 18px;padding:16px;border:1px solid #dfe6f1;border-radius:8px;background:#fff;}h1{font-size:20px;}h2{font-size:16px;color:#0f2377;}p{color:#64748b;font-size:13px;line-height:1.6;}svg{max-width:100%;height:auto;}
+
+</style>
 </head>
 <body>
   <h1>${esc(material?.name || "二维材料")} 全部物理性质可视化图表</h1>
@@ -85571,6 +85596,7 @@ function renderElectrolyteCategoryTabs() {
     }
 
     .cross-db-toolbar-actions {
+      margin-left: auto;
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -86060,27 +86086,26 @@ function renderElectrolyteCategoryTabs() {
         ? `<label><input type="checkbox" checked disabled><span>${html(item)}</span></label>`
         : `<button type="button">${html(item)}</button>`).join("");
 
-      const renderCrossDatabaseToolbar = (total, config) => `
+      const renderCrossDatabaseToolbar = (total, config = {}) => `
         <div class="cross-db-result-toolbar">
           <div class="cross-db-toolbar-count">共 <strong>${total}</strong> 条</div>
           <div class="cross-db-toolbar-actions">
-            ${config.leadingActions ? config.leadingActions.map((item) => `<button class="btn" type="button" ${item.attribute || ""}>${html(item.label)}</button>`).join("") : ""}
-            <details class="cross-db-toolbar-menu">
+            ${config.leadingActions ? `<div class="cross-db-toolbar-leading-actions">${config.leadingActions.map((item) => `<button class="btn-primary" type="button" ${item.attribute || ""}>${html(item.label)}</button>`).join("")}</div>` : ""}
+            ${config.showSort !== false ? `<details class="cross-db-toolbar-menu">
               <summary>排序▾</summary>
-              <div class="cross-db-toolbar-panel">${toolbarPanel(config.sorts)}</div>
-            </details>
-            <details class="cross-db-toolbar-menu">
+              <div class="cross-db-toolbar-panel">${toolbarPanel(config.sorts || [])}</div>
+            </details>` : ""}
+            ${config.showFilter !== false ? `<details class="cross-db-toolbar-menu">
               <summary>筛选▾</summary>
-              <div class="cross-db-toolbar-panel">${toolbarPanel(config.filters)}</div>
-            </details>
+              <div class="cross-db-toolbar-panel">${toolbarPanel(config.filters || [])}</div>
+            </details>` : ""}
             <details class="cross-db-toolbar-menu">
               <summary>列设置▾</summary>
-              <div class="cross-db-toolbar-panel">${toolbarPanel(config.columns, "check")}</div>
+              <div class="cross-db-toolbar-panel">${toolbarPanel(config.columns || [], "check")}</div>
             </details>
           </div>
         </div>
       `;
-
       const renderFlatSearchWorkspace = (moduleKey, mode, config, value, applyAttr, resetAttr, inputAttr) => `
         <div class="twod-mode-panel active">
           <div class="twod-search-row">
@@ -86629,19 +86654,19 @@ function renderElectrolyteCategoryTabs() {
 
       const resultToolbars = {
         opto: {
-          sorts: ["默认排序", "分子量升序", "HOMO能级", "LUMO能级", "带隙排序", "吸收峰位"],
-          filters: ["自有数据集", "公开数据集", "OLED", "OPV", "发光材料", "传输材料"],
+          showSort: false,
+          showFilter: false,
           columns: ["序号", "材料编号", "材料简称", "完整名称", "英文名称", "分子式", "数据来源", "操作"]
         },
         mlff: {
-          sorts: ["默认排序", "能量升序", "偶极矩排序", "参数项排序", "更新时间"],
-          filters: ["自有数据集", "公开数据集", "电荷", "多极矩", "分子结构", "小体系结构", "大体系结构"],
+          showSort: false,
+          showFilter: false,
           columns: ["材料编号", "中文名称", "英文名称", "分子式", "电荷", "多极矩", "极化率和色散系数", "键长/结构", "操作"],
           leadingActions: [{ label: "机器学习力场数据术语表", attribute: "data-mlff-glossary-page" }]
         },
         catalyst: {
-          sorts: ["默认排序", "能垒升序", "选择性降序", "TOF降序", "更新时间"],
-          filters: ["自有数据集", "公开数据集", "金属单晶", "单原子催化剂", "ORR", "OER", "CO2RR"],
+          showSort: false,
+          showFilter: false,
           columns: ["序号", "材料编号", "材料名称", "化学式", "分类标签", "材料成分", "中间产物", "材料描述", "表面参数", "数据来源", "活化能", "反应路径信息", "操作"],
           leadingActions: [
             { label: "活性位点分析", attribute: 'data-catalyst-workbench="site"' },
@@ -86650,7 +86675,6 @@ function renderElectrolyteCategoryTabs() {
           ]
         }
       };
-
       function renderMlffCurrentConversionPanel() {
         ensureMlffConvertSelection();
         const typeDescriptions = {

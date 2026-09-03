@@ -514,9 +514,23 @@
   };
 
   renderElectrolyteOrganicComputePage = function (material) {
-    const removed = new Set(["HOMO", "LUMO", "HOMO-LUMO 能量", "偶极矩", "溶剂化(水)", "溶剂化(乙腈)", "溶剂化(DMSO)"]);
-    const rows = (material.detailTabs?.compute || []).filter((item) => item && !removed.has(item.label) && !String(item.label).startsWith("溶剂化("));
-    return `<div class="twod-detail-page-head"><div><h4>计算信息</h4><p>展示当前有机电解液中保留的计算数据。</p></div></div><section class="twod-detail-section-card">${renderRows("计算信息", rows.length ? rows : [{ label: "记录状态", value: "暂无其他计算信息" }])}</section>`;
+    const computeValue = (value, unit = "") => {
+      if (value == null || (typeof isLowDimNoPropertyValue === "function" && isLowDimNoPropertyValue(value))) return "/";
+      const formatted = typeof formatElectrolyteValue === "function" ? formatElectrolyteValue(value) : String(value);
+      return unit && !String(formatted).trim().endsWith(unit) ? `${formatted} ${unit}` : formatted;
+    };
+    const chargeDistribution = material.chargeDistribution ?? material.charge ?? material.atomicCharges;
+    const rows = [
+      { label: "HOMO", value: computeValue(material.homo, "eV") },
+      { label: "LUMO", value: computeValue(material.lumo, "eV") },
+      { label: "电荷分布", value: computeValue(chargeDistribution) },
+      { label: "偶极矩", value: computeValue(material.dipole, "D") },
+      { label: "溶解剂自由能", value: computeValue(material.solvation ?? material.solvationFreeEnergy, "kJ/mol") },
+      { label: "吸附能", value: computeValue(material.adsorptionEnergy ?? material.adsorption, "eV") },
+      { label: "生成焓", value: computeValue(material.heatForm ?? material.formationEnthalpy, "kJ/mol") }
+    ];
+    const rowMarkup = rows.map((item) => `<div class="detail-kv-item"><div class="detail-kv-label">${escapeValue(item.label)}</div><div class="detail-kv-value">${escapeValue(item.value)}</div></div>`).join("");
+    return `<div class="twod-detail-page-head"><div><h4>计算信息</h4><p>展示当前有机电解液的电子结构与热力学相关计算数据。</p></div></div><section class="twod-detail-section-card"><div class="detail-kv-section"><div class="detail-kv-section-title">计算信息</div><div class="detail-kv-list organic-liquid-compute-list">${rowMarkup}</div></div></section>`;
   };
 
   const previousDetailPage = renderElectrolyteDetailPage;
@@ -1074,4 +1088,3 @@ ${values.join("\t")}`;
   style.textContent = `.electrolyte-structure-file-content{margin-top:16px;padding-top:14px;border-top:1px solid #e4ecf7}.electrolyte-structure-file-content h6{margin:0 0 8px;color:#24364d;font-size:13px}.electrolyte-structure-file-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid #e1e8f1;border-radius:6px;background:#f8fafc;color:#52657c;font-size:13px}.electrolyte-structure-file-name{font-weight:600;color:#24364d}.electrolyte-structure-file-format{color:#60748e}.electrolyte-structure-file-meta .twod-detail-link-btn{margin-left:auto}`;
   document.head.appendChild(style);
 })();
-

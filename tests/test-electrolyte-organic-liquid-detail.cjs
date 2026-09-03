@@ -39,8 +39,7 @@ const { pathToFileURL } = require('node:url');
 
     await page.locator('#page-twod-detail .twod-tree-node', { hasText: '计算信息' }).click();
     detailText = await page.locator('#page-twod-detail').innerText();
-    for (const label of ['HOMO', 'LUMO', '偶极矩', '溶剂化(水)', '溶剂化(乙腈)', '溶剂化(DMSO)']) assert.equal(detailText.includes(label), false, `计算信息不应显示${label}`);
+    for (const label of ['HOMO', 'LUMO', '电荷分布', '偶极矩', '溶解剂自由能', '吸附能', '生成焓']) assert.equal(detailText.includes(label), true, `计算信息应显示${label}`);
     console.log('有机电解液内嵌信息页签验证通过');
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error.stack || error); process.exitCode = 1; });
-
