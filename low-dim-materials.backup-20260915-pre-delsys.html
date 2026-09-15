@@ -103335,6 +103335,15 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     "__SCOPE__ .lstd-flow-step b { position:absolute; left:14px; top:14px; width:22px; height:22px; display:grid; place-items:center; border-radius:50%; background:#e8eefc; color:#00308f; font-size:11px; }",
     "__SCOPE__ .lstd-flow-step h4 { margin:0 0 6px; color:#1e293b; font-size:12.5px; }",
     "__SCOPE__ .lstd-flow-step p { margin:0; color:#64748b; font-size:11.5px; line-height:19px; }",
+    "__SCOPE__ .lstd-sys { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-top:14px; }",
+    "__SCOPE__ .lstd-sys details { border:1px solid #dbe3ee; border-radius:10px; background:#fff; overflow:hidden; }",
+    "__SCOPE__ .lstd-sys summary { display:flex; align-items:center; gap:9px; padding:13px 15px; background:#f8fafc; cursor:pointer; list-style:none; }",
+    "__SCOPE__ .lstd-sys summary::-webkit-details-marker { display:none; }",
+    "__SCOPE__ .lstd-sys summary strong { color:#1e293b; font-size:12.5px; }",
+    "__SCOPE__ .lstd-sys summary em { margin-left:auto; color:#94a3b8; font-size:11px; font-style:normal; }",
+    "__SCOPE__ .lstd-sys p { margin:0 0 8px; padding:12px 15px 0; color:#475569; font-size:11.5px; line-height:19px; }",
+    "__SCOPE__ .lstd-sys ul { margin:0; padding:0 15px 14px 30px; }",
+    "__SCOPE__ .lstd-sys li { color:#475569; font-size:11.5px; line-height:20px; }",
     "__SCOPE__ .lstd-callout { display:flex; gap:12px; align-items:flex-start; padding:13px 16px; border:1px solid #cfe0fb; border-radius:10px; background:#f2f7ff; }",
     "__SCOPE__ .lstd-callout strong { color:#00308f; font-size:12.5px; }",
     "__SCOPE__ .lstd-callout p { margin:4px 0 0; color:#475569; font-size:11.5px; line-height:19px; }",
@@ -103366,6 +103375,13 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     if (!lib.workflow || !lib.workflow.length) return "";
     return '<div class="lstd-flow">' + lib.workflow.map((step, index) => (
       '<article class="lstd-flow-step"><b>' + (index + 1) + "</b><h4>" + esc(step.title) + "</h4><p>" + esc(step.text) + "</p></article>"
+    )).join("") + "</div>";
+  }
+
+  function lstdRenderSystemStandards(lib) {
+    return '<div class="lstd-sys">' + lib.systemStandards.map((item, index) => (
+      '<details' + (index < 2 ? " open" : "") + '><summary><strong>' + esc(item.name) + "</strong><em>" + esc(item.brief) + "</em></summary>" +
+      "<ul>" + (item.points || []).map((point) => "<li>" + esc(point) + "</li>").join("") + "</ul></details>"
     )).join("") + "</div>";
   }
 
@@ -103467,6 +103483,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           "<h3 style=\"margin:0 0 6px;color:#111827;font-size:15px;\">总体工作流程</h3>" +
           '<p style="margin:0;color:#7c8b9c;font-size:12px;line-height:20px;">' + esc(lib.lead) + "</p>" +
           lstdRenderFlow(lib) +
+        "</div>" +
+
+        '<div class="lstd-card" style="margin-top:16px;padding:16px 18px;">' +
+          '<h3 style="margin:0 0 4px;color:#111827;font-size:15px;">' + esc(lib.standardName) + " · 标准体系</h3>" +
+          '<p style="margin:0;color:#7c8b9c;font-size:12px;">展开查看各项标准的要点要求，标准化页面的规则与采集加工处理的校验均以此为据。</p>' +
+          lstdRenderSystemStandards(lib) +
         "</div>" +
 
         '<div class="lstd-shell">' +
