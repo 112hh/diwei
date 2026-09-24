@@ -1,0 +1,113 @@
+
+========== 二维材料数据库 ==========
+  [PASS] 初始数据集数  →  8
+  [PASS] 点新增  →  'OK'
+  [PASS] 弹窗存在  →  1
+  [PASS] 弹窗归属本页  →  'lowdim-database-twod'
+  [PASS] 展开下拉  →  'OK'
+  [PASS] 下拉面板可见  →  None
+  [PASS] 可选项数=物理表数  →  4
+  [PASS] 已勾选数  →  2
+  [PASS] chips 数  →  2
+  [PASS] 空名进入错误态  →  1
+  [PASS] 空名未新增  →  8
+  [PASS] 弹窗已关闭  →  0
+  [PASS] 新增后数据集数  →  9
+  [PASS] 新节点 id 前缀  →  'ds:'
+  [PASS] 新数据集标题  →  '回归测试数据集'
+     关联数据表 → 关联数据表ldm_material_2d、ldm_material_2d_structure2 张表
+  [PASS] 关联数据表含多个表名  →  '关联数据表ldm_material_2d、ldm_material_2d_structure2 张表'
+  [PASS] 删除确认弹窗  →  1
+  [PASS] 删除后数据集数  →  8
+  __errs = []
+
+========== 有机光电材料数据库 ==========
+  [PASS] 初始数据集数  →  4
+  [PASS] 点新增  →  'OK'
+  [PASS] 弹窗存在  →  1
+  [PASS] 弹窗归属本页  →  'lowdim-database-opto'
+  [PASS] 展开下拉  →  'OK'
+  [PASS] 下拉面板可见  →  None
+  [PASS] 可选项数=物理表数  →  1
+  [PASS] 已勾选数  →  1
+  [PASS] chips 数  →  1
+  [PASS] 空名进入错误态  →  1
+  [PASS] 空名未新增  →  4
+  [PASS] 弹窗已关闭  →  0
+  [PASS] 新增后数据集数  →  5
+  [PASS] 新节点 id 前缀  →  'ds:'
+  [PASS] 新数据集标题  →  '回归测试数据集'
+     关联数据表 → 关联数据表material_optoelectronic
+  [PASS] 关联数据表含多个表名  →  '关联数据表material_optoelectronic'
+  [PASS] 删除确认弹窗  →  1
+  [PASS] 删除后数据集数  →  4
+  __errs = []
+
+========== 电解质材料数据库 ==========
+  [PASS] 初始数据集数  →  3
+  [PASS] 点新增  →  'OK'
+  [PASS] 弹窗存在  →  1
+  [PASS] 弹窗归属本页  →  'lowdim-database-electrolyte'
+  [PASS] 展开下拉  →  'OK'
+  [PASS] 下拉面板可见  →  None
+  [PASS] 可选项数=物理表数  →  3
+  [PASS] 已勾选数  →  2
+  [PASS] chips 数  →  2
+  [PASS] 空名进入错误态  →  1
+  [PASS] 空名未新增  →  3
+  [PASS] 弹窗已关闭  →  0
+  [PASS] 新增后数据集数  →  4
+  [PASS] 新节点 id 前缀  →  'ds:'
+  [PASS] 新数据集标题  →  '回归测试数据集'
+     关联数据表 → 关联数据表electrolyte_liquid、electrolyte_solid_organic2 张表
+  [PASS] 关联数据表含多个表名  →  '关联数据表electrolyte_liquid、electrolyte_solid_organic2 张表'
+  [PASS] 删除确认弹窗  →  1
+  [PASS] 删除后数据集数  →  3
+  __errs = []
+
+========== 机器学习力场数据库 ==========
+  [PASS] 初始数据集数  →  3
+  [PASS] 点新增  →  'OK'
+  [PASS] 弹窗存在  →  1
+  [PASS] 弹窗归属本页  →  'lowdim-database-mlff'
+  [PASS] 展开下拉  →  'OK'
+  [PASS] 下拉面板可见  →  None
+  [PASS] 可选项数=物理表数  →  3
+  [PASS] 已勾选数  →  2
+  [PASS] chips 数  →  2
+  [PASS] 空名进入错误态  →  1
+  [PASS] 空名未新增  →  3
+  [PASS] 弹窗已关闭  →  0
+  [PASS] 新增后数据集数  →  4
+  [PASS] 新节点 id 前缀  →  'ds:'
+  [PASS] 新数据集标题  →  '回归测试数据集'
+     关联数据表 → 关联数据表mlff_small_molecule、mlff_polymer2 张表
+  [PASS] 关联数据表含多个表名  →  '关联数据表mlff_small_molecule、mlff_polymer2 张表'
+  [PASS] 删除确认弹窗  →  1
+  [PASS] 删除后数据集数  →  3
+  __errs = []
+
+========== 催化材料数据库 ==========
+  [PASS] 初始数据集数  →  6
+  [PASS] 点新增  →  'OK'
+  [PASS] 弹窗存在  →  1
+  [PASS] 弹窗归属本页  →  'lowdim-database-catalyst'
+  [PASS] 展开下拉  →  'OK'
+  [PASS] 下拉面板可见  →  None
+  [PASS] 可选项数=物理表数  →  1
+  [PASS] 已勾选数  →  1
+  [PASS] chips 数  →  1
+  [PASS] 空名进入错误态  →  1
+  [PASS] 空名未新增  →  6
+  [PASS] 弹窗已关闭  →  0
+  [PASS] 新增后数据集数  →  7
+  [PASS] 新节点 id 前缀  →  'ds:'
+  [PASS] 新数据集标题  →  '回归测试数据集'
+     关联数据表 → 关联数据表material_catalyst
+  [PASS] 关联数据表含多个表名  →  '关联数据表material_catalyst'
+  [PASS] 删除确认弹窗  →  1
+  [PASS] 删除后数据集数  →  6
+  __errs = []
+
+===== 结果 =====
+全部通过 ✓

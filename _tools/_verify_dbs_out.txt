@@ -1,0 +1,264 @@
+
+========== 二维材料数据库（lowdim-database-twod） ==========
+  [PASS] 页容器已渲染本实现  →  1
+  [PASS] 注入样式前缀为本页  →  '#page-lowdim-database-twod .t2d-root { display'
+  [PASS] root 布局  →  'flex'
+  [PASS] root 圆角  →  '12px'
+  [PASS] 侧栏宽度  →  '308px'
+  [PASS] 主区内边距  →  '18px 22px 26px'
+  [PASS] 页签字重  →  '700'
+  [PASS] 表头不换行  →  'nowrap'
+  [PASS] 库级标题  →  '二维材料数据库'
+  [PASS] 库级页签  →  ['字段信息', '信息概览']
+  [PASS] 字段信息总数字段数  →  80
+  [PASS] 首页行数  →  10
+  [PASS] 库级已无指标卡片  →  0
+  [PASS] 库级已无页脚来源说明  →  0
+  [PASS] 目录数据集数量  →  8
+  [PASS] structure 标题  →  '结构特征数据集'
+  [PASS] structure 已无标题徽标  →  0
+  [PASS] structure 已无描述段  →  0
+  [PASS] structure 已无工具条提示  →  0
+  [PASS] structure 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] structure 列头前缀  →  ['序号', '材料名称', '原子结构图', '化学式', '晶胞参数']
+  [PASS] structure 数据信息行数  →  6
+  [PASS] structure 概览含关联数据表项  →  None
+  [PASS] structure 概览基本信息项数  →  10
+  [PASS] electronic 标题  →  '电子结构数据集'
+  [PASS] electronic 已无标题徽标  →  0
+  [PASS] electronic 已无描述段  →  0
+  [PASS] electronic 已无工具条提示  →  0
+  [PASS] electronic 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] electronic 列头前缀  →  ['序号', '材料名称', '能带结构', '态密度', '有效质量']
+  [PASS] electronic 数据信息行数  →  6
+  [PASS] electronic 概览含关联数据表项  →  None
+  [PASS] electronic 概览基本信息项数  →  10
+  [PASS] optical 标题  →  '光学性质数据集'
+  [PASS] optical 已无标题徽标  →  0
+  [PASS] optical 已无描述段  →  0
+  [PASS] optical 已无工具条提示  →  0
+  [PASS] optical 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] optical 列头前缀  →  ['序号', '材料名称', '介电函数', '光吸收系数', '反射率']
+  [PASS] optical 数据信息行数  →  6
+  [PASS] optical 概览含关联数据表项  →  None
+  [PASS] optical 概览基本信息项数  →  10
+  __errs = []
+
+========== 有机光电材料数据库（lowdim-database-opto） ==========
+  [PASS] 页容器已渲染本实现  →  1
+  [PASS] 注入样式前缀为本页  →  '#page-lowdim-database-opto .t2d-root { display'
+  [PASS] root 布局  →  'flex'
+  [PASS] root 圆角  →  '12px'
+  [PASS] 侧栏宽度  →  '308px'
+  [PASS] 主区内边距  →  '18px 22px 26px'
+  [PASS] 页签字重  →  '700'
+  [PASS] 表头不换行  →  'nowrap'
+  [PASS] 库级标题  →  '有机光电材料数据库'
+  [PASS] 库级页签  →  ['字段信息', '信息概览']
+  [PASS] 字段信息总数字段数  →  40
+  [PASS] 首页行数  →  10
+  [PASS] 库级已无指标卡片  →  0
+  [PASS] 库级已无页脚来源说明  →  0
+  [PASS] 目录数据集数量  →  4
+  [PASS] op_base 标题  →  '有机光电材料基础数据集'
+  [PASS] op_base 已无标题徽标  →  0
+  [PASS] op_base 已无描述段  →  0
+  [PASS] op_base 已无工具条提示  →  0
+  [PASS] op_base 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] op_base 列头前缀  →  ['序号', '材料名称', '中文名称', '英文名称', '分子式']
+  [PASS] op_base 数据信息行数  →  6
+  [PASS] op_base 概览含关联数据表项  →  None
+  [PASS] op_base 概览基本信息项数  →  10
+  [PASS] op_property 标题  →  '有机光电材料物性数据集'
+  [PASS] op_property 已无标题徽标  →  0
+  [PASS] op_property 已无描述段  →  0
+  [PASS] op_property 已无工具条提示  →  0
+  [PASS] op_property 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] op_property 列头前缀  →  ['序号', '材料名称', '密度（g/cm³）', '熔点（°C）', '沸点（°C）']
+  [PASS] op_property 数据信息行数  →  6
+  [PASS] op_property 概览含关联数据表项  →  None
+  [PASS] op_property 概览基本信息项数  →  10
+  [PASS] op_spectrum 标题  →  '有机光电材料表征图谱数据集'
+  [PASS] op_spectrum 已无标题徽标  →  0
+  [PASS] op_spectrum 已无描述段  →  0
+  [PASS] op_spectrum 已无工具条提示  →  0
+  [PASS] op_spectrum 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] op_spectrum 列头前缀  →  ['序号', '材料名称', '红外光谱', '拉曼光谱', '核磁共振谱']
+  [PASS] op_spectrum 数据信息行数  →  6
+  [PASS] op_spectrum 概览含关联数据表项  →  None
+  [PASS] op_spectrum 概览基本信息项数  →  10
+  [PASS] op_calc 标题  →  '有机光电材料计算数据集'
+  [PASS] op_calc 已无标题徽标  →  0
+  [PASS] op_calc 已无描述段  →  0
+  [PASS] op_calc 已无工具条提示  →  0
+  [PASS] op_calc 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] op_calc 列头前缀  →  ['序号', '材料名称', '基态结构', '激发态结构', '激发能（eV）']
+  [PASS] op_calc 数据信息行数  →  6
+  [PASS] op_calc 概览含关联数据表项  →  None
+  [PASS] op_calc 概览基本信息项数  →  10
+  __errs = []
+
+========== 电解质材料数据库（lowdim-database-electrolyte） ==========
+  [PASS] 页容器已渲染本实现  →  1
+  [PASS] 注入样式前缀为本页  →  '#page-lowdim-database-electrolyte .t2d-root { '
+  [PASS] root 布局  →  'flex'
+  [PASS] root 圆角  →  '12px'
+  [PASS] 侧栏宽度  →  '308px'
+  [PASS] 主区内边距  →  '18px 22px 26px'
+  [PASS] 页签字重  →  '700'
+  [PASS] 表头不换行  →  'nowrap'
+  [PASS] 库级标题  →  '电解质材料数据库'
+  [PASS] 库级页签  →  ['字段信息', '信息概览']
+  [PASS] 字段信息总数字段数  →  61
+  [PASS] 首页行数  →  10
+  [PASS] 库级已无指标卡片  →  0
+  [PASS] 库级已无页脚来源说明  →  0
+  [PASS] 目录数据集数量  →  3
+  [PASS] el_liquid 标题  →  '有机电解液数据集'
+  [PASS] el_liquid 已无标题徽标  →  0
+  [PASS] el_liquid 已无描述段  →  0
+  [PASS] el_liquid 已无工具条提示  →  0
+  [PASS] el_liquid 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] el_liquid 列头前缀  →  ['序号', '材料名称', '名称', '分子式', '三维结构']
+  [PASS] el_liquid 数据信息行数  →  6
+  [PASS] el_liquid 概览含关联数据表项  →  None
+  [PASS] el_liquid 概览基本信息项数  →  10
+  [PASS] el_solid_organic 标题  →  '固态有机电解质数据集'
+  [PASS] el_solid_organic 已无标题徽标  →  0
+  [PASS] el_solid_organic 已无描述段  →  0
+  [PASS] el_solid_organic 已无工具条提示  →  0
+  [PASS] el_solid_organic 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] el_solid_organic 列头前缀  →  ['序号', '材料名称', '名称', '分子式', '单体结构']
+  [PASS] el_solid_organic 数据信息行数  →  6
+  [PASS] el_solid_organic 概览含关联数据表项  →  None
+  [PASS] el_solid_organic 概览基本信息项数  →  10
+  [PASS] el_solid_inorganic 标题  →  '固态无机电解质数据集'
+  [PASS] el_solid_inorganic 已无标题徽标  →  0
+  [PASS] el_solid_inorganic 已无描述段  →  0
+  [PASS] el_solid_inorganic 已无工具条提示  →  0
+  [PASS] el_solid_inorganic 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] el_solid_inorganic 列头前缀  →  ['序号', '材料名称', '名称', '化学式', '晶体结构']
+  [PASS] el_solid_inorganic 数据信息行数  →  6
+  [PASS] el_solid_inorganic 概览含关联数据表项  →  None
+  [PASS] el_solid_inorganic 概览基本信息项数  →  10
+  __errs = []
+
+========== 机器学习力场数据库（lowdim-database-mlff） ==========
+  [PASS] 页容器已渲染本实现  →  1
+  [PASS] 注入样式前缀为本页  →  '#page-lowdim-database-mlff .t2d-root { display'
+  [PASS] root 布局  →  'flex'
+  [PASS] root 圆角  →  '12px'
+  [PASS] 侧栏宽度  →  '308px'
+  [PASS] 主区内边距  →  '18px 22px 26px'
+  [PASS] 页签字重  →  '700'
+  [PASS] 表头不换行  →  'nowrap'
+  [PASS] 库级标题  →  '机器学习力场数据库'
+  [PASS] 库级页签  →  ['字段信息', '信息概览']
+  [PASS] 字段信息总数字段数  →  41
+  [PASS] 首页行数  →  10
+  [PASS] 库级已无指标卡片  →  0
+  [PASS] 库级已无页脚来源说明  →  0
+  [PASS] 目录数据集数量  →  3
+  [PASS] mlff_base 标题  →  '机器学习力场基础数据集'
+  [PASS] mlff_base 已无标题徽标  →  0
+  [PASS] mlff_base 已无描述段  →  0
+  [PASS] mlff_base 已无工具条提示  →  0
+  [PASS] mlff_base 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] mlff_base 列头前缀  →  ['序号', '材料名称', '分子名称', '分子式', '分子结构']
+  [PASS] mlff_base 数据信息行数  →  6
+  [PASS] mlff_base 概览含关联数据表项  →  None
+  [PASS] mlff_base 概览基本信息项数  →  10
+  [PASS] mlff_small 标题  →  '有机小分子机器学习力场数据集'
+  [PASS] mlff_small 已无标题徽标  →  0
+  [PASS] mlff_small 已无描述段  →  0
+  [PASS] mlff_small 已无工具条提示  →  0
+  [PASS] mlff_small 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] mlff_small 列头前缀  →  ['序号', '材料名称', '单分子能量（Hartree）', '原子受力（kJ/(mol·Å)）']
+  [PASS] mlff_small 数据信息行数  →  6
+  [PASS] mlff_small 概览含关联数据表项  →  None
+  [PASS] mlff_small 概览基本信息项数  →  10
+  [PASS] mlff_polymer 标题  →  '高分子机器学习力场数据集'
+  [PASS] mlff_polymer 已无标题徽标  →  0
+  [PASS] mlff_polymer 已无描述段  →  0
+  [PASS] mlff_polymer 已无工具条提示  →  0
+  [PASS] mlff_polymer 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] mlff_polymer 列头前缀  →  ['序号', '材料名称', '聚合物名称', '重复单元', '片段结构']
+  [PASS] mlff_polymer 数据信息行数  →  6
+  [PASS] mlff_polymer 概览含关联数据表项  →  None
+  [PASS] mlff_polymer 概览基本信息项数  →  10
+  __errs = []
+
+========== 催化材料数据库（lowdim-database-catalyst） ==========
+  [PASS] 页容器已渲染本实现  →  1
+  [PASS] 注入样式前缀为本页  →  '#page-lowdim-database-catalyst .t2d-root { dis'
+  [PASS] root 布局  →  'flex'
+  [PASS] root 圆角  →  '12px'
+  [PASS] 侧栏宽度  →  '308px'
+  [PASS] 主区内边距  →  '18px 22px 26px'
+  [PASS] 页签字重  →  '700'
+  [PASS] 表头不换行  →  'nowrap'
+  [PASS] 库级标题  →  '催化材料数据库'
+  [PASS] 库级页签  →  ['字段信息', '信息概览']
+  [PASS] 字段信息总数字段数  →  24
+  [PASS] 首页行数  →  10
+  [PASS] 库级已无指标卡片  →  0
+  [PASS] 库级已无页脚来源说明  →  0
+  [PASS] 目录数据集数量  →  6
+  [PASS] cat_element 标题  →  '催化材料元素特征数据集'
+  [PASS] cat_element 已无标题徽标  →  0
+  [PASS] cat_element 已无描述段  →  0
+  [PASS] cat_element 已无工具条提示  →  0
+  [PASS] cat_element 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] cat_element 列头前缀  →  ['序号', '材料名称', '周期数', '族数', '元素电荷']
+  [PASS] cat_element 数据信息行数  →  6
+  [PASS] cat_element 概览含关联数据表项  →  None
+  [PASS] cat_element 概览基本信息项数  →  10
+  [PASS] cat_structure 标题  →  '催化材料结构特征数据集'
+  [PASS] cat_structure 已无标题徽标  →  0
+  [PASS] cat_structure 已无描述段  →  0
+  [PASS] cat_structure 已无工具条提示  →  0
+  [PASS] cat_structure 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] cat_structure 列头前缀  →  ['序号', '材料名称', '结构文件', '空间群', '配位数']
+  [PASS] cat_structure 数据信息行数  →  6
+  [PASS] cat_structure 概览含关联数据表项  →  None
+  [PASS] cat_structure 概览基本信息项数  →  10
+  [PASS] cat_single_atom 标题  →  '单原子催化剂数据集'
+  [PASS] cat_single_atom 已无标题徽标  →  0
+  [PASS] cat_single_atom 已无描述段  →  0
+  [PASS] cat_single_atom 已无工具条提示  →  0
+  [PASS] cat_single_atom 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] cat_single_atom 列头前缀  →  ['序号', '材料名称', '催化剂名称', '化学式', '催化类型']
+  [PASS] cat_single_atom 数据信息行数  →  6
+  [PASS] cat_single_atom 概览含关联数据表项  →  None
+  [PASS] cat_single_atom 概览基本信息项数  →  10
+  [PASS] cat_alloy 标题  →  '二元合金数据集'
+  [PASS] cat_alloy 已无标题徽标  →  0
+  [PASS] cat_alloy 已无描述段  →  0
+  [PASS] cat_alloy 已无工具条提示  →  0
+  [PASS] cat_alloy 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] cat_alloy 列头前缀  →  ['序号', '材料名称', '催化剂名称', '化学式', '催化类型']
+  [PASS] cat_alloy 数据信息行数  →  6
+  [PASS] cat_alloy 概览含关联数据表项  →  None
+  [PASS] cat_alloy 概览基本信息项数  →  10
+  [PASS] cat_grain 标题  →  '晶界数据集'
+  [PASS] cat_grain 已无标题徽标  →  0
+  [PASS] cat_grain 已无描述段  →  0
+  [PASS] cat_grain 已无工具条提示  →  0
+  [PASS] cat_grain 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] cat_grain 列头前缀  →  ['序号', '材料名称', '催化剂名称', '化学式', '催化类型']
+  [PASS] cat_grain 数据信息行数  →  6
+  [PASS] cat_grain 概览含关联数据表项  →  None
+  [PASS] cat_grain 概览基本信息项数  →  10
+  [PASS] cat_system 标题  →  '体系特征数据集'
+  [PASS] cat_system 已无标题徽标  →  0
+  [PASS] cat_system 已无描述段  →  0
+  [PASS] cat_system 已无工具条提示  →  0
+  [PASS] cat_system 页脚已无数据来源  →  '列顺序与数据集业务口径一致'
+  [PASS] cat_system 列头前缀  →  ['序号', '材料名称', '费米能级（eV）', '形成能（eV/atom）']
+  [PASS] cat_system 数据信息行数  →  6
+  [PASS] cat_system 概览含关联数据表项  →  None
+  [PASS] cat_system 概览基本信息项数  →  10
+  __errs = []
+
+===== 结果 =====
+全部通过 ✓
