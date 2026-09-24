@@ -1,0 +1,106 @@
+      opto: {
+        sample: "DPP-DTT",
+        sampleLabel: "DPP-DTT",
+        resourceObjects: [
+          { key: "basicinfo", name: "基础信息对象", fields: "中英文名称、分子式、分子量、分子编号、三维结构（原子坐标、键长键角）" },
+          { key: "physics", name: "物理性质对象", fields: "密度、熔点、沸点、闪点、折射率、溶解性" },
+          { key: "spectrum", name: "表征图谱对象", fields: "红外光谱、拉曼光谱、核磁共振谱（原始数据 + 图谱图片）" },
+          { key: "calcdata", name: "计算数据对象", fields: "基态/激发态结构、激发能、发射能、跃迁偶极矩、HOMO-LUMO、溶剂化自由能、态密度、简正模式" }
+        ],
+        databases: ["PubChem（化合物数据库）", "CCDC（剑桥结构数据库）", "SciFinder（化学文献数据库）", "Reaxys（化学信息数据库）"],
+        systems: ["OLED 发光分子", "有机光伏给体/受体", "有机半导体聚合物"],
+        properties: ["分子基础信息", "物性数据", "表征图谱", "激发能/发射能", "HOMO/LUMO", "溶剂化自由能", "简正模式"],
+        datasets: [
+          { name: "有机光电材料基础数据集", desc: "含中英文名称、分子式、分子量与三维结构 · 共 842 条记录", count: "已选择", checked: true },
+          { name: "有机光电材料物性数据集", desc: "含密度、熔点、沸点、闪点与折射率 · 共 516 条记录", count: "516 条" },
+          { name: "有机光电材料表征图谱数据集", desc: "含红外、拉曼、核磁共振原始数据与图谱图片 · 共 328 条记录", count: "" },
+          { name: "有机光电材料计算数据集", desc: "含基态/激发态结构、激发能、HOMO-LUMO 与溶剂化自由能 · 共 264 条记录", count: "" }
+        ],
+        fileTypes: ["SDF", "MOL", "PDB", "CSV"],
+        parser: "有机分子结构与光谱解析插件",
+        introDescription: "有机光电材料数据库数据资源包括 4 类核心对象，请了解各资源对象包含的数据信息",
+        standardization: "有机光电材料数据标准化规则",
+        defaultRows: [
+          { material: "DPP-DTT", object: "基础信息对象", value: "", placeholder: "输入中英文名称 / 分子式 / 分子编号..." },
+          { material: "DPP-DTT", object: "计算数据对象", value: "", placeholder: "输入激发能 / 发射能 / HOMO-LUMO..." }
+        ]
+      },
+      electrolyte: {
+        sample: "Li6PS5Cl",
+        sampleLabel: "Li6PS5Cl",
+        resourceObjects: [
+          { key: "organicliquid", name: "有机电解液对象", fields: "基础信息（名称、分子式、结构）、物性（熔点、燃点、介电常数）、表征图谱（红外、核磁共振）、计算数据（HOMO-LUMO、溶剂化自由能）" },
+          { key: "solidorganic", name: "固态有机电解质对象", fields: "基础信息（名称、单体结构、聚合物结构）、物性（玻璃化转变温度、拉伸模量）、计算数据（结合能、摩尔热容）" },
+          { key: "solidinorganic", name: "固态无机电解质对象", fields: "基础信息（名称、化学式、晶体结构）、物性（离子电导率、机械强度）、表征图谱（XRD、XAS）、计算数据（带隙、态密度、能带结构）" }
+        ],
+        databases: ["Materials Project（材料项目数据库）", "PubChem（化合物数据库）", "ICSD（无机晶体结构数据库）", "Reaxys（化学信息数据库）"],
+        systems: ["有机电解液", "固态有机电解质", "固态无机电解质"],
+        properties: ["基础信息", "物性数据", "表征图谱", "计算数据", "离子电导率", "机械强度", "界面兼容性"],
+        datasets: [
+          { name: "有机电解液数据集", desc: "含基础信息、物性、表征图谱与计算数据 · 共 315 条记录", count: "已选择", checked: true },
+          { name: "固态有机电解质数据集", desc: "含单体/聚合物结构、玻璃化转变温度与结合能 · 共 220 条记录", count: "220 条" },
+          { name: "固态无机电解质数据集", desc: "含晶体结构、离子电导率、XRD/XAS 与带隙 · 共 186 条记录", count: "" }
+        ],
+        fileTypes: ["PDB", "CIF", "CSV", "XLSX"],
+        parser: "电解质结构与测试数据解析插件",
+        introDescription: "电解质材料数据库数据资源包括 3 类核心对象（按电解质类型划分），请了解各资源对象包含的数据信息",
+        standardization: "电解质材料数据标准化规则",
+        defaultRows: [
+          { material: "Li6PS5Cl", object: "固态无机电解质对象", value: "", placeholder: "输入化学式 / 晶体结构 / 离子电导率..." },
+          { material: "LiFSI-DME", object: "有机电解液对象", value: "", placeholder: "输入分子式 / 熔点 / 燃点 / 介电常数..." }
+        ]
+      },
+      mlff: {
+        sample: "H2O",
+        sampleLabel: "H₂O",
+        resourceObjects: [
+          { key: "smallmol", name: "有机小分子力场对象", fields: "基础信息（名称、分子式、结构）、采样数据（温度、构象数、RMSD）、计算数据（单分子能量、原子受力、双分子相互作用能）、原子性质（电荷、偶极矩、极化率）" },
+          { key: "polymer", name: "高分子力场对象", fields: "基础信息（名称、重复单元、片段结构）、采样数据（温度、链段运动频率）、计算数据（片段总能量、原子受力、分子间相互作用能）" },
+          { key: "protein", name: "蛋白质力场对象", fields: "基础信息（名称、氨基酸序列、结构）、采样数据（温度、折叠状态）、计算数据（肽键能量、侧链相互作用能、静电相互作用能）" }
+        ],
+        databases: ["QM9（量子化学小分子数据集）", "PDB（蛋白质结构数据库）", "PubChem（化合物数据库）", "Reaxys（化学信息数据库）"],
+        systems: ["有机小分子体系", "高分子片段体系", "蛋白质体系"],
+        properties: ["单分子能量", "原子受力", "双分子相互作用能", "原子电荷", "偶极矩", "极化率", "构象数"],
+        datasets: [
+          { name: "机器学习力场基础数据集", desc: "含单分子、双分子与多分子团簇结构及力场参数 · 共 498 条记录", count: "已选择", checked: true },
+          { name: "有机小分子机器学习力场数据集", desc: "含 CCSD(T)/MP2 能量与原子受力标签 · 共 362 条记录", count: "362 条" },
+          { name: "高分子机器学习力场数据集", desc: "含 PEO、PET 片段结构与片段总能量 · 共 216 条记录", count: "" }
+        ],
+        fileTypes: ["XYZ", "PDB", "CSV", "XML"],
+        parser: "轨迹能量力与力场参数解析插件",
+        introDescription: "机器学习力场数据库数据资源包括 3 类核心对象（按分子体系类型划分），请了解各资源对象包含的数据信息",
+        standardization: "机器学习力场数据标准化规则",
+        defaultRows: [
+          { material: "H2O", object: "有机小分子力场对象", value: "", placeholder: "输入 CCSD(T) 能量 / 原子受力 / 双分子相互作用能..." },
+          { material: "H2O", object: "有机小分子力场对象", value: "", placeholder: "输入原子电荷 / 偶极矩 / 极化率..." }
+        ]
+      },
+      catalyst: {
+        sample: "Cu(211)-CO2RR",
+        sampleLabel: "Cu(211)-CO2RR",
+        resourceObjects: [
+          { key: "adsorption", name: "催化表面分子吸附数据", fields: "催化表面晶面、掺杂原子参数、吸附分子种类、吸附分子构型、分子吸附位置、分子吸附能量" },
+          { key: "pathway", name: "催化表面反应路径数据", fields: "催化表面晶面、掺杂原子参数、吸附分子种类、反应初始构型、反应产物、产物吸附构型、过渡态吸附构型、反应能、活化能" }
+        ],
+        databases: ["Catalysis-Hub（催化反应数据库）", "OC20（催化表面数据集）", "文献催化性能专题库"],
+        systems: ["Cu(100) / Cu(110) / Cu(111) 表面", "Cu(210) / Cu(411) 台阶表面", "单原子与二元合金催化剂"],
+        properties: ["催化表面晶面", "掺杂原子参数", "吸附分子种类", "吸附分子构型", "分子吸附能量", "反应能", "活化能"],
+        datasets: [
+          { name: "催化材料元素特征数据集", desc: "含元素编码、价态与周期表特征 · 共 5,100 条记录", count: "已选择", checked: true },
+          { name: "催化材料结构特征数据集", desc: "含表面、点群空间群与活性位点配位数 · 共 6,480 条记录", count: "6,480 条" },
+          { name: "单原子催化剂数据集", desc: "41 种掺杂元素 × 5 种铜表面 × 6 种中间产物 · 共 14,000 条记录", count: "" }
+        ],
+        fileTypes: ["CIF", "POSCAR", "CSV", "JSON"],
+        parser: "催化结构与反应路径解析插件",
+        introDescription: "催化材料数据库的数据资源包含催化表面分子吸附数据以及催化表面反应路径数据 2 类核心对象，请了解各资源对象包含的数据信息",
+        standardization: "催化材料数据标准化规则",
+        defaultRows: [
+          { material: "Cu(211)-CO2RR", object: "催化表面分子吸附数据", value: "", placeholder: "输入晶面 / 掺杂原子 / 吸附物 / 吸附能..." },
+          { material: "Cu(211)-CO2RR", object: "催化表面反应路径数据", value: "", placeholder: "输入反应初始构型 / 产物 / 反应能 / 活化能..." }
+        ]
+      }
+    };
+
+
+    const TWOD_INGEST_COLLECTION_TASK_DETAILS = {
+      "CLT-2026-0804-01":

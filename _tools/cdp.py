@@ -5,7 +5,7 @@ import websocket
 
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 PORT = 9333
-PROFILE = r'C:\Users\Windows\Desktop\diwei\_tools\_chromeprofile'
+PROFILE = r'C:\Users\Windows\Desktop\diwei\_tools\_chromeprofile_rw'
 
 
 class Cdp:
