@@ -1,3 +1,4 @@
-2026/09/24-18:24:56.520 b70 Reusing MANIFEST C:\Users\Windows\Desktop\diwei\_tools\_chromeprofile_rw\Default\Session Storage/MANIFEST-000001
-2026/09/24-18:24:56.522 b70 Recovering log #3
-2026/09/24-18:24:56.526 b70 Reusing old log C:\Users\Windows\Desktop\diwei\_tools\_chromeprofile_rw\Default\Session Storage/000003.log 
+2026/09/28-17:46:18.460 3ec0 Reusing MANIFEST C:\Users\Windows\Desktop\diwei\_tools\_chromeprofile_rw\Default\Session Storage/MANIFEST-000001
+2026/09/28-17:46:18.462 3ec0 Recovering log #3
+2026/09/28-17:46:18.463 3ec0 (ignoring error) C:\Users\Windows\Desktop\diwei\_tools\_chromeprofile_rw\Default\Session Storage/000003.log: dropping 591 bytes; Corruption: checksum mismatch
+2026/09/28-17:46:18.475 3ec0 Reusing old log C:\Users\Windows\Desktop\diwei\_tools\_chromeprofile_rw\Default\Session Storage/000003.log 

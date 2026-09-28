@@ -1726,7 +1726,6 @@
         + '<span class="t2d-ico">' + ICON.db + '</span>'
         + '<span class="t2d-txt">' + esc(root.label) + '</span>'
         + '<span class="t2d-cnt">' + shown.length + '</span></button>'
-        + '<button class="t2d-mini-btn is-add" type="button" data-t2d-add-ds title="新增数据集">＋ 新增</button>'
         + '</div>';
 
       html += '<div class="t2d-children' + (open ? '' : ' is-folded') + '">';
@@ -1737,8 +1736,6 @@
           + '<span class="t2d-txt" title="' + esc(child.label) + '　·　' + esc(child.code) + '">' + esc(child.label) + '</span>'
           + '<span class="t2d-cnt">' + (child.count ? fmt(child.count) : '—') + '</span></button>'
           + '<span class="t2d-row-acts">'
-          + '<button class="t2d-icon-btn" type="button" data-t2d-edit-ds="' + child.id + '" title="编辑数据集">' + ICON.edit + '</button>'
-          + '<button class="t2d-icon-btn is-danger" type="button" data-t2d-del-ds="' + child.id + '" title="删除数据集">' + ICON.trash + '</button>'
           + '</span></div>';
       });
       if (!shown.length) html += '<div class="t2d-empty" style="padding:14px 0;font-size:12.5px;">无匹配数据集</div>';
@@ -1801,10 +1798,7 @@
       { label: "数据库名称", value: META.name },
       { label: "数据表数量", value: DDL_STAT.tables + " 张" },
       { label: "字段数合计", value: fmt(DDL_STAT.fields) + " 个" },
-      { label: "索引数量",   value: fmt(DDL_STAT.indexes) + " 个" },
       { label: "数据量合计", value: fmt(DS_STAT.rows) + " 条<span class=\"t2d-badge2\">示例</span>", html: true },
-      { label: "存储大小",   value: DS_STAT.sizeText + '<span class="t2d-badge2">示例</span>', html: true },
-      { label: "创建人",     value: META.creator },
       { label: "更新时间",   value: META.updated }
     ];
     var infoHtml = '<div class="t2d-info">' + infoItems.map(function (it) {
@@ -1879,15 +1873,9 @@
   function renderDatasetOverview(ds) {
     var infoItems = [
       { label: "数据集名称", value: ds.label },
-      { label: "所属数据库", value: DB_META.name },
-      { label: "关联数据表", value: '<span class="mono">' + esc(ds.tableText) + '</span>'
-          + (ds.tables.length > 1 ? '<span class="t2d-badge2">' + ds.tables.length + ' 张表</span>' : ''), html: true },
-      { label: "数据集类型", value: ds.group },
       { label: "数据量合计", value: ds.rows ? fmt(ds.rows) + " 条" : "—" },
-      { label: "存储大小",   value: ds.rows ? ds.storage : "—" },
       { label: "字段数合计", value: ds.fieldCount + " 个" },
       { label: "数据信息条数", value: ds.infoCount ? ds.infoCount + " 条示例" : "—" },
-      { label: "创建人",     value: DB_META.creator },
       { label: "更新时间",   value: DB_META.updated }
     ];
     var infoHtml = '<div class="t2d-info">' + infoItems.map(function (it) {

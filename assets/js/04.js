@@ -254,6 +254,7 @@
     const PAGE_LAYOUT = {
       dashboard: { group: "monitor", portal: "system", title: "数据看板", breadcrumbParent: "监控统计" },
       "data-resource-catalog": { group: "monitor", portal: "system", title: "数据资源目录", breadcrumbParent: "监控统计" },
+      "data-statistics": { group: "monitor", portal: "system", title: "数据统计", breadcrumbParent: "监控统计" },
       "standard-twod": { group: "standards", portal: "system", title: "低维材料标准体系", breadcrumbParent: "低维材料标准体系" },
       "standard-opto": { group: "standards", portal: "system", title: "有机光电材料数据库标准", breadcrumbParent: "低维材料标准体系" },
       "standard-electrolyte": { group: "standards", portal: "system", title: "电解质材料数据库标准", breadcrumbParent: "低维材料标准体系" },
@@ -390,6 +391,7 @@
         { id: 6, menuName: "操作日志", level: 1, type: "菜单", parent: "系统管理", path: "/system/operlog", perms: "system:operlog:list", icon: "log", orderNum: 5, status: "启用" },
         { id: 20, menuName: "监控统计", level: 0, type: "目录", parent: "-", path: "/monitor", perms: "", icon: "monitor", orderNum: 2, status: "启用" },
         { id: 21, menuName: "数据看板", level: 1, type: "菜单", parent: "监控统计", path: "/monitor/dashboard", perms: "monitor:dashboard:list", icon: "dashboard", orderNum: 1, status: "启用" },
+        { id: 200, menuName: "数据统计", level: 1, type: "菜单", parent: "监控统计", path: "/monitor/data-statistics", perms: "monitor:statistics:list", icon: "chart", orderNum: 2, status: "启用" },
         { id: 22, menuName: "低维材料标准体系", level: 0, type: "目录", parent: "-", path: "/standards", perms: "", icon: "standard", orderNum: 3, status: "启用" },
         { id: 23, menuName: "二维材料数据库标准", level: 1, type: "菜单", parent: "低维材料标准体系", path: "/standards/twod", perms: "standards:twod:list", icon: "standard", orderNum: 1, status: "启用" },
         { id: 24, menuName: "有机光电材料数据库标准", level: 1, type: "菜单", parent: "低维材料标准体系", path: "/standards/opto", perms: "standards:opto:list", icon: "standard", orderNum: 2, status: "启用" },
@@ -27626,6 +27628,9 @@ function renderMlffTopicSampleTable(data) {
       if (page === "data-resource-catalog") {
         renderResourceCatalogPage();
       }
+      if (page === "data-statistics") {
+        renderDataStatisticsPage();
+      }
       syncPageMeta(page);
     }
 
@@ -31350,6 +31355,815 @@ print(resp.json())`;
           </div>
         </section>
       `;
+    }
+
+    /* ==========================================================================
+       数据统计（监控统计 · 二级菜单）
+       业务闭环：实时统计 → 容量水位判定 → 30 天周期去重（识别 → 确认 → 删除）
+                → 释放硬件空间 → 运维处置（入库限流 / 扩容工单）
+                → 容量回升 → 复核闭环
+       ========================================================================== */
+
+    const DATA_STAT_CYCLE_OPTIONS = [7, 15, 30, 60];
+
+    const DATA_STAT_STRATEGIES = [
+      { key: "fingerprint", label: "内容指纹比对", desc: "对数据主体字段生成哈希指纹，指纹完全一致判定为重复，误判率低。" },
+      { key: "primary-key", label: "业务主键比对", desc: "按「材料编号 + 数据集编号 + 采集批次」组合判定重复，执行效率高。" },
+      { key: "similarity", label: "字段相似度阈值", desc: "核心字段相似度 ≥ 98% 判定为疑似重复，可覆盖改写型重复。" }
+    ];
+
+    /* 五个子库的初始规模：条目数、占用空间、日均增量、历史沉淀重复率、单条平均占用 */
+    const DATA_STAT_DB_PROFILES = [
+      { key: "twod", name: "二维材料数据库", code: "LD-2D", records: 50970, sizeGb: 2140.6, dailyRecords: 186, dupRatio: 0.094, avgRecordGb: 0.042 },
+      { key: "opto", name: "有机光电材料数据库", code: "LD-OP", records: 39100, sizeGb: 1486.2, dailyRecords: 124, dupRatio: 0.081, avgRecordGb: 0.038 },
+      { key: "electrolyte", name: "电解质材料数据库", code: "LD-EL", records: 33470, sizeGb: 1204.9, dailyRecords: 98, dupRatio: 0.076, avgRecordGb: 0.036 },
+      { key: "mlff", name: "机器学习力场数据库", code: "LD-ML", records: 21030, sizeGb: 1682.5, dailyRecords: 142, dupRatio: 0.112, avgRecordGb: 0.080 },
+      { key: "catalyst", name: "催化材料数据库", code: "LD-CA", records: 20820, sizeGb: 936.8, dailyRecords: 86, dupRatio: 0.068, avgRecordGb: 0.045 }
+    ];
+
+    function fmtStatNumber(value) {
+      return Number(value || 0).toLocaleString("zh-CN", { maximumFractionDigits: 0 });
+    }
+
+    function fmtStatSize(gb) {
+      const size = Number(gb || 0);
+      if (size >= 1024) return `${(size / 1024).toFixed(2)} TB`;
+      return `${size.toFixed(1)} GB`;
+    }
+
+    function fmtStatDateTime(value) {
+      if (!value) return "—";
+      const date = value instanceof Date ? value : new Date(value);
+      const pad = (num) => String(num).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function addStatDays(source, days) {
+      const date = source instanceof Date ? new Date(source.getTime()) : new Date(source);
+      date.setDate(date.getDate() + Number(days || 0));
+      return date;
+    }
+
+    function diffStatDays(target, base) {
+      if (!target) return 0;
+      const left = target instanceof Date ? target.getTime() : new Date(target).getTime();
+      const right = base ? (base instanceof Date ? base.getTime() : new Date(base).getTime()) : Date.now();
+      return Math.ceil((left - right) / 86400000);
+    }
+
+    function createDataStatState() {
+      const now = new Date();
+      const lastRun = addStatDays(now, -27);
+      return {
+        lastSyncAt: now,
+        hardwareTotalGb: 8192,
+        systemReservedGb: 256,
+        databases: DATA_STAT_DB_PROFILES.map((item) => Object.assign({}, item)),
+        dedupe: {
+          cycleDays: 30,
+          strategy: "fingerprint",
+          autoDelete: false,
+          lastRunAt: lastRun,
+          nextRunAt: addStatDays(lastRun, 30),
+          candidates: [],
+          history: [
+            { id: "DED-20260802", runAt: addStatDays(lastRun, -30), strategyLabel: "内容指纹比对", groups: 96, removed: 742, releaseGb: 41.6, operator: "系统定时", status: "已完成" },
+            { id: "DED-20260901", runAt: lastRun, strategyLabel: "内容指纹比对", groups: 118, removed: 913, releaseGb: 52.3, operator: "系统定时", status: "已完成" }
+          ]
+        },
+        intake: { throttled: false, note: "正常录入" },
+        tickets: [],
+        scanCount: 0
+      };
+    }
+
+    function getDataStatState() {
+      if (!state.dataStatistics) state.dataStatistics = createDataStatState();
+      return state.dataStatistics;
+    }
+
+    function getDataStatStrategy() {
+      const s = getDataStatState();
+      return DATA_STAT_STRATEGIES.find((item) => item.key === s.dedupe.strategy) || DATA_STAT_STRATEGIES[0];
+    }
+
+    function getDataStatSummary() {
+      const s = getDataStatState();
+      const records = s.databases.reduce((sum, item) => sum + item.records, 0);
+      const usedGb = s.databases.reduce((sum, item) => sum + item.sizeGb, 0);
+      const dailyRecords = s.databases.reduce((sum, item) => sum + item.dailyRecords, 0);
+      const dailyGb = s.databases.reduce((sum, item) => sum + item.dailyRecords * item.avgRecordGb, 0);
+      const totalGb = s.hardwareTotalGb;
+      const reservedGb = s.systemReservedGb;
+      /* 硬件总容量扣除系统预留后为数据可用容量，剩余可用空间即维护人员可继续写入的空间 */
+      const usableGb = Math.max(0, totalGb - reservedGb);
+      const freeGb = Math.max(0, usableGb - usedGb);
+      const ratio = usableGb ? usedGb / usableGb : 0;
+      const pendingRelease = s.dedupe.candidates
+        .filter((item) => !item.ignored)
+        .reduce((sum, item) => sum + item.releaseGb, 0);
+      const pendingRecords = s.dedupe.candidates
+        .filter((item) => !item.ignored)
+        .reduce((sum, item) => sum + item.redundantRecords, 0);
+      return { records, usedGb, dailyRecords, dailyGb, totalGb, reservedGb, freeGb, ratio, pendingRelease, pendingRecords };
+    }
+
+    function getDataStatLevel(ratio) {
+      if (ratio >= 0.95) return { key: "critical", label: "告急", color: "#dc2626", bg: "#fee2e2", border: "#fecaca", tone: "紧急" };
+      if (ratio >= 0.85) return { key: "tense", label: "紧张", color: "#ea580c", bg: "#ffedd5", border: "#fed7aa", tone: "高" };
+      if (ratio >= 0.7) return { key: "warn", label: "预警", color: "#d97706", bg: "#fef3c7", border: "#fde68a", tone: "中" };
+      return { key: "normal", label: "正常", color: "#16a34a", bg: "#dcfce7", border: "#bbf7d0", tone: "低" };
+    }
+
+    /* 依据水位自动生成运维动作建议，形成「监测 → 建议 → 处置」的闭环指引 */
+    function getDataStatAdvice(ratio, summary, s) {
+      const level = getDataStatLevel(ratio);
+      const sustainDays = summary.dailyGb > 0 ? Math.floor(summary.freeGb / summary.dailyGb) : 999;
+      if (level.key === "critical") {
+        return {
+          title: "立即暂停常规录入并启动紧急扩容",
+          detail: `当前水位 ${(ratio * 100).toFixed(1)}%，剩余空间仅可支撑约 ${sustainDays} 天。建议立即暂停常规数据录入，仅保留高优先级数据通道，并在 3 个工作日内完成硬件扩容。`,
+          actions: ["暂停常规录入", "紧急扩容", "强制执行去重"]
+        };
+      }
+      if (level.key === "tense") {
+        return {
+          title: "开启入库限流并排期硬件扩容",
+          detail: `当前水位 ${(ratio * 100).toFixed(1)}%，剩余空间约可支撑 ${sustainDays} 天，已低于一个去重周期（${s.dedupe.cycleDays} 天）。建议开启入库限流，并执行一次去重清理，同步提交扩容工单。`,
+          actions: ["开启入库限流", "提交扩容工单", "立即执行去重"]
+        };
+      }
+      if (level.key === "warn") {
+        return {
+          title: "维持限流观察，按需提交扩容申请",
+          detail: `当前水位 ${(ratio * 100).toFixed(1)}%，剩余空间约可支撑 ${sustainDays} 天。建议保持入库节奏监控，按 30 天周期执行去重，并提前准备扩容方案。`,
+          actions: ["持续监测", "按需扩容"]
+        };
+      }
+      return {
+        title: "容量充足，保持常规监测",
+        detail: `当前水位 ${(ratio * 100).toFixed(1)}%，剩余空间约可支撑 ${sustainDays} 天。维持 30 天周期去重与常规监测即可。`,
+        actions: ["持续监测"]
+      };
+    }
+
+    /* 生成疑似重复清单：按各库历史沉淀重复率与识别策略推导 */
+    function buildDataStatCandidates() {
+      const s = getDataStatState();
+      const strategy = getDataStatStrategy();
+      const groups = [];
+      let serial = 1;
+      s.databases.forEach((db) => {
+        const groupCount = Math.max(6, Math.round((db.records * db.dupRatio) / 120));
+        for (let i = 0; i < groupCount; i += 1) {
+          const redundant = 3 + ((serial * 5) % 12);
+          const similarity = strategy.key === "similarity" ? 98 + (((serial * 7) % 20) / 10) : 100;
+          groups.push({
+            id: `DUP-${String(db.code).replace("LD-", "")}-${String(serial).padStart(3, "0")}`,
+            dbKey: db.key,
+            dbName: db.name,
+            fingerprint: `${db.code}-${String(100000 + serial * 137).slice(0, 6)}`,
+            groupRecords: redundant + 1,
+            redundantRecords: redundant,
+            /* 重复数据连同归档副本与索引缓存一并清理 */
+            releaseGb: +(redundant * db.avgRecordGb * 3).toFixed(3),
+            similarity: Number(similarity.toFixed(1)),
+            strategyLabel: strategy.label,
+            checked: true,
+            ignored: false
+          });
+          serial += 1;
+        }
+      });
+      return groups;
+    }
+
+    function refreshDataStatMetrics() {
+      const s = getDataStatState();
+      s.databases.forEach((db) => {
+        const delta = Math.max(1, Math.round(db.dailyRecords * (0.2 + Math.random() * 0.6)));
+        db.records += delta;
+        db.sizeGb = Number((db.sizeGb + delta * db.avgRecordGb).toFixed(2));
+      });
+      s.lastSyncAt = new Date();
+    }
+
+    function runDataStatScan() {
+      const s = getDataStatState();
+      s.scanCount += 1;
+      s.dedupe.candidates = buildDataStatCandidates();
+      return s.dedupe.candidates.length;
+    }
+
+    function deleteDataStatCandidates() {
+      const s = getDataStatState();
+      const selected = s.dedupe.candidates.filter((item) => item.checked && !item.ignored);
+      if (!selected.length) return null;
+      let removed = 0;
+      let releaseGb = 0;
+      selected.forEach((item) => {
+        const db = s.databases.find((entry) => entry.key === item.dbKey);
+        if (!db) return;
+        db.records = Math.max(0, db.records - item.redundantRecords);
+        db.sizeGb = Number(Math.max(0, db.sizeGb - item.releaseGb).toFixed(2));
+        removed += item.redundantRecords;
+        releaseGb += item.releaseGb;
+      });
+      const now = new Date();
+      const record = {
+        id: `DED-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(s.dedupe.history.length + 1).padStart(2, "0")}`,
+        runAt: now,
+        strategyLabel: getDataStatStrategy().label,
+        groups: selected.length,
+        removed: removed,
+        releaseGb: Number(releaseGb.toFixed(2)),
+        operator: "管理员9527（人工确认）",
+        status: "已完成"
+      };
+      s.dedupe.history.unshift(record);
+      s.dedupe.lastRunAt = now;
+      s.dedupe.nextRunAt = addStatDays(now, s.dedupe.cycleDays);
+      s.dedupe.candidates = s.dedupe.candidates.filter((item) => !(item.checked && !item.ignored));
+      return record;
+    }
+
+    function createDataStatTicket(expandGb) {
+      const s = getDataStatState();
+      const now = new Date();
+      const ticket = {
+        id: `EXP-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(s.tickets.length + 1).padStart(2, "0")}`,
+        createdAt: now,
+        expandGb: Number(expandGb || 2048),
+        expectAt: addStatDays(now, 14),
+        status: "待审批",
+        handler: "硬件运维组",
+        flow: ["待审批", "审批中", "扩容中", "已完成"]
+      };
+      s.tickets.unshift(ticket);
+      return ticket;
+    }
+
+    function advanceDataStatTicket(ticketId) {
+      const s = getDataStatState();
+      const ticket = s.tickets.find((item) => item.id === ticketId);
+      if (!ticket) return null;
+      const index = ticket.flow.indexOf(ticket.status);
+      const next = ticket.flow[Math.min(index + 1, ticket.flow.length - 1)];
+      if (next === ticket.status) return null;
+      ticket.status = next;
+      if (next === "已完成") {
+        s.hardwareTotalGb += ticket.expandGb;
+      }
+      return ticket;
+    }
+
+    function toggleDataStatThrottle() {
+      const s = getDataStatState();
+      s.intake.throttled = !s.intake.throttled;
+      s.intake.note = s.intake.throttled ? "限流中：仅接收高优先级数据" : "正常录入";
+      return s.intake.throttled;
+    }
+
+    /* 闭环链路：实时统计 → 容量告警 → 周期去重 → 运维处置 → 复核闭环 */
+    function getDataStatChain(summary, s) {
+      const ratio = summary.ratio;
+      const dedupeDone = s.dedupe.history.length > 0;
+      const hasPendingCandidates = s.dedupe.candidates.some((item) => !item.ignored);
+      const ticketDone = s.tickets.some((item) => item.status === "已完成");
+      const hasTicket = s.tickets.length > 0;
+      const handled = dedupeDone || ticketDone || s.intake.throttled;
+      const closed = ratio < 0.7 && handled;
+      return [
+        { label: "实时统计", desc: "采集各库条目与占用", state: "done" },
+        {
+          label: "容量告警",
+          desc: ratio >= 0.7 ? `水位 ${(ratio * 100).toFixed(1)}% 触发告警` : "水位处于安全区间",
+          state: closed ? "done" : ratio >= 0.7 ? "active" : "done"
+        },
+        {
+          label: "周期去重",
+          desc: hasPendingCandidates ? "存在待确认的疑似重复" : `${s.dedupe.cycleDays} 天周期已执行`,
+          state: dedupeDone ? "done" : hasPendingCandidates ? "active" : "pending"
+        },
+        {
+          label: "运维处置",
+          desc: ticketDone ? "扩容已完成" : hasTicket ? "工单推进中" : "待发起限流或扩容",
+          state: ticketDone ? "done" : hasTicket || s.intake.throttled ? "active" : "pending"
+        },
+        {
+          label: "复核闭环",
+          desc: closed ? "容量已回落至安全区间" : "待容量回落至安全区间",
+          state: closed ? "done" : handled ? "active" : "pending"
+        }
+      ];
+    }
+
+    function renderDataStatChain(chain) {
+      return `
+        <section class="card pad" style="margin-bottom:18px;border-radius:16px;">
+          <h3 class="section-title" style="margin-bottom:8px;">容量治理闭环链路</h3>
+          <p style="margin:0 0 18px;color:#64748b;">覆盖「监测 → 告警 → 去重 → 处置 → 复核」五个环节，当前环节高亮显示，全部置顶即代表本轮容量治理闭环完成。</p>
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;">
+            ${chain.map((step, index) => {
+              const tone = step.state === "done"
+                ? { bg: "#dcfce7", color: "#16a34a", border: "#bbf7d0" }
+                : step.state === "active"
+                  ? { bg: "#dbeafe", color: "#2563eb", border: "#bfdbfe" }
+                  : { bg: "#f1f5f9", color: "#94a3b8", border: "#e2e8f0" };
+              const mark = step.state === "done" ? "✓" : step.state === "active" ? "●" : "○";
+              return `
+                <div style="padding:16px 14px;border:1px solid ${tone.border};border-radius:14px;background:${tone.bg};">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="width:22px;height:22px;border-radius:50%;background:#fff;color:${tone.color};display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;">${mark}</span>
+                    <strong style="font-size:14px;color:#0f172a;">${index + 1}. ${escapeLowDimHtml(step.label)}</strong>
+                  </div>
+                  <p style="margin:10px 0 0;font-size:12.5px;line-height:1.7;color:#475569;">${escapeLowDimHtml(step.desc)}</p>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDataStatKpis(summary, level) {
+      const sustainDays = summary.dailyGb > 0 ? Math.floor(summary.freeGb / summary.dailyGb) : 0;
+      const cards = [
+        { label: "数据总量", value: fmtStatNumber(summary.records), unit: "条", hint: `日均新增 ${fmtStatNumber(summary.dailyRecords)} 条`, bg: "#eaf2ff", color: "#2563eb" },
+        { label: "当前占用硬件空间", value: fmtStatSize(summary.usedGb), unit: "", hint: `日均增长 ${summary.dailyGb.toFixed(2)} GB`, bg: "#fff5eb", color: "#f97316" },
+        { label: "剩余硬件空间", value: fmtStatSize(summary.freeGb), unit: "", hint: `已扣除系统预留 ${fmtStatSize(summary.reservedGb)}`, bg: "#eefbf3", color: "#16a34a" },
+        { label: "空间水位", value: `${(summary.ratio * 100).toFixed(1)}%`, unit: "", hint: `当前等级：${level.label}`, bg: level.bg, color: level.color },
+        { label: "预计可支撑", value: `${sustainDays}`, unit: "天", hint: "按当前日均增速测算", bg: "#f3efff", color: "#7c3aed" }
+      ];
+      return `
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:18px;">
+          ${cards.map((item) => `
+            <article class="card pad" style="border-radius:16px;min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="width:38px;height:38px;border-radius:11px;background:${item.bg};color:${item.color};display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;">▤</span>
+                <span style="font-size:13px;color:#64748b;">${escapeLowDimHtml(item.label)}</span>
+              </div>
+              <div style="margin-top:14px;font-size:26px;font-weight:800;color:#0f172a;line-height:1.2;">
+                ${escapeLowDimHtml(item.value)}${item.unit ? `<span style="margin-left:4px;font-size:13px;font-weight:600;color:#64748b;">${escapeLowDimHtml(item.unit)}</span>` : ""}
+              </div>
+              <p style="margin:8px 0 0;font-size:12.5px;color:#64748b;">${escapeLowDimHtml(item.hint)}</p>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderDataStatCapacity(summary, s, advice, level) {
+      const usedPct = summary.usableGb ? Math.min(100, (summary.usedGb / summary.usableGb) * 100) : 0;
+      const details = [
+        { label: "硬件总容量", value: fmtStatSize(summary.totalGb) },
+        { label: "系统预留", value: fmtStatSize(summary.reservedGb) },
+        { label: "数据可用容量", value: fmtStatSize(summary.usableGb) },
+        { label: "已占用", value: fmtStatSize(summary.usedGb) },
+        { label: "剩余可用", value: fmtStatSize(summary.freeGb) }
+      ];
+      const thresholdMarks = [70, 85, 95];
+      return `
+        <section class="card pad" style="margin-bottom:18px;border-radius:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+            <div>
+              <h3 class="section-title" style="margin-bottom:8px;">硬件容量与空间占用</h3>
+              <p style="margin:0;color:#64748b;">向数据库维护人员汇报当前占用与剩余硬件空间，并按水位自动生成处置建议。</p>
+            </div>
+            <span style="padding:6px 14px;border:1px solid ${level.border};border-radius:999px;background:${level.bg};color:${level.color};font-size:13px;font-weight:700;">水位等级：${escapeLowDimHtml(level.label)}（风险${escapeLowDimHtml(level.tone)}）</span>
+          </div>
+
+          <div style="margin-top:18px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#475569;margin-bottom:8px;">
+              <span>已占用 ${escapeLowDimHtml(fmtStatSize(summary.usedGb))}（${usedPct.toFixed(1)}%）</span>
+              <span>剩余可用 ${escapeLowDimHtml(fmtStatSize(summary.freeGb))}（${(100 - usedPct).toFixed(1)}%）</span>
+            </div>
+            <div style="position:relative;height:30px;border-radius:15px;background:#e8eef7;overflow:hidden;display:flex;">
+              <div style="width:${usedPct.toFixed(2)}%;background:linear-gradient(90deg,#fb923c,#ef4444);"></div>
+              <div style="flex:1;background:#bbf7d0;"></div>
+            </div>
+            <div style="position:relative;height:18px;margin-top:4px;">
+              ${thresholdMarks.map((mark) => `
+                <span style="position:absolute;left:${mark}%;transform:translateX(-50%);font-size:11px;color:#94a3b8;">${mark}%</span>
+              `).join("")}
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:18px;">
+            ${details.map((item) => `
+              <div style="padding:14px 12px;border:1px solid #e5eaf1;border-radius:12px;background:#f8fafc;">
+                <div style="font-size:12.5px;color:#64748b;">${escapeLowDimHtml(item.label)}</div>
+                <div style="margin-top:8px;font-size:18px;font-weight:800;color:#0f172a;">${escapeLowDimHtml(item.value)}</div>
+              </div>
+            `).join("")}
+          </div>
+
+          <div style="margin-top:18px;padding:16px 18px;border:1px solid ${level.border};border-radius:14px;background:${level.bg};">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <strong style="font-size:15px;color:${level.color};">处置建议：${escapeLowDimHtml(advice.title)}</strong>
+              <span style="font-size:12.5px;color:#475569;">建议动作：${advice.actions.map((item) => `<span class="chip" style="margin-left:6px;">${escapeLowDimHtml(item)}</span>`).join("")}</span>
+            </div>
+            <p style="margin:10px 0 0;font-size:13.5px;line-height:1.85;color:#475569;">${escapeLowDimHtml(advice.detail)}</p>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.2fr 1fr auto;gap:14px;align-items:end;margin-top:18px;">
+            <div class="field">
+              <label>数据录入状态</label>
+              <div style="padding:10px 14px;border:1px solid ${s.intake.throttled ? "#fecaca" : "#bbf7d0"};border-radius:8px;background:${s.intake.throttled ? "#fee2e2" : "#f0fdf4"};color:${s.intake.throttled ? "#dc2626" : "#16a34a"};font-size:13.5px;font-weight:700;">
+                ${escapeLowDimHtml(s.intake.note)}
+              </div>
+            </div>
+            <div class="field">
+              <label>申请扩容容量</label>
+              <select data-dstat-expand>
+                ${[1024, 2048, 4096].map((item) => `<option value="${item}">+ ${item} GB（${(item / 1024).toFixed(0)} TB）</option>`).join("")}
+              </select>
+            </div>
+            <div style="display:flex;gap:10px;padding-bottom:2px;">
+              <button class="btn" type="button" data-dstat-throttle>${s.intake.throttled ? "恢复常规录入" : "开启入库限流"}</button>
+              <button class="btn-primary" type="button" data-dstat-ticket-add>提交扩容工单</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDataStatDedupe(s, summary) {
+      const countdown = diffStatDays(s.dedupe.nextRunAt, new Date());
+      const strategy = getDataStatStrategy();
+      const pendingGroups = s.dedupe.candidates.filter((item) => !item.ignored).length;
+      return `
+        <section class="card pad" style="margin-bottom:18px;border-radius:16px;">
+          <h3 class="section-title" style="margin-bottom:8px;">重复数据周期治理（周期 ${s.dedupe.cycleDays} 天）</h3>
+          <p style="margin:0 0 18px;color:#64748b;">按固定周期对库内可能存在的重复数据进行辨别与删除，删除后释放的空间将实时回写到上方容量看板。</p>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;">
+            <div style="padding:14px 12px;border:1px solid #e5eaf1;border-radius:12px;background:#f8fafc;">
+              <div style="font-size:12.5px;color:#64748b;">上次执行</div>
+              <div style="margin-top:8px;font-size:15px;font-weight:700;color:#0f172a;">${escapeLowDimHtml(fmtStatDateTime(s.dedupe.lastRunAt))}</div>
+            </div>
+            <div style="padding:14px 12px;border:1px solid #e5eaf1;border-radius:12px;background:#f8fafc;">
+              <div style="font-size:12.5px;color:#64748b;">下次计划执行</div>
+              <div style="margin-top:8px;font-size:15px;font-weight:700;color:#0f172a;">${escapeLowDimHtml(fmtStatDateTime(s.dedupe.nextRunAt))}</div>
+            </div>
+            <div style="padding:14px 12px;border:1px solid ${countdown <= 7 ? "#fecaca" : "#e5eaf1"};border-radius:12px;background:${countdown <= 7 ? "#fee2e2" : "#f8fafc"};">
+              <div style="font-size:12.5px;color:#64748b;">距下次执行</div>
+              <div style="margin-top:8px;font-size:15px;font-weight:700;color:${countdown <= 7 ? "#dc2626" : "#0f172a"};">${countdown > 0 ? `${countdown} 天` : "已到期，待执行"}</div>
+            </div>
+            <div style="padding:14px 12px;border:1px solid #e5eaf1;border-radius:12px;background:#f8fafc;">
+              <div style="font-size:12.5px;color:#64748b;">当前待确认重复组</div>
+              <div style="margin-top:8px;font-size:15px;font-weight:700;color:#0f172a;">${pendingGroups} 组</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1.4fr auto;gap:14px;align-items:end;margin-top:18px;">
+            <div class="field">
+              <label>去重周期</label>
+              <select data-dstat-cycle>
+                ${DATA_STAT_CYCLE_OPTIONS.map((item) => `<option value="${item}"${item === s.dedupe.cycleDays ? " selected" : ""}>每 ${item} 天</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label>重复识别策略</label>
+              <select data-dstat-strategy>
+                ${DATA_STAT_STRATEGIES.map((item) => `<option value="${item.key}"${item.key === s.dedupe.strategy ? " selected" : ""}>${escapeLowDimHtml(item.label)}</option>`).join("")}
+              </select>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;padding-bottom:2px;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:#475569;white-space:nowrap;">
+                <input type="checkbox" data-dstat-auto${s.dedupe.autoDelete ? " checked" : ""}> 到期自动清理
+              </label>
+              <button class="btn-primary" type="button" data-dstat-scan>立即扫描重复数据</button>
+            </div>
+          </div>
+          <p style="margin:14px 0 0;padding:12px 14px;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc;font-size:13px;line-height:1.8;color:#475569;">
+            当前策略：${escapeLowDimHtml(strategy.label)} — ${escapeLowDimHtml(strategy.desc)}
+            ${s.dedupe.autoDelete ? "　已开启到期自动清理，周期到期后将按策略自动删除并释放空间。" : "　当前为人工确认模式，扫描后需维护人员确认再执行删除。"}
+            　本次扫描预计可释放 ${escapeLowDimHtml(fmtStatSize(summary.pendingRelease))}。
+          </p>
+        </section>
+      `;
+    }
+
+    function renderDataStatCandidateTable(s) {
+      const rows = s.dedupe.candidates;
+      const active = rows.filter((item) => !item.ignored);
+      const releaseGb = active.reduce((sum, item) => sum + item.releaseGb, 0);
+      const records = active.reduce((sum, item) => sum + item.redundantRecords, 0);
+      if (!rows.length) {
+        return `
+          <section class="card pad" style="margin-bottom:18px;border-radius:16px;">
+            <h3 class="section-title" style="margin-bottom:8px;">疑似重复数据清单</h3>
+            <div class="sys-empty" style="margin-top:14px;">当前暂无疑似重复数据。点击上方「立即扫描重复数据」按周期策略执行一次辨别。</div>
+          </section>
+        `;
+      }
+      return `
+        <section class="card pad" style="margin-bottom:18px;border-radius:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+            <div>
+              <h3 class="section-title" style="margin-bottom:8px;">疑似重复数据清单</h3>
+              <p style="margin:0;color:#64748b;">共 ${active.length} 组疑似重复，涉及冗余条目 ${fmtStatNumber(records)} 条，确认删除后预计释放 ${escapeLowDimHtml(fmtStatSize(releaseGb))}。</p>
+            </div>
+            <button class="btn" type="button" data-dstat-toggle-all>全选 / 取消全选</button>
+          </div>
+          <div class="table-wrap" style="margin-top:16px;">
+            <table class="twod-result-table">
+              <thead>
+                <tr>
+                  <th style="width:52px;">选择</th>
+                  <th>重复组编号</th>
+                  <th>所属数据库</th>
+                  <th>数据指纹</th>
+                  <th>组内条目</th>
+                  <th>冗余条目</th>
+                  <th>相似度</th>
+                  <th>识别策略</th>
+                  <th>预计释放</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map((item) => `
+                  <tr${item.ignored ? ` style="opacity:.55;"` : ""}>
+                    <td><input type="checkbox" data-dstat-check="${escapeLowDimHtml(item.id)}"${item.checked && !item.ignored ? " checked" : ""}${item.ignored ? " disabled" : ""}></td>
+                    <td><strong>${escapeLowDimHtml(item.id)}</strong></td>
+                    <td>${escapeLowDimHtml(item.dbName)}</td>
+                    <td class="mono">${escapeLowDimHtml(item.fingerprint)}</td>
+                    <td>${item.groupRecords}</td>
+                    <td>${item.redundantRecords}</td>
+                    <td>${item.similarity}%</td>
+                    <td>${escapeLowDimHtml(item.strategyLabel)}</td>
+                    <td>${escapeLowDimHtml(fmtStatSize(item.releaseGb))}</td>
+                    <td>${item.ignored
+                      ? `<span style="color:#94a3b8;">已忽略</span>`
+                      : `<button class="btn btn-sm" type="button" data-dstat-ignore="${escapeLowDimHtml(item.id)}">忽略</button>`}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;">
+            <span style="font-size:13px;color:#64748b;">删除将保留组内 1 条主数据，仅清理冗余副本及其归档与索引缓存。</span>
+            <button class="btn-primary" type="button" data-dstat-delete>删除选中项并释放空间</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDataStatHistory(s) {
+      const rows = s.dedupe.history.slice(0, 6);
+      return `
+        <section class="card pad" style="margin-bottom:18px;border-radius:16px;">
+          <h3 class="section-title" style="margin-bottom:8px;">去重执行记录</h3>
+          <p style="margin:0 0 16px;color:#64748b;">记录每次去重执行的策略、清理条目与实际释放空间，作为容量治理的审计依据。</p>
+          <div class="table-wrap">
+            <table class="twod-result-table">
+              <thead>
+                <tr><th>执行编号</th><th>执行时间</th><th>识别策略</th><th>重复组</th><th>清理条目</th><th>释放空间</th><th>执行人</th><th>状态</th></tr>
+              </thead>
+              <tbody>
+                ${rows.length ? rows.map((item) => `
+                  <tr>
+                    <td><strong>${escapeLowDimHtml(item.id)}</strong></td>
+                    <td>${escapeLowDimHtml(fmtStatDateTime(item.runAt))}</td>
+                    <td>${escapeLowDimHtml(item.strategyLabel)}</td>
+                    <td>${item.groups}</td>
+                    <td>${fmtStatNumber(item.removed)}</td>
+                    <td>${escapeLowDimHtml(fmtStatSize(item.releaseGb))}</td>
+                    <td>${escapeLowDimHtml(item.operator)}</td>
+                    <td><span class="status-badge success">${escapeLowDimHtml(item.status)}</span></td>
+                  </tr>
+                `).join("") : `<tr><td colspan="8"><div class="sys-empty">暂无执行记录</div></td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDataStatDbTable(s, summary) {
+      return `
+        <section class="card pad" style="margin-bottom:18px;border-radius:16px;">
+          <h3 class="section-title" style="margin-bottom:8px;">各数据库实时统计明细</h3>
+          <p style="margin:0 0 16px;color:#64748b;">实时统计五个子库的现有数据条目与占用空间，并按日均增量推算单库可支撑天数。</p>
+          <div class="table-wrap">
+            <table class="twod-result-table">
+              <thead>
+                <tr><th>数据库</th><th>数据条目</th><th>占用空间</th><th>容量占比</th><th>日均新增</th><th>日均空间增长</th><th>剩余空间可支撑</th></tr>
+              </thead>
+              <tbody>
+                ${s.databases.map((db) => {
+                  const share = summary.usedGb ? (db.sizeGb / summary.usedGb) * 100 : 0;
+                  const dailyGb = db.dailyRecords * db.avgRecordGb;
+                  const days = dailyGb > 0 ? Math.floor(summary.freeGb * (db.sizeGb / summary.usedGb) / dailyGb) : 0;
+                  return `
+                    <tr>
+                      <td><strong>${escapeLowDimHtml(db.name)}</strong></td>
+                      <td>${fmtStatNumber(db.records)} 条</td>
+                      <td>${escapeLowDimHtml(fmtStatSize(db.sizeGb))}</td>
+                      <td>${share.toFixed(1)}%</td>
+                      <td>${fmtStatNumber(db.dailyRecords)} 条</td>
+                      <td>${dailyGb.toFixed(2)} GB</td>
+                      <td>${days} 天</td>
+                    </tr>
+                  `;
+                }).join("")}
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer" style="margin-top:10px;">
+            <span>合计 ${fmtStatNumber(summary.records)} 条数据，占用 ${escapeLowDimHtml(fmtStatSize(summary.usedGb))}，日均增长 ${summary.dailyGb.toFixed(2)} GB。</span>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDataStatTickets(s) {
+      return `
+        <section class="card pad" style="border-radius:16px;">
+          <h3 class="section-title" style="margin-bottom:8px;">硬件扩容处置工单</h3>
+          <p style="margin:0 0 16px;color:#64748b;">维护人员依据容量水位提交扩容工单，工单完成后硬件总容量提升，剩余空间与水位于上方看板同步回落。</p>
+          <div class="table-wrap">
+            <table class="twod-result-table">
+              <thead>
+                <tr><th>工单编号</th><th>提交时间</th><th>申请扩容</th><th>期望完成</th><th>处理人</th><th>状态</th><th>操作</th></tr>
+              </thead>
+              <tbody>
+                ${s.tickets.length ? s.tickets.map((ticket) => `
+                  <tr>
+                    <td><strong>${escapeLowDimHtml(ticket.id)}</strong></td>
+                    <td>${escapeLowDimHtml(fmtStatDateTime(ticket.createdAt))}</td>
+                    <td>+ ${ticket.expandGb} GB（${(ticket.expandGb / 1024).toFixed(0)} TB）</td>
+                    <td>${escapeLowDimHtml(fmtStatDateTime(ticket.expectAt))}</td>
+                    <td>${escapeLowDimHtml(ticket.handler)}</td>
+                    <td><span class="status-badge ${ticket.status === "已完成" ? "success" : "warning"}">${escapeLowDimHtml(ticket.status)}</span></td>
+                    <td>${ticket.status === "已完成"
+                      ? `<span style="color:#16a34a;">容量已扩容</span>`
+                      : `<button class="btn btn-sm" type="button" data-dstat-ticket-advance="${escapeLowDimHtml(ticket.id)}">推进至下一状态</button>`}</td>
+                  </tr>
+                `).join("") : `<tr><td colspan="7"><div class="sys-empty">暂无扩容工单，可在「硬件容量与空间占用」中提交</div></td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDataStatisticsPage() {
+      const page = document.getElementById("page-data-statistics");
+      if (!page) return;
+      const s = getDataStatState();
+      const summary = getDataStatSummary();
+      const level = getDataStatLevel(summary.ratio);
+      const advice = getDataStatAdvice(summary.ratio, summary, s);
+      const chain = getDataStatChain(summary, s);
+      const sustainDays = summary.dailyGb > 0 ? Math.floor(summary.freeGb / summary.dailyGb) : 0;
+      const needAction = sustainDays < s.dedupe.cycleDays;
+      const pageDesc = needAction
+        ? `实时监测数据库内现有数据条目与占用空间，按 ${s.dedupe.cycleDays} 天固定周期辨别并清理重复数据，向维护人员汇报数据总量、占用空间与剩余硬件空间；当前剩余空间可支撑 ${sustainDays} 天，短于一个去重周期（${s.dedupe.cycleDays} 天），需及时管理录入节奏或安排硬件扩容。`
+        : `实时监测数据库内现有数据条目与占用空间，按 ${s.dedupe.cycleDays} 天固定周期辨别并清理重复数据，向维护人员汇报数据总量、占用空间与剩余硬件空间，支撑录入管理与硬件扩容决策。`;
+      page.innerHTML = `
+        <div class="page-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+          <div>
+            <h2>数据统计 <span class="page-role-tag admin">管理员与维护人员</span></h2>
+            <p>${escapeLowDimHtml(pageDesc)}</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span style="padding:7px 14px;border:1px solid #dbe3ec;border-radius:8px;background:#f8fafc;font-size:13px;color:#475569;">最近同步：${escapeLowDimHtml(fmtStatDateTime(s.lastSyncAt))}</span>
+            <button class="btn-primary" type="button" data-dstat-refresh>立即刷新统计</button>
+          </div>
+        </div>
+        ${renderDataStatChain(chain)}
+        ${renderDataStatKpis(summary, level)}
+        ${renderDataStatCapacity(summary, s, advice, level)}
+        ${renderDataStatDedupe(s, summary)}
+        ${renderDataStatCandidateTable(s)}
+        ${renderDataStatHistory(s)}
+        ${renderDataStatDbTable(s, summary)}
+        ${renderDataStatTickets(s)}
+      `;
+      bindDataStatisticsEvents();
+      page.scrollTop = 0;
+    }
+
+    function bindDataStatisticsEvents() {
+      const page = document.getElementById("page-data-statistics");
+      if (!page) return;
+
+      const on = (selector, handler) => {
+        const el = page.querySelector(selector);
+        if (el) el.addEventListener("click", handler);
+      };
+
+      on("[data-dstat-refresh]", () => {
+        refreshDataStatMetrics();
+        renderDataStatisticsPage();
+        showToast("数据统计", "已完成一次实时统计同步，各库条目与占用空间已更新。");
+      });
+
+      on("[data-dstat-scan]", () => {
+        const count = runDataStatScan();
+        renderDataStatisticsPage();
+        showToast("重复数据辨别", `本次扫描识别到 ${count} 组疑似重复数据，请确认后执行删除。`);
+      });
+
+      on("[data-dstat-toggle-all]", () => {
+        const s = getDataStatState();
+        const active = s.dedupe.candidates.filter((item) => !item.ignored);
+        const next = !active.every((item) => item.checked);
+        active.forEach((item) => { item.checked = next; });
+        renderDataStatisticsPage();
+      });
+
+      page.querySelectorAll("[data-dstat-ignore]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const s = getDataStatState();
+          const target = s.dedupe.candidates.find((item) => item.id === button.dataset.dstatIgnore);
+          if (target) {
+            target.ignored = true;
+            target.checked = false;
+            renderDataStatisticsPage();
+            showToast("重复数据辨别", `重复组 ${target.id} 已标记为忽略，本次不参与删除。`);
+          }
+        });
+      });
+
+      on("[data-dstat-delete]", () => {
+        const record = deleteDataStatCandidates();
+        if (!record) {
+          showToast("重复数据清理", "请至少勾选一组待清理的重复数据。");
+          return;
+        }
+        renderDataStatisticsPage();
+        showToast("重复数据清理", `已清理 ${record.groups} 组重复数据，共 ${fmtStatNumber(record.removed)} 条，释放 ${fmtStatSize(record.releaseGb)} 空间。`);
+      });
+
+      on("[data-dstat-throttle]", () => {
+        const throttled = toggleDataStatThrottle();
+        renderDataStatisticsPage();
+        showToast("录入管理", throttled ? "已开启入库限流，仅接收高优先级数据。" : "已恢复常规数据录入。");
+      });
+
+      on("[data-dstat-ticket-add]", () => {
+        const select = page.querySelector("[data-dstat-expand]");
+        const ticket = createDataStatTicket(Number(select?.value || 2048));
+        renderDataStatisticsPage();
+        showToast("硬件扩容", `扩容工单 ${ticket.id} 已提交，申请扩容 ${ticket.expandGb} GB。`);
+      });
+
+      page.querySelectorAll("[data-dstat-ticket-advance]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const s = getDataStatState();
+          const before = s.hardwareTotalGb;
+          const ticket = advanceDataStatTicket(button.dataset.dstatTicketAdvance);
+          renderDataStatisticsPage();
+          if (!ticket) return;
+          if (ticket.status === "已完成") {
+            showToast("硬件扩容", `工单 ${ticket.id} 已完成，硬件总容量由 ${fmtStatSize(before)} 提升至 ${fmtStatSize(s.hardwareTotalGb)}。`);
+          } else {
+            showToast("硬件扩容", `工单 ${ticket.id} 已推进至「${ticket.status}」。`);
+          }
+        });
+      });
+
+      page.querySelectorAll("[data-dstat-check]").forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          const s = getDataStatState();
+          const item = s.dedupe.candidates.find((entry) => entry.id === checkbox.dataset.dstatCheck);
+          if (item) item.checked = checkbox.checked;
+        });
+      });
+
+      const cycleSelect = page.querySelector("[data-dstat-cycle]");
+      if (cycleSelect) {
+        cycleSelect.addEventListener("change", () => {
+          const s = getDataStatState();
+          s.dedupe.cycleDays = Number(cycleSelect.value || 30);
+          s.dedupe.nextRunAt = addStatDays(s.dedupe.lastRunAt, s.dedupe.cycleDays);
+          renderDataStatisticsPage();
+          showToast("去重周期", `去重周期已调整为每 ${s.dedupe.cycleDays} 天执行一次。`);
+        });
+      }
+
+      const strategySelect = page.querySelector("[data-dstat-strategy]");
+      if (strategySelect) {
+        strategySelect.addEventListener("change", () => {
+          const s = getDataStatState();
+          s.dedupe.strategy = strategySelect.value;
+          if (s.dedupe.candidates.length) s.dedupe.candidates = buildDataStatCandidates();
+          renderDataStatisticsPage();
+          showToast("识别策略", `重复识别策略已切换为「${getDataStatStrategy().label}」。`);
+        });
+      }
+
+      const autoCheckbox = page.querySelector("[data-dstat-auto]");
+      if (autoCheckbox) {
+        autoCheckbox.addEventListener("change", () => {
+          const s = getDataStatState();
+          s.dedupe.autoDelete = autoCheckbox.checked;
+          renderDataStatisticsPage();
+          showToast("去重周期", s.dedupe.autoDelete ? "已开启到期自动清理。" : "已关闭到期自动清理，改为人工确认。");
+        });
+      }
     }
 
     const TWOD_STANDARD_CONFIG = {
@@ -36172,8 +36986,7 @@ print(resp.json())`;
     }
 
     function renderTwodIngestCollectionActions(pageId = "lowdim-ingest-twod") {
-      return `<button class="btn" type="button" data-twod-security-guide data-twod-wizard-page="${escapeLowDimHtml(pageId)}">数据安全等级</button>`
-        + `<button class="btn-primary" type="button" data-twod-task-wizard-start data-twod-wizard-page="${escapeLowDimHtml(pageId)}">创建任务</button>`;
+      return `<button class="btn" type="button" data-twod-security-guide data-twod-wizard-page="${escapeLowDimHtml(pageId)}">数据安全等级</button>`;
     }
 
     function getTwodIngestCollectionTasks(pageId = "lowdim-ingest-twod") {
@@ -43798,8 +44611,7 @@ const MLFF_STRUCTURE_SOURCE = {
                   ${config.fields.map((field) => `<td>${renderTwodDbDatasetValue(row, field)}</td>`).join("")}
                   <td>
                     <div class="twod-db-row-actions">
-                      <button class="btn btn-sm" type="button" data-twod-db-dataset-edit="${row.id}">编辑</button>
-                      <button class="btn btn-sm btn-danger-outline" type="button" data-twod-db-dataset-delete="${row.id}">删除</button>
+                      <button class="btn-primary btn-sm" type="button" data-twod-db-dataset-view="${row.id}">查看详情</button>
                     </div>
                   </td>
                 </tr>
@@ -43848,8 +44660,6 @@ const MLFF_STRUCTURE_SOURCE = {
                 </div>
                 <div class="twod-db-card-fields">${fieldPreview}</div>
                 <div class="twod-db-card-actions">
-                  <button class="btn btn-sm" type="button" data-twod-db-dataset-edit="${row.id}">编辑</button>
-                  <button class="btn btn-sm btn-danger-outline" type="button" data-twod-db-dataset-delete="${row.id}">删除</button>
                   <button class="btn-primary btn-sm" type="button" data-twod-db-dataset-view="${row.id}">查看详情</button>
                 </div>
               </article>
@@ -45350,7 +46160,6 @@ const MLFF_STRUCTURE_SOURCE = {
             <div><h3>${escapeLowDimHtml(item.title)}</h3><p>数据集编号：${escapeLowDimHtml(`${config.code}-${item.key.toUpperCase()}`)} · ${escapeLowDimHtml(item.description)}</p></div>
             <button type="button" class="twod-dataset-back-btn" data-ldb-detail-back="${pageId}">返回数据库</button>
             <div class="twod-dataset-detail-stats">
-              <div><span>所属数据库</span><strong>${escapeLowDimHtml(config.badge)}</strong></div>
               <div><span>数据量</span><strong>${formatLowdimDbVolume(item.volume)} 条</strong></div>
               <div><span>文件类型</span><strong>${escapeLowDimHtml(item.format)}</strong></div>
               <div><span>更新时间</span><strong>${escapeLowDimHtml(config.updated)}</strong></div>
@@ -45505,7 +46314,7 @@ const MLFF_STRUCTURE_SOURCE = {
         detailHtml = `<div class="twod-dataset-detail-page twod-dataset-detail-inline">
           <div class="twod-dataset-detail-breadcrumb">低维材料主题应用　/　低维材料数据库　/　二维材料数据库</div>
           <div class="twod-dataset-detail-heading"><h2>二维材料数据库</h2><p>统一展示二维材料八大特征数据集，查看数据库/集合介绍、样例数据和归档文件。</p></div>
-          <section class="twod-dataset-detail-summary-card"><div><h3>${escapeLowDimHtml(config.label)}</h3><p>数据集编号：${escapeLowDimHtml(`2D-${activeKey.toUpperCase()}`)} · 查看数据集介绍、预览记录和归档文件。</p></div><button type="button" class="twod-dataset-back-btn" data-twod-db-detail-back>返回数据库</button><div class="twod-dataset-detail-stats"><div><span>所属数据库</span><strong>二维材料数据库</strong></div><div><span>数据量</span><strong>${escapeLowDimHtml(meta.dataSize)}</strong></div><div><span>文件类型</span><strong>${activeKey === "structure" ? "Parquet / CIF" : "CSV / JSON"}</strong></div><div><span>更新时间</span><strong>${escapeLowDimHtml(meta.updatedAt)}</strong></div></div></section>
+          <section class="twod-dataset-detail-summary-card"><div><h3>${escapeLowDimHtml(config.label)}</h3><p>数据集编号：${escapeLowDimHtml(`2D-${activeKey.toUpperCase()}`)} · 查看数据集介绍、预览记录和归档文件。</p></div><button type="button" class="twod-dataset-back-btn" data-twod-db-detail-back>返回数据库</button><div class="twod-dataset-detail-stats"><div><span>数据量</span><strong>${escapeLowDimHtml(meta.dataSize)}</strong></div><div><span>文件类型</span><strong>${activeKey === "structure" ? "Parquet / CIF" : "CSV / JSON"}</strong></div><div><span>更新时间</span><strong>${escapeLowDimHtml(meta.updatedAt)}</strong></div></div></section>
           <div class="twod-dataset-detail-tabs"><button type="button" class="active" data-twod-detail-tab="intro" onclick="return switchTwodDatasetDetailTab(this, 'intro')">数据库/集介绍</button><button type="button" data-twod-detail-tab="preview" onclick="return switchTwodDatasetDetailTab(this, 'preview')">数据预览</button><button type="button" data-twod-detail-tab="files" onclick="return switchTwodDatasetDetailTab(this, 'files')">数据库/集文件</button></div>
           <div class="twod-dataset-detail-tab-content" data-twod-detail-content="intro">${renderIntro()}</div>
           <div class="twod-dataset-detail-tab-content" data-twod-detail-content="preview" hidden>${renderPreview()}</div>

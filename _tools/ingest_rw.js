@@ -539,6 +539,11 @@
     if (!s.tasks) s.tasks = seedTasks();
     if (!s.entryDone) s.entryDone = [];
     if (!s.procDone) s.procDone = [];
+    if (!s.collectTaskId && s.tasks.length) s.collectTaskId = s.tasks[0].id;
+    if (!s.collectTaskId) s.collectTaskId = "";
+    if (!s.handoffDone) s.handoffDone = [];
+    if (!s.approvals) s.approvals = {};
+    if (!s.collectTaskView) s.collectTaskView = "trace";
     return s;
   }
 
@@ -630,8 +635,8 @@
       + '<div class="rw-head-main"><h1>' + esc(C().title) + "</h1>"
       + "<p>" + C().headDesc + "</p></div>"
       + '<div class="rw-head-actions">'
-      + '<button class="rw-btn" type="button" data-twod-security-guide>数据安全等级</button>'
-      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button>'
+      /* 清单编号 10「数据安全等级」只挂在二维材料名下，其余四类不出现该入口 */
+      + (hasSecurity() ? '<button class="rw-btn" type="button" data-twod-security-guide>数据安全等级</button>' : "")
       + "</div></div>"
       + '<nav class="rw-tabs">' + tabs + "</nav>"
       + '<div class="rw-body">' + renderRwBody() + "</div>"
@@ -659,27 +664,14 @@
   /* -------------------------------------------------------- 页签一：资源采集 */
   function renderCollectTab() {
     var s = getS();
-    var rows = s.tasks.map(function (t) {
-      var m = methodMeta(t.method);
-      return "<tr>"
-        + '<td class="rw-id">' + esc(t.id) + "</td>"
-        + "<td><b>" + esc(t.name) + "</b></td>"
-        + '<td><span class="rw-tag ' + m.tag + '">' + esc(m.label) + "</span></td>"
-        + "<td>" + esc(t.desc) + "</td>"
-        + '<td class="rw-nowrap">'
-        + '<button class="rw-op" type="button" data-rw-act="view-task" data-id="' + esc(t.id) + '">查看</button>'
-        + '<button class="rw-op" type="button" data-rw-act="to-entry" data-id="' + esc(t.id) + '">录入</button>'
-        + "</td></tr>";
-    }).join("");
-
-    return '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>采集任务列表</h3>'
-      + "<p>共 " + s.tasks.length + " 条采集任务；点击「创建任务」按开源数据获取 / 数据购买·自采数据 / 数据计算三种方式发起采集。</p></div>"
-      + '<div><button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button></div></div>'
-      + (s.tasks.length
-        ? '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>采集ID</th><th>采集任务名称</th><th>采集方式</th><th>采集说明</th><th>操作</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
-        : '<div class="rw-empty"><b>▤</b>暂无采集任务，点击「创建任务」开始采集</div>')
-      + "</div>";
+    if (!s.tasks.length) {
+      return '<div class="rw-card">'
+        + '<div class="rw-card-head"><div><h3>采集任务列表</h3>'
+        + "<p>暂无采集任务，点击「创建任务」按开源数据获取 / 数据购买·自采数据 / 数据计算三种方式发起采集。</p></div>"
+        + '<div><button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button></div></div>'
+        + '<div class="rw-empty"><b>▤</b>暂无采集任务</div></div>';
+    }
+    return collectClosureCards();
   }
 
   function pendingEntryCount() {
@@ -778,7 +770,8 @@
       + '<div class="rw-card-head"><div><h3>已录入数据列表</h3><p>确认录入后的数据，可继续进入资源加工环节。</p></div>'
       + '<div><button class="rw-btn" type="button" data-rw-act="tab" data-rw-tab="process">进入资源加工 →</button></div></div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>采集ID</th><th>采集任务名称</th><th>状态</th><th>数据格式</th><th>确认录入时间</th></tr></thead><tbody>' + doneRows + "</tbody></table></div>"
-      + "</div>";
+      + "</div>"
+      + entryClosureCards("spec");
   }
 
   /* ------------------------------------ 页签三：资源加工 —— 规范说明（可折叠参考） */
@@ -1599,6 +1592,7 @@
       + "<div><b>原始文件</b>" + esc(t.rawFiles || "-") + "</div>"
       + "<div><b>安全等级</b>" + esc(t.security || "第1级") + "</div>"
       + "<div><b>创建时间</b>" + esc(t.createdAt) + "</div></div>"
+      + detailClosureHtml(t)
       + '<div class="rw-section-title" style="font-size:14px">采集说明</div>'
       + '<div class="rw-card-note">' + esc(t.desc || "-") + "</div>"
       + rowsHtml
@@ -2798,7 +2792,7 @@
       + '<button class="rw-subtab' + (p.view === "jobs" ? " is-active" : "") + '" type="button" data-rw-act="proc-view" data-view="jobs">加工任务（' + p.jobs.length + "）</button>"
       + '<button class="rw-subtab' + (p.view === "spec" ? " is-active" : "") + '" type="button" data-rw-act="proc-view" data-view="spec">加工规范说明</button>'
       + "</div>";
-    return sub + (p.view === "spec" ? renderProcessSpec() : renderProcJobs());
+    return sub + (p.view === "spec" ? renderProcessSpec() : renderProcJobs()) + procClosureCards(p.view);
   }
 
   function renderProcJobs() {
@@ -3235,6 +3229,788 @@
     document.body.appendChild(mask);
   }
 
+  /* ==========================================================================
+     闭环补充层 —— 依据《低维材料主题库》清单 编号 6~22 补齐
+     原则：
+       1) 只复用既有 rw-* 样式类，不新增 CSS；
+       2) 每条文案都能追溯到清单条目或「招标汇总描述」；
+       3) 批次ID / source_id / SHA-256 / evidence_type / 字段状态 / 异常单 /
+          任务状态 / 版本发布链，均为让清单功能真正闭合所需的支撑字段。
+     ========================================================================== */
+
+  /* 编号 10「数据安全等级」只挂在二维材料名下 */
+  function hasSecurity() { return CFG_KEY === "twod"; }
+  function MX() { return MATX[CFG_KEY] || MATX.twod; }
+
+  /* ------------------------------------------------------------------------
+     五类材料的追溯 / 审核 / 整合 / 更新 / 统计 / 交接数据
+     trace  : [批次ID, source_id, 来源名称, 来源类型, 数据版本, 原始文件, SHA-256, 采集时间, 状态]
+     shards : {id, n 记录数, acc 接收, rej 拒收, dup 重复, pend 待补, st 状态}  恒等：n=acc+rej+dup+pend
+     ------------------------------------------------------------------------ */
+  var MATX = {
+
+    /* ================= 二维材料（清单编号 6 / 7 / 8 / 9 / 10） ================= */
+    twod: {
+      trace: [
+        ["2D-CL-2026-0922-001", "SRC-MP-0001", "Materials Project（材料项目数据库）", "开源数据获取", "v2024.11", "JSON / CIF", "3a7f9c…c19d", "2026-09-22 10:24", "已完成"],
+        ["2D-CL-2026-0923-002", "SRC-C2DB-0007", "C2DB 商业授权数据包", "数据购买", "v3.2", "JSON", "8d21e4…4e0b", "2026-09-23 09:12", "已完成"],
+        ["2D-CL-2026-0923-003", "SRC-VASP-0012", "本地 VASP 计算输出", "数据计算", "V0.0", "OUTCAR / DOSCAR", "b5407a…7f3a", "2026-09-23 16:48", "待确认"]
+      ],
+      shards: [
+        { id: "S01", n: 1280, acc: 1180, rej: 42, dup: 51, pend: 7, st: "已完成", taskId: "2D-CL-2026-0922-001" },
+        { id: "S02", n: 960, acc: 905, rej: 28, dup: 24, pend: 3, st: "已完成", taskId: "2D-CL-2026-0922-001" },
+        { id: "S03", n: 640, acc: 512, rej: 61, dup: 55, pend: 12, st: "已完成", taskId: "2D-CL-2026-0923-002" },
+        { id: "S04", n: 420, acc: 366, rej: 30, dup: 21, pend: 3, st: "部分失败", taskId: "2D-CL-2026-0923-002" },
+        { id: "S05", n: 320, acc: 0, rej: 0, dup: 0, pend: 320, st: "采集失败", taskId: "2D-CL-2026-0923-003" }
+      ],
+      cred: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["同一材料 · 同一计算方法下的多来源结果", "将多元途径获得的数据进行比对，确认计算结果的一致性", "误差较大的计算结果予以剔除，改由数据计算方式提供准确结果并上传数据库", "一致性较好的数据判定为可信数据并上传数据库"],
+          ["开源库 / 商业库条目", "抽样调查与对比，确认第三方数据准确", "抽样不一致时整批复核", "抽样合格率达标后放行"]
+        ]
+      },
+      appl: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["不同计算方法 / 不同计算参数下的结果差异", "整理并归纳差异，在结果展示界面提供不同计算方法的结果及该结果的计算参数", "不做剔除，按计算方法分组展示", "用户可据此判断数据是否符合研究需求"],
+          ["计算数据的可重复性凭证", "必须提供计算方法与计算参数", "缺少方法或参数的数据退回补标", "凭证齐全后放行"]
+        ]
+      },
+      unify: {
+        head: ["数据类型", "统一存储格式", "展示方式"],
+        rows: [
+          ["结构特征（晶胞原子结构、原子坐标）", ".cif 文件", "调用三维建模软件在数据库界面展示"],
+          ["电子结构（能带结构、态密度）", "数据文本", "调用绘图软件在数据库界面绘制成图表展示"],
+          ["力学性质（弹性常数、杨氏模量、泊松比）", "数值", "以数字形式存储与调用展示"],
+          ["磁学性质（磁基态构型）", "二进制图片", "以图片形式展示；磁转变温度以数字展示"],
+          ["热学性质（声子谱、声子态密度）", "数据文本", "调用绘图软件可视化展示；形成能以数字展示"],
+          ["光学性质（介电函数、光吸收系数、反射率、折射率、消光系数）", "数据文本", "调用软件转换为图表展示"],
+          ["缺陷性质（缺陷构型）", "字符（结构文件）", "调用软件做三维结构可视化；缺陷形成能以数字展示"]
+        ]
+      },
+      upd: {
+        head: ["更新类型", "数据来源", "更新周期", "最近执行", "下次执行", "责任人"],
+        rows: [
+          ["现有条目基础信息更新", "开源数据库数据 + 商业数据库购买数据", "定期同步（30 天）", "2026-09-20", "2026-10-20", "数据库维护员"],
+          ["新增条目（新型二维材料）", "数据计算（第一性原理计算软件）", "定期新增（30 天）", "2026-09-20", "2026-10-20", "数据加工工程师"]
+        ]
+      },
+      stats: [
+        ["数据总量", "30,600 条 · 采集加工量指标 ≥ 30,600 条（招标汇总描述，编号 6）"],
+        ["当前占用硬件空间", "1.84 TB（含结构文件与图谱附件）"],
+        ["剩余硬件空间", "3.16 TB（总容量 5.00 TB）"],
+        ["重复数据辨别与删除", "固定周期 30 天执行一次"]
+      ],
+      handoff: [
+        ["二维材料结构特征数据集（V2.0）", "二维材料数据库 · 结构特征数据集", "编号 28", "化学式、晶系与空间群、晶胞原子结构、晶格常数、原子坐标、键长键角、层间厚度", "待交接"],
+        ["二维材料电子结构数据集（V2.0）", "二维材料数据库 · 电子结构数据集", "编号 29", "能带结构、态密度、电子有效质量", "待交接"],
+        ["二维材料电学性质数据集（V2.0）", "二维材料数据库 · 电学性质数据集", "编号 30", "铁电性、压电性", "待交接"],
+        ["二维材料磁学性质数据集（V2.0）", "二维材料数据库 · 磁学性质数据集", "编号 31", "磁基态构型、磁转变温度", "待交接"],
+        ["二维材料热学性质数据集（V2.0）", "二维材料数据库 · 热学性质数据集", "编号 32", "形成能、声子谱、声子态密度", "待交接"],
+        ["二维材料力学性质数据集（V2.0）", "二维材料数据库 · 力学性质数据集", "编号 33", "弹性常数、杨氏模量、泊松比", "待交接"],
+        ["二维材料光学性质数据集（V2.0）", "二维材料数据库 · 光学性质数据集", "编号 34", "介电函数、光吸收系数、反射率、折射率、消光系数", "待交接"],
+        ["二维材料缺陷性质数据集（V2.0）", "二维材料数据库 · 缺陷性质数据集", "编号 35", "空位缺陷、反位缺陷、缺陷构型、缺陷形成能", "待交接"]
+      ],
+      procNote: ""
+    },
+
+    /* ============ 有机光电材料（清单编号 11 / 12 / 13 / 14） ============ */
+    opto: {
+      trace: [
+        ["OP-CL-2026-0922-001", "SRC-PUBCHEM-0031", "PubChem（化合物数据库，含 CCDC 结构校核）", "开源数据获取", "2026.08", "JSON / MOL", "1f02b8…9ad3", "2026-09-22 10:24", "已完成"],
+        ["OP-CL-2026-0923-002", "SRC-SCIF-0004", "SciFinder（化学文献数据库，已购授权）", "数据购买", "2026.09", "JSON / CSV", "a9d3c7…05f1", "2026-09-23 09:12", "已完成"],
+        ["OP-CL-2026-0923-003", "SRC-G16-0021", "本地计算输出（Gaussian16 LOG / FCHK）", "数据计算", "V0.0", "LOG / FCHK", "d64e90…c8a2", "2026-09-23 16:48", "待确认"]
+      ],
+      shards: [
+        { id: "S01", n: 420, acc: 388, rej: 14, dup: 16, pend: 2, st: "已完成", taskId: "OP-CL-2026-0922-001" },
+        { id: "S02", n: 260, acc: 231, rej: 12, dup: 15, pend: 2, st: "已完成", taskId: "OP-CL-2026-0922-001" },
+        { id: "S03", n: 180, acc: 150, rej: 18, dup: 9, pend: 3, st: "部分失败", taskId: "OP-CL-2026-0923-002" },
+        { id: "S04", n: 140, acc: 0, rej: 0, dup: 0, pend: 140, st: "采集失败", taskId: "OP-CL-2026-0923-003" }
+      ],
+      cred: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["同一分子在不同来源的数据（如 PubChem 的熔点与文献值）", "多来源数值比对", "误差 > 10% 的数据需重新计算验证", "误差 ≤ 10% 判定为可信数据"],
+          ["商用库（SciFinder / Reaxys）条目", "与开源库及文献值抽样对比", "抽样不一致时整批复核", "抽样合格率达标后放行"]
+        ]
+      },
+      appl: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["计算数据", "标注计算方法（如 B3LYP / def2-SVP）", "未标注方法与参数的数据退回补标", "用户可据此判断是否符合研究需求"],
+          ["物性数据", "标注实验条件（如熔点测定压力）", "未标注实验条件的数据退回补标", "用户可据此判断是否符合研究需求"]
+        ]
+      },
+      unify: {
+        head: ["数据类型", "统一存储格式", "展示方式"],
+        rows: [
+          ["基础信息（中英文名称、分子式、分子量、分子编号）", "字符 + 数值（分子量）", "文本与数字展示"],
+          ["三维结构（原子坐标、键长键角）", "字符 + 数值统一结构文件", "三维结构可视化展示"],
+          ["分子构象", "二进制图片", "图片展示"],
+          ["物性数据（密度、熔点、沸点、闪点、折射率、溶解性）", "数值（附测试条件字符）", "数字展示并附测试条件"],
+          ["表征图谱（红外光谱、拉曼光谱、核磁共振谱）", "二进制图片（原始数据 + 图谱图片）", "图谱图片展示"],
+          ["计算数据（激发能、发射能、跃迁偶极矩、HOMO-LUMO、溶剂化自由能）", "数值", "数字展示；跃迁类型、溶剂模型以字符展示"],
+          ["计算数据（基态 / 激发态结构、态密度）", "二进制图片", "图谱 / 结构图片展示"],
+          ["简正振动模式", "数值（振动频率）+ 字符（模式描述）", "数字 + 描述展示"]
+        ]
+      },
+      upd: {
+        head: ["更新类型", "数据来源", "更新周期", "最近执行", "下次执行", "责任人"],
+        rows: [
+          ["开源数据同步", "PubChem / CCDC 新增分子", "每月", "2026-09-01", "2026-10-01", "数据库维护员"],
+          ["自主计算新增", "Gaussian16 计算新型分子（如新型 OLED 主体材料）", "每季度（50–100 个）", "2026-07-01", "2026-10-01", "数据加工工程师"]
+        ]
+      },
+      stats: [
+        ["数据总量", "1,000 条 · 采集加工量指标 ≥ 1,000 条（招标汇总描述，编号 6）"],
+        ["当前占用硬件空间", "0.62 TB（含图谱与构象图片）"],
+        ["剩余硬件空间", "4.38 TB（总容量 5.00 TB）"],
+        ["重复数据辨别与删除", "固定周期 30 天执行一次"]
+      ],
+      handoff: [
+        ["有机光电材料基础数据集（V2.0）", "有机光电材料数据库 · 基础数据集", "编号 36", "中英文名称、分子式、分子量、分子编号、三维结构", "待交接"],
+        ["有机光电材料物性数据集（V2.0）", "有机光电材料数据库 · 物性数据集", "编号 37", "密度、熔点、沸点、闪点、折射率、溶解性", "待交接"],
+        ["有机光电材料表征图谱数据集（V2.0）", "有机光电材料数据库 · 表征图谱数据集", "编号 38", "红外光谱、拉曼光谱、核磁共振谱（原始数据 + 图谱图片）", "待交接"],
+        ["有机光电材料计算数据集（V2.0）", "有机光电材料数据库 · 计算数据集", "编号 39", "基态 / 激发态结构、激发能、发射能、跃迁偶极矩、HOMO-LUMO、溶剂化自由能、态密度、简正模式", "待交接"]
+      ],
+      procNote: ""
+    },
+
+    /* ============== 电解质材料（清单编号 15 / 16 / 17 / 18） ============== */
+    electrolyte: {
+      trace: [
+        ["EL-CL-2026-0922-001", "SRC-MP-0006", "Materials Project（材料项目数据库）", "开源数据获取", "v2025.03", "JSON / CIF", "4b81d2…7c05", "2026-09-22 10:24", "已完成"],
+        ["EL-CL-2026-0923-002", "SRC-REAX-0003", "Reaxys 电解质应用数据包（已购授权）", "数据购买", "2026.07", "JSON", "5c9f02…ae34", "2026-09-23 09:12", "已完成"],
+        ["EL-CL-2026-0923-003", "SRC-VASP-0033", "本地计算输出（VASP OUTCAR / DOSCAR）", "数据计算", "V0.0", "OUTCAR / DOSCAR", "9e14bb…63f7", "2026-09-23 16:48", "待确认"]
+      ],
+      shards: [
+        { id: "S01", n: 3250, acc: 2980, rej: 140, dup: 118, pend: 12, st: "已完成", taskId: "EL-CL-2026-0922-001" },
+        { id: "S02", n: 2880, acc: 2560, rej: 178, dup: 130, pend: 12, st: "已完成", taskId: "EL-CL-2026-0922-001" },
+        { id: "S03", n: 2100, acc: 1805, rej: 165, dup: 118, pend: 12, st: "部分失败", taskId: "EL-CL-2026-0923-002" },
+        { id: "S04", n: 2020, acc: 0, rej: 0, dup: 0, pend: 2020, st: "采集失败", taskId: "EL-CL-2026-0923-003" }
+      ],
+      cred: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["同一电解质在不同来源的数据（如有机电解液燃点）", "多来源数值比对，燃点误差控制在 10 ℃ 以内", "误差超 20% 的数据需重新计算验证", "误差 ≤ 20% 判定为可信数据"],
+          ["固态无机电解质（如 LLZO 离子电导率）", "开源数据与商用数据交叉对比", "误差超 20% 触发重新计算", "误差达标后放行"]
+        ]
+      },
+      appl: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["计算数据", "标注计算方法（如 VASP-PBE）", "未标注计算方法的数据退回补标", "用户可据此判断是否符合研究需求"],
+          ["物性数据", "标注实验条件（如电导率测定温度）", "未标注实验条件的数据退回补标", "用户可据此判断是否符合研究需求"],
+          ["自主计算数据可重复性", "必须提供输入文件（INCAR / gjf）", "缺少输入文件的数据退回补交", "其他用户可重复计算后放行"]
+        ]
+      },
+      unify: {
+        head: ["数据类型", "统一存储格式", "展示方式"],
+        rows: [
+          ["有机电解液结构文件", "pdb", "三维结构可视化展示"],
+          ["固态无机电解质结构文件", "cif / POSCAR", "三维结构可视化展示"],
+          ["表征图谱（XRD、XAS、红外、核磁共振）", "jpg（300 dpi）", "图谱图片展示"],
+          ["物性数据（熔点、燃点、介电常数、离子电导率、玻璃化转变温度、拉伸模量、机械强度）", "数值（带单位）", "数字展示"],
+          ["计算数据（带隙、态密度、能带结构、HOMO-LUMO、溶剂化自由能、结合能、摩尔热容）", "数值（带单位）+ 图谱", "数字 + 图谱展示"]
+        ]
+      },
+      upd: {
+        head: ["更新类型", "数据来源", "更新周期", "最近执行", "下次执行", "责任人"],
+        rows: [
+          ["开源 / 商业数据同步", "MaterialsProject / ICSD 更新", "每季度", "2026-07-01", "2026-10-01", "数据库维护员"],
+          ["自主计算新增", "VASP / Gaussian 计算新型电解质（如新型硫化物固态电解质、高介电常数电解液溶剂）", "每半年（30–50 个）", "2026-07-01", "2027-01-01", "数据加工工程师"]
+        ]
+      },
+      stats: [
+        ["数据总量", "10,250 条 · 采集加工量指标 ≥ 10,250 条（招标汇总描述，编号 6）"],
+        ["当前占用硬件空间", "1.05 TB（含晶体结构与衍射图谱）"],
+        ["剩余硬件空间", "3.95 TB（总容量 5.00 TB）"],
+        ["重复数据辨别与删除", "固定周期 30 天执行一次"]
+      ],
+      handoff: [
+        ["有机电解液数据集（V2.0）", "电解质材料数据库 · 有机电解液数据集", "编号 40", "名称、分子式、结构、熔点、燃点、介电常数、红外与核磁图谱、HOMO-LUMO、溶剂化自由能", "待交接"],
+        ["固态有机电解质数据集（V2.0）", "电解质材料数据库 · 固态有机电解质数据集", "编号 41", "名称、单体与聚合物结构、玻璃化转变温度、拉伸模量、结合能、摩尔热容", "待交接"],
+        ["固态无机电解质数据集（V2.0）", "电解质材料数据库 · 固态无机电解质数据集", "编号 42", "名称、化学式、晶体结构、离子电导率、机械强度、XRD 与 XAS 图谱、带隙、态密度、能带结构", "待交接"]
+      ],
+      procNote: ""
+    },
+
+    /* ============ 机器学习力场（清单编号 19 / 20 / 21） ============ */
+    mlff: {
+      trace: [
+        ["ML-CL-2026-0922-001", "SRC-QM9-0002", "QM9（量子化学小分子数据集）", "开源数据获取", "v2024", "CSV / XYZ", "2c6ea1…bb47", "2026-09-22 10:24", "已完成"],
+        ["ML-CL-2026-0923-002", "SRC-REAX-0005", "Reaxys 高分子片段数据包（已购授权）", "数据购买", "2026.07", "CSV / XML", "aa07c5…3d16", "2026-09-23 09:12", "已完成"],
+        ["ML-CL-2026-0923-003", "SRC-SAMP-0027", "本地计算输出（Gromacs 采样 PDB / Q-Chem 受力 CSV）", "数据计算", "V0.0", "PDB / CSV", "3fd8e2…51c9", "2026-09-23 16:48", "待确认"]
+      ],
+      shards: [
+        { id: "S01", n: 8400, acc: 7920, rej: 260, dup: 190, pend: 30, st: "已完成", taskId: "ML-CL-2026-0922-001" },
+        { id: "S02", n: 7200, acc: 6680, rej: 300, dup: 190, pend: 30, st: "已完成", taskId: "ML-CL-2026-0922-001" },
+        { id: "S03", n: 5400, acc: 4810, rej: 350, dup: 210, pend: 30, st: "部分失败", taskId: "ML-CL-2026-0923-002" },
+        { id: "S04", n: 4200, acc: 0, rej: 0, dup: 0, pend: 4200, st: "采集失败", taskId: "ML-CL-2026-0923-003" }
+      ],
+      cred: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["同一分子在不同来源的数据（如 QM9 与自主计算的 H₂O 能量）", "多来源能量比对，误差控制在 0.001 AU 以内", "误差超 5% 的数据需重新采样计算", "误差 ≤ 5% 判定为可信数据"],
+          ["高分子 / 蛋白质体系能量与受力", "开源库与自主采样计算结果交叉对比", "超阈值触发重新采样计算", "达标后放行"]
+        ]
+      },
+      appl: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["采样数据", "标注采样系综（如 NVT）、温度区间与采样时长", "未标注采样条件的数据退回补标", "用户可据此判断是否符合力场训练需求"],
+          ["计算数据", "标注计算参数（如 CCSD(T) / def2-QZVP、DFT-PBE0、MP2）", "未标注计算参数的数据退回补标", "用户可据此判断是否符合力场训练需求"]
+        ]
+      },
+      unify: {
+        head: ["数据类型", "统一存储格式", "展示方式"],
+        rows: [
+          ["小分子构象（QM9 的 xyz）", "pdb", "三维结构可视化展示"],
+          ["能量 / 原子受力数据", "csv", "数值表格 + 图表展示"],
+          ["采样轨迹帧", "pdb（按帧编号）", "轨迹帧序列展示"],
+          ["体系基础信息（名称、分子式、重复单元、氨基酸序列）", "字符", "文本展示"],
+          ["采样数据（温度、构象数、RMSD、链段运动频率、折叠状态）", "数值（带单位）+ 字符", "数字 + 状态描述展示"],
+          ["原子性质（电荷、偶极矩、极化率）", "数值（带单位）", "数字展示"],
+          ["力场参数（如色散系数 C₆）", "数值（带单位）", "数字展示"],
+          ["采样过程描述（如 NVT 系综，300 K，10 ns）", "字符", "文本展示"]
+        ]
+      },
+      upd: {
+        head: ["更新类型", "数据来源", "更新周期", "最近执行", "下次执行", "责任人"],
+        rows: [
+          ["开源数据同步", "QM9 / PDB 更新", "每季度", "2026-07-01", "2026-10-01", "数据库维护员"],
+          ["自主采样计算新增", "小分子 10–15 个 / 高分子 5–8 个 / 蛋白质 3–5 个", "每半年", "2026-07-01", "2027-01-01", "数据加工工程师"]
+        ]
+      },
+      stats: [
+        ["数据总量", "25,200 条 · 采集加工量指标 ≥ 25,200 条（招标汇总描述，编号 6）"],
+        ["当前占用硬件空间", "2.46 TB（含轨迹帧与受力数据）"],
+        ["剩余硬件空间", "2.54 TB（总容量 5.00 TB）"],
+        ["重复数据辨别与删除", "固定周期 30 天执行一次"]
+      ],
+      handoff: [
+        ["机器学习力场基础数据集（V2.0）", "机器学习力场数据库 · 基础数据集", "编号 43", "体系名称、分子式、重复单元、氨基酸序列、结构", "待交接"],
+        ["有机小分子机器学习力场数据集（V2.0）", "机器学习力场数据库 · 有机小分子力场数据集", "编号 44", "采样温度、构象数、RMSD、单分子能量、原子受力、双分子相互作用能、电荷、偶极矩、极化率", "待交接"],
+        ["高分子机器学习力场数据集（V2.0）", "机器学习力场数据库 · 高分子力场数据集", "编号 45", "链段运动频率、片段总能量、原子受力、分子间相互作用能", "待交接"]
+      ],
+      procNote: "清单编号 19–21 未单列「数据资源加工」模块；依据编号 6 招标汇总描述「支持对……机器学习力场数据……提供低维材料数据采集加工处理服务」，本页加工环节沿用统一六步流程，产物交接至机器学习力场数据库数据集。"
+    },
+
+    /* ================ 催化材料（清单编号 22） ================ */
+    catalyst: {
+      trace: [
+        ["CA-CL-2026-0922-001", "SRC-CATHUB-0014", "Catalysis-Hub（催化反应数据库）", "开源数据获取", "2026.05", "JSON / CIF", "6b2d09…f471", "2026-09-22 10:24", "已完成"],
+        ["CA-CL-2026-0923-002", "SRC-LIT-0008", "文献催化性能专题库（已购授权）", "数据购买", "2026.06", "CSV / CIF", "cf5108…2a93", "2026-09-23 09:12", "已完成"],
+        ["CA-CL-2026-0923-003", "SRC-VASP-0046", "本地计算输出（VASP OUTCAR / CONTCAR）", "数据计算", "V0.0", "OUTCAR / CONTCAR", "18ae64…d0b5", "2026-09-23 16:48", "待确认"]
+      ],
+      shards: [
+        { id: "S01", n: 12400, acc: 11520, rej: 480, dup: 340, pend: 60, st: "已完成", taskId: "CA-CL-2026-0922-001" },
+        { id: "S02", n: 9800, acc: 9060, rej: 420, dup: 280, pend: 40, st: "已完成", taskId: "CA-CL-2026-0922-001" },
+        { id: "S03", n: 7600, acc: 6820, rej: 460, dup: 280, pend: 40, st: "部分失败", taskId: "CA-CL-2026-0923-002" },
+        { id: "S04", n: 5120, acc: 0, rej: 0, dup: 0, pend: 5120, st: "采集失败", taskId: "CA-CL-2026-0923-003" }
+      ],
+      cred: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["同一催化体系在同一计算方法下的多来源结果", "将多元途径获得的数据进行比对，确认计算结果的一致性", "误差较大的计算结果予以剔除，改由数据计算方式补算", "一致性较好的数据判定为可信数据"],
+          ["吸附能 / 反应能 / 活化能", "同晶面同吸附分子的多来源数值比对", "超阈值结果触发重新计算", "达标后放行"]
+        ]
+      },
+      appl: {
+        head: ["审核对象", "审核规则", "不一致处理", "放行条件"],
+        rows: [
+          ["不同计算方法 / 不同计算参数下的结果差异", "整理并归纳差异，在结果展示界面提供不同计算方法的结果及该结果的计算参数", "不做剔除，按计算方法分组展示", "用户可据此判断数据是否符合研究需求"],
+          ["计算数据的可重复性凭证", "必须提供计算方法与计算参数", "缺少方法或参数的数据退回补标", "凭证齐全后放行"]
+        ]
+      },
+      unify: {
+        head: ["数据类型", "统一存储格式", "展示方式"],
+        rows: [
+          ["催化表面晶面、掺杂原子参数", "字符 + 结构文件", "三维结构可视化展示"],
+          ["吸附分子构型 / 反应初始构型 / 产物吸附构型 / 过渡态吸附构型", "字符（结构文件）", "三维结构可视化展示"],
+          ["分子吸附能量 / 反应能 / 活化能", "数值（带单位）", "数字展示"],
+          ["吸附分子种类、反应产物", "字符", "文本展示"]
+        ]
+      },
+      upd: {
+        head: ["更新类型", "数据来源", "更新周期", "最近执行", "下次执行", "责任人"],
+        rows: [
+          ["现有条目基础信息更新", "开源数据库与商业数据库", "定期同步（30 天）", "2026-09-20", "2026-10-20", "数据库维护员"],
+          ["新增条目（新型催化体系）", "数据计算（VASP 吸附构型与过渡态计算）", "定期新增（30 天）", "2026-09-20", "2026-10-20", "数据加工工程师"]
+        ]
+      },
+      stats: [
+        ["数据总量", "34,920 条 · 采集加工量指标 ≥ 34,920 条（招标汇总描述，编号 6）"],
+        ["当前占用硬件空间", "3.28 TB（含吸附构型与过渡态结构）"],
+        ["剩余硬件空间", "1.72 TB（总容量 5.00 TB）"],
+        ["重复数据辨别与删除", "固定周期 30 天执行一次"]
+      ],
+      handoff: [
+        ["催化材料元素特征数据集（V2.0）", "催化材料数据库 · 元素特征数据集", "编号 46", "掺杂原子元素特征与参数", "待交接"],
+        ["催化材料结构特征数据集（V2.0）", "催化材料数据库 · 结构特征数据集", "编号 47", "催化表面晶面、表面结构特征", "待交接"],
+        ["单原子催化剂数据集（V2.0）", "催化材料数据库 · 单原子催化剂数据集", "编号 48", "单原子催化体系吸附与反应路径数据", "待交接"],
+        ["二元合金数据集（V2.0）", "催化材料数据库 · 二元合金数据集", "编号 49", "二元合金催化表面吸附与反应路径数据", "待交接"],
+        ["晶界数据集（V2.0）", "催化材料数据库 · 晶界数据集", "编号 50", "晶界体系吸附与反应路径数据", "待交接"],
+        ["体系特征数据集（V2.0）", "催化材料数据库 · 体系特征数据集", "编号 51", "反应能、活化能等体系级特征值", "待交接"]
+      ],
+      procNote: "清单编号 22 仅单列「数据资源对象」模块；依据编号 6 招标汇总描述「支持对……催化材料数据……提供低维材料数据采集加工处理服务」，本页采集 / 录入 / 加工环节沿用统一流程，产物交接至催化材料数据库数据集。"
+    }
+  };
+
+  /* ---------------------------------------------- 通用：追溯 / 守恒 / 状态 */
+  var LOOP_TRACE_HEAD = ["批次ID", "source_id", "来源名称", "来源类型", "数据版本", "原始文件", "SHA-256", "采集时间", "状态"];
+
+  /* 编号 8「数据录入统计 / 数据统计」：条目数、占用空间、剩余空间、30 天去重 */
+  var LOOP_DEDUP_CYCLE = "30 天";
+
+  /* 支撑字段：字段四级状态（手册第 4 章，用于让清单「录入规范」真正可判定） */
+  var LOOP_FIELD_STATUS = {
+    head: ["字段状态", "含义", "入库放行", "展示方式"],
+    rows: [
+      ["available（有值）", "该字段已有经审核的有效取值", "放行", "正常展示数值 / 字符 / 图谱"],
+      ["partial（部分有值）", "同批次中仅部分记录该字段有值", "放行并标注", "展示取值并标注「部分记录有值」"],
+      ["missing（缺失）", "来源未提供且无法推断", "不阻断入库，标记待补充", "展示「待补充」并引导上传"],
+      ["not_applicable（不适用）", "该字段对本材料 / 本构型无意义", "放行", "展示「不适用」并说明原因"]
+    ]
+  };
+
+  /* 支撑字段：证据类型（让清单「可信度审核 / 可重复性」可判定） */
+  var LOOP_EVIDENCE = {
+    head: ["evidence_type", "含义", "可重复性凭证", "可信度审核方式"],
+    rows: [
+      ["开源库条目", "来自开放数据库 / 开放 API", "库名 + 数据版本 + 条目号", "多来源交叉对比"],
+      ["商业库条目", "来自已购买授权的商业数据库", "授权编号 + 数据版本", "抽样调查对比"],
+      ["文献提取", "从已发表文献整理归纳", "文献出处 + 表 / 图编号", "原文复核"],
+      ["第一性原理计算", "本库自主计算所得", "输入文件（INCAR / POSCAR / gjf）+ 计算参数", "参数合规性复核 + 结果比对"],
+      ["采样计算", "分子动力学采样所得", "采样系综 + 温度 + 时长 + 软件版本", "同体系不同来源能量比对"],
+      ["实验实测", "实测物性与表征数据", "测试条件 + 仪器 + 原始图谱", "标准样复核"],
+      ["人工补录", "无法自动化解析时人工录入", "录入人 + 工单号", "管理员初审 + 审核员终审"]
+    ]
+  };
+
+  /* 编号 8「权限管理」：系统管理员 / 数据库维护员 / 高级用户 / 普通用户 */
+  var LOOP_PERM = {
+    head: ["角色", "数据录入", "数据读取", "数据修改", "密集读取", "授权方式", "有效期"],
+    rows: [
+      ["系统管理员", "✔ 最高权限", "✔", "✔", "✔", "系统内置", "长期"],
+      ["数据库维护员", "✔ 需申请", "✔", "✔ 授权范围内", "✔", "管理员授予", "到期自动回收"],
+      ["高级用户", "✕", "✔", "✕", "✔ 密集读取", "管理员授予", "到期自动回收"],
+      ["普通用户", "✕", "✔ 正常频次", "✕", "✕", "注册默认", "长期"]
+    ]
+  };
+
+  /* 编号 8「定期备份」 */
+  var LOOP_BACKUP = {
+    head: ["备份对象", "备份周期", "保留份数", "存储位置", "完整性校验"],
+    rows: [
+      ["关系型数据（条目与字段长表）", "每日增量 / 每周全量", "近 30 份", "异地备份存储", "SHA-256 清单比对"],
+      ["结构文件与图谱附件", "每周全量", "近 12 份", "对象存储", "文件数 + 哈希比对"],
+      ["操作日志与工单记录", "每月归档", "长期保留", "归档存储", "归档完整性校验"]
+    ]
+  };
+
+  /* 编号 8「质量控制」1)~3) */
+  var LOOP_QC = {
+    head: ["控制项", "控制要求", "执行周期", "责任人"],
+    rows: [
+      ["第三方数据库准确性", "适度抽样调查、对比，确保所采用数据的准确", "每批次抽样", "数据审核员"],
+      ["录入汇总整合性", "使用统一存储格式，确保数据整合性，便于快速检索与访问", "每次录入", "数据录入员"],
+      ["数据及时性", "将近期计算所得结果更新进数据库", LOOP_DEDUP_CYCLE, "数据库维护员"]
+    ]
+  };
+
+  /* 加工环返工规则（让清单编号 9「质量评价」可定向退回） */
+  var LOOP_REWORK = {
+    head: ["失败类型", "检出节点", "退回目标节点", "日志处理", "复核人"],
+    rows: [
+      ["主键冲突 / 身份重复", "录入 · 自动校验", "资源录入 · 字段映射", "保留原日志并追加冲突记录", "数据管理员"],
+      ["单位或量纲不一致", "录入 · 自动校验", "资源录入 · 字段映射", "保留原日志", "数据管理员"],
+      ["结构文件解析失败", "录入 · 解析", "资源采集 · 完整性校验", "保留原日志并标记分片失败", "数据加工工程师"],
+      ["计算参数不满足标准阈值", "录入 · 合规性复核", "资源采集 · 数据计算", "保留原日志，触发重新计算", "数据审核员"],
+      ["质量评价不合格（基础数据）", "加工 · 步骤 6 质量评价", "加工 · 步骤 2 基础数据筛选", "保留原日志", "数据审核员"],
+      ["质量评价不合格（加工模型）", "加工 · 步骤 6 质量评价", "加工 · 步骤 4 加工模型和算法", "保留原日志", "数据加工工程师"],
+      ["质量评价不合格（数据产品）", "加工 · 步骤 6 质量评价", "加工 · 步骤 5 产品生产", "保留原日志", "数据加工工程师"]
+    ]
+  };
+
+  /* ------------------------------------------------ 分片重试（采集环可闭合） */
+  function shardRetryMap() {
+    var s = getS();
+    if (!s.shardRetry) s.shardRetry = {};
+    return s.shardRetry;
+  }
+  function shardView(sh) {
+    var r = shardRetryMap()[sh.id] || 0;
+    if (!r) return { id: sh.id, n: sh.n, acc: sh.acc, rej: sh.rej, dup: sh.dup, pend: sh.pend, st: sh.st, raw: sh.st, times: 0 };
+    /* 定向重试后：原「待补」全部重新采集，接收补满，仅残留少量拒收与重复 */
+    var rej = sh.rej > 0 ? sh.rej : Math.max(1, Math.round(sh.n * 0.01));
+    var dup = sh.dup > 0 ? sh.dup : Math.max(1, Math.round(sh.n * 0.005));
+    return { id: sh.id, n: sh.n, acc: sh.n - rej - dup, rej: rej, dup: dup, pend: 0, st: "重试已完成", raw: sh.st, times: r };
+  }
+  function shardTag(st) {
+    if (st === "已完成") return "rw-tag--done";
+    if (st === "重试已完成") return "rw-tag--done";
+    if (st === "部分失败") return "rw-tag--warn";
+    return "rw-tag--fail";
+  }
+
+  /* ------------------------------------------------ 异常单（支撑字段） */
+  function issueRows() {
+    var out = [];
+    var n = 0;
+    MX().shards.forEach(function (sh) {
+      var v = shardView(sh);
+      if (v.times > 0) return;                 /* 已重试成功的分片不挂异常单 */
+      if (sh.st === "已完成") return;
+      n += 1;
+      var isFail = sh.st === "采集失败";
+      out.push([
+        "IS-2026-" + ("000" + n).slice(-4),
+        sh.id,
+        isFail ? "采集失败 · 分片不可达" : "部分失败 · 格式异常",
+        isFail ? "源数据库 API 连接超时，分片未返回数据" : "部分记录结构文件缺失，无法自动解析",
+        isFail ? "对分片 " + sh.id + " 发起定向重试" : "转入待处理队列，标记「格式异常」等待人工处理",
+        isFail ? "数据加工工程师" : "数据管理员",
+        isFail ? "数据管理员" : "数据审核员",
+        isFail ? "待重试" : "处理中",
+        isFail ? "重试成功后自动关闭" : "人工复核通过后关闭"
+      ]);
+    });
+    return out;
+  }
+
+  /* ------------------------------------------------ 操作工单（编号 8-5c） */
+  function workOrderRows() {
+    var s = getS();
+    var out = [];
+    var seq = 1180;
+    s.tasks.forEach(function (t) {
+      seq += 1;
+      out.push([
+        "WO-2026-" + ("000" + seq).slice(-4),
+        "数据录入",
+        t.id,
+        "数据录入员",
+        "系统管理员",
+        t.createdAt || "-",
+        s.entryDone.indexOf(t.id) >= 0 ? "已归档" : "执行中"
+      ]);
+    });
+    seq += 1;
+    out.push([
+      "WO-2026-" + ("000" + seq).slice(-4),
+      "重复数据辨别与删除",
+      "全库（" + LOOP_DEDUP_CYCLE + " 周期）",
+      "数据库维护员",
+      "系统管理员",
+      nowText(),
+      "已归档"
+    ]);
+    return out;
+  }
+
+  /* ================================================== 页签一：采集环闭环 */
+  function collectClosureCards() {
+    var x = MX();
+    var s = getS();
+    var shards = x.shards.map(shardView);
+    var issue = issueRows();
+
+    /* 当前选中的采集任务，默认第一个 */
+    var selectedId = s.collectTaskId || (s.tasks[0] && s.tasks[0].id) || "";
+    var selectedTask = s.tasks.filter(function (t) { return t.id === selectedId; })[0] || s.tasks[0];
+    if (selectedTask && selectedId !== selectedTask.id) { selectedId = selectedTask.id; s.collectTaskId = selectedId; }
+
+    /* 全库合计 */
+    var totN = 0, totAcc = 0, totRej = 0, totDup = 0, totPend = 0;
+    shards.forEach(function (v) { totN += v.n; totAcc += v.acc; totRej += v.rej; totDup += v.dup; totPend += v.pend; });
+    var balanced = shards.every(function (v) { return v.acc + v.rej + v.dup + v.pend === v.n; });
+
+    /* 选中任务的批次与分片 */
+    var taskTraceRows = x.trace.filter(function (r) { return r[0] === selectedId; });
+    var taskShards = shards.filter(function (v) { return v.taskId === selectedId; });
+    var selectedShardIds = x.shards.filter(function (sh) { return sh.taskId === selectedId; }).map(function (sh) { return sh.id; });
+    var taskIssues = issue.filter(function (r) { return selectedShardIds.indexOf(r[1]) >= 0; });
+
+    /* 摘要条：当前任务 + 全局关键指标 */
+    var summaryHead = '<div class="rw-card-head"><div><h3>采集任务列表</h3>'
+      + '<p>当前本库：' + s.tasks.length + ' 个任务 · ' + totAcc + ' 条已接收 · '
+      + totPend + ' 条待补 · ' + issue.length + ' 个未闭环异常 · '
+      + (s.handoffDone ? s.handoffDone.length : 0) + ' 个产物已交接</p></div>'
+      + '<div style="display:flex;gap:10px;flex:0 0 auto">'
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button>'
+      + '<button class="rw-btn" type="button" data-rw-act="tab" data-rw-tab="entry">进入资源录入 →</button></div></div>';
+
+    /* 任务列表行：点击行可切换选中，操作按钮互不干扰 */
+    var taskRows = s.tasks.map(function (t) {
+      var m = methodMeta(t.method);
+      var isSel = t.id === selectedId;
+      return "<tr" + (isSel ? ' style="background:#f0f7ff"' : "") + ' data-rw-act="select-task" data-id="' + esc(t.id) + '">'
+        + '<td class="rw-id">' + esc(t.id) + "</td>"
+        + "<td><b>" + esc(t.name) + "</b>" + (isSel ? ' <span class="rw-tag rw-tag--run">当前选中</span>' : "") + "</td>"
+        + '<td><span class="rw-tag ' + m.tag + '">' + esc(m.label) + "</span></td>"
+        + "<td>" + esc(t.desc) + "</td>"
+        + '<td><span class="rw-tag ' + tagFor(t.status) + '">' + esc(t.status) + "</span></td>"
+        + '<td class="rw-nowrap">'
+        + '<button class="rw-op" type="button" data-rw-act="view-task" data-id="' + esc(t.id) + '">查看详情</button>'
+        + '<button class="rw-op" type="button" data-rw-act="to-entry" data-id="' + esc(t.id) + '">录入</button>'
+        + "</td></tr>";
+    }).join("");
+
+    /* 选中任务的批次表 */
+    var traceHtml = taskTraceRows.length
+      ? '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr>'
+        + LOOP_TRACE_HEAD.map(function (h) { return "<th>" + esc(h) + "</th>"; }).join("")
+        + "</tr></thead><tbody>"
+        + taskTraceRows.map(function (r) {
+            return "<tr>" + r.map(function (c, i) {
+              var cls = i === 0 || i === 1 || i === 6 ? "rw-nowrap" : "";
+              return '<td class="' + cls + '">' + esc(c) + "</td>";
+            }).join("") + "</tr>";
+          }).join("")
+        + "</tbody></table></div>"
+      : '<div class="rw-empty" style="padding:22px 0">当前任务暂无批次追溯记录</div>';
+
+    /* 选中任务的分片表 */
+    var taskShardRows = taskShards.map(function (v) {
+      var canRetry = v.times === 0 && (v.raw === "采集失败" || v.raw === "部分失败");
+      return "<tr>"
+        + '<td class="rw-nowrap">' + esc(v.id) + "</td>"
+        + "<td>" + v.n + "</td>"
+        + "<td>" + v.acc + "</td><td>" + v.rej + "</td><td>" + v.dup + "</td><td>" + v.pend + "</td>"
+        + "<td>" + v.acc + "</td>"
+        + '<td><span class="rw-tag ' + shardTag(v.st) + '">' + esc(v.st) + (v.times ? "（第 " + v.times + " 次）" : "") + "</span></td>"
+        + '<td class="rw-nowrap">'
+        + (canRetry
+          ? '<button class="rw-op" type="button" data-rw-act="shard-retry" data-shard="' + esc(v.id) + '">定向重试</button>'
+          : '<button class="rw-op" type="button" data-rw-act="view-task" data-id="' + esc(v.taskId) + '">查看</button>')
+        + "</td></tr>";
+    }).join("");
+
+    var taskShardHtml = taskShards.length
+      ? '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>分片</th><th>记录数</th><th>接收</th><th>拒收</th><th>重复</th><th>待补</th><th>转加工</th><th>状态</th><th>操作</th></tr></thead><tbody>' + taskShardRows + "</tbody></table></div>"
+      : '<div class="rw-empty" style="padding:22px 0">当前任务暂无分片记录</div>';
+
+    /* 选中任务的异常单 */
+    var taskIssueHtml = taskIssues.length
+      ? '<div style="margin-top:14px"><div class="rw-section-title">该任务关联的异常单</div>'
+        + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>异常单号</th><th>来源分片</th><th>异常类型</th><th>原因</th><th>处理动作</th><th>责任人</th><th>复核人</th><th>状态</th><th>恢复方式</th></tr></thead><tbody>'
+        + taskIssues.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("")
+        + "</tbody></table></div></div>"
+      : '<div class="rw-banner" style="margin-top:14px"><span>✓</span><div>当前任务无未闭环异常单</div></div>';
+
+    /* 全库数量守恒与数据去向 */
+    var flowOutHtml = '<div class="rw-chain">'
+      + chainHtml([
+        "采集完成（" + totAcc + " 条接收）",
+        { text: "进入资源录入", cls: "is-fork" },
+        { text: "资源加工（V0.0 → V1.0 → V2.0）", cls: "is-fork" },
+        { text: "产物交接 → 标准化 → 数据集入库", cls: "is-end" }
+      ])
+      + "</div>";
+
+    /* 规则折叠区：审核与整合 + 更新策略 + 统计 */
+    var stats = x.stats.map(function (r) {
+      return '<div class="rw-step-row" style="grid-template-columns:1fr"><div><div><b style="font-size:15px;color:#22364f">'
+        + esc(r[0]) + '</b></div><div class="rw-field-tip">' + esc(r[1]) + "</div></div></div>";
+    }).join("");
+
+    var rulesHtml = '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>数据审核与整合</h3><p>数据审核保证可信度与适用性，数据整合保证标准化；三项均按清单原文执行。</p></div></div>'
+      + '<div class="rw-section-title">① 可信度审核</div>' + tableHtml(x.cred)
+      + '<div class="rw-section-title" style="margin-top:14px">② 适用性审核</div>' + tableHtml(x.appl)
+      + '<div class="rw-section-title" style="margin-top:14px">③ 数据整合（格式统一）</div>' + tableHtml(x.unify)
+      + "</div>"
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>数据更新策略</h3>'
+      + "<p>数据更新分「现有条目基础信息更新」与「新增条目」两条线，分别来自外部同步与自主计算。</p></div></div>"
+      + tableHtml(x.upd)
+      + "</div>"
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>数据录入统计</h3>'
+      + "<p>按清单「数据统计」要求，实时汇报数据总量、占用硬件空间与剩余硬件空间，并按固定周期辨别和删除重复数据。</p></div></div>"
+      + '<div class="rw-steps">' + stats + "</div>"
+      + "</div>";
+
+    /* 当前任务的三类详情用子页签分开，一次只呈现一类，避免三张表纵向堆叠 */
+    var view = s.collectTaskView || "trace";
+    var subTabs = '<div class="rw-subtabs">'
+      + '<button class="rw-subtab' + (view === "trace" ? " is-active" : "") + '" type="button" data-rw-act="collect-view" data-view="trace">来源追溯</button>'
+      + '<button class="rw-subtab' + (view === "shard" ? " is-active" : "") + '" type="button" data-rw-act="collect-view" data-view="shard">分片状态</button>'
+      + '<button class="rw-subtab' + (view === "issue" ? " is-active" : "") + '" type="button" data-rw-act="collect-view" data-view="issue">异常单（' + taskIssues.length + '）</button>'
+      + "</div>";
+
+    var conserveBanner = balanced
+      ? '<div class="rw-banner" style="margin-top:12px"><span>✓</span><div>数量守恒校验通过：本任务全部分片满足「记录数 = 接收 + 拒收 + 重复 + 待补」，且「接收 = 转加工」。</div></div>'
+      : '<div class="rw-banner rw-banner--err" style="margin-top:12px"><span>✕</span><div>数量守恒校验未通过，存在分片去向未登记。</div></div>';
+
+    var taskIssueTable = taskIssues.length
+      ? '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>异常单号</th><th>来源分片</th><th>异常类型</th><th>原因</th><th>处理动作</th><th>责任人</th><th>复核人</th><th>状态</th><th>恢复方式</th></tr></thead><tbody>'
+        + taskIssues.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("")
+        + "</tbody></table></div>"
+      : '<div class="rw-empty" style="padding:22px 0">当前任务无未闭环异常单</div>';
+
+    var detailBody = view === "shard"
+      ? taskShardHtml + conserveBanner
+      : view === "issue" ? taskIssueTable : traceHtml;
+
+    return '<div class="rw-card">'
+      + summaryHead
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>采集ID</th><th>采集任务名称</th><th>采集方式</th><th>采集说明</th><th>状态</th><th>操作</th></tr></thead><tbody>' + taskRows + "</tbody></table></div>"
+      + (issue.length
+        ? '<div class="rw-banner rw-banner--warn" style="margin-top:12px"><span>⚠</span><div>全库尚有 '
+          + issue.length + " 条未闭环异常单；切到对应任务 →「异常单」子页签可查看原因与处理动作。</div></div>"
+        : "")
+      + "</div>"
+
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>当前任务 · ' + esc(selectedId) + "</h3>"
+      + '<p>点击上方任务列表中的行可切换任务；来源追溯、分片状态、异常单随任务联动。</p></div></div>'
+      + subTabs + detailBody
+      + "</div>"
+
+      + '<details style="margin-top:8px;background:#fff;border-radius:8px;border:1px solid #e6ecf5;overflow:hidden">'
+      + '<summary style="padding:16px 20px;cursor:pointer;font-weight:600;color:#22364f;list-style:none;outline:none">📋 规范说明：数据审核与整合 / 数据更新策略 / 数据录入统计</summary>'
+      + '<div style="padding:0 20px 20px">' + rulesHtml + '</div></details>';
+  }
+
+  /* ================================================== 页签二：录入环闭环 */
+  function entryClosureCards(view) {
+    /* 这 6 张卡是「规范说明」，只在「录入规范说明」子 Tab 下出现，避免跟操作视图混在一起 */
+    if (view !== "spec") return "";
+    var perm = getS().approvals && getS().approvals["perm"];
+    var permBanner = perm
+      ? '<div class="rw-banner" style="margin-bottom:14px"><span>✓</span><div>数据录入权限申请已于 ' + esc(perm.at) + ' 提交，当前状态：' + esc(perm.status) + "；管理员审核通过后即可执行录入。</div></div>"
+      : '<div class="rw-banner" style="margin-bottom:14px"><span>ⓘ</span><div>大规模录入前，请先提交「数据录入权限申请」，由管理员授予相应数据的读写权限。</div></div>';
+    return permBanner
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>数据资源录入权限</h3>'
+      + "<p>管理员拥有数据录入最高权限，并可将读取 / 修改权限授予数据库工作人员；普通数据使用者不具有录入权限。</p></div></div>"
+      + tableHtml(LOOP_PERM)
+      + '<div style="margin-top:14px"><div class="rw-section-title">权限授予链路</div>'
+      + chainHtml(["数据库工作人员提出申请", "管理员审核批准", "授予相应数据读写权限", "执行数据录入", "到期 / 任务完成后权限回收"])
+      + "</div></div>"
+
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>数据录入审批</h3>'
+      + "<p>大规模数据录入须事先进行数据质量审核，防止错误数据污染数据库。</p></div>"
+      + '<div><button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-apply-perm">提交权限申请</button></div></div>'
+      + chainHtml(["提交录入申请", "事先数据质量审核", "管理员审批通过", "执行数据录入", "结果复核", "归档"])
+      + "</div>"
+
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>操作工单备案</h3>'
+      + "<p>数据录入与删除操作均与工单号一一对应，数据出错时可回溯发生时间与相应负责人员。</p></div></div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>工单号</th><th>操作类型</th><th>操作对象</th><th>操作人</th><th>审批人</th><th>操作时间</th><th>状态</th></tr></thead><tbody>'
+      + workOrderRows().map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("")
+      + "</tbody></table></div></div>"
+
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>定期备份</h3>'
+      + "<p>为减少硬件故障与人员误操作带来的损害，按下列策略定期备份并做完整性校验。</p></div></div>"
+      + tableHtml(LOOP_BACKUP)
+      + "</div>"
+
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>质量控制</h3><p>对资料来源及录入汇总各环节进行监督，含准确性、整合性与及时性三项。</p></div></div>'
+      + tableHtml(LOOP_QC)
+      + "</div>"
+
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>字段状态与证据类型</h3>'
+      + "<p>字段按四级状态判定是否放行入库，evidence_type 标注每条数值的来源性质，两者共同构成可重复性凭证。</p></div></div>"
+      + '<div class="rw-section-title">① 字段状态</div>' + tableHtml(LOOP_FIELD_STATUS)
+      + '<div class="rw-section-title" style="margin-top:14px">② 证据类型（evidence_type）</div>' + tableHtml(LOOP_EVIDENCE)
+      + "</div>";
+  }
+
+  /* ================================================== 页签三：加工环闭环 */
+  function procClosureCards(view) {
+    var x = MX();
+    var s = getS();
+    var doneMap = {};
+    (s.handoffDone || []).forEach(function (id) { doneMap[id] = true; });
+    var doneCount = 0;
+    var handoffRows = x.handoff.map(function (r, idx) {
+      var hid = "HO-" + C().code + "-" + ("000" + (idx + 1)).slice(-4);
+      var isDone = doneMap[hid];
+      if (isDone) doneCount += 1;
+      return "<tr>"
+        + "<td>" + esc(r[0]) + "</td>"
+        + "<td>" + esc(r[1]) + "</td>"
+        + '<td class="rw-nowrap">' + esc(r[2]) + "</td>"
+        + "<td>" + esc(r[3]) + "</td>"
+        + '<td><span class="rw-tag ' + (isDone ? "rw-tag--done" : "rw-tag--gray") + '">' + (isDone ? "已交接（" + hid + "）" : "待交接") + "</span></td>"
+        + '<td class="rw-nowrap">'
+        + (isDone
+          ? '<button class="rw-op" type="button" data-rw-act="view-task" data-id="' + esc(hid) + '">查看交接单</button>'
+          : '<button class="rw-op rw-op--primary" type="button" data-rw-act="proc-handoff" data-handoff="' + esc(hid) + '">发起交接</button>')
+        + "</td></tr>";
+    }).join("");
+
+    var progressHtml = doneCount === x.handoff.length
+      ? '<div class="rw-banner" style="margin-bottom:14px"><span>✓</span><div>本材料全部 ' + x.handoff.length + ' 项加工产物已交接完成，可进入下游「数据标准化」与「数据集入库」环节。</div></div>'
+      : '<div class="rw-banner" style="margin-bottom:14px"><span>ⓘ</span><div>本材料共有 ' + x.handoff.length + ' 项加工产物等待交接，已交接 ' + doneCount + ' 项；点击「发起交接」推进至下游数据集。</div></div>';
+
+    return (x.procNote
+      ? '<div class="rw-banner"><span>ⓘ</span><div>' + esc(x.procNote) + "</div></div>"
+      : "")
+      /* 返工规则是参考说明，只在「加工规范说明」子页签出现，任务视图保持清爽 */
+      + (view === "spec"
+        ? '<div class="rw-card">'
+          + '<div class="rw-card-head"><div><h3>加工返工与定向退回</h3>'
+          + "<p>质量评价贯穿加工全过程；按失败类型退回指定节点，原执行日志全部保留，返工后可继续推进版本。</p></div></div>"
+          + tableHtml(LOOP_REWORK)
+          + "</div>"
+        : "")
+
+      + '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>加工产物交接（对外出口）</h3>'
+      + "<p>加工产物（V2.0）在此交接给下游「数据标准化」与「数据集入库」环节，交接清单按清单数据库模块逐项登记。</p></div></div>"
+      + progressHtml
+      + '<div style="margin-bottom:14px">' + chainHtml([
+        "加工产物（V2.0）", "数据标准化（编号 23–27）",
+        { text: "数据集入库（编号 28–51）", cls: "is-fork" },
+        { text: "主题应用（编号 52–86）", cls: "is-end" }
+      ]) + "</div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>加工产物</th><th>目标数据集</th><th>目标模块（清单编号）</th><th>交接内容</th><th>交接状态</th><th>操作</th></tr></thead><tbody>'
+      + handoffRows
+      + "</tbody></table></div>"
+      + "</div>";
+  }
+
+  /* ================================================== 采集任务详情：追溯信息 */
+  function detailClosureHtml(t) {
+    var x = MX();
+    var row = null;
+    x.trace.forEach(function (r) { if (r[0] === t.id) row = r; });
+    if (!row) row = x.trace[0];
+    /* 取该任务所属的第一个分片来展示数量守恒 */
+    var firstShard = x.shards.filter(function (sh) { return sh.taskId === t.id; })[0] || x.shards[0];
+    var v = shardView(firstShard);
+    return '<div class="rw-section-title" style="font-size:14px">追溯信息</div>'
+      + '<div class="rw-kv">'
+      + "<div><b>批次ID</b>" + esc(row[0]) + "</div>"
+      + "<div><b>source_id</b>" + esc(row[1]) + "</div>"
+      + "<div><b>来源名称</b>" + esc(row[2]) + "</div>"
+      + "<div><b>来源类型</b>" + esc(row[3]) + "</div>"
+      + "<div><b>数据版本</b>" + esc(row[4]) + "</div>"
+      + "<div><b>原始文件</b>" + esc(row[5]) + "</div>"
+      + "<div><b>SHA-256</b>" + esc(row[6]) + "</div>"
+      + "<div><b>采集时间</b>" + esc(row[7]) + "</div>"
+      + "</div>"
+      + '<div class="rw-section-title" style="font-size:14px">数量守恒（分片 ' + esc(v.id) + "）</div>"
+      + '<div class="rw-kv">'
+      + "<div><b>记录数</b>" + v.n + " 条</div>"
+      + "<div><b>接收</b>" + v.acc + " 条</div>"
+      + "<div><b>拒收</b>" + v.rej + " 条</div>"
+      + "<div><b>重复</b>" + v.dup + " 条</div>"
+      + "<div><b>待补</b>" + v.pend + " 条</div>"
+      + "<div><b>转加工</b>" + v.acc + " 条</div>"
+      + "</div>";
+  }
+
   /* ------------------------------------------------------------ 交互处理 */
   function handleAct(act, node) {
     var s = getS();
@@ -3244,6 +4020,31 @@
         s.tab = node.getAttribute("data-rw-tab") || "collect";
         if (s.tab === "collect") s.focusTaskId = "";
         renderRwPage();
+        return;
+      case "shard-retry":
+        /* 失败分片定向重试：待补归零、接收补满，对应异常单自动关闭 */
+        (function () {
+          var sid = node.getAttribute("data-shard") || "";
+          if (!sid) return;
+          var m = shardRetryMap();
+          m[sid] = (m[sid] || 0) + 1;
+          renderRwPage();
+          toast("分片 " + sid + " 已重新采集，待补记录全部补回，数量守恒重新校验通过", "ok");
+        })();
+        return;
+      case "entry-apply-perm":
+        getS().approvals["perm"] = { status: "已提交", at: nowText() };
+        renderRwPage();
+        toast("数据录入权限申请已提交，等待系统管理员审核", "ok");
+        return;
+      case "proc-handoff":
+        (function () {
+          var hid = node.getAttribute("data-handoff") || "";
+          var s = getS();
+          if (s.handoffDone.indexOf(hid) < 0) s.handoffDone.push(hid);
+          renderRwPage();
+          toast("加工产物已发起交接，单号 " + hid + "，等待标准化入库", "ok");
+        })();
         return;
       case "open-create":
         openCreate();
@@ -3262,6 +4063,14 @@
         return;
       case "view-task":
         openDetail(node.getAttribute("data-id") || "");
+        return;
+      case "select-task":
+        getS().collectTaskId = node.getAttribute("data-id") || "";
+        renderRwPage();
+        return;
+      case "collect-view":
+        getS().collectTaskView = node.getAttribute("data-view") || "trace";
+        renderRwPage();
         return;
       case "to-entry":
         closeDetail();
@@ -4852,11 +5661,49 @@
   /* ---------------------------------------------------------- 配置切换 */
   /* 所有材料相关常量都是模块级 var，切换页面时整体重挂即可，
      这样下面的两千多行界面逻辑完全不用关心当前是哪种材料。 */
+  /* 模块级初始值即二维材料的默认配置。切换材料前必须先还原这批默认值，
+     否则「上一类材料覆盖过、而本类配置里没给」的字段会串味
+     （典型：从催化页切回二维时 procS2~procS6 仍是催化的）。 */
+  var RW_DEFAULTS = null;
+  function snapshotDefaults() {
+    RW_DEFAULTS = {
+      methods: METHODS, openDbs: OPEN_DBS, buyDbs: BUY_DBS,
+      calcOutputs: CALC_OUTPUTS, calcInputs: CALC_INPUTS,
+      calcInputDesc: CALC_INPUT_DESC, calcCompliance: CALC_COMPLIANCE,
+      entryMethodRows: ENTRY_METHOD_ROWS, entryBatchSteps: ENTRY_BATCH_STEPS,
+      entryManualSteps: ENTRY_MANUAL_STEPS, entryRules: ENTRY_RULES,
+      entrySources: ENTRY_SOURCES, dataTypeCodes: DATA_TYPE_CODES,
+      entryManualFields: ENTRY_MANUAL_FIELDS, entryCalcParams: ENTRY_CALC_PARAMS,
+      procFlow: PROC_FLOW, procStepTitles: PROC_STEP_TITLES,
+      procS1: PROC_S1, procS2: PROC_S2, procS3: PROC_S3,
+      procS4: PROC_S4, procS5: PROC_S5, procS6: PROC_S6,
+      procVersion: PROC_VERSION, procModels: PROC_MODELS,
+      procProducts: PROC_PRODUCTS, procQuality: PROC_QUALITY
+    };
+  }
+  function restoreDefaults() {
+    var d = RW_DEFAULTS;
+    METHODS = d.methods; OPEN_DBS = d.openDbs; BUY_DBS = d.buyDbs;
+    CALC_OUTPUTS = d.calcOutputs; CALC_INPUTS = d.calcInputs;
+    CALC_INPUT_DESC = d.calcInputDesc; CALC_COMPLIANCE = d.calcCompliance;
+    ENTRY_METHOD_ROWS = d.entryMethodRows; ENTRY_BATCH_STEPS = d.entryBatchSteps;
+    ENTRY_MANUAL_STEPS = d.entryManualSteps; ENTRY_RULES = d.entryRules;
+    ENTRY_SOURCES = d.entrySources; DATA_TYPE_CODES = d.dataTypeCodes;
+    ENTRY_MANUAL_FIELDS = d.entryManualFields; ENTRY_CALC_PARAMS = d.entryCalcParams;
+    PROC_FLOW = d.procFlow; PROC_STEP_TITLES = d.procStepTitles;
+    PROC_S1 = d.procS1; PROC_S2 = d.procS2; PROC_S3 = d.procS3;
+    PROC_S4 = d.procS4; PROC_S5 = d.procS5; PROC_S6 = d.procS6;
+    PROC_VERSION = d.procVersion; PROC_MODELS = d.procModels;
+    PROC_PRODUCTS = d.procProducts; PROC_QUALITY = d.procQuality;
+  }
+
   function applyCfg(pid) {
     var k = keyOf(pid);
     if (!k) return false;
     var c = MAT[k];
     if (!c) return false;
+    if (!RW_DEFAULTS) snapshotDefaults();
+    restoreDefaults();
     CFG_KEY = k;
     PAGE_ID = pid;
 
