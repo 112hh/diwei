@@ -1,0 +1,107 @@
+== overlays before
+["twodStandardFieldModal|none|                                 新增字段   ","twodIngestResourceObjectModal|none|                                 新增资源对象 ","twodIngestGenericRowModal|none|                                 新增配置   ","twodIngestTaskDetailModal|none|                                        ","twodIngestSecurityModal|none|                                 安全等级操作 ","twodSecurityGuideModal|none|                                        ","twodIngestTaskErrorModal|none|                                        ","twodStandardizationRuleModal|none|                                 新增标准规则 ","twodDatabaseDatasetModal|none|                                 新增数据集  ","twodDatabaseDatasetDetailModal|none|                                        ","twodDatabaseStructurePreviewModal|none|                                 原子结构图  ","systemCrudModal|none|                                系统管理    ","resourceCatalogDetailModal|none|                                数据资源详情  ","materialModal|none|                                MoS₂    ","twodDetailDownloadModal|none|                     确认下载         ×     ","twodVisualPreviewModal|none|                                性质可视化图集 ","electrolyteUploadModal|none|                     新增数据         ×     ","electrolyteReviewModal|none|                     提交审核         ×     ","electrolyteRecordModal|none|                     更新记录详情         ×   ","optoDetailModal|none|                                TPD - 数据","optoStructureModal|none|                                三维结构    ","optoSpectraModal|none|                                表征图谱    ","optoParamsModal|none|                                特征参数    ","mlffDetailModal|none|                                机器学习力场数据","mlffGlossaryModal|none|                                机器学习力场数据","mlffUploadModal|none|                     机器学习力场数据上传         ","mlffConvertModal|none|                     文件格式转换         ×   ","mlffRecordModal|none|                     数据处理更新记录         × ","catalystDetailModal|none|                                        ","catalystUploadModal|none|                     新增数据         ×     ","catalystReviewModal|none|                     提交审核         ×     ","catalystRecordModal|none|                     数据处理更新记录         × ","catalystModelPreviewModal|none|                                模型预览    ","addDataModal|none|                     二维材料数据上传         × ","convertModal|none|                     文件转换         ×     ","reviewModal|none|                     提交审核         ×     ","recordDetailModal|none|                     记录详情         ×     ","forgotPasswordModal|none|                     忘记密码         ×     ","profileModal|none|                     个人中心         ×     ","algorithmManualModal|none|                     非磁单层材料结构驰豫算法 - 使用手册","algorithmDocModal|none|                     非磁单层材料结构驰豫算法 - 算法详情","algorithmCodeModal|none|                     下载代码包         ×    ","algorithmMaintenanceModal|none|                     算法维护提示         ×   ","algorithmRequestModal|none|                     调用登记已创建         ×  ","toolDetailModal|none|                                工具名称    ","toolDownloadModal|none|                                下载代码包   ","toolGuideModal|none|                                平台部署与使用指","predictionTaskModal|none|                                ⚡       ","materialConvertDetailModal|none|                                        ","mlffReviewModal|none|                                        ","optoUploadModal|none|                                        ","optoReviewModal|none|                                        ","optoRecordModal|none|                                        "]
+== click 数据安全等级: clicked:<button class="rw-btn" type="button" data-twod-security-guide="">数据安全等级</button>
+["twodStandardFieldModal|none|                                 新增字段             ×                                              取消             保存      ","twodIngestResourceObjectModal|none|                                 新增资源对象             ×                                              取消             保存    ","twodIngestGenericRowModal|none|                                 新增配置             ×                                              取消             保存      ","twodIngestTaskDetailModal|none|                                                采集任务详情               查看二维材料数据资源采集结果、来源范围与入库准备情况                         ","twodIngestSecurityModal|none|                                 安全等级操作             ×                                              取消             保存    ","twodSecurityGuideModal|VISIBLE|数据安全等级说明  二维材料数据库数据整理、定级准备、级别判定与用户审核机制  ×  二维材料数据库中的数据不包含隐私、涉密等敏感数据，因此不存在无法公开的数据。我方依据数据来源与数据时效性对数据进行整理与安全定级，并通过用户身份审核机制保","twodIngestTaskErrorModal|none|                                                错误详情               查看数据资源采集失败原因、自动重试记录与错误日志                          ×  ","twodStandardizationRuleModal|none|                                 新增标准规则             ×                                              取消             保存    ","twodDatabaseDatasetModal|none|                                 新增数据集             ×                                              取消             保存     ","twodDatabaseDatasetDetailModal|none|                                                数据集详情               查看数据集字段和内容信息                          ×             ","twodDatabaseStructurePreviewModal|none|                                 原子结构图             ×                                      ","systemCrudModal|none|                                系统管理           新增或编辑管理信息                  ×                             ","resourceCatalogDetailModal|none|                                数据资源详情           查看数据资源目录字段内容                  ×                              关闭        ","materialModal|none|                                MoS₂           ID: 2D-MoS2-001                                          基本信息            ","twodDetailDownloadModal|none|                     确认下载         ×                                  当前内容           确认下载当前内容？                           ","twodVisualPreviewModal|none|                                性质可视化图集           当前可视化内容                  ×                                            ","electrolyteUploadModal|none|                     新增数据         ×                                           ","electrolyteReviewModal|none|                     提交审核         ×                             ","electrolyteRecordModal|none|                     更新记录详情         ×                              关闭               ","optoDetailModal|none|                                TPD - 数据详情           有机光电材料基础信息与三维结构预览                  ×                               ","optoStructureModal|none|                                三维结构           有机光电材料的分子三维结构展示                  ×                                       ","optoSpectraModal|none|                                表征图谱           有机光电材料的表征图谱与光谱数据                  ×                                      ","optoParamsModal|none|                                特征参数           有机光电材料的电子结构与分子特征参数                  ×                                    ","mlffDetailModal|none|                                机器学习力场数据详情           分子信息、力场参数与结构可视化                  ×                                 ","mlffGlossaryModal|none|                                机器学习力场数据术语表           通过弹窗查看参数数据定义表与数据获取方法表，不再跳转到页面下方。                  ×               ","mlffUploadModal|none|                     机器学习力场数据上传         ×                                  文件名称                                        文","mlffConvertModal|none|                     文件格式转换         ×                                               第三方工具转换                            从","mlffRecordModal|none|                     数据处理更新记录         ×                                  记录信息                                           ","catalystDetailModal|none|                                             Pt(111)             ID: CAT-PT-111-001                      ×              ","catalystUploadModal|none|                     新增数据         ×                                           ","catalystReviewModal|none|                     提交审核         ×                             ","catalystRecordModal|none|                     数据处理更新记录         ×                              关闭               ","catalystModelPreviewModal|none|                                模型预览           基于当前参数生成的催化材料结构预览                  ×                                     ","addDataModal|none|                     二维材料数据上传         ×                                               01上传文件             02补充信息         ","convertModal|none|                     文件转换         ×                                               第三方工具转换                            从当前","reviewModal|none|                     提交审核         ×                                               第一步：选择文件             下一步 →            ","recordDetailModal|none|                     记录详情         ×                                               基本信息                                  ","forgotPasswordModal|none|                     忘记密码         ×                                           请输入您的注册用户名或邮箱，系统将发送验证码。                   ","profileModal|none|                     个人中心         ×                                  R                        研究员             researcher","algorithmManualModal|none|                     非磁单层材料结构驰豫算法 - 使用手册         ×                       文档信息                             内容简介          ","algorithmDocModal|none|                     非磁单层材料结构驰豫算法 - 算法详情         ×                                                              非磁单层材料结构","algorithmCodeModal|none|                     下载代码包         ×                                  ⬇                        非磁单层材料结构驰豫算法             ","algorithmMaintenanceModal|none|                     算法维护提示         ×                                  当前算法服务处于维护中，可继续查看使用手册与算法详情。维护窗口为 2026-04-21 至 202","algorithmRequestModal|none|                     调用登记已创建         ×                                              关闭         复制请求示例               ","toolDetailModal|none|                                工具名称           功能成效                  ×                                              关闭  ","toolDownloadModal|none|                                下载代码包           请确认是否下载当前工具代码包。                  ×                                  ⬇   ","toolGuideModal|none|                                平台部署与使用指引           环境要求 · 安装步骤 · 配置说明 · 使用示例                  ×                        ","predictionTaskModal|none|                                ⚡                        发起预测任务             配置任务名称、算法和计算参数后提交预测。                        ","materialConvertDetailModal|none|                                                                        转换记录详情                     查看文件转换业务记录           ","mlffReviewModal|none|                                                   提交审核                   ×                                             ","optoUploadModal|none|                                                   新增数据                   ×                                             ","optoReviewModal|none|                                                   提交审核                   ×                                             ","optoRecordModal|none|                                                   更新记录详情                   ×                                           "]
+== 资源加工页签: ok
+二维材料数据采集加工处理
+
+面向二维材料数据的采集、录入与加工全流程管理：支持开源数据库 API 采集、已购 / 自采数据导入与 VASP 计算数据提取，
+内置字段级校验、异常处理队列与质量评价规则，采集结果确认后统一入库。
+
+数据安全等级
+资源采集3
+资源录入3
+资源加工0
+加工任务（0）
+加工规范说明
+加工任务工作台
+
+已入库数据 0 条可参与加工；每个加工任务按「数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价」六步执行，版本随阶段推进 V0.0 → V1.0 → V2.0。
+
+＋ 新建加工任务
+任务ID	加工任务名称	版本	当前步骤	数据量	创建时间	操作
+
+暂无加工任务，点击「新建加工任务」按六步流程开始加工
+加工流程总览
+
+数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价
+
+1
+数据策划
+明确数据产品目标用途、格式与精度要求
+→
+2
+基础数据筛选
+按质量等级与材料类型筛选可用数据集合
+→
+3
+标准化预处理
+格式 / 单位统一、缺失值与异常值处理
+→
+4
+数据加工
+属性统计、图谱标准化、结构优化验证
+→
+5
+产品生产
+AI 训练集、科研参考集、跨库融通集
+→
+6
+质量评价
+来源质量、模型质量、产品质量抽样评价
+加工产物交接（对外出口）
+
+加工产物（V2.0）在此交接给下游「数据标准化」与「数据集入库」环节，交接清单按清单数据库模块逐项登记。
+
+ⓘ
+本材料共有 8 项加工产物等待交接，已交接 0 项；点击「发起交接」推进至下游数据集。
+加工产物（V2.0）
+→
+数据标准化（编号 23–27）
+→
+数据集入库（编号 28–51）
+→
+主题应用（编号 52–86）
+加工产物	目标数据集	目标模块（清单编号）	交接内容	交接状态	操作
+二维材料结构特征数据集（V2.0）	二维材料数据库 · 结构特征数据集	编号 28	化学式、晶系与空间群、晶胞原子结构、晶格常数、原子坐标、键长键角、层间厚度	待交接	发起交接
+二维材料电子结构数据集（V2.0）	二维材料数据库 · 电子结构数据集	编号 29	能带结构、态密度、电子有效质量	待交接	发起交接
+二维材料电学性质数据集（V2.0）	二维材料数据库 · 电学性质数据集	编号 30	铁电性、压电性	待交接	发起交接
+二维材料磁学性质数据集（V2.0）	二维材料数据库 · 磁学性质数据集	编号 31	磁基态构型、磁转变温度	待交接	发起交接
+二维材料热学性质数据集（V2.0）	二维材料数据库 · 热学性质数据集	编号 32	形成能、声子谱、声子态密度	待交接	发起交接
+二维材料力学性质数据集（V2.0）	二维材料数据库 · 力学性质数据集	编号 33	弹性常数、杨氏模量、泊松比	待交接	发起交接
+二维材料光学性质数据集（V2.0）	二维材料数据库 · 光学性质数据集	编号 34	介电函数、光吸收系数、反射率、折射率、消光系数	待交接	发起交接
+二维材料缺陷性质数据集（V2.0）	二维材料数据库 · 缺陷性质数据集	编号 35	空位缺陷、反位缺陷、缺陷构型、缺陷形成能	待交接	发起交接
+== 资源录入页签: ok
+二维材料数据采集加工处理
+
+面向二维材料数据的采集、录入与加工全流程管理：支持开源数据库 API 采集、已购 / 自采数据导入与 VASP 计算数据提取，
+内置字段级校验、异常处理队列与质量评价规则，采集结果确认后统一入库。
+
+数据安全等级
+资源采集3
+资源录入3
+资源加工0
+数据录入工作台
+
+按数据来源选择录入方式：公开库 / C2DB 走定制插件批量导入，VASP 自主计算走自动化流程，文献与用户上传走手动录入并自动校验。
+
+⇧ 批量导入
+＋ 新增材料（单条录入）
+数据来源	推荐录入方式	系统自动识别规则	人工介入点	操作
+Materials Project 等公开库	定制插件批量导入	文件头含 "Materials Project" 标识	采集参数配置	按此来源导入手动录入
+C2DB 数据库	定制插件批量导入	文件头含 "C2DB" 标识	采集参数配置	按此来源导入手动录入
+VASP 自主计算数据	自动化流程录入	包含 INCAR+POSCAR+POTCAR+KPOINTS	参数合规性复核	按此来源导入手动录入
+文献提取数据	手动输入	无法自动识别	全文录入	按此来源导入手动录入
+用户上传数据	手动输入 + 自动校验	文件格式识别	质量审核	按此来源导入手动录入
+待录入数据（3）
+录入审核（0）
+已入库数据（0）
+录入规范说明
+待录入数据
+
+资源采集完成后进入录入环节，点击「录入」填写材料数据并提交审核。
+
+采集ID	采集任务名称	采集方式	采集状态	原始文件	操作
+2D-CL-2026-0922-001	过渡金属硫族化合物（MoS2）电子结构数据采集	开源数据获取	已完成	JSON / CIF	录入查看
+2D-CL-2026-0923-002	过渡金属硫族化合物（WS2）力学性质数据采集	数据购买 / 自采数据	已完成	JSON	录入查看
+2D-CL-2026-0923-003	二维磁性材料（CrI3）态密度数据计算	数据计算	待确认	JSON	录入查看

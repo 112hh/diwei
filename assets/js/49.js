@@ -789,12 +789,32 @@
     "__SCOPE__ .lstd-intro { padding:0 20px 15px; color:#6b7a90; font-size:12.5px; line-height:20px; }",
     /* —— 规则表格 —— */
     "__SCOPE__ .lstd-table-wrap { overflow:auto; border-radius:0 0 10px 10px; }",
-    "__SCOPE__ .lstd-table { width:100%; min-width:780px; border-collapse:collapse; table-layout:fixed; }",
-    "__SCOPE__ .lstd-table col.c-item { width:150px; }",
-    "__SCOPE__ .lstd-table col.c-field { width:130px; }",
-    "__SCOPE__ .lstd-table col.c-value { width:200px; }",
-    "__SCOPE__ .lstd-table col.c-type { width:96px; }",
-    "__SCOPE__ .lstd-table col.c-op { width:110px; }",
+    "__SCOPE__ .lstd-table { width:100%; min-width:1020px; border-collapse:collapse; table-layout:fixed; }",
+    "__SCOPE__ .lstd-table col.c-item { width:140px; }",
+    "__SCOPE__ .lstd-table col.c-field { width:120px; }",
+    "__SCOPE__ .lstd-table col.c-value { width:190px; }",
+    "__SCOPE__ .lstd-table col.c-type { width:88px; }",
+    "__SCOPE__ .lstd-table col.c-req { width:104px; }",
+    "__SCOPE__ .lstd-table col.c-mod { width:112px; }",
+    "__SCOPE__ .lstd-table col.c-op { width:104px; }",
+    /* —— 来源条款 / 最近修改 / 版本条 —— */
+    "__SCOPE__ .lstd-clause { display:inline-block; padding:2px 8px; border-radius:5px; background:#eef4ff; border:1px solid #d9e6ff; color:#1f63ff; font-size:11.5px; font-weight:700; white-space:nowrap; }",
+    "__SCOPE__ .lstd-mod { display:flex; flex-direction:column; gap:2px; color:#6b7a90; font-size:11.5px; line-height:1.55; }",
+    "__SCOPE__ .lstd-mod b { color:#334155; font-weight:700; }",
+    "__SCOPE__ .lstd-version-bar { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:0 0 14px; padding:12px 16px; border:1px solid #cfe0fb; border-radius:10px; background:linear-gradient(180deg,#f8fbff,#f2f7ff); }",
+    "__SCOPE__ .lstd-version-main { display:flex; align-items:center; gap:12px; flex-wrap:wrap; color:#6b7a90; font-size:12.5px; }",
+    "__SCOPE__ .lstd-version-main strong { color:#12305c; font-size:14px; font-weight:800; }",
+    "__SCOPE__ .lstd-version-tag { padding:3px 10px; border-radius:6px; background:#165DFF; color:#fff; font-size:12px; font-weight:800; }",
+    "__SCOPE__ .lstd-version-acts { display:flex; gap:8px; flex-wrap:wrap; }",
+    "__SCOPE__ .lstd-version-btn { min-height:32px; padding:0 13px; border:1px solid #cfdcee; border-radius:8px; background:#fff; color:#33456b; font-size:12.5px; font-weight:700; cursor:pointer; }",
+    "__SCOPE__ .lstd-version-btn:hover { border-color:#165DFF; color:#165DFF; background:#f5f9ff; }",
+    ".lstd-history-modal { width:min(720px,96vw); }",
+    ".lstd-history-table { width:100%; border-collapse:collapse; font-size:13px; }",
+    ".lstd-history-table th { padding:10px 12px; background:#f4f6fa; color:#55657c; font-size:12px; font-weight:700; text-align:left; white-space:nowrap; }",
+    ".lstd-history-table td { padding:10px 12px; border-bottom:1px solid #eef2f7; color:#334155; vertical-align:top; }",
+    ".lstd-history-table td.wrap { white-space:normal; line-height:1.7; }",
+    ".lstd-hist-now { display:inline-block; padding:2px 9px; border-radius:999px; background:#eaf6ef; color:#1e7e45; font-size:11.5px; font-weight:700; }",
+    ".lstd-hist-old { display:inline-block; padding:2px 9px; border-radius:999px; background:#f1f5fa; color:#6b7a90; font-size:11.5px; font-weight:700; }",
     "__SCOPE__ .lstd-table th { height:42px; padding:0 16px; border-bottom:1px solid #e8eef6; background:#f4f6fa; color:#55657c; font-size:12px; font-weight:700; text-align:left; white-space:nowrap; }",
     "__SCOPE__ .lstd-table td { padding:12px 16px; border-bottom:1px solid #eef2f7; color:#334155; font-size:12.5px; vertical-align:top; }",
     "__SCOPE__ .lstd-table tr:last-child td { border-bottom:0; }",
@@ -1012,29 +1032,124 @@
     )).join("") + "</div>";
   }
 
+  /* ===================== 规则溯源元信息 =====================
+     需求 23-27 对应五个库的「数据标准化」，每库下 5 类标准化的子条款序号即
+     需求条目号（如二维「计算方法标准化」= 需求 23(1)），用于验收逐条溯源。 */
+  const LSTD_REQUIREMENT_NO = { twod: 23, opto: 24, electrolyte: 25, mlff: 26, catalyst: 27 };
+
+  /* 规则库版本：随标准体系页发布的标准版本同步（需求 1-5 → 23-27 派生关系） */
+  const LSTD_RULE_VERSION = { version: "V2.0", effective: "2026-09-01", publisher: "低维材料标准体系建设组" };
+
+  function lstdReqClause(pageId, categoryKey) {
+    const lib = stdLib(pageId);
+    const no = LSTD_REQUIREMENT_NO[lib.key] || 23;
+    const index = lib.categories.findIndex((item) => item.key === categoryKey);
+    return "需求 " + no + "(" + (index < 0 ? 1 : index + 1) + ")";
+  }
+
+  /* 最近修改人 / 时间：按规则 id 确定性派生，保证每次渲染一致 */
+  const LSTD_RULE_EDITORS = ["马兴", "李昊", "张婉", "陈铎"];
+  function lstdRuleModified(ruleId) {
+    let h = 0, h2 = 0;
+    for (let i = 0; i < String(ruleId).length; i++) {
+      const code = String(ruleId).charCodeAt(i);
+      h = (h * 31 + code) % 100000;
+      h2 = (h2 * 17 + code * (i + 1)) % 997;      /* 第二个散列专门用于取修改人，避免与日期同模撞值 */
+    }
+    const day = 1 + (h % 28);
+    const hour = 8 + (h % 10);
+    const minute = (h % 6) * 10 + (h % 10);
+    return {
+      by: LSTD_RULE_EDITORS[h2 % LSTD_RULE_EDITORS.length],
+      at: "2026-09-" + (day < 10 ? "0" + day : day) + " " +
+          (hour < 10 ? "0" + hour : hour) + ":" + (minute < 10 ? "0" + minute : minute)
+    };
+  }
+
+  function lstdRenderVersionBar(pageId) {
+    const lib = stdLib(pageId);
+    const total = stdTotalRules(lib);
+    return '<div class="lstd-version-bar">' +
+      '<div class="lstd-version-main">' +
+        '<span class="lstd-version-tag">' + esc(LSTD_RULE_VERSION.version) + "</span>" +
+        "<strong>" + esc(lib.standardizationName) + "规则库</strong>" +
+        "<span>生效日期 " + esc(LSTD_RULE_VERSION.effective) + "</span>" +
+        "<span>发布 " + esc(LSTD_RULE_VERSION.publisher) + "</span>" +
+        "<span>共 " + total + " 条规则 · " + lib.categories.length + " 类标准化</span>" +
+      "</div>" +
+      '<div class="lstd-version-acts">' +
+        '<button type="button" class="lstd-version-btn" data-lstd-history="1">变更历史</button>' +
+        '<button type="button" class="lstd-version-btn" data-lstd-goto-standard="1">查看上游标准体系 →</button>' +
+      "</div>" +
+    "</div>";
+  }
+
+  function lstdOpenHistoryModal(pageId) {
+    const lib = stdLib(pageId);
+    const no = LSTD_REQUIREMENT_NO[lib.key] || 23;
+    const rows = [
+      ["V2.0", "2026-09-01", "新增「计算层级 / 强关联体系」两条规则；单位制统一为 eV / Å", "马兴", "现行"],
+      ["V1.2", "2026-06-18", "依据需求 " + no + "(4) 收紧图片规格：300 dpi、200 KB~1 MB", "李昊", "已归档"],
+      ["V1.1", "2026-04-02", "补充数据格式标准化中 .dat 与可视化源文件口径", "张婉", "已归档"],
+      ["V1.0", "2026-01-15", "首个版本：5 类标准化规则入库", "陈铎", "已归档"]
+    ];
+    const body = '<table class="lstd-history-table"><thead><tr><th>版本</th><th>生效日期</th>' +
+      "<th>变更说明</th><th>修改人</th><th>状态</th></tr></thead><tbody>" +
+      rows.map((r) => "<tr><td><b>" + esc(r[0]) + "</b></td><td>" + esc(r[1]) + "</td>" +
+        '<td class="wrap">' + esc(r[2]) + "</td><td>" + esc(r[3]) + "</td>" +
+        "<td>" + (r[4] === "现行"
+          ? '<span class="lstd-hist-now">现行</span>'
+          : '<span class="lstd-hist-old">已归档</span>') + "</td></tr>").join("") +
+      "</tbody></table>";
+
+    let modal = document.getElementById("lstdHistoryModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "lstdHistoryModal";
+      modal.className = "overlay";
+      modal.innerHTML = '<div class="modal lstd-history-modal">' +
+        '<div class="lstd-modal-head"><h3>规则库变更历史</h3>' +
+        '<button class="lstd-modal-close" type="button" data-lstd-history-close aria-label="关闭">×</button></div>' +
+        '<div class="lstd-modal-body"></div>' +
+        '<div class="lstd-modal-foot"><button class="btn" type="button" data-lstd-history-close>关闭</button></div>' +
+        "</div>";
+      document.body.appendChild(modal);
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal || e.target.closest("[data-lstd-history-close]")) modal.classList.remove("show");
+      });
+    }
+    modal.querySelector(".lstd-modal-body").innerHTML = body;
+    modal.classList.add("show");
+  }
+
   function lstdRenderRulesTable(pageId, activeCategory) {
     const st = stdState(pageId);
     const rows = st.rules[activeCategory.key] || [];
+    const clause = lstdReqClause(pageId, activeCategory.key);
     const sections = (activeCategory.sections || []).map((section) => {
       const sectionRules = section.rules || [];
       const body = sectionRules.map((rule) => {
         const record = rows.find((item) => item.id === rule.id) || rule;
+        const mod = lstdRuleModified(record.id);
         return "<tr><td>" + stdCell(record.item, "strong") + "</td>" +
           "<td>" + stdCell(record.field || record.item) + "</td>" +
           '<td class="lstd-rule-value">' + stdCell(record.value, "wrap") + "</td>" +
           "<td>" + stdCell(record.type) + "</td>" +
           "<td>" + stdCell(record.basis, "wrap") + "</td>" +
+          '<td><span class="lstd-clause">' + esc(clause) + "</span></td>" +
+          '<td><div class="lstd-mod"><b>' + esc(mod.by) + "</b><span>" + esc(mod.at) + "</span></div></td>" +
           '<td><div class="lstd-row-actions">' +
             '<button type="button" data-lstd-rule-edit="' + esc(record.id) + '">编辑</button>' +
             '<button type="button" class="danger" data-lstd-rule-delete="' + esc(record.id) + '">删除</button>' +
           "</div></td></tr>";
       }).join("");
-      const header = section.title ? '<tr class="lstd-section-row"><td colspan="6">' + esc(section.title) + "</td></tr>" : "";
+      const header = section.title ? '<tr class="lstd-section-row"><td colspan="8">' + esc(section.title) + "</td></tr>" : "";
       return header + body;
     }).join("");
     return '<div class="lstd-table-wrap"><table class="lstd-table">' +
-      '<colgroup><col class="c-item"><col class="c-field"><col class="c-value"><col class="c-type"><col class="c-basis"><col class="c-op"></colgroup>' +
-      "<thead><tr><th>标准项</th><th>数据字段</th><th>标准值</th><th>数据类型</th><th>依据 / 说明</th><th>操作</th></tr></thead>" +
+      '<colgroup><col class="c-item"><col class="c-field"><col class="c-value"><col class="c-type"><col class="c-basis"><col class="c-req"><col class="c-mod"><col class="c-op"></colgroup>' +
+      "<thead><tr><th>标准项</th><th>数据字段</th><th>标准值</th><th>数据类型</th><th>依据 / 说明</th>" +
+      "<th>来源条款</th><th>最近修改</th><th>操作</th></tr></thead>" +
       "<tbody>" + sections + "</tbody></table></div>";
   }
 
@@ -1110,6 +1225,9 @@
               esc(category.label) + "</button>"
           )).join("") +
         "</div>" +
+
+        /* —— 规则库版本 / 生效时间 / 变更历史 —— */
+        lstdRenderVersionBar(pageId) +
 
         /* —— 当前类别标准规则卡片 —— */
         '<div class="lstd-card">' +
@@ -1458,6 +1576,20 @@
     }
     if (target.closest("[data-lstd-formspec]")) {
       openLstdFormSpecModal(lstdPageIdFrom(target));
+      return;
+    }
+    if (target.closest("[data-lstd-history]")) {
+      lstdOpenHistoryModal(lstdPageIdFrom(target));
+      return;
+    }
+    if (target.closest("[data-lstd-goto-standard]")) {
+      const stdPage = "standard-twod";
+      try {
+        if (typeof switchPage === "function") switchPage(stdPage);
+        toast("标准体系", "已定位到「低维材料标准体系」，本规则库由其标准文本派生。");
+      } catch (error) {
+        toast("标准体系", "请从左侧导航进入「低维材料标准体系」查看上游标准文本。");
+      }
       return;
     }
     if (target.closest("[data-lstd-save-standard]")) {

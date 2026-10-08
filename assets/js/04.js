@@ -391,7 +391,6 @@
         { id: 6, menuName: "操作日志", level: 1, type: "菜单", parent: "系统管理", path: "/system/operlog", perms: "system:operlog:list", icon: "log", orderNum: 5, status: "启用" },
         { id: 20, menuName: "监控统计", level: 0, type: "目录", parent: "-", path: "/monitor", perms: "", icon: "monitor", orderNum: 2, status: "启用" },
         { id: 21, menuName: "数据看板", level: 1, type: "菜单", parent: "监控统计", path: "/monitor/dashboard", perms: "monitor:dashboard:list", icon: "dashboard", orderNum: 1, status: "启用" },
-        { id: 200, menuName: "数据统计", level: 1, type: "菜单", parent: "监控统计", path: "/monitor/data-statistics", perms: "monitor:statistics:list", icon: "chart", orderNum: 2, status: "启用" },
         { id: 22, menuName: "低维材料标准体系", level: 0, type: "目录", parent: "-", path: "/standards", perms: "", icon: "standard", orderNum: 3, status: "启用" },
         { id: 23, menuName: "二维材料数据库标准", level: 1, type: "菜单", parent: "低维材料标准体系", path: "/standards/twod", perms: "standards:twod:list", icon: "standard", orderNum: 1, status: "启用" },
         { id: 24, menuName: "有机光电材料数据库标准", level: 1, type: "菜单", parent: "低维材料标准体系", path: "/standards/opto", perms: "standards:opto:list", icon: "standard", orderNum: 2, status: "启用" },
@@ -5784,6 +5783,48 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         sourceFormat: "JSON",
         category: "数据更新共享",
         status: "rejected"
+      },
+      {
+        id: "rec-05",
+        uploadedAt: "2026-04-16 10:08",
+        fileName: "Graphene-Monolayer.xyz",
+        fileType: "结构文件",
+        sourceFormat: "XYZ",
+        category: "文件格式转换",
+        status: "approved",
+        materialName: "石墨烯（单层）",
+        materialFormula: "C",
+        materialType: "二维材料",
+        source: "自有数据集",
+        description: "单层石墨烯 XYZ 结构文件，可用于转换为 ORCA 计算输入文件。"
+      },
+      {
+        id: "rec-06",
+        uploadedAt: "2026-04-16 15:41",
+        fileName: "MoS2-POTCAR",
+        fileType: "计算数据",
+        sourceFormat: "POTCAR",
+        category: "文件格式转换",
+        status: "approved",
+        materialName: "二硫化钼（多层）",
+        materialFormula: "MoS₂",
+        materialType: "二维材料",
+        source: "VASP 赝势库",
+        description: "MoS₂ 体系赝势文件，可转换为 CIF / XYZ 结构文件。"
+      },
+      {
+        id: "rec-07",
+        uploadedAt: "2026-04-17 09:26",
+        fileName: "h-BN-Visual.xyz",
+        fileType: "可视化文件",
+        sourceFormat: "XYZ",
+        category: "文件格式转换",
+        status: "approved",
+        materialName: "六方氮化硼（单层）",
+        materialFormula: "h-BN",
+        materialType: "二维材料",
+        source: "自有数据集",
+        description: "单层 h-BN 可视化 XYZ 文件，可转换为 PDB 结构文件。"
       }
     ];
 
@@ -16956,7 +16997,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 <input id="twodElements" type="text" value="${escapeTwodHtml(drafts.elements)}" aria-label="元素组成检索条件" placeholder="请输入材料名称、化学式或元素组成，如 Mo-S">
               </label>
               <button class="btn-primary twod-search-submit" type="button" id="twodElementSearchBtn">检索</button>
-              <button class="btn twod-search-clear" type="button" id="twodClearBtn">清空条件</button>
+              <button class="btn twod-search-clear" type="button" id="twodClearBtn">重置</button>
             </div>
             <div class="twod-status-text">支持输入材料名称、化学式或一个及多个元素；例如输入 Mo-S，将筛选同时包含 Mo 和 S 的二维材料。</div>
           </div>
@@ -16976,7 +17017,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 <option value="fuzzy" ${state.twodIdMatchMode === "fuzzy" ? "selected" : ""}>模糊检索</option>
               </select>
               <button class="btn-primary twod-search-submit" type="button" id="twodIdSearchBtn">检索</button>
-              <button class="btn twod-search-clear" type="button" id="twodClearBtn">清空条件</button>
+              <button class="btn twod-search-clear" type="button" id="twodClearBtn">重置</button>
             </div>
             <div class="twod-status-text">支持按材料编号准确检索或模糊检索，便于快速定位指定材料条目。</div>
           </div>
@@ -17003,7 +17044,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-status-text">当前模式仅保留元素周期表选择区，点击“检索”后对结果栏进行筛选。</div>
               <div class="action-row">
                 <button class="btn-primary" type="button" id="periodicSearchBtn">检索</button>
-                <button class="btn twod-search-clear" type="button" id="twodClearBtn">清空条件</button>
+                <button class="btn twod-search-clear" type="button" id="twodClearBtn">重置</button>
               </div>
             </div>
           </div>
@@ -17032,7 +17073,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-property-actions">
                 <div class="action-row">
                   <button class="btn-primary" type="button" id="propertySearchBtn">检索</button>
-                  <button class="btn twod-search-clear" type="button" id="twodClearBtn">清空条件</button>
+                  <button class="btn twod-search-clear" type="button" id="twodClearBtn">重置</button>
                 </div>
               </div>
             </div>
@@ -17054,7 +17095,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <option value="fuzzy" ${state.twodFormulaMatchMode === "fuzzy" ? "selected" : ""}>模糊结构检索</option>
             </select>
             <button class="btn-primary twod-search-submit" type="button" id="twodSearchBtn">检索</button>
-            <button class="btn twod-search-clear" type="button" id="twodClearBtn">清空条件</button>
+            <button class="btn twod-search-clear" type="button" id="twodClearBtn">重置</button>
           </div>
           <div class="twod-status-text">全结构检索为精确匹配，子结构检索为片段匹配，模糊结构检索为近似匹配。</div>
         </div>
@@ -17877,6 +17918,18 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const list = document.getElementById("twodUploadFileList");
       const metaCard = document.getElementById("twodUploadMetaCard");
       const file = input?.files?.[0];
+      const category = getSelectedTwodUploadCategory();
+      if (file && category && !isTwodUploadFormatAllowed(category, file.name)) {
+        const meta = getTwodUploadCategoryMeta(category);
+        if (input) input.value = "";
+        revokeUploadPreviewUrl(twodUploadPreviewUrl);
+        twodUploadPreviewUrl = "";
+        if (list) list.innerHTML = listSelectedFileNames(input);
+        if (metaCard) metaCard.hidden = true;
+        updateTwodUploadSubmitState();
+        showToast("数据上传", `${meta?.label || "当前类别"}仅支持上传 ${(meta?.formats || []).join(" / ")} 格式文件，请重新选择。`);
+        return;
+      }
       revokeUploadPreviewUrl(twodUploadPreviewUrl);
       twodUploadPreviewUrl = file && isUploadImageFile(file.name) ? URL.createObjectURL(file) : "";
       if (list) list.innerHTML = listSelectedFileNames(input);
@@ -17996,18 +18049,21 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const categoryMap = {
         structure: {
           label: "结构文件",
-          hint: "已选择结构文件，请上传 POSCAR、CIF、XYZ 等结构类文件。",
-          accept: ".poscar,.cif,.xyz,.vasp"
+          hint: "已选择结构文件，仅支持上传 CIF、XYZ 格式文件。",
+          accept: ".cif,.xyz",
+          formats: ["CIF", "XYZ"]
         },
         compute: {
           label: "计算数据",
-          hint: "已选择计算数据，请上传 OUTCAR、log、能带或收敛结果文件。",
-          accept: ".outcar,.log,.txt,.dat,.json,.xml,.csv"
+          hint: "已选择计算数据，仅支持上传 POTCAR 格式文件。",
+          accept: ".potcar",
+          formats: ["POTCAR"]
         },
         visual: {
           label: "可视化文件",
-          hint: "已选择可视化文件，请上传图谱、渲染结果或展示文件。",
-          accept: ".png,.jpg,.jpeg,.svg,.csv,.json"
+          hint: "已选择可视化文件，仅支持上传 XYZ 格式文件。",
+          accept: ".xyz",
+          formats: ["XYZ"]
         }
       };
       return categoryMap[category] || null;
@@ -18015,6 +18071,22 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
 
     function getSelectedTwodUploadCategory() {
       return document.querySelector('input[name="twodUploadCategory"]:checked')?.value || "";
+    }
+
+    /* 二维材料上传格式硬校验：accept 只过滤文件选择框，拖拽 / 手动改后缀仍可绕过 */
+    function getFileExtension(fileName) {
+      const name = String(fileName || "").trim();
+      if (!name) return "";
+      /* POTCAR 这类文件通常没有扩展名，此时用完整文件名作为格式 */
+      if (!name.includes(".")) return name.toUpperCase();
+      return name.split(".").pop().toUpperCase();
+    }
+
+    function isTwodUploadFormatAllowed(category, fileName) {
+      const meta = getTwodUploadCategoryMeta(category);
+      if (!meta || !fileName) return false;
+      const allowed = meta.formats || [];
+      return allowed.includes(getFileExtension(fileName));
     }
 
     function getTwodUploadSelectedFile() {
@@ -18174,6 +18246,17 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     function updateTwodUploadPreview() {
       const input = document.getElementById("twodUploadFile");
       const file = input?.files?.[0];
+      const category = getSelectedTwodUploadCategory();
+      if (file && category && !isTwodUploadFormatAllowed(category, file.name)) {
+        const meta = getTwodUploadCategoryMeta(category);
+        if (input) input.value = "";
+        revokeUploadPreviewUrl(twodUploadPreviewUrl);
+        twodUploadPreviewUrl = "";
+        renderTwodUploadFilePanels();
+        updateTwodUploadSubmitState();
+        showToast("数据上传", `${meta?.label || "当前类别"}仅支持上传 ${(meta?.formats || []).join(" / ")} 格式文件，请重新选择。`);
+        return;
+      }
       revokeUploadPreviewUrl(twodUploadPreviewUrl);
       twodUploadPreviewUrl = file && isUploadImageFile(file.name) ? URL.createObjectURL(file) : "";
       renderTwodUploadFilePanels();
@@ -19785,7 +19868,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             </div>
             <div class="twod-platform-actions electrolyte-property-actions">
               <div class="twod-detail-actions">
-                <button class="btn twod-search-reset" type="button" data-ely-reset>清空条件</button>
+                <button class="btn twod-search-reset" type="button" data-ely-reset>重置</button>
                 <button class="btn-primary" type="button" data-ely-apply ${hasElectrolyteActiveFilters(category, "property", filters) ? "" : "disabled"}>检索</button>
               </div>
             </div>
@@ -19825,7 +19908,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               </select>
             ` : ""}
             <button class="btn-primary twod-search-submit" type="button" data-ely-apply>检索</button>
-            <button class="btn twod-search-reset" type="button" data-ely-reset>清空条件</button>
+            <button class="btn twod-search-reset" type="button" data-ely-reset>重置</button>
           </div>
           <div class="twod-status-text">${mode === "formula" ? "全结构检索为精确匹配，子结构检索为片段匹配，模糊结构检索为近似匹配。" : modeConfig.helper}</div>
         </div>
@@ -20872,7 +20955,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-platform-actions">
                 <div class="twod-status-text">例如选择“分子量”，输入 200-300，即可筛选分子量在该范围内的有机分子。</div>
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -20933,7 +21016,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-platform-actions">
                 <div class="twod-status-text">当前模式仅展示性质数据相关条件，点击“检索”后更新下方结果栏。</div>
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -20954,7 +21037,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           </div>
           <div class="twod-platform-actions">
             <div class="twod-status-text">${OPTO_MODE_CONFIG[mode].helper}</div>
-            <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+            <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
           </div>
         </div>
       `;
@@ -21394,7 +21477,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-platform-actions">
                 <div class="twod-status-text">例如选择“分子量”并输入 200-300，即可筛选该范围内的目标分子。</div>
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -21419,7 +21502,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-platform-actions">
                 <div class="twod-status-text">填写任一性质参数后点击“检索”，下方结果列表将按当前条件更新。</div>
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -21439,7 +21522,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           </div>
           <div class="twod-platform-actions">
             <div class="twod-status-text">${OPTO_MODE_CONFIG[mode].helper}</div>
-            <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+            <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
           </div>
         </div>
       `;
@@ -21712,7 +21795,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-platform-actions">
                 <div class="twod-status-text">例如选择“分子量”并输入 200-300，即可筛选该范围内的目标分子。</div>
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -21736,7 +21819,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <div class="twod-platform-actions">
                 <div class="twod-status-text">支持按条件检索样式进行多条件组合，点击“检索”后更新结果列表。</div>
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -21756,7 +21839,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           </div>
           <div class="twod-platform-actions">
             <div class="twod-status-text">${OPTO_MODE_CONFIG[mode].helper}</div>
-            <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+            <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
           </div>
         </div>
       `;
@@ -22796,7 +22879,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               </div>
               <div class="twod-platform-actions">
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-mlff-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-mlff-reset>重置</button>
                   <button class="btn-primary" type="button" data-mlff-apply ${canApply ? "" : "disabled"}>检索</button>
                 </div>
               </div>
@@ -22818,7 +22901,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           </div>
           <div class="twod-platform-actions">
             <div class="twod-status-text">${config.helper}</div>
-            <button class="btn twod-search-reset" type="button" data-mlff-reset>清空条件</button>
+            <button class="btn twod-search-reset" type="button" data-mlff-reset>重置</button>
           </div>
         </div>
       `;
@@ -26135,7 +26218,7 @@ function renderMlffTopicSampleTable(data) {
               </div>
               <div class="twod-platform-actions">
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-catalyst-platform-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-catalyst-platform-reset>重置</button>
                   <button class="btn-primary" type="button" data-catalyst-platform-apply>检索</button>
                 </div>
               </div>
@@ -26159,7 +26242,7 @@ function renderMlffTopicSampleTable(data) {
               </div>
               <div class="twod-platform-actions">
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-catalyst-platform-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-catalyst-platform-reset>重置</button>
                   <button class="btn-primary" type="button" data-catalyst-platform-apply>检索</button>
                 </div>
               </div>
@@ -26179,7 +26262,7 @@ function renderMlffTopicSampleTable(data) {
           </div>
           <div class="twod-platform-actions">
             <div class="twod-status-text">${config.helper}</div>
-            <button class="btn twod-search-reset" type="button" data-catalyst-platform-reset>清空条件</button>
+            <button class="btn twod-search-reset" type="button" data-catalyst-platform-reset>重置</button>
           </div>
         </div>
       `;
@@ -29139,19 +29222,57 @@ function renderMlffTopicSampleTable(data) {
       });
     }
 
-    function inferTwodConvertFileType(fileName) {
-      const ext = detectFileFormat(fileName).toLowerCase();
-      if (["cif", "poscar", "vasp", "xsf", "xyz"].includes(ext)) return "结构文件";
-      if (["json", "xml", "txt", "dat", "out", "log"].includes(ext)) return "计算数据";
-      if (["csv", "png", "jpg", "jpeg", "svg"].includes(ext)) return "可视化文件";
-      return "";
+    /* ===== 二维材料文件转换规则 =====
+       结构文件：仅允许上传 CIF / XYZ；CIF → POSCAR / XYZ；XYZ → ORCA
+       计算数据：仅允许上传 POTCAR；POTCAR → CIF / XYZ
+       可视化文件：仅允许上传 XYZ；XYZ → PDB
+       目标格式由「文件类别 + 源格式」共同决定，不再只按类别给固定列表。 */
+    const TWOD_CONVERT_RULES = {
+      "结构文件": {
+        sourceFormats: ["CIF", "XYZ"],
+        targets: { CIF: ["POSCAR", "XYZ"], XYZ: ["ORCA"] }
+      },
+      "计算数据": {
+        sourceFormats: ["POTCAR"],
+        targets: { POTCAR: ["CIF", "XYZ"] }
+      },
+      "可视化文件": {
+        sourceFormats: ["XYZ"],
+        targets: { XYZ: ["PDB"] }
+      }
+    };
+
+    function normalizeTwodFileFormat(value) {
+      const upper = String(value || "").toUpperCase();
+      return upper === "JPEG" ? "JPG" : upper;
     }
 
-    function getTwodConvertTargetFormats(fileType) {
-      if (fileType === "结构文件") return ["POSCAR", "CIF", "XSF", "XYZ", "VASP"];
-      if (fileType === "计算数据") return ["JSON", "XML", "TXT", "DAT", "CSV"];
-      if (fileType === "可视化文件") return ["PNG", "SVG", "CSV", "JSON", "JPG"];
-      return [];
+    function getTwodConvertSourceFormats(fileType) {
+      return TWOD_CONVERT_RULES[fileType]?.sourceFormats || [];
+    }
+
+    /* 源格式是否允许出现在该文件类别下 */
+    function isTwodConvertSourceAllowed(fileType, sourceFormat) {
+      const allowed = getTwodConvertSourceFormats(fileType);
+      if (!allowed.length) return false;
+      return allowed.includes(normalizeTwodFileFormat(sourceFormat));
+    }
+
+    function getTwodConvertTargetFormats(fileType, sourceFormat = "") {
+      const rule = TWOD_CONVERT_RULES[fileType];
+      if (!rule) return [];
+      const source = normalizeTwodFileFormat(sourceFormat);
+      return rule.targets[source] || [];
+    }
+
+    function inferTwodConvertFileType(fileName, preferredType = "") {
+      if (["结构文件", "计算数据", "可视化文件"].includes(preferredType)) return preferredType;
+      /* 用 getFileExtension：POTCAR 这类无扩展名文件要以完整文件名识别 */
+      const ext = getFileExtension(fileName).toLowerCase();
+      if (ext === "cif") return "结构文件";
+      if (ext === "potcar") return "计算数据";
+      if (ext === "xyz") return "结构文件";
+      return "";
     }
 
     function buildTwodConvertSummary(items) {
@@ -29211,18 +29332,60 @@ function renderMlffTopicSampleTable(data) {
       ].join("\n");
     }
 
+    /* 生成笛卡尔坐标原子列表，供 XYZ / ORCA / PDB 共用 */
+    function buildTwodCartesianAtoms(material) {
+      const species = parseTwodFormulaSpecies(material?.formula, material?.elements || []);
+      const elements = species.flatMap((item) => Array.from({ length: item.count }, () => item.element));
+      return elements.map((element, index) => {
+        const x = (index % 3) * 1.58;
+        const y = Math.floor(index / 3) * 1.37;
+        const z = index % 2 === 0 ? 0 : 0.62;
+        return { element, x, y, z };
+      });
+    }
+
+    /* ORCA 计算输入文件：关键词行 + 坐标块（* xyz 电荷 自旋 ... *） */
+    function buildTwodConvertedOrcaContent(material, sourceName) {
+      const atoms = buildTwodCartesianAtoms(material);
+      return [
+        "! B3LYP def2-SVP Opt",
+        "%maxcore 2000",
+        "%pal nprocs 4 end",
+        `# 由 ${sourceName || "源文件"} 转换生成 · ${material?.name || "二维材料"}`,
+        "* xyz 0 1",
+        ...atoms.map((item) => `${item.element} ${item.x.toFixed(6)} ${item.y.toFixed(6)} ${item.z.toFixed(6)}`),
+        "*"
+      ].join("\n");
+    }
+
+    /* PDB 结构文件：按 80 列固定宽格式输出 HETATM 记录 */
+    function buildTwodConvertedPdbContent(material, sourceName) {
+      const atoms = buildTwodCartesianAtoms(material);
+      const rows = atoms.map((item, index) => {
+        const serial = String(index + 1).padStart(5);
+        const name = String(item.element).padEnd(3).slice(0, 3);
+        const x = item.x.toFixed(3).padStart(8);
+        const y = item.y.toFixed(3).padStart(8);
+        const z = item.z.toFixed(3).padStart(8);
+        const element = String(item.element).padStart(2);
+        return `HETATM${serial} ${name} UNL     1    ${x}${y}${z}  1.00  0.00         ${element}`;
+      });
+      return [
+        `REMARK   converted from ${sourceName || "source file"}`,
+        `REMARK   material: ${material?.name || "二维材料"} (${material?.formula || "-"})`,
+        ...rows,
+        "END"
+      ].join("\n");
+    }
+
     function buildTwodConvertedStructureContent(material, draft) {
       const targetFormat = String(draft?.targetFormat || "POSCAR").toUpperCase();
       if (targetFormat === "CIF") return buildTwodStructureFileContent(material);
+      if (targetFormat === "ORCA") return buildTwodConvertedOrcaContent(material, draft?.sourceName);
+      if (targetFormat === "PDB") return buildTwodConvertedPdbContent(material, draft?.sourceName);
       if (targetFormat === "XYZ") {
-        const species = parseTwodFormulaSpecies(material?.formula, material?.elements || []);
-        const atoms = species.flatMap((item) => Array.from({ length: item.count }, () => item.element));
-        const coords = atoms.map((element, index) => {
-          const x = (index % 3) * 1.58;
-          const y = Math.floor(index / 3) * 1.37;
-          const z = index % 2 === 0 ? 0 : 0.62;
-          return `${element} ${x.toFixed(4)} ${y.toFixed(4)} ${z.toFixed(4)}`;
-        });
+        const atoms = buildTwodCartesianAtoms(material);
+        const coords = atoms.map((item) => `${item.element} ${item.x.toFixed(4)} ${item.y.toFixed(4)} ${item.z.toFixed(4)}`);
         return [String(atoms.length), `${material?.name || "二维材料"} converted from ${draft?.sourceName || "source file"}`, ...coords].join("\n");
       }
       if (targetFormat === "XSF") {
@@ -29256,7 +29419,11 @@ function renderMlffTopicSampleTable(data) {
     }
 
     function getTwodConvertRecordsByType(fileType = state.twodConvertFilterType) {
-      return twodUpdateRecords.filter((record) => !fileType || record.fileType === fileType);
+      return twodUpdateRecords.filter((record) => {
+        if (fileType && record.fileType !== fileType) return false;
+        /* 只保留符合上传格式规则的记录（旧的 JSON / CSV 等记录不再可转换） */
+        return isTwodConvertSourceAllowed(record.fileType, record.sourceFormat);
+      });
     }
 
     function ensureTwodConvertSelection(material) {
@@ -29277,8 +29444,9 @@ function renderMlffTopicSampleTable(data) {
       }
       const currentRecord = records.find((item) => item.id === state.twodConvertRecordId) || records[0];
       state.twodConvertRecordId = currentRecord.id;
-      const formats = getTwodConvertTargetFormats(currentRecord.fileType || state.twodConvertFilterType).filter((item) => item !== String(currentRecord.sourceFormat || "").toUpperCase());
-      const availableFormats = formats.length ? formats : getTwodConvertTargetFormats(currentRecord.fileType || state.twodConvertFilterType);
+      const recordType = currentRecord.fileType || state.twodConvertFilterType;
+      const formats = getTwodConvertTargetFormats(recordType, currentRecord.sourceFormat).filter((item) => item !== normalizeTwodFileFormat(currentRecord.sourceFormat));
+      const availableFormats = formats.length ? formats : getTwodConvertTargetFormats(recordType, currentRecord.sourceFormat);
       state.twodConvertTargetFormat = availableFormats.includes(state.twodConvertTargetFormat) ? state.twodConvertTargetFormat : (availableFormats[0] || "");
     }
 
@@ -29288,17 +29456,17 @@ function renderMlffTopicSampleTable(data) {
       if (!page) return;
       ensureTwodConvertSelection(material);
       const typeDescriptions = {
-        "结构文件": "用户可选择系统内已有二维材料结构文件进行格式转换，如将 CIF 文件转换为 POSCAR 等结构格式。",
-        "计算数据": "用户可选择系统内已有二维材料计算结果数据，完成统一格式的标准化转换。",
-        "可视化文件": "用户可选择系统内已有可视化源数据文件，完成统一格式的可视化图像转换。"
+        "结构文件": "仅支持 CIF、XYZ 格式的结构文件：CIF 可转换为 POSCAR / XYZ，XYZ 可转换为 ORCA。",
+        "计算数据": "仅支持 POTCAR 格式的计算数据文件：POTCAR 可转换为 CIF / XYZ。",
+        "可视化文件": "仅支持 XYZ 格式的可视化文件：XYZ 可转换为 PDB。"
       };
       const records = getTwodConvertRecordsByType(state.twodConvertFilterType);
       const activeRecord = records.find((item) => item.id === state.twodConvertRecordId) || null;
       const targetFormats = activeRecord
         ? (() => {
-            const normalizedSource = String(activeRecord.sourceFormat || "").toUpperCase();
-            const filtered = getTwodConvertTargetFormats(activeRecord.fileType).filter((item) => item !== normalizedSource);
-            return filtered.length ? filtered : getTwodConvertTargetFormats(activeRecord.fileType);
+            const normalizedSource = normalizeTwodFileFormat(activeRecord.sourceFormat);
+            const filtered = getTwodConvertTargetFormats(activeRecord.fileType, normalizedSource).filter((item) => item !== normalizedSource);
+            return filtered.length ? filtered : getTwodConvertTargetFormats(activeRecord.fileType, normalizedSource);
           })()
         : [];
       page.innerHTML = `
@@ -29313,13 +29481,13 @@ function renderMlffTopicSampleTable(data) {
             <div class="twod-convert-status-head">
               <div>
                 <h3>选择待转换文件</h3>
-                <p>支持结构文件、计算数据和可视化文件三类系统内文件转换，筛选完成后即可发起格式转换。</p>
+                <p>结构文件支持 CIF / XYZ，计算数据支持 POTCAR，可视化文件支持 XYZ；筛选完成后即可发起格式转换。</p>
               </div>
             </div>
             <div class="twod-convert-filter-row">
               <div class="twod-convert-filter-tags">
                 ${["结构文件", "计算数据", "可视化文件"].map((item) => `
-                  <button class="twod-convert-filter-tag${state.twodConvertFilterType === item ? " active" : ""}" type="button" data-twod-convert-type="${item}">${item}</button>
+                  <button class="twod-convert-filter-tag${state.twodConvertFilterType === item ? " active" : ""}" type="button" data-twod-convert-type="${item}">${item}（${getTwodConvertSourceFormats(item).join(" / ")}）</button>
                 `).join("")}
               </div>
               <p class="twod-convert-note" style="margin:0;">${typeDescriptions[state.twodConvertFilterType] || ""}</p>
@@ -29352,7 +29520,7 @@ function renderMlffTopicSampleTable(data) {
                 <button class="btn" type="button" data-twod-convert-cancel>返回检索页</button>
               </div>
             ` : `
-              <div class="twod-convert-empty-card">当前系统内暂无可用于转换的${state.twodConvertFilterType}记录，请先在系统中上传对应文件后再进行格式转换。</div>
+              <div class="twod-convert-empty-card">当前系统内暂无可用于转换的${state.twodConvertFilterType}记录。该类仅支持 ${getTwodConvertSourceFormats(state.twodConvertFilterType).join(" / ")} 格式文件，请先上传对应格式的文件后再进行格式转换。</div>
               <div class="twod-convert-actions">
                 <button class="btn" type="button" data-twod-convert-cancel>返回检索页</button>
               </div>
@@ -29480,9 +29648,9 @@ function renderMlffTopicSampleTable(data) {
       const sourceName = record?.fileName || `${targetMaterial?.name || "二维材料"}-Multilayer.cif`;
       const sourceFormat = String(record?.sourceFormat || "CIF").toUpperCase();
       const fileType = record?.fileType || state.twodConvertFilterType || "结构文件";
-      const targetFormat = state.twodConvertTargetFormat || getTwodConvertTargetFormats(fileType)[0] || "POSCAR";
+      const targetFormat = state.twodConvertTargetFormat || getTwodConvertTargetFormats(fileType, sourceFormat)[0] || "";
       if (!targetFormat) {
-        showToast("文件格式转换", "请先选择目标格式。");
+        showToast("文件格式转换", `当前源格式 ${sourceFormat} 无可转换的目标格式，请重新选择文件。`);
         return;
       }
       clearTwodConvertAutoTimer();
@@ -29503,59 +29671,17 @@ function renderMlffTopicSampleTable(data) {
       }, 2400);
     }
 
+    /* 按转换规则生成输出文件：
+       结构文件 CIF → POSCAR / XYZ；结构文件 XYZ → ORCA
+       计算数据 POTCAR → CIF / XYZ；可视化文件 XYZ → PDB */
     function buildTwodConvertedFilePayload(material, draft) {
       const resultName = draft.resultName || replaceFileExtension(draft.sourceName, draft.targetFormat);
-      if ((draft.fileType || "") === "结构文件") {
-        return {
-          filename: resultName,
-          content: buildTwodConvertedStructureContent(material, draft),
-          mime: "text/plain;charset=utf-8"
-        };
-      }
-      if ((draft.fileType || "") === "计算数据") {
-        const content = draft.targetFormat === "JSON"
-          ? JSON.stringify({
-              materialId: material?.id || "",
-              materialName: material?.name || "",
-              sourceFile: draft.sourceName,
-              sourceFormat: draft.sourceFormat,
-              targetFormat: draft.targetFormat,
-              dataset: {
-                bandGap: material?.bandGap ?? null,
-                formationEnergy: material?.formation ?? null,
-                latticeA: material?.latticeA ?? null,
-                latticeB: material?.latticeB ?? null,
-                latticeC: material?.latticeC ?? null
-              }
-            }, null, 2)
-          : [
-              `Material ID,${material?.id || ""}`,
-              `Material Name,${material?.name || ""}`,
-              `Source File,${draft.sourceName}`,
-              `Source Format,${draft.sourceFormat}`,
-              `Target Format,${draft.targetFormat}`,
-              `Band Gap,${material?.bandGap ?? ""}`,
-              `Formation Energy,${material?.formation ?? ""}`
-            ].join("\n");
-        return {
-          filename: resultName,
-          content,
-          mime: draft.targetFormat === "JSON" ? "application/json;charset=utf-8" : "text/plain;charset=utf-8"
-        };
-      }
-      const content = draft.targetFormat === "SVG"
-        ? `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540"><rect width="100%" height="100%" fill="#f7fbff"/><text x="60" y="120" font-size="32" fill="#18325d">${material?.name || "二维材料"} 可视化图像</text><text x="60" y="180" font-size="20" fill="#5f7898">源文件：${draft.sourceName}</text><text x="60" y="218" font-size="20" fill="#5f7898">目标格式：${draft.targetFormat}</text><text x="60" y="290" font-size="18" fill="#2453d4">当前图像数据已完成统一格式转换，可用于后续展示与归档。</text></svg>`
-        : [
-            `Material Name: ${material?.name || ""}`,
-            `Source File: ${draft.sourceName}`,
-            `Source Format: ${draft.sourceFormat}`,
-            `Target Format: ${draft.targetFormat}`,
-            `Visualization Status: Converted`
-          ].join("\n");
+      const targetFormat = normalizeTwodFileFormat(draft.targetFormat);
+      const mimeMap = { CIF: "chemical/x-cif;charset=utf-8", PDB: "chemical/x-pdb;charset=utf-8" };
       return {
         filename: resultName,
-        content,
-        mime: draft.targetFormat === "SVG" ? "image/svg+xml;charset=utf-8" : "text/plain;charset=utf-8"
+        content: buildTwodConvertedStructureContent(material, { ...draft, targetFormat }),
+        mime: mimeMap[targetFormat] || "text/plain;charset=utf-8"
       };
     }
 
@@ -29576,15 +29702,13 @@ function renderMlffTopicSampleTable(data) {
     function populateTwodConvertTargetFormats(selectId, fileType, sourceFormat = "") {
       const select = document.getElementById(selectId);
       if (!select) return;
-      const normalizedSource = String(sourceFormat || "").toUpperCase() === "JPEG"
-        ? "JPG"
-        : String(sourceFormat || "").toUpperCase();
-      const formats = getTwodConvertTargetFormats(fileType);
+      const normalizedSource = normalizeTwodFileFormat(sourceFormat);
+      const formats = getTwodConvertTargetFormats(fileType, normalizedSource);
       const available = formats.filter((item) => item !== normalizedSource);
       const list = available.length ? available : formats;
       select.innerHTML = list.length
         ? list.map((item) => `<option value="${item}">${item}</option>`).join("")
-        : '<option value="">请先选择文件</option>';
+        : '<option value="">当前源格式无可转换目标</option>';
       select.disabled = !list.length;
     }
 
@@ -33884,6 +34008,9 @@ print(resp.json())`;
           previewFileKey: "",
           fileDrafts: [],
           records: [
+            ...(Array.isArray(window.LOWDIM_STANDARD_CATALOG)
+              ? window.LOWDIM_STANDARD_CATALOG.map((item) => JSON.parse(JSON.stringify(item)))
+              : []),
             {
               id: "std-system-2d-001",
               standardName: "二维材料数据库字段与图谱归档标准",
@@ -34147,15 +34274,6 @@ print(resp.json())`;
             </div>
             <button class="btn-primary" type="button" data-lowdim-standard-add>新增标准体系</button>
           </div>
-          <section class="lowdim-standard-panel">
-            <div class="lowdim-standard-toolbar">
-              <span class="lowdim-standard-total">共 ${filteredTotal === total ? total : `${filteredTotal} / ${total}`} 条标准</span>
-              <label class="lowdim-standard-search" aria-label="筛选标准体系管理记录">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                <input type="search" value="${escapeLowdimStandardHtml(std.keyword || "")}" placeholder="筛选编号、文件名称、简介、发布机构或状态" data-lowdim-standard-search>
-              </label>
-            </div>
-          </section>
           ${renderLowdimStandardManageTable(pageRecords)}
           <div class="result-footer twod-result-footer lowdim-standard-footer">
             ${renderSharedPaginationFooter({
@@ -34204,6 +34322,8 @@ print(resp.json())`;
                 ["更新时间", record.updatedAt],
                 ["格式", record.format],
                 ["标准类型", record.standardType],
+                ["版本号", record.version || "V1.0"],
+                ["生效日期", record.effectiveDate || "-"],
                 ["文件数量", `${files.length} 个`]
               ].map(([label, value]) => `
                 <div class="lowdim-standard-detail-item">
@@ -34213,6 +34333,50 @@ print(resp.json())`;
               `).join("")}
             </div>
           </section>
+          ${record.systemPurpose ? `
+          <section class="lowdim-standard-panel">
+            <div class="lowdim-standard-section-title">
+              <h3>标准介绍</h3>
+              <span>简介与适用范围</span>
+            </div>
+            <div class="lowdim-standard-doc-block">
+              <span>标准简介</span>
+              <p>${escapeLowdimStandardHtml(record.intro || "暂无简介")}</p>
+            </div>
+            <div class="lowdim-standard-doc-block">
+              <span>适用范围</span>
+              <p>${escapeLowdimStandardHtml(record.systemPurpose)}</p>
+            </div>
+          </section>
+          ` : ""}
+          ${(Array.isArray(record.clauses) && record.clauses.length) ? `
+          <section class="lowdim-standard-panel">
+            <div class="lowdim-standard-section-title">
+              <h3>标准文档正文</h3>
+              <span>${record.version || "V1.0"} · 共 ${record.clauses.length} 条核心条款</span>
+            </div>
+            <p class="lowdim-standard-doc-lead">${escapeLowdimStandardHtml(record.standardContent || "")}</p>
+            <ol class="lowdim-standard-clause-list">
+              ${record.clauses.map((clause) => `
+                <li class="lowdim-standard-clause">
+                  <div class="lowdim-standard-clause-head"><span>${escapeLowdimStandardHtml(clause.no)}</span><strong>${escapeLowdimStandardHtml(clause.title)}</strong></div>
+                  <p>${escapeLowdimStandardHtml(clause.text)}</p>
+                </li>
+              `).join("")}
+            </ol>
+          </section>
+          ` : ""}
+          ${(Array.isArray(record.references) && record.references.length) ? `
+          <section class="lowdim-standard-panel">
+            <div class="lowdim-standard-section-title">
+              <h3>规范性引用文件</h3>
+              <span>${record.references.length} 项</span>
+            </div>
+            <ol class="lowdim-standard-reference-list">
+              ${record.references.map((item) => `<li>${escapeLowdimStandardHtml(item)}</li>`).join("")}
+            </ol>
+          </section>
+          ` : ""}
           <section class="lowdim-standard-panel">
             <div class="lowdim-standard-section-title">
               <h3>文件内容</h3>
@@ -34299,6 +34463,18 @@ print(resp.json())`;
         #page-standard-twod .lowdim-standard-attachment-detail{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px;border:1px solid #dfe6f1;border-radius:8px;background:var(--color-bg-table-head, #f5f5f5);}
         #page-standard-twod .lowdim-standard-attachment-detail strong{color:#142033;}
         #page-standard-twod .lowdim-standard-attachment-detail p{margin:6px 0 0;color:#64748b;line-height:22px;}
+        #page-standard-twod .lowdim-standard-doc-block{display:grid;gap:6px;padding:12px 14px;border:1px solid #dfe6f1;border-radius:6px;background:#fbfdff;}
+        #page-standard-twod .lowdim-standard-doc-block + .lowdim-standard-doc-block{margin-top:12px;}
+        #page-standard-twod .lowdim-standard-doc-block span{color:#123c9c;font-size:12px;font-weight:800;}
+        #page-standard-twod .lowdim-standard-doc-block p{margin:0;color:#334155;font-size:14px;line-height:26px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;}
+        #page-standard-twod .lowdim-standard-doc-lead{margin:0 0 14px;padding:14px;border:1px solid #dfe6f1;border-radius:6px;background:#fbfdff;color:#334155;font-size:14px;line-height:26px;white-space:pre-wrap;overflow-wrap:anywhere;}
+        #page-standard-twod .lowdim-standard-clause-list{display:grid;gap:10px;margin:0;padding:0;list-style:none;}
+        #page-standard-twod .lowdim-standard-clause{padding:12px 14px;border:1px solid #e2e8f0;border-radius:6px;background:var(--color-bg-table-head, #f5f5f5);}
+        #page-standard-twod .lowdim-standard-clause-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+        #page-standard-twod .lowdim-standard-clause-head span{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:4px;background:#eaf2ff;color:#123c9c;font-size:12px;font-weight:800;}
+        #page-standard-twod .lowdim-standard-clause-head strong{color:#142033;font-size:14px;line-height:22px;}
+        #page-standard-twod .lowdim-standard-clause p{margin:0;color:#475569;font-size:13px;line-height:24px;overflow-wrap:anywhere;word-break:break-word;}
+        #page-standard-twod .lowdim-standard-reference-list{display:grid;gap:8px;margin:0;padding:0 0 0 22px;color:#334155;font-size:13px;line-height:24px;}
         #page-standard-twod .lowdim-standard-file-list{display:grid;gap:10px;margin-bottom:14px;}
         #page-standard-twod .lowdim-standard-file-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid #dfe6f1;border-radius:8px;background:#fbfdff;}
         #page-standard-twod .lowdim-standard-file-row.active{border-color:#2451c6;background:#eaf2ff;box-shadow:inset 3px 0 0 #2451c6;}
@@ -49074,7 +49250,7 @@ const MLFF_STRUCTURE_SOURCE = {
               </div>
               <div class="twod-platform-actions">
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-mlff-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-mlff-reset>重置</button>
                   <button class="btn-primary" type="button" data-mlff-apply ${canApply ? "" : "disabled"}>检索</button>
                 </div>
               </div>
@@ -57064,8 +57240,10 @@ function escapeHtml(value) {
       if (event.target.id === "twodConvertRecordSelect") {
         state.twodConvertRecordId = event.target.value;
         const record = findRecord(state.twodConvertRecordId);
-        const formats = getTwodConvertTargetFormats(record?.fileType || state.twodConvertFilterType).filter((item) => item !== String(record?.sourceFormat || "").toUpperCase());
-        const available = formats.length ? formats : getTwodConvertTargetFormats(record?.fileType || state.twodConvertFilterType);
+        const recordType = record?.fileType || state.twodConvertFilterType;
+        const normalizedSource = normalizeTwodFileFormat(record?.sourceFormat);
+        const formats = getTwodConvertTargetFormats(recordType, normalizedSource).filter((item) => item !== normalizedSource);
+        const available = formats.length ? formats : getTwodConvertTargetFormats(recordType, normalizedSource);
         state.twodConvertTargetFormat = available[0] || "";
         if (state.page === "twod-convert") renderTwodConvertSelectPage();
         return;

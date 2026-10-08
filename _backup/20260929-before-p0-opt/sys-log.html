@@ -1,0 +1,3461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>低维材料主题库 · 操作日志</title>
+  <meta name="lowdim-standalone-page" content="sys-log">
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<body>
+  <section class="login-shell" id="loginShell">
+    <div class="login-shell-inner">
+      <div class="login-visual" aria-hidden="true">
+        <div class="login-visual-image"></div>
+        <h2>低维材料主题库</h2>
+      </div>
+      <div class="login-stage">
+        <div class="login-auth-card">
+          <div class="login-form-head">
+            <h3>低维材料主题库</h3>
+          </div>
+          <div class="login-auth-switch">
+            <button class="login-auth-tab active" type="button">登录</button>
+            <button class="login-auth-tab" type="button">注册</button>
+          </div>
+          <form class="login-form" id="loginForm">
+            <div class="login-field">
+              <label for="loginAccount">用户名</label>
+              <div class="input-wrapper">
+                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span>
+                <input id="loginAccount" type="text" autocomplete="username" placeholder="用户名" value="researcher">
+              </div>
+            </div>
+            <div class="login-field">
+              <label for="loginPassword">密码</label>
+              <div class="input-wrapper">
+                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                <input id="loginPassword" type="password" autocomplete="current-password" placeholder="密码" value="123456">
+              </div>
+            </div>
+            <div class="login-field">
+              <label for="loginCaptchaInput">验证码</label>
+              <div class="login-captcha-row">
+                <input id="loginCaptchaInput" type="text" autocomplete="off" placeholder="请输入验证码" value="ABCD">
+                <div class="login-captcha-box" id="loginCaptchaBox">ABCD</div>
+                <button class="login-captcha-refresh" id="loginCaptchaRefresh" type="button" aria-label="刷新验证码">↻</button>
+              </div>
+            </div>
+            <div class="login-error" id="loginError"></div>
+            <div class="login-aux">
+              <label class="login-remember" for="loginRememberStatic">
+                <input id="loginRememberStatic" type="checkbox" checked>
+                <span>记住密码</span>
+              </label>
+              <div class="login-aux-meta">
+                <span>使用系统账号密码与验证码登录</span>
+                <button class="login-aux-link" type="button">去注册</button>
+              </div>
+            </div>
+            <button class="login-submit" type="button" data-standard-login-submit>登 录</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="login-footer">Copyright 2024 低维材料主题库 All Rights Reserved</div>
+  </section>
+
+  <div class="app" id="appRoot" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-mark" src="data:image/png;base64,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" alt="深圳国际科技信息中心" style="width:46px;height:46px;border-radius:14px;object-fit:contain;">
+        <div>
+          <h1>低维材料主题库</h1>
+          <!-- <p>蓝白风格交互原型 · API 数据应用平台</p> -->
+        </div>
+      </div>
+
+      <label class="topbar-search" aria-label="全局搜索">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <input type="text" placeholder="请输入">
+      </label>
+
+      <nav class="portal-nav" id="portalNav" aria-label="顶部菜单导航">
+        <button class="portal-link active" type="button" data-portal="applications" data-page="twod">低维材料主题应用</button>
+        <button class="portal-link" type="button" data-portal="workflow" data-page="data-submit">数据管理</button>
+        <button class="portal-link" type="button" data-portal="algorithms" data-page="algorithms">数据算法</button>
+        <button class="portal-link" type="button" data-portal="tools" data-page="tools">开发工具</button>
+        <button class="portal-link" type="button" data-portal="system" data-page="sys-user">系统管理</button>
+      </nav>
+
+      <div class="topbar-actions">
+        <button class="topbar-action-btn primary" id="portalReturnBtn" type="button" onclick="window.location.href='portal.html'">返回门户</button>
+        <button class="topbar-action-btn" type="button" aria-label="应用">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>应用</span>
+        </button>
+        <button class="topbar-action-btn" type="button" aria-label="帮助">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M9.5 9a2.5 2.5 0 0 1 4.6 1.4c0 1.7-2.1 2-2.1 3.6"></path>
+            <path d="M12 17h.01"></path>
+          </svg>
+          <span>帮助</span>
+        </button>
+        <div class="user-menu-wrapper" id="userMenuWrapper">
+          <div class="user-chip" id="userMenuTrigger" style="cursor:pointer;">
+            <div class="avatar">R</div>
+            <span>管理员9527</span>
+            <span class="user-menu-arrow">▾</span>
+          </div>
+          <div class="user-dropdown" id="userDropdown" hidden>
+            <div class="user-dropdown-item" data-action="profile">
+              <span class="user-dropdown-icon">👤</span>
+              <span>查看用户信息</span>
+            </div>
+            <div class="user-dropdown-item" data-action="portal">
+              <span class="user-dropdown-icon">⌂</span>
+              <span>返回门户</span>
+            </div>
+            <div class="user-dropdown-divider"></div>
+            <div class="user-dropdown-item" data-action="logout">
+              <span class="user-dropdown-icon">🚪</span>
+              <span>退出登录</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-toolbar">
+        <!-- 收起按钮已移除：导航始终展开 -->
+      </div>
+
+      <div class="sidebar-group admin-group" data-group="monitor">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">监控统计 <span class="admin-badge">管理</span></span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="monitor" data-page="dashboard" data-label="数据看板"><span>数据看板</span></button>
+          <button class="nav-btn" data-group="monitor" data-page="data-statistics" data-label="数据统计"><span>数据统计</span></button>
+        </div>
+      </div>
+      <div class="sidebar-group" data-group="standards">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">低维材料标准体系</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="standards" data-page="standard-twod" data-label="低维材料标准体系"><span>低维材料标准体系</span></button>
+        </div>
+      </div>
+      <div class="sidebar-group" data-group="ingest">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">低维材料数据入库</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="ingest" data-page="lowdim-ingest-twod" data-label="二维材料数据采集加工处理"><span>二维材料数据采集加工处理</span></button>
+          <button class="nav-btn" data-group="ingest" data-page="lowdim-ingest-opto" data-label="有机光电材料数据采集加工处理"><span>有机光电材料数据采集加工处理</span></button>
+          <button class="nav-btn" data-group="ingest" data-page="lowdim-ingest-electrolyte" data-label="电解质材料数据采集加工处理"><span>电解质材料数据采集加工处理</span></button>
+          <button class="nav-btn" data-group="ingest" data-page="lowdim-ingest-mlff" data-label="机器学习力场数据采集加工处理"><span>机器学习力场数据采集加工处理</span></button>
+          <button class="nav-btn" data-group="ingest" data-page="lowdim-ingest-catalyst" data-label="催化材料数据采集加工处理"><span>催化材料数据采集加工处理</span></button>
+        </div>
+      </div>
+      <div class="sidebar-group" data-group="standardization">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">低维材料数据标准化</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="standardization" data-page="lowdim-standardization-twod" data-label="二维材料数据库标准化"><span>二维材料数据库标准化</span></button>
+          <button class="nav-btn" data-group="standardization" data-page="lowdim-standardization-opto" data-label="有机光电材料数据库标准化"><span>有机光电材料数据库标准化</span></button>
+          <button class="nav-btn" data-group="standardization" data-page="lowdim-standardization-electrolyte" data-label="电解质材料数据库标准化"><span>电解质材料数据库标准化</span></button>
+          <button class="nav-btn" data-group="standardization" data-page="lowdim-standardization-mlff" data-label="机器学习力场数据库标准化"><span>机器学习力场数据库标准化</span></button>
+          <button class="nav-btn" data-group="standardization" data-page="lowdim-standardization-catalyst" data-label="催化材料数据库标准化"><span>催化材料数据库标准化</span></button>
+        </div>
+      </div>
+      <div class="sidebar-group" data-group="database">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">低维材料数据库</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="database" data-page="lowdim-database-twod" data-label="二维材料数据库"><span>二维材料数据库</span></button>
+          <button class="nav-btn" data-group="database" data-page="lowdim-database-opto" data-label="有机光电材料数据库"><span>有机光电材料数据库</span></button>
+          <button class="nav-btn" data-group="database" data-page="lowdim-database-electrolyte" data-label="电解质材料数据库"><span>电解质材料数据库</span></button>
+          <button class="nav-btn" data-group="database" data-page="lowdim-database-mlff" data-label="机器学习力场数据库"><span>机器学习力场数据库</span></button>
+          <button class="nav-btn" data-group="database" data-page="lowdim-database-catalyst" data-label="催化材料数据库"><span>催化材料数据库</span></button>
+        </div>
+      </div>
+      <div class="sidebar-group" data-group="applications">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">低维材料主题应用</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" type="button" data-group="applications" data-page="twod" data-label="二维材料数据应用"><span>二维材料数据应用</span></button>
+          <button class="nav-btn" type="button" data-group="applications" data-page="electrolyte" data-label="电解质材料数据应用"><span>电解质材料数据应用</span></button>
+          <button class="nav-btn" type="button" data-group="applications" data-page="opto" data-label="有机光电材料应用"><span>有机光电材料应用</span></button>
+          <button class="nav-btn" type="button" data-group="applications" data-page="mlff" data-label="机器学习力场应用"><span>机器学习力场应用</span></button>
+          <button class="nav-btn" type="button" data-group="applications" data-page="catalyst" data-label="催化材料数据应用"><span>催化材料数据应用</span></button>
+        </div>
+      </div>
+
+      <div class="sidebar-group" data-group="analysis">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">低维材料数据库分析预测</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="analysis" data-page="algorithms" data-label="数据应用算法"><span>数据应用算法</span></button>
+          <button class="nav-btn" data-group="analysis" data-page="tools" data-label="数据工具开发"><span>数据工具开发</span></button>
+          <button class="nav-btn" data-group="analysis" data-page="prediction-tasks" data-label="预测任务管理"><span>预测任务管理</span></button>
+        </div>
+      </div>
+      <div class="sidebar-group" data-group="workflow">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">数据管理</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="workflow" data-page="data-submit" data-label="数据上传"><span>数据上传</span></button>
+          <button class="nav-btn" data-group="workflow" data-page="my-submissions" data-label="我的提交"><span>我的提交</span></button>
+          <button class="nav-btn" data-group="workflow" data-page="twod-review" data-label="入库审核"><span>入库审核 <span class="admin-badge">管理</span></span></button>
+        </div>
+      </div>
+      <div class="sidebar-group" data-group="algorithm-tools">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">算法/工具管理</span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="algorithm-tools" data-page="sys-algorithm" data-label="算法/接口管理"><span>算法/接口管理</span></button>
+        </div>
+      </div>
+      <div class="sidebar-group admin-group" data-group="system">
+        <button class="sidebar-group-toggle" type="button" data-group-toggle>
+          <span class="sidebar-group-title">系统管理 <span class="admin-badge">管理</span></span>
+          <span class="sidebar-group-arrow">⌄</span>
+        </button>
+        <div class="nav">
+          <button class="nav-btn" data-group="system" data-page="sys-permission" data-label="权限审批"><span>权限审批</span></button>
+          <button class="nav-btn" data-group="system" data-page="sys-user" data-label="用户管理"><span>用户管理</span></button>
+          <button class="nav-btn" data-group="system" data-page="sys-role" data-label="角色管理"><span>角色管理</span></button>
+          <button class="nav-btn" data-group="system" data-page="sys-menu" data-label="菜单管理"><span>菜单管理</span></button>
+          <button class="nav-btn" data-group="system" data-page="sys-dict" data-label="字典管理"><span>字典管理</span></button>
+          <button class="nav-btn" data-group="system" data-page="system-config" data-label="平台配置"><span>平台配置</span></button>
+          <button class="nav-btn" data-group="system" data-page="sys-log" data-label="操作日志"><span>操作日志</span></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="main-shell">
+        <div class="page-meta">
+          <div class="breadcrumb" id="breadcrumb">
+            <span>低维材料主题应用</span>
+            <span>/</span>
+            <strong>二维材料数据应用</strong>
+          </div>
+          <!-- <div class="page-meta-note">标准画板 1440px · 12 列栅格 · 响应断点 ≥1600 / ≥1200 / &lt;1200</div> -->
+        </div>
+
+      <section class="page active" id="page-twod">
+        <div class="page-head">
+          <div>
+            <h2>二维材料数据应用</h2>
+            <p>聚焦二维材料检索、预测分析与结果查看，支持多维属性检索。</p>
+          </div>
+        </div>
+
+        <div id="twodAppRoot">
+          <div class="module-tab-strip">
+            <button class="module-tab-btn active" type="button" data-module-tab="twod" data-module-target="search">数据检索</button>
+          </div>
+
+          <div class="twod-platform-shell">
+            <section class="card twod-search-platform">
+              <div class="twod-search-hero">
+                <div class="twod-mode-selector" id="twodModeSelector">
+                  <button class="twod-mode-btn active" type="button" data-twod-mode="formula">化学式检索</button>
+                  <button class="twod-mode-btn" type="button" data-twod-mode="elements">元素组成检索</button>
+                  <button class="twod-mode-btn" type="button" data-twod-mode="materialId">材料编号检索</button>
+                  <button class="twod-mode-btn" type="button" data-twod-mode="periodic">元素周期表检索</button>
+                  <button class="twod-mode-btn" type="button" data-twod-mode="property">二维材料性质检索</button>
+                </div>
+              </div>
+
+              <div class="twod-mode-stage" id="twodModeWorkspace"></div>
+            </section>
+
+            <section class="card twod-search-results">
+              <div class="twod-results-head"></div>
+
+              <div class="table-wrap twod-result-table-wrap" id="twodBaseTableWrap">
+                <table class="twod-result-table">
+                  <thead>
+                    <tr>
+                      <th>序号</th>
+                      <th>材料编号</th>
+                      <th>材料名称</th>
+                      <th>化学式</th>
+                      <th>带隙</th>
+                      <th>形成能</th>
+                      <th>有效质量</th>
+                      <th>磁转变温度</th>
+                      <th>元素组成</th>
+                      <th class="missing-field-red">数据来源</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="twodBaseTableBody"></tbody>
+                </table>
+              </div>
+              <div id="twodBaseCardView" hidden></div>
+
+              <div class="result-footer twod-result-footer" id="twodBaseFooter"></div>
+            </section>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="page" id="page-twod-detail">
+        <div class="twod-detail-page-shell">
+          <div class="twod-detail-toolbar">
+            <div class="twod-detail-toolbar-main">
+              <h2 id="twodDetailPageTitle">二维材料详情</h2>
+              <p id="twodDetailPageSubtitle">查看二维材料的结构特征、电子结构、电学性质、磁学性质、热学性质、力学性质、光学性质、缺陷性质与物理性质可视化内容。</p>
+            </div>
+            <div class="twod-detail-toolbar-actions">
+              <button class="btn" type="button" id="twodDetailBackBtn">返回</button>
+            </div>
+          </div>
+          <div class="twod-tree-shell">
+          <aside class="twod-tree-panel">
+            <div class="twod-tree-panel-head">
+              <strong>详情信息</strong>
+            </div>
+            <div class="twod-tree-list" id="twodDetailTree"></div>
+          </aside>
+            <section class="twod-detail-panel">
+              <div class="twod-detail-content" id="twodDetailPageContent"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- 算法预测结果页：与"查看详情"完全独立，只展示本课题算出来的结果 -->
+      <section class="page" id="page-prediction">
+        <div class="twod-detail-page-shell">
+          <div class="twod-detail-toolbar">
+            <div class="twod-detail-toolbar-main">
+              <h2 id="predictionPageTitle">算法预测结果</h2>
+              <p id="predictionPageSubtitle">展示本课题算法/量子化学流程计算得到的结果。</p>
+            </div>
+            <div class="twod-detail-toolbar-actions">
+              <button class="btn" type="button" id="predictionBackBtn">返回</button>
+            </div>
+          </div>
+          <div class="prediction-provenance-banner" id="predictionProvenanceBanner"></div>
+          <div class="twod-tree-shell">
+            <aside class="twod-tree-panel">
+              <div class="twod-tree-panel-head">
+                <strong>预测菜单</strong>
+              </div>
+              <div class="twod-tree-list" id="predictionTree"></div>
+            </aside>
+            <section class="twod-detail-panel">
+              <div class="twod-detail-content" id="predictionPageContent"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-prediction-pending">
+        <div class="twod-detail-page-shell">
+          <div class="twod-detail-toolbar">
+            <div class="twod-detail-toolbar-main">
+              <h2>正在调用算法预测结果</h2>
+              <p>正在调用算法预测结果，请耐心等待几分钟。</p>
+            </div>
+            <div class="twod-detail-toolbar-actions">
+              <button class="btn" type="button" data-prediction-pending-back>返回应用</button>
+            </div>
+          </div>
+          <section class="card twod-detail-section-card">
+            <div class="twod-results-head">
+              <div>
+                <h3 id="predictionPendingTaskName">预测任务</h3>
+                <p class="twod-result-hint" id="predictionPendingSummary">任务已提交，算法正在处理中，请耐心等待几分钟。</p>
+              </div>
+              <span class="status-badge info prediction-pending-status"><span class="prediction-pending-dot"></span>算法计算中</span>
+            </div>
+            <div class="twod-detail-property-grid">
+              <article class="twod-detail-property-item"><span>任务状态</span><strong>等待算法运行</strong></article>
+              <article class="twod-detail-property-item"><span>输入材料</span><strong id="predictionPendingMaterial">-</strong></article>
+              <article class="twod-detail-property-item"><span>调用算法</span><strong id="predictionPendingAlgorithm">-</strong></article>
+              <article class="twod-detail-property-item"><span>提交时间</span><strong>2026-08-21 14:32</strong></article>
+            </div>
+            <div class="twod-platform-actions">
+              <div class="prediction-pending-message"><span class="prediction-pending-spinner" aria-hidden="true"></span><div><strong>预测任务正在处理中</strong><span>系统正在调用算法分析材料数据，预计需要 5-10 分钟，请耐心等待。</span></div></div>
+              <div class="twod-record-inline-actions">
+                <button class="btn-primary" type="button" data-prediction-pending-result>查看预测结果</button>
+                <button class="btn" type="button" data-prediction-pending-back>返回列表</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="page-twod-review">
+        <div class="page-head">
+          <div>
+            <h2>入库审核 <span class="page-role-tag auditor">审核员工作台</span></h2>
+            <p>统一审核工作台，支持五类材料差异化审核，配置驱动材料专属审核规则。</p>
+          </div>
+          <div class="page-tools">
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">材料类型</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="twod-filter-chip active" type="button" data-review-material="2DM">二维材料</button>
+            <button class="twod-filter-chip" type="button" data-review-material="OPM">有机光电材料</button>
+            <button class="twod-filter-chip" type="button" data-review-material="ELY">电解质材料</button>
+            <button class="twod-filter-chip" type="button" data-review-material="MLF">机器学习力场</button>
+            <button class="twod-filter-chip" type="button" data-review-material="CAT">催化材料</button>
+          </div>
+          <div style="margin-top:12px;padding:12px;background:var(--primary-soft);border-radius:8px;font-size:13px;color:var(--muted);" id="reviewMaterialHint">
+            当前：<strong style="color:var(--primary);">二维材料</strong> | 误差容忍度：15% | 安全分级：已启用（第1级/第2级）| 审核插件：安全定级
+          </div>
+        </div>
+        <div class="twod-platform-shell">
+          <section class="card twod-workflow-panel">
+            <div class="twod-workflow-head">
+              <div>
+                <h3>待审核与入库记录</h3>
+              </div>
+            </div>
+
+            <div class="twod-review-filter-row">
+              <div class="twod-review-filters">
+                <button class="twod-filter-chip active" type="button" data-twod-review-filter="all">全部记录</button>
+                <button class="twod-filter-chip" type="button" data-twod-review-filter="pending">待审核</button>
+                <button class="twod-filter-chip" type="button" data-twod-review-filter="approved">已入库</button>
+                <button class="twod-filter-chip" type="button" data-twod-review-filter="rejected">审核不通过</button>
+              </div>
+              <div class="twod-review-helper" id="twodReviewHelperText">提交后自动定位记录。</div>
+            </div>
+
+            <div class="table-wrap">
+              <table class="twod-review-table">
+                <thead>
+                  <tr>
+                    <th>提交时间</th>
+                    <th>材料名称</th>
+                    <th>数据类型</th>
+                    <th>流程类型</th>
+                    <th>审核状态</th>
+                    <th>入库结果</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="twodWorkflowTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="result-footer">
+              <span id="twodWorkflowFooter">显示 0 条记录</span>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="page-twod-convert">
+        <div class="page-head">
+          <div>
+            <h2>文件格式转换</h2>
+            <p>将二维材料结构文件在不同格式之间转换，支持 CIF、POSCAR、XYZ、VASP 等常见格式。</p>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">选择源文件</h3>
+          <div class="upload-dropzone">
+            <p>从系统内已有结构文件记录中选择源文件进行格式转换。</p>
+            <p style="font-size:12px;color:var(--muted);">支持 .cif / .vasp / .poscar / .xyz / .pdb 格式。</p>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">转换设置</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label class="form-label">源格式</label>
+              <select class="page-select"><option>CIF</option><option>POSCAR</option><option>XYZ</option><option>VASP</option><option>PDB</option></select>
+            </div>
+            <div class="field">
+              <label class="form-label">目标格式</label>
+              <select class="page-select"><option>POSCAR</option><option>CIF</option><option>XYZ</option><option>VASP</option><option>PDB</option></select>
+            </div>
+            <div class="field">
+              <label class="form-label">超胞扩展</label>
+              <select class="page-select"><option>1×1×1（原胞）</option><option>2×2×1</option><option>2×2×2</option><option>3×3×1</option></select>
+            </div>
+            <div class="field">
+              <label class="form-label">真空层厚度 (Å)</label>
+              <input type="number" class="page-select" value="20" min="0" max="50">
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn-primary" style="min-height:40px;padding:8px 24px;">开始转换</button>
+            <span style="margin-left:12px;color:var(--muted);font-size:13px;">转换过程通常在 3 秒内完成</span>
+          </div>
+        </div>
+        <div class="card pad">
+          <h3 class="section-title">转换历史</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>源文件</th><th>源格式</th><th>目标格式</th><th>转换时间</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>MoS2_2H.cif</td><td>CIF</td><td>POSCAR</td><td>2026-06-23 10:15</td><td><span class="status-badge success">成功</span></td><td><button class="btn btn-sm">下载</button> <button class="btn btn-sm">重新转换</button></td></tr>
+                <tr><td>graphene_primitive.vasp</td><td>VASP</td><td>CIF</td><td>2026-06-22 14:30</td><td><span class="status-badge success">成功</span></td><td><button class="btn btn-sm">下载</button> <button class="btn btn-sm">重新转换</button></td></tr>
+                <tr><td>hBN_bilayer.xyz</td><td>XYZ</td><td>POSCAR</td><td>2026-06-21 09:00</td><td><span class="status-badge success">成功</span></td><td><button class="btn btn-sm">下载</button> <button class="btn btn-sm">重新转换</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 3 条转换记录</span></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-twod-convert-progress">
+        <div class="page-head">
+          <div>
+            <h2>转换进度</h2>
+            <p>实时查看当前文件格式转换任务的处理进度和中间状态。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" onclick="MarvisRouter.go('page-twod-convert')">返回转换页</button>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <div style="text-align:center;padding:32px;">
+            <div style="width:120px;height:120px;border-radius:50%;border:6px solid var(--line);border-top-color:var(--primary);margin:0 auto 20px;animation:spin 1.2s linear infinite;"></div>
+            <h3 style="margin-bottom:8px;">正在转换中…</h3>
+            <p style="color:var(--muted);">MoS2_2H.cif → POSCAR | 已处理 2/4 步骤</p>
+            <div style="max-width:400px;margin:16px auto;background:var(--line);border-radius:8px;height:8px;overflow:hidden;">
+              <div style="width:50%;height:100%;background:var(--primary);border-radius:8px;transition:width 0.8s;"></div>
+            </div>
+            <p style="font-size:12px;color:var(--muted);">步骤 2/4：超胞扩展 (2×2×1)</p>
+          </div>
+        </div>
+        <div class="card pad">
+          <h3 class="section-title">转换步骤日志</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;background:#f0fdf4;border-radius:8px;"><span style="color:var(--green);font-weight:700;">✓</span><span>读取源文件 MoS2_2H.cif — 成功 (0.4s)</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;background:#f0fdf4;border-radius:8px;"><span style="color:var(--green);font-weight:700;">✓</span><span>结构解析与对称性识别 — 成功 (0.9s)</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;background:var(--primary-soft);border-radius:8px;"><span style="color:var(--primary);font-weight:700;">⟳</span><span>超胞扩展 (2×2×1) — 进行中…</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;"><span style="color:var(--muted);">○</span><span style="color:var(--muted);">写入目标格式 POSCAR — 等待中</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-twod-convert-result">
+        <div class="page-head">
+          <div>
+            <h2>转换结果</h2>
+            <p>文件格式转换已完成，可下载目标文件或查看结构预览。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" onclick="MarvisRouter.go('page-twod-convert')">新建转换</button>
+            <button class="btn-primary">下载 POSCAR 文件</button>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <div style="background:#f0fdf4;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;">
+            <span style="font-size:28px;color:var(--green);">✓</span>
+            <div>
+              <strong style="font-size:16px;">转换成功</strong>
+              <p style="color:var(--muted);margin:4px 0 0;">MoS2_2H.cif → MoS2_2H.vasp | 总耗时 3.2s</p>
+            </div>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">转换详情</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="detail-row"><span class="detail-label">源文件</span><span>MoS2_2H.cif</span></div>
+            <div class="detail-row"><span class="detail-label">目标文件</span><span>MoS2_2H.vasp</span></div>
+            <div class="detail-row"><span class="detail-label">源格式</span><span>CIF (Crystallographic Information File)</span></div>
+            <div class="detail-row"><span class="detail-label">目标格式</span><span>POSCAR (VASP 输入格式)</span></div>
+            <div class="detail-row"><span class="detail-label">超胞</span><span>2×2×1 (原胞→超胞 4 倍)</span></div>
+            <div class="detail-row"><span class="detail-label">原子数</span><span>12 → 48</span></div>
+            <div class="detail-row"><span class="detail-label">晶格参数</span><span>a=6.34Å, b=6.34Å, c=24.58Å</span></div>
+            <div class="detail-row"><span class="detail-label">空间群</span><span>P6₃/mmc (No.194)</span></div>
+          </div>
+        </div>
+        <div class="card pad">
+          <h3 class="section-title">结构预览</h3>
+          <div style="text-align:center;padding:24px;background:var(--panel-soft);border-radius:12px;">
+            <p style="color:var(--muted);">结构预览由外部可视化 API 提供，下载文件后可在 VESTA / VMD 中查看完整三维结构。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-electrolyte">
+        <div class="page-head">
+          <div>
+            <h2>电解质材料数据应用</h2>
+            <p>面向有机电解液、固态有机和固态无机三类电解质，提供基础检索、性质检索和可视化详情查看。</p>
+          </div>
+        </div>
+        <div id="electrolyteApp"></div>
+      </section>
+
+      <section class="page" id="page-opto">
+        <div class="page-head">
+          <div>
+            <h2>有机光电材料应用</h2>
+            <p>支持化学名称、分子式、分子编号和条件组合检索，并查看三维结构、表征图谱、特征参数、态密度和外部关联数据。</p>
+          </div>
+        </div>
+
+        <div class="pill-row">
+          <span class="chip">化学名称检索</span>
+          <span class="chip">分子式检索</span>
+          <span class="chip">分子编号检索</span>
+          <span class="chip">条件组合检索</span>
+          <span class="chip">性质数据检索（三维结构、表征图谱、特征参数、态密度、外部关联）</span>
+        </div>
+
+        <div class="card pad">
+          <div class="search-grid">
+            <div class="field"><label>化学名称检索</label><input type="text" placeholder="如：P3HT"></div>
+            <div class="field"><label>分子式检索</label><input type="text" placeholder="如：C10H14S"></div>
+            <div class="field"><label>分子编号检索</label><input type="text" placeholder="如：OP-023"></div>
+          </div>
+          <div class="search-grid two" style="margin-top:18px;">
+            <div class="field"><label>条件组合检索</label><textarea placeholder="可组合输入：带隙范围、HOMO/LUMO、三线态能级、吸收峰位置等条件"></textarea></div>
+            <div class="field">
+              <label>性质数据类别</label>
+              <select>
+                <option>三维结构</option>
+                <option>表征图谱</option>
+                <option>特征参数</option>
+                <option>态密度</option>
+                <option>外部关联</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-grid" style="margin-top:20px;">
+          <article class="card pad">
+            <h3 class="section-title">性质数据面板</h3>
+            <div class="subtab-row" data-tabs="opto-sub">
+              <button class="subtab-btn active" data-tab="opto-structure">三维结构</button>
+              <button class="subtab-btn" data-tab="opto-spectra">表征图谱</button>
+              <button class="subtab-btn" data-tab="opto-params">特征参数</button>
+              <button class="subtab-btn" data-tab="opto-dos">态密度</button>
+              <button class="subtab-btn" data-tab="opto-external">外部关联</button>
+            </div>
+            <div class="subtab-panel active" id="opto-structure"><div class="tool-stage"><div class="box"><h4>三维结构索引</h4><p>通过结构展示 API 返回分子骨架、取代基位置和预览文件地址。</p></div><div class="box"><h4>结构预览</h4><p>当前原型仅展示结构数据面板，真实结构由外部 API 返回后渲染。</p></div></div></div>
+            <div class="subtab-panel" id="opto-spectra"><div class="tool-stage"><div class="box"><h4>表征图谱</h4><p>吸收谱、发射谱、循环伏安曲线等索引均通过 API 返回。</p></div><div class="box"><h4>谱图摘要</h4><p>支持展示峰位、半峰宽、测试条件与图谱下载地址。</p></div></div></div>
+            <div class="subtab-panel" id="opto-params"><div class="tool-stage"><div class="box"><h4>特征参数</h4><p>展示带隙、HOMO/LUMO、三线态能级、吸收/发射峰位等参数。绝大部分分子暂无器件级数据，因此不作为通用检索字段展示。</p></div></div></div>
+            <div class="subtab-panel" id="opto-dos"><div class="tool-stage"><div class="box"><h4>态密度数据</h4><p>统一通过态密度数据 API 获取曲线点位和图谱链接。</p></div></div></div>
+            <div class="subtab-panel" id="opto-external"><div class="tool-stage"><div class="box"><h4>外部关联</h4><p>聚合论文、专利、数据库条目和外部实验链接。</p></div></div></div>
+          </article>
+
+          <article class="card pad">
+            <h3 class="section-title">样例结果</h3>
+            <div class="summary-list">
+              <div class="summary-item"><strong>P3HT</strong><div class="meta">分子编号：OP-023 · 适配性质数据：结构、图谱、参数、态密度。</div></div>
+              <div class="summary-item"><strong>PCBM</strong><div class="meta">分子编号：OP-114 · 外部关联条目 28 项。</div></div>
+              <div class="summary-item"><strong>MAPbI3</strong><div class="meta">分子编号：OP-6119 · 表征图谱与结构索引均可调用 API 获取。</div></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="page-mlff">
+        <div class="page-head">
+          <div>
+            <h2>机器学习力场应用</h2>
+            <p>支持化学名称与分子式检索、性质数据查询、机器学习力场术语表浏览，以及结构与参数文件下载。</p>
+          </div>
+        </div>
+
+        <div class="pill-row">
+          <span class="chip">化学名称检索</span>
+          <span class="chip">分子式检索</span>
+          <span class="chip">性质数据检索（电荷、多极矩、分子结构、小体系结构、大体系结构）</span>
+          <span class="chip">机器学习力场术语表（参数数据定义表 + 数据获取方法表）</span>
+          <span class="chip">结构与参数下载</span>
+        </div>
+
+        <div class="card pad">
+          <div class="electrolyte-search-grid two">
+            <div class="field">
+              <label>化学名称检索</label>
+              <input type="text" placeholder="如：Methane、Water Cluster">
+            </div>
+            <div class="field">
+              <label>分子式检索</label>
+              <input type="text" placeholder="如：CH4、H2O">
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-grid" style="margin-top:20px;">
+          <div class="property-card"><strong>电荷</strong><p>原子电荷、局域电荷分布与相关索引。</p></div>
+          <div class="property-card"><strong>多极矩</strong><p>偶极矩、四极矩及其数据摘要。</p></div>
+          <div class="property-card"><strong>分子结构</strong><p>单分子结构、键角与拓扑数据。</p></div>
+          <div class="property-card"><strong>小体系结构</strong><p>小分子簇和局域片段结构集合。</p></div>
+          <div class="property-card"><strong>大体系结构</strong><p>聚集态、界面体系和扩展结构索引。</p></div>
+        </div>
+
+        <div class="card table-card" style="margin-top:20px;">
+          <div class="table-head">
+            <h3>机器学习力场术语表</h3>
+            <div class="table-tools"><span class="tag-blue">参数数据定义表</span><span class="tag-green">数据获取方法表</span></div>
+          </div>
+          <div class="table-wrap">
+            <table class="summary-table">
+              <thead><tr><th>术语</th><th>参数定义</th><th>数据获取方法</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>Atomic Charge</td><td>原子级电荷分布</td><td>通过外部力场数据 API 获取</td><td>用于描述电荷响应数据集</td></tr>
+                <tr><td>Multipole Moment</td><td>偶极矩 / 四极矩</td><td>通过参数结果 API 返回</td><td>用于多极矩训练样本组织</td></tr>
+                <tr><td>Small System Structure</td><td>小体系结构片段</td><td>通过结构数据 API 提供</td><td>适合用于局域结构学习</td></tr>
+                <tr><td>Large System Structure</td><td>大体系结构索引</td><td>通过聚合数据接口返回</td><td>适合跨尺度结构样本共享</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="share-grid" style="margin-top:20px;">
+          <div class="share-box">
+            <h4>材料数据下载</h4>
+            <ul>
+              <li>按模型训练批次共享数据样本</li>
+              <li>按属性类型导出标准化 JSON 数据包</li>
+              <li>按项目组开放只读订阅接口</li>
+            </ul>
+          </div>
+          <div class="share-box">
+            <h4>术语表 API 示例</h4>
+            <div class="api-list">
+              <div class="api-item"><strong>数据集订阅 API</strong><div class="meta">POST /api/v1/mlff/share/subscribe</div></div>
+              <div class="api-item"><strong>术语表 API</strong><div class="meta">GET /api/v1/mlff/glossary</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-mlff-convert">
+        <div class="page-head">
+          <div>
+            <h2>MLFF 数据格式转换</h2>
+            <p>将机器学习力场训练数据在扩展 XYZ、NPZ、HDF5 等格式间转换，支持训练集/测试集划分。</p>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">选择数据文件</h3>
+          <div class="upload-dropzone">
+            <p>从系统内已有机器学习力场数据记录中选择源文件进行格式转换。</p>
+            <p style="font-size:12px;color:var(--muted);">支持 .xyz / .extxyz / .npz / .h5 / .hdf5 格式。</p>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">转换设置</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label class="form-label">源格式</label>
+              <select class="page-select"><option>extended XYZ</option><option>NPZ</option><option>HDF5</option><option>ASE db</option></select>
+            </div>
+            <div class="field">
+              <label class="form-label">目标格式</label>
+              <select class="page-select"><option>NPZ</option><option>extended XYZ</option><option>HDF5</option><option>ASE db</option></select>
+            </div>
+            <div class="field">
+              <label class="form-label">训练集比例</label>
+              <select class="page-select"><option>80% 训练 / 20% 测试</option><option>90% 训练 / 10% 测试</option><option>70% 训练 / 30% 测试</option></select>
+            </div>
+            <div class="field">
+              <label class="form-label">随机种子</label>
+              <input type="number" class="page-select" value="42" min="0">
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <label class="form-label"><input type="checkbox" checked> 包含能量/力/应力标签</label>
+            <label class="form-label" style="margin-left:16px;"><input type="checkbox"> 按化学计量比分层抽样</label>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn-primary" style="min-height:40px;padding:8px 24px;">开始转换</button>
+          </div>
+        </div>
+        <div class="card pad">
+          <h3 class="section-title">转换历史</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>文件名</th><th>源格式</th><th>目标格式</th><th>构型数</th><th>时间</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>water_clusters_10k.extxyz</td><td>extXYZ</td><td>NPZ</td><td>10,000</td><td>2026-06-23</td><td><button class="btn btn-sm">下载</button></td></tr>
+                <tr><td>methane_structures.npz</td><td>NPZ</td><td>HDF5</td><td>5,200</td><td>2026-06-20</td><td><button class="btn btn-sm">下载</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-mlff-convert-progress">
+        <div class="page-head">
+          <div>
+            <h2>MLFF 转换进度</h2>
+            <p>查看当前数据格式转换任务的处理状态和中间日志。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" onclick="MarvisRouter.go('page-mlff-convert')">返回转换页</button>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <div style="text-align:center;padding:32px;">
+            <div style="width:120px;height:120px;border-radius:50%;border:6px solid var(--line);border-top-color:var(--purple);margin:0 auto 20px;animation:spin 1.2s linear infinite;"></div>
+            <h3 style="margin-bottom:8px;">正在转换数据格式</h3>
+            <p style="color:var(--muted);">water_clusters_10k.extxyz → NPZ | 8,200 / 10,000 构型已处理</p>
+            <div style="max-width:400px;margin:16px auto;background:var(--line);border-radius:8px;height:8px;overflow:hidden;">
+              <div style="width:82%;height:100%;background:var(--purple);border-radius:8px;"></div>
+            </div>
+            <p style="font-size:12px;color:var(--muted);">预估剩余时间：约 4 秒</p>
+          </div>
+        </div>
+        <div class="card pad">
+          <h3 class="section-title">处理日志</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;background:#f0fdf4;border-radius:8px;"><span style="color:var(--green);">✓</span><span>读取 extXYZ 文件头，解析原子类型 [H, O] — 成功 (0.6s)</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;background:#f0fdf4;border-radius:8px;"><span style="color:var(--green);">✓</span><span>验证能量/力标签完整性，覆盖率 100% — 成功 (1.2s)</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;background:var(--primary-soft);border-radius:8px;"><span style="color:var(--purple);">⟳</span><span>逐构型编码写入 NPZ 压缩数组 — 82% (8,200/10,000)</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px;"><span style="color:var(--muted);">○</span><span style="color:var(--muted);">划分训练集/测试集 (80%/20%) — 等待中</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-mlff-convert-result">
+        <div class="page-head">
+          <div>
+            <h2>MLFF 转换结果</h2>
+            <p>数据格式转换完成，可下载目标文件或查看数据摘要。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" onclick="MarvisRouter.go('page-mlff-convert')">新建转换</button>
+            <button class="btn-primary">下载 NPZ 数据包</button>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <div style="background:#f0fdf4;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;">
+            <span style="font-size:28px;color:var(--green);">✓</span>
+            <div>
+              <strong style="font-size:16px;">转换成功</strong>
+              <p style="color:var(--muted);margin:4px 0 0;">water_clusters_10k.extxyz → water_clusters_10k.npz | 总耗时 18.5s</p>
+            </div>
+          </div>
+        </div>
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">数据摘要</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div class="detail-row"><span class="detail-label">总构型数</span><span>10,000</span></div>
+            <div class="detail-row"><span class="detail-label">训练集</span><span>8,000 (80%)</span></div>
+            <div class="detail-row"><span class="detail-label">测试集</span><span>2,000 (20%)</span></div>
+            <div class="detail-row"><span class="detail-label">原子类型</span><span>H, O</span></div>
+            <div class="detail-row"><span class="detail-label">最大原子数</span><span>192</span></div>
+            <div class="detail-row"><span class="detail-label">标签字段</span><span>energy, forces, stress</span></div>
+            <div class="detail-row"><span class="detail-label">输出格式</span><span>NPZ (压缩 NumPy)</span></div>
+            <div class="detail-row"><span class="detail-label">文件大小</span><span>48.3 MB</span></div>
+            <div class="detail-row"><span class="detail-label">随机种子</span><span>42</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-catalyst">
+        <div class="page-head">
+          <div>
+            <h2>催化材料数据应用</h2>
+            <p>用于浏览催化材料基础信息、活性相关数据、外部关联和结果下载能力。页面中所有复杂能力统一描述为 API 数据调用，不展示平台内部执行过程。</p>
+          </div>
+        </div>
+
+        <div class="pill-row">
+          <span class="chip">化学名称检索</span>
+          <span class="chip">化学式检索</span>
+          <span class="chip">材料编号检索</span>
+          <span class="chip">关键词检索</span>
+          <span class="chip">催化性质数据浏览</span>
+          <span class="chip">外部关联</span>
+          <span class="chip">批量下载</span>
+        </div>
+
+        <div class="card pad">
+          <div class="electrolyte-search-grid three">
+            <div class="field">
+              <label>化学名称检索</label>
+              <input type="text" placeholder="如：Pt/C、NiCo-LDH">
+            </div>
+            <div class="field">
+              <label>化学式检索</label>
+              <input type="text" placeholder="如：Pt、NiCo-LDH">
+            </div>
+            <div class="field">
+              <label>材料编号检索</label>
+              <input type="text" placeholder="如：CAT-021">
+            </div>
+            <div class="field">
+              <label>关键词检索</label>
+              <input type="text" placeholder="如：析氧、析氢、CO2 还原">
+            </div>
+            <div class="field">
+              <label>催化性质数据</label>
+              <select>
+                <option>基础信息</option>
+                <option>活性数据</option>
+                <option>吸附构型数据索引</option>
+                <option>外部关联</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-grid" style="margin-top:20px;">
+          <div class="endpoint-card"><strong>催化材料基础信息 API</strong><p>返回材料名称、类型、活性区间和实验摘要。</p><code>GET /api/v1/catalyst/materials</code></div>
+          <div class="endpoint-card"><strong>外部关联 API</strong><p>返回论文、专利和外部数据库映射信息。</p><code>GET /api/v1/catalyst/external-links</code></div>
+        </div>
+
+      </section>
+
+      <section class="page" id="page-algorithms">
+        <div class="page-head">
+          <div>
+            <h2>数据应用算法</h2>
+            <p>算法知识库采用算法大类分层展示方式，可按大类进入详情页查看父类算法、通用说明文档和代码包下载入口。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" id="algoResetBtn">⟳ 返回列表</button>
+          </div>
+        </div>
+        <div id="algorithmPageMount"></div>
+
+      </section>
+
+      <section class="page" id="page-tools">
+        <div class="page-head">
+          <div>
+            <h2>数据工具开发平台</h2>
+            <p>工具资源采用工具大类分层展示方式，可按大类进入详情页查看工具列表、使用手册和代码包下载入口。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" id="toolPageBackBtn">⟳ 返回列表</button>
+          </div>
+        </div>
+        <div id="toolPageMount"></div>
+      </section>
+      <section class="page" id="page-prediction-tasks"></section>
+      <section class="page" id="page-algorithm-doc-detail"></section>
+      <section class="page" id="page-sys-user">
+        <div class="page-head">
+          <div>
+            <h2>用户管理 <span class="page-role-tag admin">管理员专属</span></h2>
+            <p>管理系统用户账号、基本信息、角色分配和账户状态。</p>
+          </div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;gap:8px;">
+              <input type="text" class="page-select" placeholder="搜索用户名/邮箱..." style="min-width:220px;">
+              <select class="page-select"><option>全部角色</option><option>系统管理员</option><option>审核员</option><option>普通用户</option><option>专业用户</option><option>数据贡献者</option></select>
+              <select class="page-select"><option>全部状态</option><option>启用</option><option>禁用</option></select>
+              <button class="btn-primary">查询</button>
+            </div>
+            <button class="btn-primary">+ 新增用户</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>用户名</th><th>姓名</th><th>邮箱</th><th>角色</th><th>所属机构</th><th>状态</th><th>最后登录</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>zhangsan</td><td>张三</td><td>zhangsan@materials.cn</td><td><span class="status-badge" style="background:#ede9fe;color:#7c3aed;">系统管理员</span></td><td>清华-材料计算中心</td><td><span class="status-badge success">启用</span></td><td>2026-06-24 09:15</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">禁用</button></td></tr>
+                <tr><td>lisi</td><td>李四</td><td>lisi@pku.edu.cn</td><td><span class="status-badge" style="background:#fef3c7;color:#d97706;">审核员</span></td><td>北京大学</td><td><span class="status-badge success">启用</span></td><td>2026-06-24 08:40</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">禁用</button></td></tr>
+                <tr><td>wangwu</td><td>王五</td><td>wangwu@fudan.edu.cn</td><td><span class="status-badge" style="background:#dbeafe;color:#2563eb;">普通用户</span></td><td>复旦大学</td><td><span class="status-badge success">启用</span></td><td>2026-06-23 17:30</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">禁用</button></td></tr>
+                <tr><td>zhaoliu</td><td>赵六</td><td>zhaoliu@ustc.edu.cn</td><td><span class="status-badge" style="background:#e0f2fe;color:#0891b2;">专业用户</span></td><td>中国科学技术大学</td><td><span class="status-badge success">启用</span></td><td>2026-06-23 14:20</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">禁用</button></td></tr>
+                <tr><td>sunqi</td><td>孙七</td><td>sunqi@nju.edu.cn</td><td><span class="status-badge" style="background:#f3e8ff;color:#7e22ce;">数据贡献者</span></td><td>南京大学</td><td><span class="status-badge warning">禁用</span></td><td>2026-05-10 10:00</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">启用</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 5 条用户记录 | 第 1/1 页</span></div>
+        </div>
+      </section>
+      <section class="page" id="page-sys-role">
+        <div class="page-head">
+          <div>
+            <h2>角色管理 <span class="page-role-tag admin">管理员专属</span></h2>
+            <p>定义系统角色、配置角色权限集和菜单访问策略。</p>
+          </div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;gap:8px;">
+              <input type="text" class="page-select" placeholder="搜索角色名称..." style="min-width:200px;">
+              <button class="btn-primary">查询</button>
+            </div>
+            <button class="btn-primary">+ 新增角色</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>角色标识</th><th>角色名称</th><th>用户数</th><th>权限范围</th><th>创建时间</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td><code>admin</code></td><td>系统管理员</td><td>2</td><td>全部模块、平台配置、用户管理</td><td>2025-12-01</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">权限配置</button> <button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td><code>reviewer</code></td><td>审核员</td><td>3</td><td>审核工作台、数据查看、操作日志</td><td>2025-12-01</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">权限配置</button> <button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td><code>researcher</code></td><td>普通用户</td><td>8</td><td>材料浏览、数据查询、个人提交</td><td>2025-12-01</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">权限配置</button> <button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td><code>professional</code></td><td>专业用户</td><td>4</td><td>材料浏览、数据查询、L2 数据访问、模型导出</td><td>2026-01-15</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">权限配置</button> <button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td><code>contributor</code></td><td>数据贡献者</td><td>5</td><td>数据上传、众包导入、我的提交</td><td>2026-03-10</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">权限配置</button> <button class="btn btn-sm">编辑</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 5 个角色 | 第 1/1 页</span></div>
+        </div>
+      </section>
+      <section class="page" id="page-sys-menu">
+        <div class="page-head">
+          <div>
+            <h2>菜单管理 <span class="page-role-tag admin">管理员专属</span></h2>
+            <p>配置系统导航菜单结构、可见性和排序。</p>
+          </div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <button class="btn-primary" style="margin-left:auto;">+ 新增菜单项</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>菜单名称</th><th>图标</th><th>路由</th><th>父级菜单</th><th>排序</th><th>可见角色</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>二维材料数据应用</td><td>2D</td><td>twod</td><td>-</td><td>1</td><td>全部</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td>有机光电材料</td><td>OP</td><td>opto</td><td>-</td><td>2</td><td>全部</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td>入库审核</td><td>RV</td><td>twod-review</td><td>数据管理</td><td>3</td><td>admin, reviewer</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td>数据看板</td><td>DB</td><td>dashboard</td><td>监控统计</td><td>1</td><td>admin, reviewer</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td>数据统计</td><td>DS</td><td>data-statistics</td><td>监控统计</td><td>2</td><td>admin, reviewer</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
+                <tr><td>用户管理</td><td>UM</td><td>sys-user</td><td>系统管理</td><td>2</td><td>admin</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 6 条菜单记录</span></div>
+        </div>
+      </section>
+      <section class="page" id="page-sys-dict">
+        <div class="page-head">
+          <div>
+            <h2>字典管理 <span class="page-role-tag admin">管理员专属</span></h2>
+            <p>维护系统数据字典，统一管理下拉选项和枚举值。</p>
+          </div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;gap:8px;">
+              <select class="page-select"><option>全部类别</option><option>材料类型</option><option>状态码</option><option>晶系</option><option>安全等级</option></select>
+              <button class="btn-primary">查询</button>
+            </div>
+            <button class="btn-primary">+ 新增字典</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>字典类别</th><th>键值</th><th>显示名称</th><th>排序</th><th>备注</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>材料类型</td><td>twod</td><td>二维材料</td><td>1</td><td>2D materials category</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">删除</button></td></tr>
+                <tr><td>材料类型</td><td>opto</td><td>有机光电材料</td><td>2</td><td>Organic optoelectronic</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">删除</button></td></tr>
+                <tr><td>状态码</td><td>pending</td><td>待审核</td><td>1</td><td>审核状态-待审核</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">删除</button></td></tr>
+                <tr><td>安全等级</td><td>L1</td><td>一级（公开）</td><td>1</td><td>所有用户可访问</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">删除</button></td></tr>
+                <tr><td>安全等级</td><td>L2</td><td>二级（受限）</td><td>2</td><td>专业用户+可访问</td><td><button class="btn btn-sm">编辑</button> <button class="btn btn-sm">删除</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 5 条字典记录</span></div>
+        </div>
+      </section>
+      <section class="page" id="page-sys-algorithm"></section>
+      <section class="page" id="page-sys-api"></section>
+      <section class="page" id="page-sys-log">
+        <div class="page-head">
+          <div>
+            <h2>操作日志 <span class="page-role-tag admin">管理员专属</span></h2>
+            <p>查看系统操作审计日志，记录仅支持查看。</p>
+          </div>
+        </div>
+        <div class="card pad">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;gap:8px;">
+              <input type="text" class="page-select" placeholder="搜索操作人/操作描述..." style="min-width:220px;">
+              <select class="page-select"><option>全部类型</option><option>登录</option><option>数据操作</option><option>审核操作</option><option>平台配置</option></select>
+              <input type="date" class="page-select" value="2026-06-24">
+              <button class="btn-primary">查询</button>
+            </div>
+            <button class="btn">导出日志</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>操作时间</th><th>操作人</th><th>IP 地址</th><th>操作类型</th><th>操作描述</th><th>结果</th></tr></thead>
+              <tbody>
+                <tr><td>2026-06-24 09:15:32</td><td>zhangsan</td><td>192.168.1.100</td><td>登录</td><td>管理员登录系统</td><td><span class="status-badge success">成功</span></td></tr>
+                <tr><td>2026-06-24 09:18:10</td><td>zhangsan</td><td>192.168.1.100</td><td>数据操作</td><td>新增材料记录 MoS₂ (ID:102)</td><td><span class="status-badge success">成功</span></td></tr>
+                <tr><td>2026-06-24 08:40:05</td><td>lisi</td><td>192.168.1.101</td><td>审核操作</td><td>审核通过提交记录 #2024-001</td><td><span class="status-badge success">成功</span></td></tr>
+                <tr><td>2026-06-23 17:30:22</td><td>wangwu</td><td>10.0.0.55</td><td>登录</td><td>用户登录（普通用户）</td><td><span class="status-badge success">成功</span></td></tr>
+                <tr><td>2026-06-23 16:45:00</td><td>anonymous</td><td>10.0.1.23</td><td>登录</td><td>登录尝试（密码错误）</td><td><span class="status-badge warning">失败</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 5 条操作日志 | 第 1/1 页</span></div>
+        </div>
+      </section>
+      <section class="page" id="page-catalyst-site">
+        <div class="page-head">
+          <div>
+            <h2>催化活性站点浏览</h2>
+            <p>该功能依赖吸附能与反应动力学计算，本轮快速方法不提供，页面内容已移除。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-catalyst-compare">
+        <div class="page-head">
+          <div>
+            <h2>催化材料对比</h2>
+            <p>该功能依赖吸附能与反应动力学计算，本轮快速方法不提供，页面内容已移除。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-catalyst-build">
+        <div class="page-head">
+          <div>
+            <h2>催化模型构建</h2>
+            <p>该功能依赖吸附能与反应动力学计算，本轮快速方法不提供，页面内容已移除。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 新增：我的提交页 (PRD P04) ====== -->
+      <section class="page" id="page-my-submissions">
+        <div class="page-head">
+          <div>
+            <h2>我的提交</h2>
+            <p>查看和管理您提交的所有材料数据，追踪审核状态。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn-primary my-submissions-batch-btn" type="button" data-my-submissions-batch-open>批量导入</button>
+            <input id="mySubmissionsBatchInput" type="file" multiple hidden
+              accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5,.png,.jpg,.jpeg,.webp,.svg,.zip">
+            <button class="btn-primary" type="button" onclick="MarvisRouter.go('page-data-submit')">＋ 新增提交</button>
+          </div>
+        </div>
+        <div class="my-submissions-batch-panel" id="mySubmissionsBatchPanel" hidden>
+          <div class="my-submissions-batch-head">
+            <div>
+              <strong>确认批量导入信息</strong>
+              <span>文件上传后请确认材料类型和格式识别结果，确认后将进入入库审核。</span>
+            </div>
+            <button class="btn" type="button" data-my-submissions-batch-cancel>取消</button>
+          </div>
+          <div class="my-submissions-batch-controls">
+            <label>
+              <span>导入材料类型</span>
+              <select id="mySubmissionsBatchMaterialType">
+                <option>二维材料</option>
+                <option>有机光电材料</option>
+                <option>电解质材料</option>
+                <option>机器学习力场</option>
+                <option>催化材料</option>
+              </select>
+            </label>
+            <p id="mySubmissionsBatchHint">请选择文件后确认导入信息。</p>
+          </div>
+          <div class="my-submissions-batch-body" id="mySubmissionsBatchBody"></div>
+          <div class="my-submissions-batch-actions">
+            <button class="btn" type="button" data-my-submissions-batch-cancel>取消</button>
+            <button class="btn-primary" type="button" data-my-submissions-batch-confirm>确认导入并提交审核</button>
+          </div>
+        </div>
+        <div class="card pad filter-card">
+          <div class="filter-row" style="margin-bottom:12px;">
+            <button class="twod-filter-chip active" type="button">全部类型</button>
+            <button class="twod-filter-chip" type="button">二维材料</button>
+            <button class="twod-filter-chip" type="button">有机光电材料</button>
+            <button class="twod-filter-chip" type="button">电解质材料</button>
+            <button class="twod-filter-chip" type="button">机器学习力场</button>
+            <button class="twod-filter-chip" type="button">催化材料</button>
+          </div>
+          <div class="filter-row" style="margin-bottom:12px;">
+            <button class="twod-filter-chip active" type="button">全部状态</button>
+            <button class="twod-filter-chip" type="button">草稿</button>
+            <button class="twod-filter-chip" type="button">待审核</button>
+            <button class="twod-filter-chip" type="button">审核中</button>
+            <button class="twod-filter-chip" type="button">已通过</button>
+            <button class="twod-filter-chip" type="button">已驳回</button>
+          </div>
+          <div class="filter-row">
+            <input type="text" class="page-select" placeholder="搜索材料名称" style="min-width:220px;">
+            <button class="btn-primary" style="min-height:36px;padding:6px 18px;font-size:13px;border-radius:8px;">查询</button>
+          </div>
+        </div>
+        <div class="card pad">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>提交时间</th><th>材料名称</th><th>材料类型</th><th>审核状态</th><th>驳回原因</th><th>操作</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>2026-06-20 14:30</td><td>MoS₂ 单层</td><td>二维材料</td><td><span class="status-badge success">已通过</span></td><td>-</td><td class="action-cell"><button class="btn btn-sm">查看详情</button></td></tr>
+                <tr><td>2026-06-19 09:15</td><td>PEDOT:PSS</td><td>有机光电材料</td><td><span class="status-badge warning">审核中</span></td><td>-</td><td class="action-cell"><button class="btn btn-sm">查看详情</button></td></tr>
+                <tr><td>2026-06-18 16:42</td><td>Li₇La₃Zr₂O₁₂</td><td>电解质材料</td><td><span class="status-badge danger">已驳回</span></td><td>格式不符：结构文件缺失</td><td class="action-cell"><button class="btn-primary btn-sm">重新编辑</button></td></tr>
+                <tr><td>2026-06-17 11:08</td><td>Cu(111)-CO₂</td><td>催化材料</td><td><span class="status-badge info">待审核</span></td><td>-</td><td class="action-cell"><button class="btn btn-sm">查看详情</button></td></tr>
+                <tr><td>2026-06-15 10:20</td><td>Graphene/hBN</td><td>二维材料</td><td><span class="status-badge muted">草稿</span></td><td>-</td><td class="action-cell"><button class="btn-primary btn-sm">提交审核</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 5 条提交记录</span></div>
+        </div>
+      </section>
+
+      <!-- ====== 新增：数据看板 (PRD P08) ====== -->
+      <section class="page" id="page-dashboard">
+        <div class="page-head">
+          <div>
+            <h2>数据看板 <span class="page-role-tag mixed">管理员与审核员</span></h2>
+            <p>低维材料主题库运营数据总览，实时监控数据入库与审核效率。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn">导出报表</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="dash-stat-card accent-blue">
+            <div class="dash-stat-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1890FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <div class="dash-stat-body">
+              <div class="dash-stat-value">9</div>
+              <div class="dash-stat-label">材料总数</div>
+            </div>
+          </div>
+          <div class="dash-stat-card accent-green">
+            <div class="dash-stat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="dash-stat-body">
+              <div class="dash-stat-value">80.0%</div>
+              <div class="dash-stat-label">审核通过率</div>
+            </div>
+          </div>
+          <div class="dash-stat-card accent-purple">
+            <div class="dash-stat-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#7C4DFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="dash-stat-body">
+              <div class="dash-stat-value">3,241</div>
+              <div class="dash-stat-label">入库数量（本月）</div>
+            </div>
+          </div>
+          <div class="dash-stat-card accent-orange">
+            <div class="dash-stat-icon orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="dash-stat-body">
+              <div class="dash-stat-value">24.6%</div>
+              <div class="dash-stat-label">增长率（同比）</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-chart-grid">
+          <div class="dash-chart-card">
+            <div class="dash-chart-head">
+              <h3>数据入库趋势</h3>
+              <select class="dash-chart-filter" data-dashboard-filter="trend">
+                <option value="7d">近7天</option>
+                <option value="30d" selected>近30天</option>
+                <option value="90d">近90天</option>
+                <option value="year">年度</option>
+              </select>
+            </div>
+            <div class="css-bar-chart" id="dashboardTrendChart"></div>
+          </div>
+          <div class="dash-chart-card">
+            <div class="dash-chart-head">
+              <h3>材料类型分布</h3>
+              <select class="dash-chart-filter" data-dashboard-filter="distribution">
+                <option value="7d">近7天</option>
+                <option value="30d" selected>近30天</option>
+                <option value="90d">近90天</option>
+                <option value="year">年度</option>
+              </select>
+            </div>
+            <div class="dash-donut-wrap" id="dashboardDistributionChart"></div>
+          </div>
+          <div class="dash-chart-card">
+            <div class="dash-chart-head">
+              <h3>审核效率趋势</h3>
+              <select class="dash-chart-filter" data-dashboard-filter="review">
+                <option value="7d">近7天</option>
+                <option value="30d" selected>近30天</option>
+                <option value="90d">近90天</option>
+                <option value="year">年度</option>
+              </select>
+            </div>
+            <div class="dash-line-wrap" id="dashboardReviewChart"></div>
+          </div>
+          <div class="dash-chart-card">
+            <div class="dash-chart-head">
+              <h3>用户贡献排行 TOP 10</h3>
+              <select class="dash-chart-filter" data-dashboard-filter="contributors">
+                <option value="7d">近7天</option>
+                <option value="30d" selected>近30天</option>
+                <option value="90d">近90天</option>
+                <option value="year">年度</option>
+              </select>
+            </div>
+            <div class="css-hbar-chart" id="dashboardContributorChart"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-data-resource-catalog"></section>
+      <section class="page" id="page-data-statistics"></section>
+      <section class="page" id="page-standard-twod"></section>
+      <div class="overlay" id="twodStandardFieldModal">
+        <div class="modal modal-lg twod-standard-field-modal">
+          <div class="modal-header">
+            <h3 id="twodStandardFieldModalTitle">新增字段</h3>
+            <button class="modal-close" type="button" data-close-modal="twodStandardFieldModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodStandardFieldModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodStandardFieldModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-standard-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <section class="page" id="page-standard-opto"></section>
+      <section class="page" id="page-standard-electrolyte"></section>
+      <section class="page" id="page-standard-mlff"></section>
+      <section class="page" id="page-standard-catalyst"></section>
+      <section class="page" id="page-lowdim-ingest-twod"></section>
+      <!-- 采集任务详情页：由「查看详情」进入，与列表页相互独立 -->
+      <section class="page" id="page-lowdim-ingest-detail">
+        <div class="ldidp-shell">
+          <header class="ldidp-head">
+            <div class="ldidp-head-main">
+              <div class="ldidp-breadcrumb">
+                <button class="ldidp-crumb-link" type="button" data-ldidp-back>低维材料数据入库</button>
+                <span class="ldidp-crumb-sep" aria-hidden="true">/</span>
+                <button class="ldidp-crumb-link" type="button" data-ldidp-back id="ldidpCrumbPage">二维材料数据采集加工处理</button>
+                <span class="ldidp-crumb-sep" aria-hidden="true">/</span>
+                <span class="ldidp-crumb-current" id="ldidpCrumbCurrent">采集任务详情</span>
+              </div>
+              <h2 id="ldidpTitle">采集任务详情</h2>
+              <p id="ldidpSubtitle">查看二维材料数据资源采集结果、来源范围与入库准备情况</p>
+            </div>
+            <div class="ldidp-head-actions">
+              <button class="btn" type="button" data-ldidp-back>返回</button>
+              <button class="btn-primary" type="button" data-ldidp-export>导出采集报告</button>
+            </div>
+          </header>
+
+          <div class="ldidp-summary" id="ldidpSummary"></div>
+
+          <nav class="ldidp-tabs" id="ldidpTabs" role="tablist" aria-label="采集任务详情分区"></nav>
+
+          <div class="ldidp-body" id="ldidpBody"></div>
+        </div>
+      </section>
+      <div class="overlay" id="twodIngestResourceObjectModal">
+        <div class="modal modal-lg twod-ingest-resource-modal">
+          <div class="modal-header">
+            <h3 id="twodIngestResourceObjectModalTitle">新增资源对象</h3>
+            <button class="modal-close" type="button" data-close-modal="twodIngestResourceObjectModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodIngestResourceObjectModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodIngestResourceObjectModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-ingest-resource-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodIngestGenericRowModal">
+        <div class="modal modal-lg twod-ingest-resource-modal">
+          <div class="modal-header">
+            <h3 id="twodIngestGenericRowModalTitle">新增配置</h3>
+            <button class="modal-close" type="button" data-close-modal="twodIngestGenericRowModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodIngestGenericRowModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodIngestGenericRowModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-ingest-generic-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodIngestTaskDetailModal">
+        <div class="modal modal-lg twod-ingest-task-detail-modal">
+          <div class="modal-header">
+            <div>
+              <h3 id="twodIngestTaskDetailTitle">采集任务详情</h3>
+              <p id="twodIngestTaskDetailSubtitle">查看二维材料数据资源采集结果、来源范围与入库准备情况</p>
+            </div>
+            <button class="modal-close" type="button" data-close-modal="twodIngestTaskDetailModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodIngestTaskDetailBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodIngestTaskDetailModal">关闭</button>
+            <button class="btn-primary" type="button" data-twod-ingest-detail-export>导出采集报告</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodIngestSecurityModal">
+        <div class="modal modal-lg twod-ingest-security-modal">
+          <div class="modal-header">
+            <h3 id="twodIngestSecurityModalTitle">安全等级操作</h3>
+            <button class="modal-close" type="button" data-close-modal="twodIngestSecurityModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodIngestSecurityModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodIngestSecurityModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-ingest-security-modal-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodSecurityGuideModal">
+        <div class="modal modal-lg twod-security-guide-modal">
+          <div class="modal-header">
+            <div>
+              <h3>数据安全等级说明</h3>
+              <p>二维材料数据库数据整理、定级准备、级别判定与用户审核机制</p>
+            </div>
+            <button class="modal-close" type="button" data-close-modal="twodSecurityGuideModal" aria-label="关闭数据安全等级说明">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodSecurityGuideModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn-primary" type="button" data-close-modal="twodSecurityGuideModal">我知道了</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodIngestTaskErrorModal">
+        <div class="modal modal-lg twod-ingest-error-modal">
+          <div class="twod-ingest-error-header">
+            <div>
+              <h3 id="twodIngestTaskErrorTitle">错误详情</h3>
+              <p id="twodIngestTaskErrorSubtitle">查看数据资源采集失败原因、自动重试记录与错误日志</p>
+            </div>
+            <button class="twod-ingest-error-close" type="button" data-close-modal="twodIngestTaskErrorModal" aria-label="关闭错误详情">×</button>
+          </div>
+          <div class="twod-ingest-error-body" id="twodIngestTaskErrorBody"></div>
+          <div class="twod-ingest-error-footer">
+            <button class="twod-ingest-error-btn secondary" type="button" data-close-modal="twodIngestTaskErrorModal">关闭</button>
+            <button class="twod-ingest-error-btn primary" type="button" id="twodIngestTaskRetryBtn">重新采集</button>
+          </div>
+        </div>
+      </div>
+      <section class="page" id="page-lowdim-ingest-opto"></section>
+      <section class="page" id="page-lowdim-ingest-electrolyte"></section>
+      <section class="page" id="page-lowdim-ingest-mlff"></section>
+      <section class="page" id="page-lowdim-ingest-catalyst"></section>
+      <section class="page" id="page-lowdim-standardization-twod"></section>
+      <div class="overlay" id="twodStandardizationRuleModal">
+        <div class="modal modal-lg twod-standardization-rule-modal">
+          <div class="modal-header">
+            <h3 id="twodStandardizationRuleModalTitle">新增标准规则</h3>
+            <button class="modal-close" type="button" data-close-modal="twodStandardizationRuleModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodStandardizationRuleModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodStandardizationRuleModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-std-rule-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <section class="page" id="page-lowdim-standardization-opto"></section>
+      <section class="page" id="page-lowdim-standardization-electrolyte"></section>
+      <section class="page" id="page-lowdim-standardization-mlff"></section>
+      <section class="page" id="page-lowdim-standardization-catalyst"></section>
+      <section class="page" id="page-lowdim-database-twod"></section>
+      <div class="overlay" id="twodDatabaseDatasetModal">
+        <div class="modal modal-lg twod-database-dataset-modal">
+          <div class="modal-header">
+            <h3 id="twodDatabaseDatasetModalTitle">新增数据集</h3>
+            <button class="modal-close" type="button" data-close-modal="twodDatabaseDatasetModal">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodDatabaseDatasetModalBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodDatabaseDatasetModal">取消</button>
+            <button class="btn-primary" type="button" data-twod-db-dataset-save>保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodDatabaseDatasetDetailModal">
+        <div class="modal modal-lg twod-database-detail-modal">
+          <div class="modal-header">
+            <div>
+              <h3 id="twodDatabaseDatasetDetailTitle">数据集详情</h3>
+              <p id="twodDatabaseDatasetDetailSubtitle">查看数据集字段和内容信息</p>
+            </div>
+            <button class="modal-close" type="button" data-close-modal="twodDatabaseDatasetDetailModal" aria-label="关闭数据集详情">×</button>
+          </div>
+          <div class="modal-body modal-scroll" id="twodDatabaseDatasetDetailBody"></div>
+          <div class="modal-footer">
+            <button class="btn" type="button" data-close-modal="twodDatabaseDatasetDetailModal">关闭</button>
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="twodDatabaseStructurePreviewModal">
+        <div class="modal modal-lg twod-database-preview-modal">
+          <div class="modal-header">
+            <h3 id="twodDatabaseStructurePreviewTitle">原子结构图</h3>
+            <button class="modal-close" type="button" data-close-modal="twodDatabaseStructurePreviewModal">×</button>
+          </div>
+          <div class="modal-body" id="twodDatabaseStructurePreviewBody"></div>
+        </div>
+      </div>
+      <section class="page" id="page-lowdim-database-opto"></section>
+      <section class="page" id="page-lowdim-database-electrolyte"></section>
+      <section class="page" id="page-lowdim-database-mlff"></section>
+      <section class="page" id="page-lowdim-database-catalyst"></section>
+
+      <!-- ====== 新增：权限申请与审批页 (PRD P06) ====== -->
+      <section class="page" id="page-sys-permission">
+        <div class="page-head">
+          <div>
+            <h2>权限申请与审批 <span class="page-role-tag admin">管理员专属</span></h2>
+            <p>管理专业用户申请（二维材料第2级数据访问）和催化材料导入权限审批。</p>
+          </div>
+          <div class="page-tools">
+            <div class="batch-actions">
+              <button class="btn btn-primary btn-sm">批量通过</button>
+              <button class="btn btn-sm btn-danger-outline">批量驳回</button>
+            </div>
+          </div>
+        </div>
+        <div class="card pad filter-card">
+          <div class="filter-row">
+            <button class="twod-filter-chip active" type="button">全部申请</button>
+            <button class="twod-filter-chip" type="button">专业用户申请</button>
+            <button class="twod-filter-chip" type="button">导入权限申请</button>
+            <button class="twod-filter-chip" type="button">已通过</button>
+            <button class="twod-filter-chip" type="button">已驳回</button>
+          </div>
+        </div>
+        <div class="card pad table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th><input type="checkbox"></th><th>申请人</th><th>机构</th><th>申请类型</th><th>申请理由</th><th>申请时间</th><th>状态</th><th>操作</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><input type="checkbox"></td><td>张明远</td><td>中科院半导体所</td><td>专业用户</td><td>开展二维材料能带结构高通量研究</td><td>2026-06-22</td><td><span class="status-badge info">待审批</span></td><td class="action-cell"><button class="btn-primary btn-sm">通过</button> <button class="btn btn-sm btn-danger">驳回</button></td></tr>
+                <tr><td><input type="checkbox"></td><td>李华</td><td>清华大学</td><td>专业用户</td><td>铁电材料计算与器件设计项目</td><td>2026-06-21</td><td><span class="status-badge success">已通过</span></td><td class="action-cell"><span style="color:var(--muted);">有效期至 2027-06-21</span></td></tr>
+                <tr><td><input type="checkbox"></td><td>王晓峰</td><td>复旦大学</td><td>导入权限</td><td>铜基催化材料 DFT 计算数据上传</td><td>2026-06-20</td><td><span class="status-badge danger">已驳回</span></td><td class="action-cell"><span style="color:var(--muted);">理由：账号活跃度不足</span></td></tr>
+                <tr><td><input type="checkbox"></td><td>陈思远</td><td>南方科技大学</td><td>导入权限</td><td>CO₂ 电催化实验数据共享</td><td>2026-06-19</td><td><span class="status-badge info">待审批</span></td><td class="action-cell"><button class="btn-primary btn-sm">通过</button> <button class="btn btn-sm btn-danger">驳回</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="result-footer"><span>共 4 条审批记录</span></div>
+        </div>
+      </section>
+
+      <!-- ====== 平台配置：系统门户内容配置 ====== -->
+      <section class="page" id="page-system-config">
+        <div class="page-head">
+          <div>
+            <h2>平台配置 <span class="page-role-tag admin">管理员专属</span></h2>
+            <p>配置系统门户首页展示内容，覆盖数据情况、平台价值、合作案例和底部联系信息。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" type="button" data-platform-config-preview>预览门户</button>
+            <button class="btn-primary" type="button" data-platform-config-save>保存配置</button>
+          </div>
+        </div>
+        <div class="platform-config-shell">
+          <section class="platform-config-card">
+            <div class="platform-config-head">
+              <div>
+                <h3>门户首屏内容</h3>
+                <p>配置门户首页首屏的标题、说明、按钮文案和公告摘要。</p>
+              </div>
+              <span class="status-badge success">已启用</span>
+            </div>
+            <div class="platform-config-grid">
+              <label class="field"><span>门户名称</span><input type="text" value="低维材料主题库"></label>
+              <label class="field"><span>门户副标题</span><input type="text" value="面向低维材料研发的数据资源与智能服务门户"></label>
+              <label class="field"><span>主按钮文案</span><input type="text" value="进入主题应用"></label>
+              <label class="field"><span>门户状态</span><select><option>上线</option><option>维护中</option><option>仅管理员可见</option></select></label>
+              <label class="field platform-config-span"><span>首页主标题</span><input type="text" value="低维材料主题库"></label>
+              <label class="field platform-config-span"><span>首页说明</span><textarea rows="3">汇聚二维材料、电解质、有机光电、机器学习力场和催化材料数据，提供检索、分析、预测与开放协作服务。</textarea></label>
+              <label class="field platform-config-span"><span>公告摘要</span><textarea rows="3">平台持续更新材料数据集、算法服务和合作项目进展，支持科研院所与企业用户按权限访问。</textarea></label>
+            </div>
+          </section>
+
+          <section class="platform-config-card">
+            <div class="platform-config-head">
+              <div>
+                <h3>数据情况配置</h3>
+                <p>维护门户首页数据总览指标，用于展示平台数据规模与更新情况。</p>
+              </div>
+              <button class="btn-primary" type="button">新增指标</button>
+            </div>
+            <div class="platform-config-list">
+              <div class="platform-config-row"><strong>01</strong><input value="材料数据总量"><input value="128,640 条"><select><option>显示</option><option>隐藏</option></select></div>
+              <div class="platform-config-row"><strong>02</strong><input value="覆盖材料类别"><input value="5 类"><select><option>显示</option><option>隐藏</option></select></div>
+              <div class="platform-config-row"><strong>03</strong><input value="开放数据集"><input value="86 个"><select><option>显示</option><option>隐藏</option></select></div>
+              <div class="platform-config-row"><strong>04</strong><input value="合作机构"><input value="32 家"><select><option>显示</option><option>隐藏</option></select></div>
+              <div class="platform-config-row"><strong>05</strong><input value="月度更新"><input value="3,200+ 条"><select><option>显示</option><option>隐藏</option></select></div>
+            </div>
+          </section>
+
+          <section class="platform-config-card">
+            <div class="platform-config-head">
+              <div>
+                <h3>平台价值配置</h3>
+                <p>维护门户首页平台价值内容，突出数据、算法、工具和协作能力。</p>
+              </div>
+              <button class="btn-primary" type="button">新增价值点</button>
+            </div>
+            <div class="platform-section-grid">
+              <div class="platform-section-item"><label>价值标题<input value="高质量材料数据沉淀"></label><label>展示文案<textarea rows="3">统一材料结构、性能、图谱和计算结果标准，支撑可追溯的数据复用。</textarea></label><label>排序<input value="1"></label></div>
+              <div class="platform-section-item"><label>价值标题<input value="面向研发的分析预测"></label><label>展示文案<textarea rows="3">整合材料筛选、性质预测和算法调用能力，缩短候选材料发现周期。</textarea></label><label>排序<input value="2"></label></div>
+              <div class="platform-section-item"><label>价值标题<input value="多角色协同共建"></label><label>展示文案<textarea rows="3">支持科研、企业、审核与管理员角色协作完成数据提交、审核和发布。</textarea></label><label>排序<input value="3"></label></div>
+              <div class="platform-section-item"><label>价值标题<input value="可持续开放服务"></label><label>展示文案<textarea rows="3">通过接口、工具和资源目录向合作方提供可扩展的数据服务能力。</textarea></label><label>排序<input value="4"></label></div>
+            </div>
+          </section>
+
+          <section class="platform-config-card">
+            <div class="platform-config-head">
+              <div>
+                <h3>合作案例配置</h3>
+                <p>维护门户首页合作案例内容，展示应用场景、合作单位和成果摘要。</p>
+              </div>
+              <button class="btn-primary" type="button">新增案例</button>
+            </div>
+            <div class="platform-section-grid">
+              <div class="platform-section-item"><label>案例名称<input value="二维半导体材料筛选"></label><label>合作单位<input value="材料科学联合实验室"></label><label>成果摘要<textarea rows="3">基于平台数据完成候选材料初筛，并形成可复核的结构与带隙分析记录。</textarea></label><select><option>首页展示</option><option>暂不展示</option></select></div>
+              <div class="platform-section-item"><label>案例名称<input value="电解质体系数据治理"></label><label>合作单位<input value="新能源材料创新中心"></label><label>成果摘要<textarea rows="3">完成电解质材料实验与计算数据标准化整理，支持跨团队共享检索。</textarea></label><select><option>首页展示</option><option>暂不展示</option></select></div>
+              <div class="platform-section-item"><label>案例名称<input value="催化材料构效分析"></label><label>合作单位<input value="绿色催化技术团队"></label><label>成果摘要<textarea rows="3">围绕活性位点与反应路径建立案例数据包，辅助催化性能对比分析。</textarea></label><select><option>首页展示</option><option>暂不展示</option></select></div>
+              <div class="platform-section-item"><label>案例名称<input value="机器学习力场训练集共建"></label><label>合作单位<input value="智能计算材料平台"></label><label>成果摘要<textarea rows="3">沉淀结构样本、训练参数与评估指标，支撑可复用的力场模型开发。</textarea></label><select><option>首页展示</option><option>暂不展示</option></select></div>
+            </div>
+          </section>
+
+          <section class="platform-config-card">
+            <div class="platform-config-head">
+              <div>
+                <h3>门户底部内容</h3>
+                <p>配置门户底部展示的联系信息、版权信息和开放服务说明。</p>
+              </div>
+            </div>
+            <div class="platform-config-grid">
+              <label class="field"><span>联系电话</span><input value="010-00000000"></label>
+              <label class="field"><span>联系邮箱</span><input value="service@lowdim-materials.cn"></label>
+              <label class="field platform-config-span"><span>开放服务说明</span><textarea rows="3">面向科研院所、企业研发团队和平台合作单位提供数据检索、数据治理、算法调用和专题合作服务。</textarea></label>
+              <label class="field platform-config-span"><span>版权信息</span><input value="Copyright 2024 低维材料主题库 All Rights Reserved"></label>
+              <label class="field platform-config-span"><span>底部链接</span><textarea rows="3">平台介绍 / 数据情况 / 平台价值 / 合作案例 / 联系我们</textarea></label>
+            </div>
+            <div class="platform-config-actions">
+              <button class="btn" type="button" data-platform-config-preview>预览门户</button>
+              <button class="btn-primary" type="button" data-platform-config-save>保存配置</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ====== 新增：数据上传页 (PRD P03) ====== -->
+      <section class="page" id="page-data-submit">
+        <div class="page-head">
+          <div>
+            <h2>数据上传</h2>
+            <p>统一承接五类材料的数据新增、补充提交与驳回重提；提交后可在“我的提交”查看状态，并由“入库审核”统一审核。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn-primary data-batch-import-btn" type="button" data-batch-import-open>批量导入</button>
+            <input id="dataBatchImportInput" type="file" multiple hidden
+              accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5,.png,.jpg,.jpeg,.webp,.svg,.zip">
+          </div>
+        </div>
+
+        <div class="data-batch-import-panel" id="dataBatchImportPanel" hidden>
+          <div class="data-batch-import-head">
+            <div>
+              <strong>批量导入预览</strong>
+              <span id="dataBatchImportContext">当前按二维材料规则识别文件。</span>
+            </div>
+            <button class="btn" type="button" data-batch-import-clear>清空预览</button>
+          </div>
+          <div class="data-batch-import-body" id="dataBatchImportBody"></div>
+          <div class="data-batch-import-actions">
+            <button class="btn" type="button" data-batch-import-clear>取消</button>
+            <button class="btn-primary" type="button" data-batch-import-confirm>确认导入并提交审核</button>
+          </div>
+        </div>
+
+        <!-- 第一步：选择材料类型 -->
+        <div class="card pad" style="margin-bottom:24px;">
+          <h3 class="section-title">第一步：选择材料类型</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="twod-filter-chip active" type="button">二维材料</button>
+            <button class="twod-filter-chip" type="button">有机光电材料</button>
+            <button class="twod-filter-chip" type="button">电解质材料</button>
+            <button class="twod-filter-chip" type="button">机器学习力场</button>
+            <button class="twod-filter-chip" type="button">催化材料</button>
+          </div>
+        </div>
+
+        <!-- 第二步：填写材料信息 -->
+        <div class="card pad" style="margin-bottom:24px;">
+          <h3 class="section-title">第二步：填写材料信息</h3>
+          <!-- 二维材料字段组 -->
+          <div class="form-grid material-form-group" data-material="二维材料" style="display:flex;">
+            <div>
+              <label class="form-label">材料名称 <span class="required">*</span></label>
+              <input type="text" placeholder="如 MoS₂" data-field="materialName">
+            </div>
+            <div>
+              <label class="form-label">化学式 <span class="required">*</span></label>
+              <input type="text" placeholder="如 MoS₂" data-field="formula">
+            </div>
+            <div>
+              <label class="form-label">能带间隙 (eV)</label>
+              <input type="text" placeholder="如 1.8" data-field="bandGap">
+            </div>
+            <div>
+              <label class="form-label">杨氏模量 (GPa)</label>
+              <input type="text" placeholder="如 270" data-field="youngsModulus">
+            </div>
+            <div>
+              <label class="form-label">数据来源</label>
+              <select data-field="source">
+                <option>自有数据集</option>
+                <option>公开数据集</option>
+              </select>
+            </div>
+            <div class="form-full">
+              <label class="form-label">计算方法与实验条件</label>
+              <textarea placeholder="描述计算方法（DFT/GGA-PBE等）、基组、收敛标准等" style="min-height:80px;" data-field="methodDescription"></textarea>
+            </div>
+          </div>
+          <!-- 有机光电材料字段组 -->
+          <div class="form-grid material-form-group" data-material="有机光电材料" style="display:none;">
+            <div>
+              <label class="form-label">材料名称 <span class="required">*</span></label>
+              <input type="text" placeholder="如 PEDOT:PSS" data-field="materialName">
+            </div>
+            <div>
+              <label class="form-label">化学式 <span class="required">*</span></label>
+              <input type="text" placeholder="如 C₈H₈O₃S" data-field="formula">
+            </div>
+            <div>
+              <label class="form-label">HOMO (eV)</label>
+              <input type="text" placeholder="如 -5.2" data-field="homo">
+            </div>
+            <div>
+              <label class="form-label">LUMO (eV)</label>
+              <input type="text" placeholder="如 -3.1" data-field="lumo">
+            </div>
+            <div>
+              <label class="form-label">迁移率 (cm²/V·s)</label>
+              <input type="text" placeholder="如 1.5" data-field="mobility">
+            </div>
+            <div>
+              <label class="form-label">数据来源</label>
+              <select data-field="source">
+                <option>自有数据集</option>
+                <option>公开数据集</option>
+              </select>
+            </div>
+            <div class="form-full">
+              <label class="form-label">合成方法</label>
+              <textarea placeholder="描述合成方法、聚合条件、溶剂体系等" style="min-height:80px;" data-field="methodDescription"></textarea>
+            </div>
+          </div>
+          <!-- 电解质材料字段组 -->
+          <div class="form-grid material-form-group" data-material="电解质材料" style="display:none;">
+            <div>
+              <label class="form-label">材料名称 <span class="required">*</span></label>
+              <input type="text" placeholder="如 Li₇La₃Zr₂O₁₂" data-field="materialName">
+            </div>
+            <div>
+              <label class="form-label">化学式 <span class="required">*</span></label>
+              <input type="text" placeholder="如 Li₇La₃Zr₂O₁₂" data-field="formula">
+            </div>
+            <div>
+              <label class="form-label">离子电导率 (S/cm)</label>
+              <input type="text" placeholder="如 1.0×10⁻³" data-field="ionicConductivity">
+            </div>
+            <div>
+              <label class="form-label">活化能 (eV)</label>
+              <input type="text" placeholder="如 0.32" data-field="activationEnergy">
+            </div>
+            <div>
+              <label class="form-label">测量温度 (℃)</label>
+              <input type="text" placeholder="如 25" data-field="measureTemp">
+            </div>
+            <div>
+              <label class="form-label">数据来源</label>
+              <select data-field="source">
+                <option>自有数据集</option>
+                <option>公开数据集</option>
+              </select>
+            </div>
+            <div class="form-full">
+              <label class="form-label">合成方法与测试条件</label>
+              <textarea placeholder="描述固相烧结法、球磨条件、EIS 测试参数等" style="min-height:80px;" data-field="methodDescription"></textarea>
+            </div>
+          </div>
+          <!-- 机器学习力场字段组 -->
+          <div class="form-grid material-form-group" data-material="机器学习力场" style="display:none;">
+            <div>
+              <label class="form-label">模型名称 <span class="required">*</span></label>
+              <input type="text" placeholder="如 DeepMD-H₂O" data-field="materialName">
+            </div>
+            <div>
+              <label class="form-label">覆盖元素</label>
+              <input type="text" placeholder="如 H, O, C, N" data-field="formula">
+            </div>
+            <div>
+              <label class="form-label">训练集规模</label>
+              <input type="text" placeholder="如 50000" data-field="trainSize">
+            </div>
+            <div>
+              <label class="form-label">力场格式</label>
+              <select data-field="forceFieldFormat">
+                <option>DeepMD</option>
+                <option>LAMMPS</option>
+                <option>GAP</option>
+                <option>NequIP</option>
+                <option>MACE</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">势函数类型</label>
+              <select data-field="potentialType">
+                <option>神经网络势</option>
+                <option>高斯近似势</option>
+                <option>等变消息传递</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">数据来源</label>
+              <select data-field="source">
+                <option>自有数据集</option>
+                <option>公开数据集</option>
+              </select>
+            </div>
+            <div class="form-full">
+              <label class="form-label">模型架构与训练参数</label>
+              <textarea placeholder="描述网络结构、descriptor 类型、cutoff 半径、训练策略等" style="min-height:80px;" data-field="methodDescription"></textarea>
+            </div>
+          </div>
+          <!-- 催化材料字段组 -->
+          <div class="form-grid material-form-group" data-material="催化材料" style="display:none;">
+            <div>
+              <label class="form-label">材料名称 <span class="required">*</span></label>
+              <input type="text" placeholder="如 Cu(111)-CO₂" data-field="materialName">
+            </div>
+            <div>
+              <label class="form-label">化学式 <span class="required">*</span></label>
+              <input type="text" placeholder="如 Cu-CO₂" data-field="formula">
+            </div>
+            <div>
+              <label class="form-label">催化反应类型</label>
+              <select data-field="reactionType">
+                <option>CO₂ 还原 (CO₂RR)</option>
+                <option>析氧反应 (OER)</option>
+                <option>氧还原 (ORR)</option>
+                <option>析氢反应 (HER)</option>
+                <option>氮还原 (NRR)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">过电位 (V)</label>
+              <input type="text" placeholder="如 0.35" data-field="overpotential">
+            </div>
+            <div>
+              <label class="form-label">Tafel 斜率 (mV/dec)</label>
+              <input type="text" placeholder="如 78" data-field="tafelSlope">
+            </div>
+            <div>
+              <label class="form-label">数据来源</label>
+              <select data-field="source">
+                <option>自有数据集</option>
+                <option>公开数据集</option>
+              </select>
+            </div>
+            <div class="form-full">
+              <label class="form-label">实验方法与反应条件</label>
+              <textarea placeholder="描述电极制备、电解液体系、电化学测试方法等" style="min-height:80px;" data-field="methodDescription"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第三步：上传附件 -->
+        <div class="card pad" style="margin-bottom:24px;">
+          <h3 class="section-title">第三步：上传附件</h3>
+          <div class="upload-actions">
+            <button class="btn-primary upload-btn" style="min-height:36px;padding:7px 18px;font-size:13px;border-radius:6px;">上传结构/数据附件</button>
+            <button class="btn upload-btn" style="min-height:36px;padding:7px 18px;font-size:13px;border-radius:6px;background:#F7F8FA;border:1px solid #C9CDD4;color:#333;">上传图谱/结果文件</button>
+            <span class="upload-hint">格式要求：.cif / .vasp / .xsf / .xyz / .csv / .png</span>
+          </div>
+          <div class="upload-dropzone">
+            暂无附件（可跳过，提交后可在“我的提交”中继续查看当前记录）
+          </div>
+        </div>
+
+        <!-- 底部操作 -->
+        <div class="submit-actions">
+          <button class="btn" style="min-height:40px;padding:8px 28px;font-size:14px;border-radius:6px;background:#F7F8FA;border:1px solid #C9CDD4;color:#333;font-weight:700;">保存草稿</button>
+          <button class="btn-primary" style="min-height:40px;padding:8px 28px;font-size:14px;border-radius:6px;background:#1890ff;border:1px solid #1890ff;color:#fff;font-weight:700;">提交审核</button>
+        </div>
+      </section>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="systemCrudModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="systemCrudModalTitle">系统管理</h3>
+          <p id="systemCrudModalSubtitle">新增或编辑管理信息</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="systemCrudModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="systemCrudModalBody"></div>
+      <div class="modal-footer" id="systemCrudModalFooter"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="resourceCatalogDetailModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="resourceCatalogDetailTitle">数据资源详情</h3>
+          <p id="resourceCatalogDetailSubtitle">查看数据资源目录字段内容</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="resourceCatalogDetailModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="resourceCatalogDetailBody"></div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="resourceCatalogDetailModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="materialModal">
+    <div class="modal modal-xl material-modal twod-detail-modal">
+      <div class="modal-header modal-header-primary twod-detail-header">
+        <div>
+          <h3 id="materialModalTitle">MoS₂</h3>
+          <p id="materialModalSubtitle">ID: 2D-MoS2-001</p>
+        </div>
+        <div class="twod-detail-header-tools">
+          <div class="twod-detail-nav" id="materialSectionNav">
+            <button class="twod-detail-nav-btn active" type="button" data-material-section="basic">基本信息</button>
+            <button class="twod-detail-nav-btn" type="button" data-material-section="properties">材料性质</button>
+            <button class="twod-detail-nav-btn" type="button" data-material-section="visualization">可视化</button>
+          </div>
+          <button class="modal-close" type="button" data-close-modal="materialModal">×</button>
+        </div>
+      </div>
+      <div class="modal-body modal-scroll">
+        <section class="twod-detail-workbench" id="twodDetailWorkbench">
+          <aside class="twod-detail-sidebar">
+            <div class="twod-detail-sidebar-group">
+              <h5 class="twod-detail-sidebar-title">详情信息</h5>
+              <button class="twod-detail-menu-btn active" type="button" data-twod-detail-section="basic">结构特征</button>
+              <button class="twod-detail-menu-btn" type="button" data-twod-detail-section="properties">电子结构</button>
+              <div class="twod-detail-submenu" id="twodDetailPropertyMenu"></div>
+              <button class="twod-detail-menu-btn" type="button" data-twod-detail-section="visualization">物理性质可视化</button>
+              <div class="twod-detail-submenu" id="twodDetailVisualMenu"></div>
+            </div>
+          </aside>
+          <div class="twod-detail-content" id="twodDetailContent"></div>
+        </section>
+
+        <section class="twod-detail-section active" data-material-page="basic">
+          <div class="twod-detail-section-head">
+            <div>
+              <h4>基本信息</h4>
+              <p>查看目标材料的结构预览、基础信息与数据来源。</p>
+            </div>
+            <div class="twod-detail-actions">
+              <select id="materialBasicDownloadScope">
+                <option value="all">下载全部基础信息</option>
+                <option value="current">下载当前展示信息</option>
+              </select>
+              <button class="btn-primary" type="button" id="materialBasicDownloadBtn">下载</button>
+            </div>
+          </div>
+
+          <div class="material-modal-grid">
+            <div class="material-view-card">
+              <h4 id="materialViewTitle">结构可视化</h4>
+              <div class="material-visual-stage">
+                <div class="material-atom-cluster" id="materialStructureCanvas"></div>
+                <div class="material-legend" id="materialLegend"></div>
+              </div>
+              <div class="material-stage-actions">
+                <button type="button">⟲</button>
+                <button type="button">⊕</button>
+                <button type="button">⊖</button>
+                <button type="button">⌕</button>
+                <button type="button">↻</button>
+              </div>
+              <div class="chart-caption" id="materialStructureCaption"></div>
+            </div>
+
+            <div class="material-info-card">
+              <div class="material-info-panel">
+                <h4 id="materialInfoPanelTitle">基本信息</h4>
+                <div class="material-info-grid" id="materialInfoGrid"></div>
+              </div>
+              <div class="material-info-panel material-info-panel-soft">
+                <h4 id="materialDataPanelTitle">数据信息</h4>
+                <div class="material-data-grid" id="materialDataGrid"></div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="twod-detail-section" data-material-page="properties">
+          <div class="twod-detail-section-head">
+            <div>
+              <h4 id="materialMetricsTitle">材料性质详情</h4>
+              <p>按性质类别分开查看目标材料的关键参数，并支持按当前页签筛选下载。</p>
+            </div>
+            <div class="twod-detail-actions">
+              <select id="materialPropertyDownloadScope">
+                <option value="all">下载全部性质数据</option>
+                <option value="filtered">下载当前性质页签</option>
+              </select>
+              <button class="btn-primary" type="button" id="materialPropertyDownloadBtn">下载</button>
+            </div>
+          </div>
+
+          <div class="material-section">
+            <div class="material-tab-row" id="materialDetailTabs"></div>
+            <div class="material-metric-grid" id="materialMetricGrid"></div>
+          </div>
+        </section>
+
+        <section class="twod-detail-section" data-material-page="visualization">
+          <div class="twod-detail-section-head">
+            <div>
+              <h4 id="materialChartTitle">物性可视化图谱</h4>
+              <p>按图谱类型分别查看可视化结果，并支持按当前图谱或全部图谱下载。</p>
+            </div>
+            <div class="twod-detail-actions">
+              <select id="materialVisualDownloadScope">
+                <option value="all">下载全部图谱</option>
+                <option value="filtered">下载当前图谱</option>
+              </select>
+              <button class="btn-primary" type="button" id="materialVisualDownloadBtn">下载</button>
+            </div>
+          </div>
+
+          <div class="material-section">
+            <div class="material-visual-chip-row" id="materialVisualChips"></div>
+            <div class="material-chart-card">
+              <div class="line-chart" id="materialLineChart"></div>
+              <div class="chart-caption" id="materialChartCaption">费米能级设置为 0 eV，显示高对称点路径下的能带结构。</div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="materialModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="twodDetailDownloadModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3 id="twodDetailDownloadTitle">确认下载</h3>
+        <button class="modal-close" type="button" data-close-modal="twodDetailDownloadModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="doc-box">
+          <h4 id="twodDetailDownloadName">当前内容</h4>
+          <p id="twodDetailDownloadText">确认下载当前内容？</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="twodDetailDownloadModal">取消</button>
+        <button class="btn-primary" type="button" id="twodDetailDownloadConfirmBtn">确认下载</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="twodVisualPreviewModal">
+    <div class="modal modal-xl twod-visual-preview-modal">
+      <div class="modal-header modal-header-primary">
+        <div>
+          <h3 id="twodVisualPreviewTitle">性质可视化图集</h3>
+          <p id="twodVisualPreviewName">当前可视化内容</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="twodVisualPreviewModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="twod-visual-preview-stage" id="twodVisualPreviewBody"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="twodVisualPreviewModal">关闭</button>
+        <button class="btn-primary" type="button" id="twodVisualPreviewDownloadBtn">下载</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="electrolyteUploadModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>新增数据</h3>
+        <button class="modal-close" type="button" data-close-modal="electrolyteUploadModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="electrolyteUploadWizard"></div>
+      <div class="modal-footer" id="electrolyteUploadFooter"></div>
+      <input id="electrolyteUploadFileInput" type="file" hidden>
+      <input id="electrolyteUploadFileInputV2" type="file" hidden>
+    </div>
+  </div>
+
+  <div class="overlay" id="electrolyteReviewModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>提交审核</h3>
+        <button class="modal-close" type="button" data-close-modal="electrolyteReviewModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="electrolyteReviewWizard"></div>
+      <div class="modal-footer" id="electrolyteReviewFooter"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="electrolyteRecordModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>更新记录详情</h3>
+        <button class="modal-close" type="button" data-close-modal="electrolyteRecordModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="electrolyteRecordInfo"></div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="electrolyteRecordModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="optoDetailModal">
+    <div class="modal modal-xl opto-modal opto-detail-modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="optoDetailTitle">TPD - 数据详情</h3>
+          <p id="optoDetailSubtitle">有机光电材料基础信息与三维结构预览</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="optoDetailModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="opto-detail-grid">
+          <div class="opto-detail-column">
+            <section class="opto-info-card">
+              <h4>基础信息</h4>
+              <div class="opto-basic-grid" id="optoDetailBasicGrid"></div>
+            </section>
+            <section class="opto-info-card">
+              <h4>电子性质</h4>
+              <div class="opto-basic-grid" id="optoDetailElectronicGrid"></div>
+            </section>
+          </div>
+          <div class="opto-structure-preview-card">
+            <div class="opto-section-head">
+              <h4>三维结构</h4>
+              <span class="tag-blue" id="optoDetailApplicationTag">发光材料</span>
+            </div>
+            <div class="opto-structure-preview-stage">
+              <div class="opto-structure-canvas is-preview mode-ball" id="optoDetailStructureCanvas"></div>
+              <div class="opto-preview-placeholder">
+                <div id="optoDetailPreviewCaption">3D 分子结构可视化</div>
+                <p id="optoDetailPreviewNote">通过 API 返回的结构节点与键连关系进行前端渲染</p>
+              </div>
+            </div>
+            <div class="opto-structure-toolbar">
+              <button class="btn" type="button" data-opto-open-panel="structure">三维结构</button>
+              <button class="btn" type="button" data-opto-open-panel="spectra">表征图谱</button>
+              <button class="btn" type="button" data-opto-open-panel="params">特征参数</button>
+            </div>
+          </div>
+        </div>
+        <section class="opto-related-section">
+          <div class="opto-section-head">
+            <h4>相关数据</h4>
+          </div>
+          <div class="opto-related-grid" id="optoDetailRelatedGrid"></div>
+        </section>
+        <section class="opto-info-card opto-external-card">
+          <h4>外部关联</h4>
+          <div class="opto-external-list" id="optoDetailExternalList"></div>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="optoDetailModal">关闭</button>
+        <button class="btn-primary" type="button" id="optoDetailDownloadBtn">下载数据</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="optoStructureModal">
+    <div class="modal modal-xl opto-modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="optoStructureTitle">三维结构</h3>
+          <p id="optoStructureSubtitle">有机光电材料的分子三维结构展示</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="optoStructureModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="opto-structure-modal-grid">
+          <div class="opto-structure-panel">
+            <div class="opto-structure-stage">
+              <div class="opto-structure-canvas mode-ball" id="optoStructureCanvas"></div>
+              <div class="opto-structure-stage-copy">
+                <h4 id="optoStructureStageTitle">TPD - 2D 分子结构示意图</h4>
+                <p id="optoStructureStageFormula">分子式：C38H32N2</p>
+                <span id="optoStructureStageNote">结构模式依据 API 返回的节点、键长和骨架信息生成</span>
+              </div>
+            </div>
+            <div class="opto-structure-actions">
+              <button class="btn" type="button" data-opto-structure-action="rotate">旋转</button>
+              <button class="btn" type="button" data-opto-structure-action="zoom-in">放大</button>
+              <button class="btn" type="button" data-opto-structure-action="zoom-out">缩小</button>
+              <button class="btn" type="button" data-opto-structure-action="reset">重置视图</button>
+              <button class="btn-primary" type="button" data-opto-download="structure-file">下载结构文件</button>
+            </div>
+          </div>
+          <div class="opto-side-column">
+            <section class="opto-side-card">
+              <h4>结构参数</h4>
+              <div class="opto-parameter-list" id="optoStructureParameterList"></div>
+            </section>
+            <section class="opto-side-card">
+              <h4>显示模式</h4>
+              <div class="opto-mode-row">
+                <button class="opto-mode-btn active" type="button" data-opto-structure-mode="ball">球棍</button>
+                <button class="opto-mode-btn" type="button" data-opto-structure-mode="space">空间填充</button>
+                <button class="opto-mode-btn" type="button" data-opto-structure-mode="wireframe">线框</button>
+              </div>
+            </section>
+            <section class="opto-side-card opto-file-card">
+              <h4>结构文件</h4>
+              <p>下载标准格式结构文件</p>
+              <div class="opto-download-list" id="optoStructureDownloadList"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="optoSpectraModal">
+    <div class="modal modal-xl opto-modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="optoSpectraTitle">表征图谱</h3>
+          <p id="optoSpectraSubtitle">有机光电材料的表征图谱与光谱数据</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="optoSpectraModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="opto-spectra-tab-row" id="optoSpectraTabRow"></div>
+        <div class="opto-spectra-grid">
+          <div class="opto-spectra-main">
+            <div class="opto-spectra-chart-card">
+              <div class="line-chart" id="optoSpectraChart"></div>
+              <div class="opto-chart-caption" id="optoSpectraCaption"></div>
+            </div>
+            <div class="opto-spectra-footer">
+              <span id="optoSpectraCurrentLabel">当前显示：紫外-可见吸收光谱</span>
+              <div class="table-actions">
+                <button class="btn" type="button" data-opto-download="spectra-data">导出数据</button>
+                <button class="btn" type="button" data-opto-download="spectra-image">保存图片</button>
+              </div>
+            </div>
+          </div>
+          <div class="opto-side-column">
+            <section class="opto-side-card">
+              <h4>光谱参数</h4>
+              <div class="opto-parameter-list" id="optoSpectraParameterList"></div>
+            </section>
+            <section class="opto-side-card opto-side-card-soft">
+              <h4>数据来源</h4>
+              <div class="opto-source-list" id="optoSpectraSourceList"></div>
+            </section>
+            <section class="opto-side-card">
+              <h4>相关图谱</h4>
+              <div class="opto-download-list" id="optoSpectraFileList"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="optoParamsModal">
+    <div class="modal modal-xl opto-modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="optoParamsTitle">特征参数</h3>
+          <p id="optoParamsSubtitle">有机光电材料的电子结构与分子特征参数</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="optoParamsModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="opto-params-grid" id="optoParamsGrid"></div>
+        <div class="opto-params-foot">
+          <span id="optoParamsSourceNote">数据来源：实验测量与 API 数据服务</span>
+          <div class="table-actions">
+            <button class="btn" type="button" data-opto-download="params-excel">导出 Excel</button>
+            <button class="btn-primary" type="button" data-opto-download="params-all">下载全部参数</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="mlffDetailModal">
+    <div class="modal modal-xl mlff-modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="mlffDetailTitle">机器学习力场数据详情</h3>
+          <p id="mlffDetailSubtitle">分子信息、力场参数与结构可视化</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="mlffDetailModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="mlff-detail-top">
+          <section class="mlff-info-card">
+            <h4>分子信息</h4>
+            <div class="mlff-basic-header">
+              <div class="mlff-avatar large" id="mlffDetailAvatar">H2O</div>
+              <div>
+                <strong id="mlffDetailName">水分子</strong>
+                <p id="mlffDetailPubchem">PUBCHEM: 962</p>
+              </div>
+            </div>
+            <div class="mlff-basic-grid" id="mlffChemicalGrid"></div>
+          </section>
+          <section class="mlff-info-card">
+            <h4>力场参数</h4>
+            <div class="mlff-basic-grid" id="mlffForceFieldGrid"></div>
+            <h4 style="margin-top:20px;">数据信息</h4>
+            <div class="mlff-basic-grid" id="mlffDataGrid"></div>
+          </section>
+        </div>
+        <section class="mlff-structure-card">
+          <h4>分子结构可视化</h4>
+          <div class="mlff-structure-stage">
+            <div class="mlff-structure-canvas" id="mlffStructureCanvas"></div>
+            <div class="mlff-structure-legend" id="mlffStructureLegend"></div>
+          </div>
+          <div class="mlff-structure-actions">
+            <button class="btn" type="button" data-mlff-structure-action="rotate-left">左旋</button>
+            <button class="btn" type="button" data-mlff-structure-action="rotate-right">右旋</button>
+            <button class="btn" type="button" data-mlff-structure-action="zoom-in">放大</button>
+            <button class="btn" type="button" data-mlff-structure-action="zoom-out">缩小</button>
+            <button class="btn" type="button" data-mlff-structure-action="reset">重置</button>
+          </div>
+        </section>
+        <div class="mlff-visual-grid">
+          <section class="mlff-chart-card">
+            <h4>电荷分布</h4>
+            <div class="line-chart" id="mlffChargeChart"></div>
+          </section>
+          <section class="mlff-chart-card">
+            <h4>势能曲线</h4>
+            <div class="line-chart" id="mlffEnergyChart"></div>
+          </section>
+        </div>
+        <section class="mlff-reference-card">
+          <h4>数据引用信息</h4>
+          <div class="mlff-reference-box" id="mlffReferenceText"></div>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="mlffDetailModal">关闭</button>
+        <button class="btn-primary" type="button" id="mlffDetailDownloadBtn">下载数据</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="mlffGlossaryModal">
+    <div class="modal modal-xl mlff-glossary-modal-shell">
+      <div class="modal-header">
+        <div>
+          <h3>机器学习力场数据术语表</h3>
+          <p>通过弹窗查看参数数据定义表与数据获取方法表，不再跳转到页面下方。</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="mlffGlossaryModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="mlffGlossaryModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="mlffGlossaryModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="mlffUploadModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>机器学习力场数据上传</h3>
+        <button class="modal-close" type="button" data-close-modal="mlffUploadModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="mlffUploadName">文件名称</label>
+          <input id="mlffUploadName" type="text" placeholder="如: water_charge_dataset.json">
+        </div>
+        <div class="field">
+          <label for="mlffUploadType">文件类型</label>
+          <select id="mlffUploadType">
+            <option>电荷参数</option>
+            <option>多极矩参数</option>
+            <option>分子结构</option>
+            <option>小体系结构</option>
+            <option>大体系结构</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mlffUploadFormat">源文件格式</label>
+          <select id="mlffUploadFormat">
+            <option>JSON</option>
+            <option>CSV</option>
+            <option>XYZ</option>
+            <option>PDB</option>
+            <option>NPZ</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="mlffUploadModal">取消</button>
+        <button class="btn-primary" type="button" id="mlffUploadSubmitBtn">确认上传</button>
+      </div>
+      <input id="mlffUploadFileInputV2" type="file" hidden>
+    </div>
+  </div>
+
+  <div class="overlay" id="mlffConvertModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>文件格式转换</h3>
+        <button class="modal-close" type="button" data-close-modal="mlffConvertModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="twod-convert-layout">
+          <div class="twod-convert-card" id="mlffConvertStepLocal">
+            <h4>第三方工具转换</h4>
+            <div id="mlffConvertThirdPartyPanel">
+              <p class="twod-convert-note">从当前系统记录中选择源文件，模拟跳转至第三方工具进行同类格式转换，并在完成后将结果回传到当前系统。</p>
+              <div class="twod-convert-grid">
+                <div class="field">
+                  <label for="mlffConvertSourceRecord">选择系统内文件</label>
+                  <select id="mlffConvertSourceRecord"></select>
+                </div>
+                <div class="field">
+                  <label for="mlffConvertTargetFormat">目标格式</label>
+                  <select id="mlffConvertTargetFormat"></select>
+                </div>
+              </div>
+              <div class="twod-convert-summary" id="mlffConvertThirdPartyInfo"></div>
+            </div>
+          </div>
+
+          <div class="twod-convert-card" id="mlffConvertStepExternal" hidden>
+            <h4>第三方工具工作区</h4>
+            <div class="twod-external-stage">
+              <div>
+                <strong>已跳转至第三方工具</strong>
+                <p id="mlffConvertExternalText">系统已将文件转换请求发送至第三方工具，完成后可将结果回传至当前系统。</p>
+                <div class="twod-convert-summary twod-convert-summary-inline" id="mlffConvertExternalMeta"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="twod-convert-card" id="mlffConvertStepReturn" hidden>
+            <h4>回传结果</h4>
+            <div class="twod-record-detail-grid" id="mlffConvertReturnInfo"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="mlffConvertModal">取消</button>
+        <button class="btn-primary" type="button" id="mlffStartConvertBtn">跳转至第三方工具</button>
+        <button class="btn-primary" type="button" id="mlffFinishConvertBtn" hidden>模拟转换成功并返回</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="mlffRecordModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>数据处理更新记录</h3>
+        <button class="modal-close" type="button" data-close-modal="mlffRecordModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-card">
+          <h4>记录信息</h4>
+          <div class="detail-grid" id="mlffRecordInfo"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="mlffRecordModal">关闭</button>
+        <button class="btn-primary" type="button" id="mlffRecordDownloadBtn">下载文件</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="catalystDetailModal">
+    <div class="modal modal-xl catalyst-modal">
+      <div class="modal-body modal-scroll">
+        <div class="catalyst-detail-banner">
+          <div>
+            <strong id="catalystDetailTitle">Pt(111)</strong>
+            <span id="catalystDetailSubtitle">ID: CAT-PT-111-001</span>
+          </div>
+          <button class="modal-close" type="button" data-close-modal="catalystDetailModal">×</button>
+        </div>
+        <div style="padding:24px 24px 8px;">
+          <div class="catalyst-detail-grid">
+            <div class="catalyst-detail-side">
+              <section class="catalyst-visual-box">
+                <h4>3D晶体结构可视化</h4>
+                <div class="catalyst-canvas" id="catalystDetailCanvas"></div>
+              </section>
+              <section class="catalyst-visual-box">
+                <h4>催化剂表面结构</h4>
+                <div class="catalyst-surface" id="catalystSurfaceCanvas"></div>
+              </section>
+              <section class="catalyst-visual-box">
+                <h4>火山图分析</h4>
+                <div class="catalyst-volcano" id="catalystVolcanoCanvas"></div>
+              </section>
+            </div>
+            <div class="catalyst-detail-side">
+              <section class="catalyst-detail-card">
+                <h4>基本信息</h4>
+                <div class="catalyst-info-grid" id="catalystBasicInfo"></div>
+              </section>
+              <section class="catalyst-detail-card">
+                <h4>催化性能</h4>
+                <div class="catalyst-info-grid" id="catalystMetricInfo"></div>
+              </section>
+              <section class="catalyst-detail-card">
+                <h4>电子结构</h4>
+                <div class="catalyst-info-grid" id="catalystElectronicInfo"></div>
+              </section>
+              <section class="catalyst-detail-card">
+                <h4>数据信息</h4>
+                <div class="catalyst-info-grid" id="catalystDataInfo"></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="catalystDetailModal">关闭</button>
+        <button class="btn-primary" type="button" id="catalystDetailDownloadBtn">下载数据</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="catalystUploadModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>新增数据</h3>
+        <button class="modal-close" type="button" data-close-modal="catalystUploadModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="catalystUploadWizard"></div>
+      <div class="modal-footer" id="catalystUploadFooter"></div>
+      <input id="catalystUploadFileInput" type="file" hidden>
+      <input id="catalystUploadFileInputV2" type="file" hidden>
+    </div>
+  </div>
+
+  <div class="overlay" id="catalystReviewModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>提交审核</h3>
+        <button class="modal-close" type="button" data-close-modal="catalystReviewModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="catalystReviewWizard"></div>
+      <div class="modal-footer" id="catalystReviewFooter"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="catalystRecordModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>数据处理更新记录</h3>
+        <button class="modal-close" type="button" data-close-modal="catalystRecordModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="catalystRecordInfo"></div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="catalystRecordModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="catalystModelPreviewModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="catalystPreviewTitle">模型预览</h3>
+          <p id="catalystPreviewSubtitle">基于当前参数生成的催化材料结构预览</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="catalystModelPreviewModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="catalyst-model-preview">
+          <div class="catalyst-preview-box">
+            <div class="catalyst-canvas" id="catalystModelPreviewCanvas"></div>
+          </div>
+          <div class="catalyst-preview-meta" id="catalystModelPreviewMeta"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="catalystModelPreviewModal">关闭</button>
+        <button class="btn-primary" type="button" id="catalystModelGenerateBtn">确认生成 API 调用</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="addDataModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="twodUploadModalTitle">二维材料数据上传</h3>
+        <button class="modal-close" type="button" data-close-modal="addDataModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="twod-upload-shell">
+          <div class="twod-step-indicator" id="twodUploadStepIndicator">
+            <span class="twod-step-item is-active" data-upload-step-indicator="1"><i>01</i><span>上传文件</span></span>
+            <span class="twod-step-item" data-upload-step-indicator="2"><i>02</i><span>补充信息</span></span>
+            <span class="twod-step-item" data-upload-step-indicator="3"><i>03</i><span>提交审核</span></span>
+          </div>
+
+          <section class="twod-upload-card twod-upload-stage" id="twodUploadStage1">
+            <div class="twod-upload-stage-head">
+              <h4>上传文件</h4>
+              <p>选择上传类别后，上传当前二维材料相关的单个文件。</p>
+            </div>
+            <div class="twod-upload-type-grid">
+              <label class="twod-upload-type-item">
+                <input type="radio" name="twodUploadCategory" value="structure">
+                <div>
+                  <strong>结构文件</strong>
+                  <span>支持 POSCAR / CIF / XYZ</span>
+                </div>
+              </label>
+              <label class="twod-upload-type-item">
+                <input type="radio" name="twodUploadCategory" value="compute">
+                <div>
+                  <strong>计算数据</strong>
+                  <span>支持 OUTCAR / log / 能带文件</span>
+                </div>
+              </label>
+              <label class="twod-upload-type-item">
+                <input type="radio" name="twodUploadCategory" value="visual">
+                <div>
+                  <strong>可视化文件</strong>
+                  <span>支持图谱 / 渲染结果</span>
+                </div>
+              </label>
+            </div>
+            <div class="twod-upload-slot">
+              <div class="twod-upload-slot-head">
+                <div>
+                  <strong id="twodUploadFileTitle">请选择上传类别</strong>
+                  <p id="twodUploadFileHint">结构文件、计算数据、可视化文件三选一后，再上传单个文件。</p>
+                </div>
+                <button class="btn-primary" type="button" id="twodUploadBrowseBtn" disabled>点击上传</button>
+              </div>
+              <input id="twodUploadFile" type="file" hidden disabled>
+              <div class="twod-upload-file-list upload-asset-panel" id="twodUploadFileList">未选择文件</div>
+            </div>
+          </section>
+
+          <section class="twod-upload-card twod-upload-stage" id="twodUploadStage2" hidden>
+            <div class="twod-upload-stage-head">
+              <h4 id="twodUploadStageTitle">补充信息</h4>
+              <p id="twodUploadStageDesc">确认上传文件后，补充材料核心信息并提交审核。</p>
+            </div>
+            <div class="twod-upload-review-card">
+              <div class="twod-upload-review-head">
+                <strong>已上传文件</strong>
+                <button class="btn-link" type="button" id="twodUploadReplaceBtn">删除重传</button>
+              </div>
+              <div class="twod-upload-file-list upload-asset-panel" id="twodUploadReviewFileList">未选择文件</div>
+              <div class="twod-upload-review-meta" id="twodUploadReviewMeta"></div>
+            </div>
+            <div class="twod-upload-form-grid">
+              <div class="field">
+                <label for="twodUploadMaterialName">材料名称 *</label>
+                <input id="twodUploadMaterialName" type="text" placeholder="请输入材料名称">
+              </div>
+              <div class="field">
+                <label for="twodUploadMaterialFormula">材料化学式</label>
+                <input id="twodUploadMaterialFormula" type="text" placeholder="如：MoS2">
+              </div>
+              <div class="field">
+                <label for="twodUploadMaterialType">材料类别</label>
+                <select id="twodUploadMaterialType">
+                  <option value="">请选择</option>
+                  <option>石墨烯</option>
+                  <option>过渡金属硫族化物</option>
+                  <option>氮化物</option>
+                  <option>氧化物</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="twodUploadDataSource">数据来源 *</label>
+                <select id="twodUploadDataSource">
+                  <option value="">请选择</option>
+                  <option>自有数据集</option>
+                  <option>公开数据集</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="twodUploadDescription">数据描述 *</label>
+                <textarea id="twodUploadDescription" placeholder="请输入实验验证、计算补充或结果回填说明"></textarea>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="addDataModal">取消</button>
+        <button class="btn" type="button" id="twodUploadPrevBtn" hidden>上一步</button>
+        <button class="btn-primary" type="button" id="twodUploadNextBtn" disabled>下一步</button>
+        <button class="btn-primary" type="button" id="confirmUploadBtn" hidden disabled>提交审核</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="convertModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>文件转换</h3>
+        <button class="modal-close" type="button" data-close-modal="convertModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="twod-convert-layout">
+          <div class="twod-convert-card" id="twodConvertStepLocal">
+            <h4>第三方工具转换</h4>
+            <div id="twodConvertThirdPartyPanel">
+              <p class="twod-convert-note">从当前系统记录中选择源文件，模拟跳转至第三方工具进行同类格式转换，并在完成后将结果回传到当前系统。</p>
+              <div class="twod-convert-grid">
+                <div class="field">
+                  <label for="convertSourceRecord">选择系统内文件</label>
+                  <select id="convertSourceRecord"></select>
+                </div>
+                <div class="field">
+                  <label for="convertTargetFormat">目标格式</label>
+                  <select id="convertTargetFormat"></select>
+                </div>
+              </div>
+              <div class="twod-convert-summary" id="twodConvertThirdPartyInfo"></div>
+            </div>
+          </div>
+
+          <div class="twod-convert-card" id="twodConvertStepExternal" hidden>
+            <h4>第三方工具工作区</h4>
+            <div class="twod-external-stage">
+              <div>
+                <strong>已跳转至第三方工具</strong>
+                <p id="twodConvertExternalText">系统已将文件转换请求发送至第三方工具，完成后可将结果回传至当前系统。</p>
+                <div class="twod-convert-summary twod-convert-summary-inline" id="twodConvertExternalMeta"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="twod-convert-card" id="twodConvertStepReturn" hidden>
+            <h4>回传结果</h4>
+            <div class="twod-record-detail-grid" id="twodConvertReturnInfo"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="convertModal">取消</button>
+        <button class="btn-primary" type="button" id="startConvertBtn">前往第三方工具</button>
+        <button class="btn-primary" type="button" id="finishConvertBtn" hidden>模拟转换成功并返回</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="reviewModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>提交审核</h3>
+        <button class="modal-close" type="button" data-close-modal="reviewModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <section class="wizard-section">
+          <div class="wizard-title-row">
+            <h4>第一步：选择文件</h4>
+            <button class="btn-primary" type="button" id="reviewNextStep1">下一步 →</button>
+          </div>
+          <div class="field">
+            <label>筛选文件类型</label>
+            <div class="radio-row" id="reviewTypeFilters">
+              <label><input type="radio" name="reviewFilter" value="全部" checked> 全部</label>
+              <label><input type="radio" name="reviewFilter" value="结构文件"> 结构文件</label>
+              <label><input type="radio" name="reviewFilter" value="计算数据"> 计算数据</label>
+              <label><input type="radio" name="reviewFilter" value="可视化文件"> 可视化文件</label>
+            </div>
+          </div>
+          <div class="record-select-list" id="reviewRecordList"></div>
+        </section>
+
+        <section class="wizard-section" id="reviewStep2" hidden>
+          <div class="wizard-title-row">
+            <h4>第二步：填写材料信息</h4>
+            <button class="btn-primary" type="button" id="reviewNextStep2">下一步 →</button>
+          </div>
+          <div class="field">
+            <label for="reviewMaterialName">二维材料名称 *</label>
+            <input id="reviewMaterialName" type="text" placeholder="请输入材料名称">
+          </div>
+          <div class="field">
+            <label for="reviewMaterialType">二维材料类型</label>
+            <select id="reviewMaterialType">
+              <option value="">请选择类型</option>
+              <option>石墨烯</option>
+              <option>过渡金属硫族化物</option>
+              <option>氮化物</option>
+              <option>氧化物</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="reviewSource">数据来源</label>
+            <select id="reviewSource">
+              <option>自有数据集</option>
+              <option>公开数据集</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="reviewDescription">数据描述</label>
+            <textarea id="reviewDescription" placeholder="请简要描述数据内容..."></textarea>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn" type="button" id="reviewPrevStep2">← 上一步</button>
+          </div>
+        </section>
+
+        <section class="wizard-section" id="reviewStep3" hidden>
+          <div class="wizard-title-row">
+            <h4>第三步：预览并提交</h4>
+            <button class="btn-primary" type="button" id="submitReviewBtn">✈ 提交审核</button>
+          </div>
+          <div class="wizard-info-card" id="reviewPreviewCard"></div>
+          <div class="wizard-actions">
+            <button class="btn" type="button" id="reviewPrevStep3">← 上一步</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="recordDetailModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>记录详情</h3>
+        <button class="modal-close" type="button" data-close-modal="recordDetailModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="record-detail-content">
+          <div class="record-detail-section">
+            <h4>基本信息</h4>
+            <div class="record-detail-grid" id="recordBasicInfo"></div>
+          </div>
+          <div class="record-detail-section">
+            <h4>补充信息</h4>
+            <div class="record-detail-grid" id="recordExtraInfo"></div>
+          </div>
+          <div class="record-detail-section">
+            <h4>审核状态</h4>
+            <div id="recordStatusBlock"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="recordDetailModal">关闭</button>
+        <button class="btn-primary" type="button" id="recordDetailDownloadBtn">下载文件</button>
+        <button class="btn-primary" type="button" id="recordApproveBtn" hidden>模拟审核通过并入库</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 忘记密码弹窗 ── -->
+  <div class="overlay" id="forgotPasswordModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3 id="forgotPwdTitle">忘记密码</h3>
+        <button class="modal-close" type="button" data-close-modal="forgotPasswordModal">×</button>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: 输入用户名/邮箱 -->
+        <div id="forgotPwdStep1">
+          <p style="margin:0 0 20px;color:#64748B;font-size:14px;">请输入您的注册用户名或邮箱，系统将发送验证码。</p>
+          <div class="form-group">
+            <label class="form-label">用户名 / 邮箱</label>
+            <input type="text" class="form-input" id="forgotPwdAccount" placeholder="请输入用户名或邮箱">
+          </div>
+          <div style="margin-top:24px;text-align:right;">
+            <button class="btn btn-primary" type="button" id="forgotPwdNextBtn">下一步</button>
+          </div>
+        </div>
+        <!-- Step 2: 输入验证码 -->
+        <div id="forgotPwdStep2" hidden>
+          <p style="margin:0 0 20px;color:#64748B;font-size:14px;">验证码已发送至您的注册邮箱，请查收并输入。</p>
+          <div class="form-group">
+            <label class="form-label">验证码</label>
+            <div style="display:flex;gap:12px;">
+              <input type="text" class="form-input" id="forgotPwdCode" placeholder="请输入 6 位验证码" maxlength="6" style="flex:1;">
+              <button class="btn" type="button" id="forgotPwdResendBtn" style="white-space:nowrap;">重新发送</button>
+            </div>
+          </div>
+          <div style="margin-top:24px;text-align:right;display:flex;justify-content:space-between;">
+            <button class="btn" type="button" id="forgotPwdBackBtn1">上一步</button>
+            <button class="btn btn-primary" type="button" id="forgotPwdVerifyBtn">验证</button>
+          </div>
+        </div>
+        <!-- Step 3: 设置新密码 -->
+        <div id="forgotPwdStep3" hidden>
+          <p style="margin:0 0 20px;color:#64748B;font-size:14px;">请设置您的新密码。</p>
+          <div class="form-group">
+            <label class="form-label">新密码</label>
+            <input type="password" class="form-input" id="forgotPwdNew" placeholder="请输入新密码（至少 6 位）">
+          </div>
+          <div class="form-group">
+            <label class="form-label">确认新密码</label>
+            <input type="password" class="form-input" id="forgotPwdConfirm" placeholder="请再次输入新密码">
+            <span id="forgotPwdMatchHint" style="font-size:12px;color:#DC2626;display:none;">两次输入的密码不一致</span>
+          </div>
+          <div style="margin-top:24px;text-align:right;display:flex;justify-content:space-between;">
+            <button class="btn" type="button" id="forgotPwdBackBtn2">上一步</button>
+            <button class="btn btn-primary" type="button" id="forgotPwdSubmitBtn">重置密码</button>
+          </div>
+        </div>
+        <!-- Step 4: 完成 -->
+        <div id="forgotPwdStep4" hidden style="text-align:center;padding:20px 0;">
+          <div style="width:64px;height:64px;border-radius:50%;background:#DCFCE7;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <span style="font-size:32px;color:#16A34A;">✓</span>
+          </div>
+          <h3 style="margin:0 0 8px;color:#1E293B;">密码重置成功</h3>
+          <p style="margin:0 0 24px;color:#64748B;font-size:14px;">请使用新密码重新登录。</p>
+          <button class="btn btn-primary" type="button" data-close-modal="forgotPasswordModal">返回登录</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 个人中心弹窗 ── -->
+  <div class="overlay" id="profileModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>个人中心</h3>
+        <button class="modal-close" type="button" data-close-modal="profileModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #E2E8F0;">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;">R</div>
+          <div>
+            <h3 style="margin:0;font-size:18px;color:#1E293B;">研究员</h3>
+            <p style="margin:4px 0 0;color:#64748B;font-size:13px;">researcher@materials.lab</p>
+          </div>
+          <button class="btn" type="button" style="margin-left:auto;" id="profileEditBtn">编辑资料</button>
+        </div>
+        <div class="record-detail-content">
+          <div class="record-detail-section">
+            <h4>基本信息</h4>
+            <div class="record-detail-grid">
+              <span class="record-detail-label">用户名</span><span class="record-detail-value">researcher</span>
+              <span class="record-detail-label">姓名</span><span class="record-detail-value">研究员</span>
+              <span class="record-detail-label">所属机构</span><span class="record-detail-value">中国科学院物理研究所</span>
+              <span class="record-detail-label">角色</span><span class="record-detail-value">专业用户（材料计算与模拟）</span>
+              <span class="record-detail-label">注册时间</span><span class="record-detail-value">2026-03-15</span>
+            </div>
+          </div>
+          <div class="record-detail-section">
+            <h4>账号信息</h4>
+            <div class="record-detail-grid">
+              <span class="record-detail-label">邮箱</span><span class="record-detail-value">researcher@materials.lab</span>
+              <span class="record-detail-label">手机</span><span class="record-detail-value">138****5678</span>
+              <span class="record-detail-label">上次登录</span><span class="record-detail-value">2026-06-24 11:32</span>
+              <span class="record-detail-label">数据权限</span><span class="record-detail-value">二维材料 L2 / 催化材料 L1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="profileModal">关闭</button>
+        <button class="btn btn-danger-outline" type="button" id="profileLogoutBtn">退出登录</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="algorithmManualModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="algorithmManualTitle">非磁单层材料结构驰豫算法 - 使用手册</h3>
+        <button class="modal-close" type="button" data-close-modal="algorithmManualModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <h4 class="section-title" style="margin-bottom:10px;">文档信息</h4>
+        <div class="algorithm-file-meta" id="algorithmManualMeta"></div>
+        <div class="doc-box" style="margin-top:20px;">
+          <h4>内容简介</h4>
+          <p id="algorithmManualDesc">针对非磁性二维单层材料的结构优化算法，通过 API 调用返回优化后的晶格参数与原子位置信息。</p>
+        </div>
+        <div class="algorithm-manual-directory">
+          <h4>手册目录</h4>
+          <ol id="algorithmManualToc"></ol>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="algorithmManualModal">关闭</button>
+        <button class="btn-primary" type="button" id="algorithmManualDownloadBtn">下载手册</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="algorithmDocModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="algorithmDocTitle">非磁单层材料结构驰豫算法 - 算法详情</h3>
+        <button class="modal-close" type="button" data-close-modal="algorithmDocModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="algorithm-detail-card">
+          <div class="algorithm-item-head">
+            <div>
+              <h3 class="section-title" id="algorithmDetailTitle" style="margin-bottom:4px;">非磁单层材料结构驰豫算法</h3>
+              <div class="algorithm-item-subtitle" id="algorithmDetailSubtitle">Non-magnetic Monolayer Relaxation</div>
+            </div>
+            <span class="algorithm-status-pill available" id="algorithmDetailStatus">可用</span>
+          </div>
+          <p id="algorithmDetailDesc" class="section-subtitle" style="margin-top:14px; margin-bottom:0;">针对非磁性二维单层材料的结构优化算法，通过 API 调用返回优化后的晶格参数与原子位置信息。</p>
+          <div class="algorithm-tag-row" id="algorithmDetailTags"></div>
+          <div class="algorithm-info-grid" id="algorithmDetailMeta"></div>
+          <div class="algorithm-endpoint-list" id="algorithmEndpointList"></div>
+          <div class="algorithm-alert" id="algorithmMaintenanceAlert" hidden>
+            <strong>维护中说明</strong>
+            <p id="algorithmMaintenanceText">当前算法服务处于维护窗口，下载与调用入口已临时关闭，可继续查看手册和算法详情。</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="algorithmDocModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="algorithmCodeModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3 id="algorithmCodeTitle">下载代码包</h3>
+        <button class="modal-close" type="button" data-close-modal="algorithmCodeModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="algorithm-file-card">
+          <div class="algorithm-file-icon">⬇</div>
+          <div>
+            <h4 id="algorithmCodeName">非磁单层材料结构驰豫算法</h4>
+            <p id="algorithmCodeFile">relax_nonmagnetic_code_v1.0.zip</p>
+          </div>
+        </div>
+        <div class="algorithm-file-meta" id="algorithmCodeMeta"></div>
+        <div class="doc-box" style="margin-top:16px;">
+          <h4>下载确认</h4>
+          <p id="algorithmCodeConfirmText">确认下载当前算法代码包？</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="algorithmCodeModal">取消</button>
+        <button class="btn-primary" type="button" id="algorithmCodeConfirmBtn">确认下载</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="algorithmMaintenanceModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3 id="algorithmMaintenanceModalTitle">算法维护提示</h3>
+        <button class="modal-close" type="button" data-close-modal="algorithmMaintenanceModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="algorithm-maintenance-box">
+          <p id="algorithmMaintenanceModalText">当前算法服务处于维护中，可继续查看使用手册与算法详情。维护窗口为 2026-04-21 至 2026-04-25。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="algorithmMaintenanceModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="algorithmRequestModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="algorithmRequestModalTitle">调用登记已创建</h3>
+        <button class="modal-close" type="button" data-close-modal="algorithmRequestModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="algorithm-request-preview" id="algorithmRequestPreview"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="algorithmRequestModal">关闭</button>
+        <button class="btn-primary" type="button" id="algorithmRequestCopyBtn">复制请求示例</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 数据工具开发 - 功能详情弹窗 -->
+  <div class="overlay" id="toolDetailModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="toolDetailTitle">工具名称</h3>
+          <p id="toolDetailSubtitle">功能成效</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="toolDetailModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <ul class="tool-detail-list" id="toolDetailList"></ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="toolDetailModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 数据工具开发 - 代码包下载弹窗 -->
+  <div class="overlay" id="toolDownloadModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <div>
+          <h3 id="toolDownloadTitle">下载代码包</h3>
+          <p id="toolDownloadSubtitle">请确认是否下载当前工具代码包。</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="toolDownloadModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <div class="algorithm-file-card">
+          <div class="algorithm-file-icon">⬇</div>
+          <div>
+            <h4 id="toolDownloadName">当前工具</h4>
+            <p id="toolDownloadFileName">tool.zip</p>
+          </div>
+        </div>
+        <div class="algorithm-file-meta" id="toolDownloadMeta"></div>
+        <div class="doc-box" style="margin-top:16px;">
+          <h4>下载确认</h4>
+          <p id="toolDownloadConfirmText">确认下载当前工具代码包？</p>
+        </div>
+      </div>
+      <div class="modal-footer" id="toolDownloadFooter">
+        <button class="btn" type="button" data-close-modal="toolDownloadModal">取消</button>
+        <button class="btn-primary" type="button" id="toolDownloadNextBtn">确认下载</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 数据工具开发 - 平台指引弹窗 -->
+  <div class="overlay" id="toolGuideModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="toolGuideTitle">平台部署与使用指引</h3>
+          <p id="toolGuideSubtitle">环境要求 · 安装步骤 · 配置说明 · 使用示例</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="toolGuideModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" style="padding:0;">
+        <div class="tool-guide-layout">
+          <nav class="tool-guide-nav" id="toolGuideNav">
+            <button class="active" type="button" data-guide-section="env">环境要求</button>
+            <button type="button" data-guide-section="install">安装步骤</button>
+            <button type="button" data-guide-section="config">配置说明</button>
+            <button type="button" data-guide-section="usage">使用示例</button>
+            <button type="button" data-guide-section="faq">常见问题</button>
+          </nav>
+          <div class="tool-guide-body" id="toolGuideBody">
+            <div class="tool-guide-section active" data-guide-page="env">
+              <h4>环境要求</h4>
+              <ol>
+                <li><strong>操作系统：</strong>Linux (Ubuntu 20.04+ / CentOS 8+)、macOS 12+、Windows 11 (WSL2)</li>
+                <li><strong>Python：</strong>3.9 / 3.10 / 3.11，推荐使用 Anaconda 或 Miniconda 管理环境</li>
+                <li><strong>依赖包：</strong>numpy、pandas、scipy、matplotlib、ase、pymatgen（具体以 requirements.txt 为准）</li>
+                <li><strong>硬件建议：</strong>CPU 4 核以上，内存 8 GB 以上；若涉及神经网络训练，建议配备 NVIDIA GPU (CUDA 11.8+)</li>
+              </ol>
+              <div class="doc-box">
+                <h4>前置检查</h4>
+                <p>在终端执行 <code>python --version</code> 与 <code>pip --version</code> 确认环境已就绪。建议使用虚拟环境隔离各工具依赖。</p>
+              </div>
+            </div>
+            <div class="tool-guide-section" data-guide-page="install">
+              <h4>安装步骤</h4>
+              <ol>
+                <li><strong>解压代码包：</strong>将下载的 ZIP 文件解压至目标工作目录，建议路径不含中文与空格。</li>
+                <li><strong>创建虚拟环境：</strong><code>conda create -n tool-env python=3.11</code>，然后激活 <code>conda activate tool-env</code>。</li>
+                <li><strong>安装依赖：</strong>在项目根目录执行 <code>pip install -r requirements.txt</code>，等待所有依赖安装完成。</li>
+                <li><strong>验证安装：</strong>执行 <code>python -c "import main; print('OK')"</code> 确认无报错。</li>
+                <li><strong>启动工具：</strong>根据 README 指引运行入口脚本，如 <code>python main.py</code> 或 <code>python -m src.cli</code>。</li>
+              </ol>
+            </div>
+            <div class="tool-guide-section" data-guide-page="config">
+              <h4>配置说明</h4>
+              <ol>
+                <li><strong>配置文件位置：</strong>项目根目录下的 <code>config.yaml</code> 或 <code>.env</code> 文件。</li>
+                <li><strong>数据路径：</strong>修改 <code>DATA_PATH</code> 指向本地数据集存放目录，建议使用绝对路径。</li>
+                <li><strong>计算参数：</strong>VASP/QE 接口需配置赝势路径、截断能、K 点网格等参数，详见 <code>config/calc.yaml</code>。</li>
+                <li><strong>日志级别：</strong>默认 INFO，调试时可修改为 DEBUG，日志输出至 <code>logs/</code> 目录。</li>
+              </ol>
+            </div>
+            <div class="tool-guide-section" data-guide-page="usage">
+              <h4>使用示例</h4>
+              <ol>
+                <li><strong>导入数据：</strong>将材料结构文件 (POSCAR / CIF) 放入指定输入目录，或通过 CLI 参数传入文件路径。</li>
+                <li><strong>执行功能：</strong>根据需求选择子模块，如逆向筛选执行 <code>python scripts/inverse_design.py --input data.csv</code>。</li>
+                <li><strong>查看结果：</strong>结果默认输出至 <code>outputs/</code> 目录，包含结构文件、计算输入文件与可视化图表。</li>
+                <li><strong>对接平台：</strong>通过平台 API 接口回传计算结果，实现数据闭环管理与版本追踪。</li>
+              </ol>
+            </div>
+            <div class="tool-guide-section" data-guide-page="faq">
+              <h4>常见问题</h4>
+              <ol>
+                <li><strong>依赖冲突：</strong>如遇版本冲突，建议使用 conda 新建独立环境，避免与系统 Python 混用。</li>
+                <li><strong>格式报错：</strong>确保输入文件为标准 CIF / POSCAR 格式，非标准格式需先用 pymatgen 转换。</li>
+                <li><strong>计算资源不足：</strong>大体系计算建议降低 K 点密度或使用更小超胞测试，确认无误后再放大规模。</li>
+                <li><strong>结果不一致：</strong>检查赝势版本、交换关联泛函及收敛阈值是否与平台数据库保持一致。</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="toolGuideModal">关闭</button>
+        <button class="btn-primary" type="button" onclick="showToast('指引文档','已模拟导出 PDF 指引文档')">导出 PDF 指引</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <strong id="toastTitle"></strong>
+    <div id="toastBody"></div>
+  </div>
+
+  
+  
+  
+  
+  <!-- ===== GNoME 风格交互式 3D 晶体结构查看器（挂载逻辑，3Dmol.js） ===== -->
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+
+  
+  
+  
+  
+  <div class="overlay" id="predictionTaskModal">
+    <div class="modal modal-xl prediction-task-modal">
+      <div class="modal-header">
+        <div class="prediction-task-title-wrap">
+          <span class="prediction-task-title-icon" aria-hidden="true">⚡</span>
+          <div>
+            <h3>发起预测任务</h3>
+            <p>配置任务名称、算法和计算参数后提交预测。</p>
+          </div>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="predictionTaskModal">×</button>
+      </div>
+      <div class="modal-body modal-scroll" id="predictionTaskModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-close-modal="predictionTaskModal">取消</button>
+        <button class="btn-primary" type="button" data-prediction-submit-pending>确认发起</button>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+      '
+'
+  
+'
+  
+
+
+
+<!-- ==========================================================================
+     低维材料主题库 · 统一令牌补全  v1.1-fix
+     仅补全 v1.0 覆盖层中被引用但未定义的令牌（行高/过渡/反白文字等），
+     不改动任何既有规则，修复 var() 解析失败导致声明失效的问题。
+     ========================================================================== -->
+
+
+  <script src="assets/js/00.js"></script>
+  <script src="assets/js/01.js"></script>
+  <script src="assets/js/02.js"></script>
+  <script src="assets/js/03.js"></script>
+  <script src="assets/js/04.js"></script>
+  <script src="assets/js/05.js"></script>
+  <script src="assets/js/06.js"></script>
+  <script src="assets/js/07.js"></script>
+  <script src="assets/js/08.js"></script>
+  <script src="assets/js/09.js"></script>
+  <script src="assets/js/10.js"></script>
+  <script src="assets/js/11.js"></script>
+  <script src="assets/js/12.js"></script>
+  <script src="assets/js/13.js"></script>
+  <script src="assets/js/14.js"></script>
+  <script src="assets/js/15.js"></script>
+  <script src="assets/js/16.js"></script>
+  <script src="assets/js/17.js"></script>
+  <script src="assets/js/18.js"></script>
+  <script src="assets/js/19.js"></script>
+  <script src="assets/js/20.js"></script>
+  <script src="assets/js/21.js"></script>
+  <script src="assets/js/22.js"></script>
+  <script src="assets/js/23.js"></script>
+  <script src="assets/js/24.js"></script>
+  <script src="assets/js/25.js"></script>
+  <script src="assets/js/26.js"></script>
+  <script src="assets/js/27.js"></script>
+  <script src="assets/js/28.js"></script>
+  <script src="assets/js/29.js"></script>
+  <script src="assets/js/30.js"></script>
+  <script src="assets/js/31.js"></script>
+  <script src="assets/js/32.js"></script>
+  <script src="assets/js/33.js"></script>
+  <script src="assets/js/34.js"></script>
+  <script src="assets/js/35.js"></script>
+  <script src="assets/js/36.js"></script>
+  <script src="assets/js/37.js"></script>
+  <script src="assets/js/38.js"></script>
+  <script src="assets/js/39.js"></script>
+  <script src="assets/js/40.js"></script>
+  <script src="assets/js/41.js"></script>
+  <script src="assets/js/42.js"></script>
+  <script src="assets/js/43.js"></script>
+  <script src="assets/js/44.js"></script>
+  <script src="assets/js/45.js"></script>
+  <script src="assets/js/46.js"></script>
+  <script src="assets/js/47.js"></script>
+  <script src="assets/js/48.js"></script>
+  <script src="assets/js/49.js"></script>
+  <script src="assets/js/50.js"></script>
+  <script src="assets/js/51.js"></script>
+  <script src="assets/js/52.js"></script>
+  <script src="assets/js/53.js"></script>
+  <script src="assets/js/54.js"></script>
+  <script src="assets/js/55.js"></script>
+  <script src="assets/js/99-layer.js"></script>
+<script src="assets/js/61-ingest-twod.js"></script>
+  <script>
+    /* 独立页面引导：以管理员身份直达本页（普通角色会被角色守卫回落到首页） */
+    (function () {
+      var target = "sys-log";
+      function activate() {
+        try {
+          var page = document.getElementById("page-" + target);
+          if (!page) return false;
+          var ok = page.classList.contains("active");
+          if (!ok) {
+            document.querySelectorAll(".page").forEach(function (n) { n.classList.remove("active"); });
+            page.classList.add("active");
+          }
+          var nav = document.querySelector('.sidebar .nav-btn[data-page="' + target + '"]');
+          if (nav) {
+            document.querySelectorAll(".nav-btn").forEach(function (n) { n.classList.remove("active"); });
+            nav.classList.add("active");
+          }
+          return true;
+        } catch (e) { return false; }
+      }
+      try {
+        if (typeof state !== "undefined") { state.isAuthenticated = true; state.loginRole = "admin"; }
+        if (typeof setUserRole === "function") setUserRole("admin");
+        if (typeof syncAuthView === "function") syncAuthView();
+        if (typeof switchPage === "function") switchPage(target);
+      } catch (e) { console.warn("standalone bootstrap", e); }
+      activate();
+      [0, 120, 400, 900].forEach(function (d) { setTimeout(activate, d); });
+    })();
+  </script>
+</body>
+</html>

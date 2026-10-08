@@ -264,7 +264,7 @@
               <div class="opto-condition-config-footer">
                 <div class="opto-condition-logic">多个条件默认同时满足筛选。</div>
                 <div class="twod-detail-actions">
-                  <button class="btn" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -316,7 +316,7 @@
               <div class="opto-property-selected-hint">${renderPropertySelectedHint(type, selected)}</div>
               <div class="cross-db-search-row">
                 <button class="btn-primary cross-db-search-btn" type="button" data-opto-apply>检索</button>
-                <button class="btn cross-db-clear-btn" type="button" data-opto-reset>清空条件</button>
+                <button class="btn cross-db-clear-btn" type="button" data-opto-reset>重置</button>
               </div>
             </div>
             <div class="twod-platform-actions"><div class="twod-status-text">${esc(OPTO_MODE_CONFIG.property.helper)}</div></div>

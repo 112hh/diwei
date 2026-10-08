@@ -22,6 +22,10 @@
   function styleIdFor(pid) { return "rw-ingest-" + pid + "-style-20260924"; }
   var NS = "rw";
 
+  /* 2026-10-08：资源录入页的「批量导入」功能暂时下线——入口按钮不渲染，
+     对应动作也被拦下（数据仍保留，恢复只需把下面这个开关改回 false）。 */
+  var HIDE_ENTRY_BATCH = true;
+
   /* ---------------------------------------------------------------- 工具 */
   var esc = (function () {
     try {
@@ -243,6 +247,16 @@
       ".rw-ds-name { font-size:13px; color:#2c3e56; font-weight:600; }",
       ".rw-ds-desc { font-size:12px; color:#8a99ae; }",
       ".rw-ds-count { margin-left:auto; font-size:12px; color:#1f63ff; white-space:nowrap !important; }",
+      /* 2026-10-08：加工步骤 5「数据产品按数据集划分」卡片 */
+      ".rw-ds-wrap { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }",
+      ".rw-pds { display:block; padding:10px 12px; border-radius:10px; background:#fff; border:1px solid #eaeff7; cursor:pointer; }",
+      ".rw-pds:hover { border-color:#9dbcf5; }",
+      ".rw-pds.is-on { background:#eef4ff; border-color:#a9c6f8; }",
+      ".rw-pds-top { display:flex; align-items:center; gap:9px; }",
+      ".rw-pds-top input { width:15px !important; height:15px !important; margin:0 !important; }",
+      ".rw-pds-top b { font-size:13px; color:#22364f; }",
+      ".rw-pds-desc { margin-top:6px; font-size:12px; color:#5b6c85; line-height:20px; }",
+      ".rw-pds .rw-field-tip { margin-top:6px; font-size:12px; line-height:18px; }",
       ".rw-pick-result { margin-top:14px; border:1px solid #e2e8f2; border-radius:10px; overflow:hidden; }",
       ".rw-pick-result-head { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#f4f8fd; font-size:13px; color:#54637c; border-bottom:1px solid #e6ecf5; }",
 
@@ -270,6 +284,21 @@
       ".rw-result.is-warn .rw-result-title { color:#b8720f; }",
       ".rw-kv { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px 18px; margin-bottom:10px; font-size:13px; color:#5c6b83; }",
       ".rw-kv b { color:#8a99ae; font-weight:500; margin-right:6px; }",
+
+      /* 关联配置规范（勾选标准化处理模块的规则）——弹窗挂在 body 下，样式必须是全局选择器 */
+      ".rw-std-wrap { margin-top:12px; border:1px solid #dfe7f3; border-radius:10px; background:#fafcff; padding:12px 14px; }",
+      ".rw-std-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; font-size:13px; color:#5c6b83; }",
+      ".rw-std-top b { color:#1f63ff; font-size:14px; }",
+      ".rw-std-top .rw-btn { margin-left:8px; }",
+      ".rw-std-cat { margin-bottom:12px; }",
+      ".rw-std-cat-head { display:flex; align-items:center; gap:8px; font-size:13px; color:#22364f; margin-bottom:7px; }",
+      ".rw-std-cat-count { padding:1px 8px; border-radius:9px; background:#eaf1ff; color:#1f63ff; font-size:12px; }",
+      ".rw-std-items { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:8px; }",
+      ".rw-std-item { display:flex; gap:8px; align-items:flex-start; padding:9px 11px; border:1px solid #e3eaf6; border-radius:8px; background:#fff; cursor:pointer; }",
+      ".rw-std-item.is-on { border-color:#7aa2f7; background:#f2f7ff; }",
+      ".rw-std-item input { margin-top:3px; }",
+      ".rw-std-item-title { font-size:13px; color:#22364f; font-weight:600; }",
+      ".rw-std-item-desc { font-size:12px; color:#8a99ae; line-height:1.5; margin-top:2px; }",
 
       /* 计算方式：输出文件单选 + 输入文件上传 */
       ".rw-calc-outs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }",
@@ -549,28 +578,113 @@
 
   function seedTasks() {
     var cfgTasks = C().tasks;
-    if (cfgTasks) return cfgTasks.map(function (x) { return Object.assign({}, x); });
-    var t = materialTypes()[0];
-    return [
+    var base = cfgTasks ? cfgTasks.map(function (x) { return Object.assign({}, x); }) : (function () {
+      var t = materialTypes()[0];
+      return [
+        {
+          id: "2D-CL-2026-0922-001", name: t.name + "（MoS2）电子结构数据采集", method: "open",
+          desc: "从 Materials Project 开放 API 采集 MoS2 能带结构与态密度数据", status: "已完成",
+          createdAt: "2026-09-22 10:24", source: "Materials Project（材料项目数据库）",
+          version: "v2024.11", rawFiles: "JSON / CIF", security: "第1级"
+        },
+        {
+          id: "2D-CL-2026-0923-002", name: t.name + "（WS2）力学性质数据采集", method: "buy",
+          desc: "从已购买 C2DB 商业授权数据包导入 WS2 弹性常数与杨氏模量数据", status: "已完成",
+          createdAt: "2026-09-23 09:12", source: "C2DB 商业授权数据包",
+          version: "v3.2", rawFiles: "JSON", security: "第1级"
+        },
+        {
+          id: "2D-CL-2026-0923-003", name: "二维磁性材料（CrI3）态密度数据计算", method: "calc",
+          desc: "基于 VASP 计算输出文件提取结构信息、能带数据与态密度", status: "待确认",
+          createdAt: "2026-09-23 16:48", source: "本地计算输出（OUTCAR / DOSCAR）",
+          version: "V0.0", rawFiles: "JSON", security: "第2级"
+        }
+      ];
+    })();
+    return collectSeedTasks(base);
+  }
+
+  /* ------------------------------------------------------------------------
+     2026-10-08：演示用样例数据——「采集任务执行记录」补足到 6 条，
+     覆盖 已完成 / 待确认 / 采集失败 / 格式异常 四类状态与三种采集方式，
+     字段与「创建采集任务」三步向导落库结构保持一致（数据来源 / 入库名称 / 数据整合报告 / 审核状态）。
+     ------------------------------------------------------------------------ */
+  function collectSeedTasks(base) {
+    var out = base.slice();
+    var code = C().code || "2D";
+    var short = C().short || "材料";
+    var ds = C().datasets || [];
+    var EXTRA = [
       {
-        id: "2D-CL-2026-0922-001", name: t.name + "（MoS2）电子结构数据采集", method: "open",
-        desc: "从 Materials Project 开放 API 采集 MoS2 能带结构与态密度数据", status: "已完成",
-        createdAt: "2026-09-22 10:24", source: "Materials Project（材料项目数据库）",
-        version: "v2024.11", rawFiles: "JSON / CIF", security: "第1级"
+        method: "calc", status: "采集失败", security: "第2级",
+        name: short + "高通量计算数据采集（第 2 批）",
+        desc: "批量提交第一性原理计算任务，API 限流导致拉取中断，已自动重试 2 次",
+        source: "本地计算输出（OUTCAR / DOSCAR）", sourceType: "计算数据",
+        obtainWay: "API", dataType: "非结构化", collectObject: "图",
+        version: "V0.0", rawFiles: "OUTCAR / DOSCAR",
+        updateFreq: "每周", updateMode: "自动",
+        report: "图像校验规则 6/6 通过（分辨率 / 格式 / 色彩模式 / 尺寸 / 清晰度 / 水印）· 命名统一",
+        auditStatus: "审核驳回", auditOpinion: "本批次缺失关键计算参数说明，退回补充计算方法与参数后重新提交。"
       },
       {
-        id: "2D-CL-2026-0923-002", name: t.name + "（WS2）力学性质数据采集", method: "buy",
-        desc: "从已购买 C2DB 商业授权数据包导入 WS2 弹性常数与杨氏模量数据", status: "已完成",
-        createdAt: "2026-09-23 09:12", source: "C2DB 商业授权数据包",
-        version: "v3.2", rawFiles: "JSON", security: "第1级"
+        method: "open", status: "格式异常", security: "第1级",
+        name: short + "开放库文献数据采集",
+        desc: "采集文献报道数据，部分记录字段缺失（缺失率 8.4%），已进入异常处理队列",
+        source: "文献数据库（开放 API）", sourceType: "文献采集",
+        obtainWay: "API", dataType: "结构化", collectObject: "表",
+        version: "v2026.09", rawFiles: "JSON / CSV",
+        updateFreq: "每月", updateMode: "手动",
+        report: "表字段规则校验 5/6 通过 · 1 项单位未统一（待人工复核）",
+        auditStatus: "待审核", auditOpinion: ""
       },
       {
-        id: "2D-CL-2026-0923-003", name: "二维磁性材料（CrI3）态密度数据计算", method: "calc",
-        desc: "基于 VASP 计算输出文件提取结构信息、能带数据与态密度", status: "待确认",
-        createdAt: "2026-09-23 16:48", source: "本地计算输出（OUTCAR / DOSCAR）",
-        version: "V0.0", rawFiles: "JSON", security: "第2级"
+        method: "buy", status: "已完成", security: "第1级",
+        name: short + "商业库定期同步任务",
+        desc: "按更新周期自动同步已购数据包，同步完成后推送至数据整合环节",
+        source: "已购商业数据库（定期同步）", sourceType: "商业购买数据库",
+        obtainWay: "数据库", dataType: "结构化", collectObject: "表",
+        version: "v3.2", rawFiles: "JSON / CSV",
+        updateFreq: "每季度", updateMode: "自动",
+        report: "表字段规则校验 6/6 通过 · 增量去重完成",
+        auditStatus: "审核通过", auditOpinion: "数据来源合规、整合校验全部通过，同意入库。"
       }
     ];
+    var daySeq = ["2026-09-24 09:35", "2026-09-25 14:02", "2026-09-26 17:20", "2026-09-27 10:08", "2026-09-28 15:44"];
+    var n = out.length;
+    EXTRA.forEach(function (x, i) {
+      if (n >= 6) return;
+      var idx = n + 1;
+      var d = ds.length ? ds[(idx - 1) % ds.length] : null;
+      out.push({
+        id: code + "-CL-2026-09" + (23 + idx) + "-00" + idx,
+        name: x.name + (d ? "（" + d.title.replace("数据集", "") + "）" : ""),
+        method: x.method,
+        desc: x.desc,
+        status: x.status,
+        createdAt: daySeq[(idx - 4 + daySeq.length) % daySeq.length] || daySeq[0],
+        source: x.source,
+        sourceType: x.sourceType,
+        obtainWay: x.obtainWay,
+        dataType: x.dataType,
+        collectObject: x.collectObject,
+        dbName: (d ? short + d.title : short + "数据集") + "（V2.0）",
+        integrationReport: x.report,
+        updateFreq: x.updateFreq,
+        updateMode: x.updateMode,
+        version: x.version,
+        rawFiles: x.rawFiles,
+        security: x.security,
+        audit: {
+          status: x.auditStatus,
+          result: x.auditStatus === "审核通过" ? "通过" : (x.auditStatus === "审核驳回" ? "不通过" : ""),
+          opinion: x.auditOpinion,
+          at: x.auditOpinion ? daySeq[(idx - 4 + daySeq.length) % daySeq.length] : "",
+          by: x.auditOpinion ? "管理员9527" : ""
+        }
+      });
+      n += 1;
+    });
+    return out;
   }
 
   function methodMeta(key) { return METHODS[key] || METHODS.open; }
@@ -646,6 +760,7 @@
 
   function renderRwBody() {
     var s = getS();
+    if (s.auditOpen) return renderAuditPage();
     if (s.tab === "entry") return renderEntryTab();
     if (s.tab === "process") return renderProcessTab();
     return renderCollectTab();
@@ -666,9 +781,11 @@
     var s = getS();
     if (!s.tasks.length) {
       return '<div class="rw-card">'
-        + '<div class="rw-card-head"><div><h3>采集任务列表</h3>'
-        + "<p>暂无采集任务，点击「创建任务」按开源数据获取 / 数据购买·自采数据 / 数据计算三种方式发起采集。</p></div>"
-        + '<div><button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button></div></div>'
+        + '<div class="rw-card-head"><div><h3>采集任务执行记录</h3>'
+        + "<p>暂无采集任务，点击「创建任务」三步完成：数据获取 → 数据整合 → 数据更新。</p></div>"
+        + '<div style="display:flex;gap:10px;flex:0 0 auto">'
+        + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button>'
+        + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="open-audit">数据采集审核</button></div></div>'
         + '<div class="rw-empty"><b>▤</b>暂无采集任务</div></div>';
     }
     return collectClosureCards();
@@ -754,9 +871,9 @@
       + "</tbody></table></div></div>"
 
       + '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>数据录入审核流程（2.2.4）</h3><p>多级审核：自动校验 → 数据管理员初审 → 数据审核员终审 → 入库 / 退回。</p></div></div>'
+      + '<div class="rw-card-head"><div><h3>数据录入审核流程（2.2.4）</h3><p>一次审批：提交 → 自动校验 → 管理员审核 → 入库 / 退回。</p></div></div>'
       + chainHtml([
-        "提交", { text: "自动校验", cls: "" }, { text: "数据管理员初审", cls: "" }, { text: "数据审核员终审", cls: "" },
+        "提交", { text: "自动校验", cls: "" }, { text: "管理员审核", cls: "" },
         { text: "入库", cls: "is-end" }, { text: "退回", cls: "is-back" }
       ])
       + "</div>"
@@ -852,22 +969,18 @@
 
   function openCreate() {
     var s = getS();
-    var mt = materialTypes()[0];
+    /* 2026-10-08 重做：创建采集任务三步向导 —— 数据获取 → 数据整合 → 数据更新 */
     s.create = {
       step: 1,
       id: nextTaskId(),
       name: "",
+      obtainWay: "API",
+      sourceType: "文献采集",
       desc: "",
-      method: "open",
-      dbPick: {},
-      params: { materialType: mt.name, ranges: [{ property: (mt.fields || [])[0] || "带隙", min: "", max: "", unit: "eV" }] },
-      demo: "normal",
-      speed: true,
-      running: false,
-      log: [],
-      result: null,
-      calc: { out: "", files: {}, validated: false, report: null, quality: "", missingAlert: false },
-      autoScroll: false,
+      dataType: "结构化",
+      collectObject: "表",
+      updateFreq: "每周",
+      updateMode: "手动",
       error: ""
     };
     renderCreateModal();
@@ -880,6 +993,7 @@
     if (c && c.parentNode) c.parentNode.removeChild(c);
     var s = getS();
     s.create = null;
+    s.auditId = "";
   }
 
   function renderCreateModal() {
@@ -901,7 +1015,7 @@
   }
 
   function createStepbar(step) {
-    var labels = ["任务基本信息", "采集方式与配置", "结果确认与提交"];
+    var labels = ["数据获取", "数据整合", "数据更新"];
     return '<div class="rw-stepbar">' + labels.map(function (l, i) {
       var cls = step === i + 1 ? "is-active" : (step > i + 1 ? "is-done" : "");
       return '<div class="rw-stepbar-item ' + cls + '"><span class="dot">' + (step > i + 1 ? "✓" : i + 1) + "</span>" + esc(l) + "</div>"
@@ -914,7 +1028,7 @@
     var foot = renderCreateFoot(c);
     return '<div class="rw-modal" role="dialog" aria-modal="true">'
       + '<div class="rw-modal-head">'
-      + '<div><h3>创建采集任务</h3><p>采集 ID 由系统自动编码；按采集方式完成参数配置、数据获取与结果确认后入库。</p></div>'
+      + '<div><h3>创建采集任务</h3><p>分三步完成任务创建：数据获取 → 数据整合 → 数据更新；提交后进入数据采集审核。</p></div>'
       + '<div class="rw-modal-head-side">'
       + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="intro">数据资源对象介绍</button>'
       + '<button class="rw-modal-close" type="button" data-rw-act="close-create" aria-label="关闭">×</button>'
@@ -927,58 +1041,101 @@
 
   function renderCreateFoot(c) {
     var error = c.error ? '<span class="rw-foot-tip" style="color:#d03050">' + esc(c.error) + "</span>" : "";
-    var left = c.step === 3 ? '<span class="rw-foot-tip">确认无误后点击「确认提交」，数据将保存至资源采集列表。</span>' : error;
     if (c.step === 1) {
-      return '<div class="rw-modal-foot">' + left
+      return '<div class="rw-modal-foot">' + error
         + '<button class="rw-btn" type="button" data-rw-act="close-create">取消</button>'
         + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="next">下一步</button></div>';
     }
     if (c.step === 2) {
-      return '<div class="rw-modal-foot">' + left
+      return '<div class="rw-modal-foot">' + error
         + '<button class="rw-btn" type="button" data-rw-act="prev">上一步</button>'
-        + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="run-collect"' + (c.running ? " disabled" : "") + ">"
-        + (c.running ? "采集中…" : (c.method === "calc" ? "校验并提取数据" : "开始采集")) + "</button>"
-        + '<button class="rw-btn" type="button" data-rw-act="skip-to-confirm"' + (c.result ? "" : " disabled") + ">进入确认</button></div>";
+        + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="next">下一步</button></div>';
     }
-    return '<div class="rw-modal-foot">' + left
+    return '<div class="rw-modal-foot">'
+      + '<span class="rw-foot-tip">确认无误后点击「确认提交」，任务将进入数据采集审核。</span>'
       + '<button class="rw-btn" type="button" data-rw-act="prev">上一步</button>'
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="submit-task">确认提交</button></div>';
   }
 
-  /* ------------------------------------------------------------ 步骤 1 */
-  function renderCreateStep1(c) {
-    return '<div class="rw-form">'
-      + '<div class="rw-field"><label>采集 ID（系统自动编码）</label>'
-      + '<input type="text" readonly data-rw-f="id" value="' + esc(c.id) + '">'
-      + '<span class="rw-field-tip">编码规则：2D-CL-年-月-日-三位序号，创建时自动生成，不可修改。</span></div>'
-      + '<div class="rw-field"><label>采集方式</label>'
-      + '<input type="text" readonly value="' + esc(methodMeta(c.method).label) + '">'
-      + '<span class="rw-field-tip">在下一步选择采集方式，可选择开源数据获取 / 数据购买·自采数据 / 数据计算。</span></div>'
-      + '<div class="rw-field is-full"><label>采集任务名称<i>*</i></label>'
-      + '<input type="text" data-rw-f="name" maxlength="60" placeholder="' + esc(C().taskNamePh) + '" value="' + esc(c.name) + '">'
-      + "</div>"
-      + '<div class="rw-field is-full"><label>采集说明</label>'
-      + '<textarea data-rw-f="desc" placeholder="请输入本次采集的目标、数据范围与用途说明…">' + esc(c.desc) + "</textarea>"
-      + '<span class="rw-field-tip">采集说明将展示在资源采集列表中，用于说明该任务的采集目标与数据范围。</span></div>'
-      + "</div>"
-      + '<div class="rw-banner" style="margin-top:16px"><span>ⓘ</span><div>不熟悉本库的数据资源对象？点击右上角蓝色按钮「数据资源对象介绍」，查看' + esc(C().objectsNote) + '及各自包含的数据字段。</div></div>';
+  /* ------------------------------------------------ 整合规则（表字段 / 图像校验） */
+  var TABLE_RULES = [
+    ["晶格常数", "数值", "保留小数点后 7 位，单位 Å，须为正数", "通过"],
+    ["化学式", "字符", "元素符号按国际通行规范书写，原子个数归一化", "通过"],
+    ["空间群", "枚举", "国际编号 1–230，须与对称性数据一致", "通过"],
+    ["带隙", "数值", "单位 eV，保留小数点后 4 位，取值 ≥ 0", "通过"],
+    ["形成能", "数值", "单位 eV/atom，保留小数点后 6 位", "通过"],
+    ["原子坐标", "数组", "分数坐标取值 0 ≤ x < 1，原子数与化学式一致", "通过"]
+  ];
+  var IMAGE_RULES = [
+    ["分辨率", "≥ 300 dpi，低于阈值判定为不合规图像", "通过"],
+    ["图像格式", "PNG / JPG / BMP，禁止截图二次压缩件", "通过"],
+    ["色彩模式", "RGB 或灰度，位深 ≥ 8 bit", "通过"],
+    ["图像尺寸", "长与宽均 ≥ 512 px，宽高比无拉伸变形", "通过"],
+    ["清晰度", "拉普拉斯方差 ≥ 100，无模糊失焦", "通过"],
+    ["水印与标注", "无水印、无人工标注框，坐标轴与图例完整", "通过"]
+  ];
+
+  function rulesTable(rules, withType) {
+    var head = withType
+      ? "<tr><th>字段名称</th><th>数据类型</th><th>校验规则</th><th>校验结果</th></tr>"
+      : "<tr><th>校验项</th><th>校验规则</th><th>校验结果</th></tr>";
+    var rows = rules.map(function (r) {
+      return "<tr><td><b>" + esc(r[0]) + "</b></td>"
+        + (withType ? "<td>" + esc(r[1]) + "</td>" : "")
+        + "<td>" + esc(r[withType ? 2 : 1]) + "</td>"
+        + '<td><span class="rw-tag rw-tag--done">' + esc(r[withType ? 3 : 2]) + "</span></td></tr>";
+    }).join("");
+    return '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead>' + head + "</thead><tbody>" + rows + "</tbody></table></div>";
   }
 
-  /* ------------------------------------------------------------ 步骤 2 */
-  function renderCreateStep2(c) {
-    var methods = ["open", "buy", "calc"].map(function (k) {
-      var m = METHODS[k];
-      return '<label class="rw-method' + (c.method === k ? " is-on" : "") + '">'
-        + '<div class="rw-method-top"><input type="radio" name="rwMethod" data-rw-f="method" value="' + k + '"' + (c.method === k ? " checked" : "") + ">"
-        + '<span class="rw-method-title">' + esc(m.label) + "</span></div>"
-        + '<div class="rw-method-desc">' + esc(m.desc) + "</div></label>";
-    }).join("");
+  /* ------------------------------------------------------------ 步骤 1：数据获取 */
+  function renderCreateStep1(c) {
+    function opt(list, cur) {
+      return list.map(function (o) { return '<option value="' + esc(o) + '"' + (cur === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("");
+    }
+    return '<div class="rw-section-title">第一步 · 数据获取</div>'
+      + '<div class="rw-form">'
+      + '<div class="rw-field"><label>采集 ID（系统自动编码）</label>'
+      + '<input type="text" readonly value="' + esc(c.id) + '">'
+      + '<span class="rw-field-tip">编码规则：材料代码-CL-年-月-日-三位序号，创建时自动生成，不可修改。</span></div>'
+      + '<div class="rw-field"><label>数据获取方式<i>*</i></label>'
+      + '<select data-rw-f="obtainWay">' + opt(["API", "数据库"], c.obtainWay) + "</select>"
+      + '<span class="rw-field-tip">API：通过接口实时拉取；数据库：直连数据库抽取。</span></div>'
+      + '<div class="rw-field"><label>数据来源<i>*</i></label>'
+      + '<select data-rw-f="sourceType">' + opt(["文献采集", "开源数据库", "计算数据", "商业购买数据库"], c.sourceType) + "</select>"
+      + '<span class="rw-field-tip">选择本次采集任务的数据来源渠道。</span></div>'
+      + '<div class="rw-field"><label>数据类型<i>*</i></label>'
+      + '<select data-rw-f="dataType">' + opt(["结构化", "非结构化"], c.dataType) + "</select>"
+      + '<span class="rw-field-tip">结构化：表格 / 数值类数据；非结构化：图像 / 文档类数据。</span></div>'
+      + '<div class="rw-field is-full"><label>入库名称<i>*</i></label>'
+      + '<input type="text" data-rw-f="name" maxlength="60" placeholder="请输入入库名称" value="' + esc(c.name) + '">'
+      + '<span class="rw-field-tip">入库名称将展示在采集任务执行记录与数据库目录中。</span></div>'
+      + '<div class="rw-field is-full"><label>数据来源描述</label>'
+      + '<textarea data-rw-f="desc" placeholder="请输入数据来源描述，例如来源数据库 / 文献范围 / 计算工况与数据规模…">' + esc(c.desc) + "</textarea>"
+      + '<span class="rw-field-tip">数据来源描述将随采集任务归档，供数据采集审核与追溯使用。</span></div>'
+      + "</div>";
+  }
 
-    return '<div class="rw-section-title">采集方式</div>'
-      + '<div class="rw-methods">' + methods + "</div>"
-      + '<div style="margin-top:16px">'
-      + (c.method === "open" ? renderOpenPanel(c) : c.method === "buy" ? renderBuyPanel(c) : renderCalcPanel(c))
-      + "</div>" + renderRunPanel(c);
+  /* ------------------------------------------------------------ 步骤 2：数据整合 */
+  function renderCreateStep2(c) {
+    var isTable = c.collectObject !== "图";
+    return '<div class="rw-section-title">第二步 · 数据整合</div>'
+      + '<div class="rw-card-note">数据整合配置：选择数据采集对象后，系统按对应规则对采集数据进行自动校验与格式统一。</div>'
+      + '<div class="rw-form">'
+      + '<div class="rw-field"><label>数据采集对象<i>*</i></label>'
+      + '<select data-rw-f="collectObject">'
+      + '<option value="表"' + (isTable ? " selected" : "") + ">表（结构化数据字段校验）</option>"
+      + '<option value="图"' + (isTable ? "" : " selected") + ">图（图像数据校验）</option>"
+      + "</select>"
+      + '<span class="rw-field-tip">选择「表」按表字段规则逐字段校验；选择「图」按图像校验规则逐项校验。</span></div>'
+      + "</div>"
+      + '<div class="rw-section-title" style="margin-top:14px">' + (isTable ? "表字段规则校验" : "图像校验规则") + "</div>"
+      + rulesTable(isTable ? TABLE_RULES : IMAGE_RULES, isTable)
+      + '<div class="rw-banner" style="margin-top:14px"><span>✓</span><div>'
+      + (isTable
+        ? "已按表字段规则完成预校验：全部字段校验通过，其中<b>晶格常数</b>保留小数点后 7 位；校验不通过的字段将转入待处理队列，不会直接入库。"
+        : "已按图像校验规则完成预校验：全部校验项通过；不合规图像将转入待处理队列，不会直接入库。")
+      + "</div></div>";
   }
 
   /* ---------- 采集参数（材料类型 + 性质范围） ---------- */
@@ -1249,55 +1406,36 @@
       + "</div>";
   }
 
-  /* ---------- 步骤 3：结果确认与提交 ---------- */
+  /* ---------- 步骤 3：数据更新 ---------- */
   function renderCreateStep3(c) {
-    var r = c.result;
-    if (!r) return '<div class="rw-empty"><b>▤</b>尚未执行采集/校验，请返回上一步</div>';
-
-    if (r.method === "calc") {
-      var payload = structuredPayload();
-      var groups = Object.keys(payload).map(function (g) {
-        var inner = Object.keys(payload[g]).map(function (k) {
-          return "<tr><td class=\"rw-nowrap\">" + esc(k) + "</td><td>" + esc(payload[g][k]) + "</td></tr>";
-        }).join("");
-        return '<div class="rw-card" style="margin:0"><div class="rw-card-head"><div><h3 style="font-size:14px">' + esc(g) + "</h3></div></div>"
-          + '<table class="rw-tbl"><tbody>' + inner + "</tbody></table></div>";
-      }).join("");
-      var bad = (r.report.items || []).filter(function (i) { return !i.ok; }).length;
-      return '<div class="rw-banner"><span>▸</span><div>请确认以下上传结果与提取到的结构化数据信息，确认后点击「确认提交」保存到资源采集列表。</div></div>'
-        + '<div class="rw-result"><div class="rw-result-title">✓ 上传结果与合规性校验报告</div>'
-        + '<div class="rw-kv"><div><b>计算输出文件</b>' + esc(r.out) + "</div>"
-        + "<div><b>输入文件完整性</b>INCAR / POSCAR / POTCAR / KPOINTS 已齐全</div>"
-        + "<div><b>合规性</b>" + (bad ? "存在 " + bad + " 项不合规" : "全部合规") + "</div>"
-        + "<div><b>数据质量等级</b>" + esc(r.quality) + "</div>"
-        + "<div><b>数据版本</b>V0.0（原始版）</div>"
-        + "<div><b>提取时间</b>" + esc(r.at) + "</div></div>"
-        + (bad ? '<div class="rw-banner rw-banner--warn" style="margin:0 0 12px"><span>⚠</span><div>参数不合规项已在报告中标出，本次按 <b>“' + esc(r.quality) + '”</b> 标注入库，后续可重新计算后覆盖更新。</div></div>' : "")
-        + '<div class="rw-card-note" style="margin:0">以下为最终提取信息（无论数据质量等级高低均完整展示）：</div></div>'
-        + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">' + groups + "</div>";
-    }
-
-    var rows = (r.rows || []).map(function (x) {
-      return "<tr><td>" + esc(x.dbName) + "</td><td class=\"rw-nowrap\">" + esc(x.version) + "</td><td class=\"rw-nowrap\">" + esc(x.time) + "</td><td>" + x.count + " 条</td></tr>";
-    }).join("");
-    var fileRows = (r.files || []).map(function (f) {
-      return "<tr><td class=\"rw-nowrap\">" + esc(f.name) + "</td><td>" + esc(f.type) + "</td><td>" + (f.check === "ok" ? '<span class="rw-tag rw-tag--done">校验通过</span>' : '<span class="rw-tag rw-tag--warn">格式异常</span>') + "</td></tr>";
-    }).join("");
-
-    return '<div class="rw-banner' + (r.kind === "format" ? " rw-banner--warn" : "") + '"><span>▸</span><div>'
-      + (r.kind === "format"
-        ? "采集已完成，其中部分数据格式不匹配已转「待处理队列」；以下为采集成功的确认列表，点击「确认提交」后保存到资源采集列表。"
-        : "采集成功，请确认以下采集列表信息，点击「确认提交」后保存到资源采集列表。")
-      + "</div></div>"
-      + '<div class="rw-result"><div class="rw-result-title">✓ 采集成功确认列表</div>'
-      + '<table class="rw-tbl" style="background:#fff;border-radius:8px;overflow:hidden"><thead><tr><th>源数据库名称</th><th>数据版本</th><th>采集时间</th><th>记录数</th></tr></thead><tbody>' + rows + "</tbody></table>"
-      + '<div style="margin-top:14px"><div class="rw-section-title" style="font-size:14px">计算数据文件校验</div>'
-      + '<table class="rw-tbl" style="background:#fff;border-radius:8px;overflow:hidden"><thead><tr><th>文件名称</th><th>类型</th><th>校验结果</th></tr></thead><tbody>' + fileRows + "</tbody></table></div>"
-      + "</div>"
+    var summary = '<div class="rw-result"><div class="rw-result-title">✓ 任务配置确认</div>'
+      + '<div class="rw-kv">'
+      + "<div><b>采集 ID</b>" + esc(c.id) + "</div>"
+      + "<div><b>入库名称</b>" + esc(c.name || "-") + "</div>"
+      + "<div><b>数据获取方式</b>" + esc(c.obtainWay) + "</div>"
+      + "<div><b>数据来源</b>" + esc(c.sourceType) + "</div>"
+      + "<div><b>数据类型</b>" + esc(c.dataType) + "</div>"
+      + "<div><b>数据整合对象</b>" + esc(c.collectObject === "图" ? "图（图像校验规则）" : "表（表字段规则校验）") + "</div>"
+      + "</div></div>";
+    return '<div class="rw-section-title">第三步 · 数据更新</div>'
+      + summary
       + '<div class="rw-form" style="margin-top:14px">'
-      + '<div class="rw-field"><label>采集任务名称<i>*</i></label><input type="text" data-rw-f="name" value="' + esc(c.name) + '" placeholder="请输入采集任务名称"></div>'
-      + '<div class="rw-field"><label>采集 ID</label><input type="text" readonly value="' + esc(c.id) + '"></div>'
-      + '<div class="rw-field is-full"><label>采集说明</label><textarea data-rw-f="desc" placeholder="请输入采集说明">' + esc(c.desc) + "</textarea></div>"
+      + '<div class="rw-field"><label>更新频率<i>*</i></label>'
+      + '<select data-rw-f="updateFreq">'
+      + ["每日", "每周", "每月", "每季度"].map(function (o) { return '<option value="' + esc(o) + '"' + (c.updateFreq === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
+      + "</select>"
+      + '<span class="rw-field-tip">按所选周期自动检查数据源更新并生成更新批次。</span></div>'
+      + '<div class="rw-field"><label>更新执行方式<i>*</i></label>'
+      + '<div class="rw-methods" style="margin-top:2px">'
+      + '<label class="rw-method' + (c.updateMode !== "自动" ? " is-on" : "") + '"><div class="rw-method-top">'
+      + '<input type="radio" name="rwUpdateMode" data-rw-f="updateMode" value="手动"' + (c.updateMode !== "自动" ? " checked" : "") + ">"
+      + '<span class="rw-method-title">手动</span></div>'
+      + '<div class="rw-method-desc">由工作人员在任务列表中手动触发更新执行。</div></label>'
+      + '<label class="rw-method' + (c.updateMode === "自动" ? " is-on" : "") + '"><div class="rw-method-top">'
+      + '<input type="radio" name="rwUpdateMode" data-rw-f="updateMode" value="自动"' + (c.updateMode === "自动" ? " checked" : "") + ">"
+      + '<span class="rw-method-title">自动</span></div>'
+      + '<div class="rw-method-desc">系统按更新频率定时执行更新，无需人工干预。</div></label>'
+      + "</div></div>"
       + "</div>";
   }
 
@@ -1621,6 +1759,12 @@
       var f = el.getAttribute("data-rw-f");
       if (f === "name") c.name = el.value;
       else if (f === "desc") c.desc = el.value;
+      else if (f === "obtainWay") c.obtainWay = el.value;
+      else if (f === "sourceType") c.sourceType = el.value;
+      else if (f === "dataType") c.dataType = el.value;
+      else if (f === "collectObject") c.collectObject = el.value;
+      else if (f === "updateFreq") c.updateFreq = el.value;
+      else if (f === "updateMode") { if (el.type !== "radio" || el.checked) c.updateMode = el.value; }
       else if (f === "method") {
         if (el.checked && c.method !== el.value) {
           c.method = el.value;
@@ -1704,45 +1848,191 @@
   function syncModal() { /* 弹窗挂在 body 上，页面重渲染不影响它 */ }
 
   /* ------------------------------------------------------------ 提交入库 */
+  var METHOD_BY_SOURCE = { "文献采集": "buy", "开源数据库": "open", "计算数据": "calc", "商业购买数据库": "buy" };
+
   function submitTask() {
     syncFromDom();
     var s = getS();
     var c = s.create;
-    if (!c || !c.result) return;
-    if (c.result.kind === "fail") { toast("该批次采集失败，无法提交", "err"); return; }
+    if (!c) return;
     if (!String(c.name || "").trim()) {
-      c.error = "请填写采集任务名称";
+      c.error = "请填写入库名称";
       c.step = 3;
       renderCreateModal();
       return;
     }
-    var list = c.method === "buy" ? BUY_DBS : OPEN_DBS;
-    var picks = pickedList(list, c);
-    var src = c.method === "calc"
-      ? ("本地计算输出（" + c.result.out + "）")
-      : (c.result.rows || []).map(function (x) { return x.dbName; }).join("、");
-    var status = c.result.kind === "format" ? "格式异常" : "已完成";
+    var isTable = c.collectObject !== "图";
+    var report = isTable
+      ? "表字段规则校验 " + TABLE_RULES.length + "/" + TABLE_RULES.length + " 通过（含晶格常数小数点后 7 位）· 格式统一完成"
+      : "图像校验规则 " + IMAGE_RULES.length + "/" + IMAGE_RULES.length + " 通过（分辨率/格式/清晰度合格）· 已统一存储格式";
 
     var task = {
       id: c.id,
       name: String(c.name).trim(),
-      method: c.method,
-      desc: String(c.desc || "").trim() || (methodMeta(c.method).label + "：" + src),
-      status: status,
-      createdAt: c.result.at || nowText(),
-      source: src,
-      version: c.method === "calc" ? "V0.0" : ((c.result.rows || [])[0] || {}).version || "v1.0",
-      rawFiles: "JSON / CIF",
-      security: c.result.security || "第1级",
-      picks: picks.map(function (p) { return p.dbName + " / " + p.dsName; }),
-      result: c.result
+      method: METHOD_BY_SOURCE[c.sourceType] || "open",
+      desc: String(c.desc || "").trim(),
+      status: "已完成",
+      createdAt: nowText(),
+      source: c.sourceType,
+      sourceType: c.sourceType,
+      obtainWay: c.obtainWay,
+      dataType: c.dataType,
+      collectObject: c.collectObject,
+      dbName: String(c.name).trim(),
+      integrationReport: report,
+      updateFreq: c.updateFreq,
+      updateMode: c.updateMode,
+      version: "V1.0",
+      rawFiles: isTable ? "JSON / CSV" : "PNG / JPG",
+      security: "第1级",
+      audit: { status: "待审核", result: "", opinion: "", at: "", by: "" }
     };
     s.tasks.unshift(task);
     s.tab = "collect";
     s.focusTaskId = "";
+    s.collectTaskId = task.id;
+    s.auditOpen = false;
     closeCreate();
     renderRwPage();
-    toast("采集任务 " + task.id + " 已保存到资源采集列表", "ok");
+    toast("采集任务 " + task.id + " 已提交，等待数据采集审核", "ok");
+  }
+
+  /* ================================================== 数据采集审核（2026-10-08 新增） */
+  function auditTagOf(t) {
+    var a = (t && t.audit && t.audit.status) || "待审核";
+    var cls = a === "审核通过" ? "rw-tag--done" : (a === "审核驳回" ? "rw-tag--fail" : "rw-tag--warn");
+    return '<span class="rw-tag ' + cls + '">' + esc(a) + "</span>";
+  }
+
+  function auditSourceOf(t) { return t.sourceType || t.source || methodMeta(t.method).label; }
+
+  function renderAuditPage() {
+    var s = getS();
+    var wait = s.tasks.filter(function (t) { return !t.audit || !t.audit.status || t.audit.status === "待审核"; }).length;
+    var rows = s.tasks.map(function (t) {
+      return "<tr>"
+        + '<td class="rw-id">' + esc(t.id) + "</td>"
+        + "<td>" + esc(auditSourceOf(t)) + "</td>"
+        + "<td><b>" + esc(t.dbName || t.name) + "</b></td>"
+        + "<td>" + esc(t.integrationReport || "表字段规则校验通过 · 格式统一完成") + "</td>"
+        + "<td>" + auditTagOf(t)
+        + (t.audit && t.audit.opinion
+          ? '<div class="rw-field-tip">审核' + esc(t.audit.status || "-") + "：" + esc(t.audit.opinion)
+            + (t.audit.at ? "（" + esc(t.audit.by || "管理员") + " · " + esc(t.audit.at) + "）" : "") + "</div>"
+          : "")
+        + "</td>"
+        + '<td class="rw-nowrap">'
+        + '<button class="rw-op rw-op--primary" type="button" data-rw-act="open-audit-modal" data-id="' + esc(t.id) + '">审核</button>'
+        + '<button class="rw-op" type="button" data-rw-act="view-task" data-id="' + esc(t.id) + '">查看详情</button>'
+        + "</td></tr>";
+    }).join("");
+    return '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>数据采集审核</h3>'
+      + "<p>管理员对全部采集任务的执行记录进行审核：共 " + s.tasks.length + " 条，其中待审核 " + wait + " 条；审核通过后方可进入入库流程。</p></div>"
+      + '<div><button class="rw-btn" type="button" data-rw-act="collect-audit-back">← 返回采集任务执行记录</button></div></div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>采集ID</th><th>数据来源</th><th>入库名称</th><th>数据整合报告</th><th>审核状态</th><th>操作</th></tr></thead><tbody>'
+      + rows
+      + "</tbody></table></div>"
+      + "</div>";
+  }
+
+  function auditKvRow(label, value) {
+    return "<div><b>" + esc(label) + "</b>" + esc(value == null || value === "" ? "-" : value) + "</div>";
+  }
+
+  function renderAuditModal() {
+    ensureStyle();
+    var s = getS();
+    var t = s.tasks.filter(function (x) { return x.id === s.auditId; })[0];
+    if (!t) return;
+    var mask = document.getElementById("rwMask");
+    if (!mask) {
+      mask = document.createElement("div");
+      mask.className = "rw-mask";
+      mask.id = "rwMask";
+      mask.setAttribute("data-rw-root", "modal");
+      mask.addEventListener("click", function (e) { if (e.target === mask) closeCreate(); });
+      document.body.appendChild(mask);
+    }
+    var a = t.audit || {};
+    var isTable = t.collectObject !== "图";
+    var rulesHtml = t.collectObject
+      ? '<div class="rw-section-title" style="margin-top:14px">' + (isTable ? "表字段规则校验" : "图像校验规则") + "</div>"
+        + rulesTable(isTable ? TABLE_RULES : IMAGE_RULES, isTable)
+      : "";
+    var auditResultHtml = a.status && a.status !== "待审核"
+      ? '<div class="rw-banner' + (a.status === "审核驳回" ? " rw-banner--warn" : "") + '" style="margin-top:14px"><span>' + (a.status === "审核通过" ? "✓" : "✕") + "</span><div>已有审核结果：<b>" + esc(a.status) + "</b>"
+        + (a.opinion ? "，审核意见：" + esc(a.opinion) : "")
+        + (a.at ? "（" + esc(a.by || "管理员") + " · " + esc(a.at) + "）" : "") + "。重新提交将覆盖原结果。</div></div>"
+      : "";
+    mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
+      + '<div class="rw-modal-head">'
+      + '<div><h3>数据采集审核 · ' + esc(t.id) + "</h3><p>展示采集任务的全部配置内容与校验结果，管理员填写审核结果与意见。审核只需一次：通过后即可进入入库流程。</p></div>"
+      + '<div class="rw-modal-head-side">'
+      + '<button class="rw-modal-close" type="button" data-rw-act="close-create" aria-label="关闭">×</button>'
+      + "</div></div>"
+      + '<div class="rw-modal-body">'
+      + '<div class="rw-section-title">采集任务内容</div>'
+      + '<div class="rw-kv">'
+      + auditKvRow("采集 ID", t.id)
+      + auditKvRow("入库名称", t.dbName || t.name)
+      + auditKvRow("数据获取方式", t.obtainWay || "API")
+      + auditKvRow("数据来源", auditSourceOf(t))
+      + auditKvRow("数据来源描述", t.desc)
+      + auditKvRow("数据类型", t.dataType || "结构化")
+      + auditKvRow("数据采集对象", t.collectObject || "表")
+      + auditKvRow("数据整合报告", t.integrationReport || "表字段规则校验通过 · 格式统一完成")
+      + auditKvRow("更新频率", t.updateFreq || "每周")
+      + auditKvRow("更新执行方式", t.updateMode || "手动")
+      + auditKvRow("创建时间", t.createdAt)
+      + "</div>"
+      + rulesHtml
+      + auditResultHtml
+      + '<div class="rw-section-title" style="margin-top:16px">审核结果</div>'
+      + '<div class="rw-form">'
+      + '<div class="rw-field"><label>审核是否通过<i>*</i></label>'
+      + '<div class="rw-methods" style="margin-top:2px">'
+      + '<label class="rw-method"><div class="rw-method-top">'
+      + '<input type="radio" name="rwAuditResult" value="通过">'
+      + '<span class="rw-method-title">审核通过</span></div>'
+      + '<div class="rw-method-desc">任务数据允许进入入库流程。</div></label>'
+      + '<label class="rw-method"><div class="rw-method-top">'
+      + '<input type="radio" name="rwAuditResult" value="不通过">'
+      + '<span class="rw-method-title">审核不通过</span></div>'
+      + '<div class="rw-method-desc">任务数据退回修改，需重新提交审核。</div></label>'
+      + "</div></div>"
+      + '<div class="rw-field is-full"><label>审核意见</label>'
+      + '<textarea id="rwAuditOpinion" placeholder="请输入审核意见，例如数据来源合规性、整合校验结论或退回原因…"></textarea>'
+      + "</div>"
+      + "</div>"
+      + "</div>"
+      + '<div class="rw-modal-foot">'
+      + '<button class="rw-btn" type="button" data-rw-act="close-create">取消</button>'
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="submit-audit">提交审核结果</button>'
+      + "</div>"
+      + "</div>";
+  }
+
+  function submitAudit() {
+    var s = getS();
+    var mask = document.getElementById("rwMask");
+    if (!mask) return;
+    var t = s.tasks.filter(function (x) { return x.id === s.auditId; })[0];
+    if (!t) return;
+    var sel = mask.querySelector('input[name="rwAuditResult"]:checked');
+    if (!sel) { toast("请先选择审核是否通过", "err"); return; }
+    var op = mask.querySelector("#rwAuditOpinion");
+    var pass = sel.value === "通过";
+    t.audit = {
+      status: pass ? "审核通过" : "审核驳回",
+      result: sel.value,
+      opinion: op ? op.value.trim() : "",
+      at: nowText(),
+      by: "管理员9527"
+    };
+    closeCreate();
+    renderRwPage();
+    toast("采集任务 " + t.id + " 审核完成：" + t.audit.status, pass ? "ok" : "err");
   }
 
   /* ==========================================================================
@@ -1786,7 +2076,8 @@
   ];
 
   /* 审核流程阶段（2.2.4） */
-  var AUDIT_STAGES = ["待审核", "自动校验", "数据管理员初审", "数据审核员终审", "入库 / 退回"];
+  /* 2026-10-08：所有审核统一为一次审批——提交 → 自动校验 → 管理员审核 → 入库 / 退回 */
+  var AUDIT_STAGES = ["待审核", "自动校验", "管理员审核", "入库 / 退回"];
 
   var AUDIT_BATCH_STAGES = ["待处理", "解析中", "字段映射中", "审核中", "通过 / 部分失败 / 全部失败", "管理员人工复核", "入库"];
 
@@ -1797,17 +2088,71 @@
       s.entry = {
         view: "todo",
         seq: 0,
-        records: [],
+        /* 2026-10-08：演示用样例数据——预置已入库 / 待审核记录若干，
+           使「已入库数据」「录入审核」两个列表开箱即有内容，加工任务也能直接取到数据源 */
+        records: seedEntryRecords(),
         manual: null,
         batch: null,
         specOpen: false,
         auditFilter: "all"
       };
+      s.entry.seq = s.entry.records.length;
+    }
+    /* 兼容：2026-10-08 起审核改为一次审批，历史数据中的待初审 / 待终审统一视为待审核 */
+    if (s.entry.records && s.entry.records.length) {
+      s.entry.records.forEach(function (r) {
+        if (r.status === "待初审" || r.status === "待终审") r.status = "待审核";
+      });
     }
     return s.entry;
   }
 
   function entryRecords() { return entryState().records; }
+
+  /* ------------------------------------------------------------------------
+     2026-10-08：录入模块演示样例数据
+     取当前材料的 batchSamples 作为蓝本：前 2 条标记为「已入库」（带管理员一次审核痕迹与关联规范），
+     其余标记为「待审核」，审核通过后即进入已入库列表。字段沿用手动录入落库结构。
+     ------------------------------------------------------------------------ */
+  function seedEntryRecords() {
+    var samples = C().batchSamples || [];
+    var groups = stdRuleGroups();
+    var pickRules = function (n) {
+      return groups.slice(0, n).map(function (g) { return g.id; });
+    };
+    var times = ["2026-09-24 10:12", "2026-09-25 15:38", "2026-09-26 11:05", "2026-09-27 16:41"];
+    var auditTimes = ["2026-09-24 14:20", "2026-09-25 17:02", "", ""];
+    return samples.map(function (s, i) {
+      var rec = Object.assign({}, s);
+      rec.id = (C().code || "2D") + "-" + (DATA_TYPE_CODES[rec.dataType] || "GEN") + "-000" + (i + 1);
+      rec.source = i % 2 === 0 ? "手动录入" : "批量导入";
+      rec.sourceName = i % 2 === 0 ? "数据录入员手动录入" : "公开库 / 计算数据批量导入";
+      rec.sourceType = i % 2 === 0 ? "manual" : "batch";
+      rec.createdAt = times[i] || times[times.length - 1];
+      rec.taskId = "";
+      rec.calc = rec.calc || {};
+      if (i < 2) {
+        rec.status = "已入库";
+        rec.auditedAt = auditTimes[i];
+        rec.stdRules = pickRules(3);
+        rec.stdRuleNames = rec.stdRules.map(stdRuleName);
+        rec.audit = {
+          auto: "自动校验通过",
+          adminResult: "通过",
+          opinion: "字段完整、已按标准化处理模块关联规范校验，同意入库。",
+          adminAt: rec.auditedAt,
+          adminBy: "管理员9527"
+        };
+      } else {
+        rec.status = "待审核";
+        rec.auditedAt = "";
+        rec.stdRules = pickRules(2);
+        rec.stdRuleNames = rec.stdRules.map(stdRuleName);
+        rec.audit = { auto: "", adminResult: "", opinion: "", reason: "" };
+      }
+      return rec;
+    });
+  }
 
   /* 录入表单里「数据类型」字段的第一个选项，用作新建记录的默认值 */
   function firstDataType() {
@@ -1824,14 +2169,14 @@
   }
 
   function auditStageIndex(status) {
-    var map = { "待审核": 0, "自动校验中": 1, "待初审": 2, "待终审": 3, "已入库": 4, "已退回": 4, "自动校验未通过": 1 };
+    var map = { "待审核": 0, "自动校验中": 1, "自动校验未通过": 1, "已入库": 3, "已退回": 3 };
     return map[status] == null ? 0 : map[status];
   }
 
   function auditStatusTag(status) {
     if (status === "已入库") return "rw-tag--done";
     if (status === "已退回" || status === "自动校验未通过") return "rw-tag--fail";
-    if (status === "待初审" || status === "待终审") return "rw-tag--open";
+    if (status === "待审核" || status === "自动校验中") return "rw-tag--open";
     return "rw-tag--warn";
   }
 
@@ -1922,19 +2267,18 @@
     var actions = '<div class="rw-card">'
       + '<div class="rw-card-head"><div><h3>数据录入工作台</h3>'
       + "<p>按数据来源选择录入方式：公开库 / C2DB 走定制插件批量导入，VASP 自主计算走自动化流程，文献与用户上传走手动录入并自动校验。</p></div>"
-      + '<div style="display:flex;gap:10px;flex:0 0 auto">'
-      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-batch">⇧ 批量导入</button>'
+      + '<div style="display:flex;gap:10px;flex:0 0 auto;flex-wrap:wrap">'
+      + (HIDE_ENTRY_BATCH
+        ? ""
+        : '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-batch">⇧ 批量导入</button>')
       + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="entry-manual">＋ 新增材料（单条录入）</button>'
+      + '<button class="rw-btn' + (e.view === "stats" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="stats">📊 数据统计</button>'
+      + '<button class="rw-btn' + (e.view === "perm" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="perm">🔐 权限管理</button>'
+      + '<button class="rw-btn' + (e.view === "flow" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="flow">🧭 流程管理</button>'
       + "</div></div>"
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl rw-source-table"><thead><tr><th>数据来源</th><th>推荐录入方式</th><th>系统自动识别规则</th><th>人工介入点</th><th>操作</th></tr></thead><tbody>'
-      + ENTRY_SOURCES.map(function (s) {
-        return "<tr><td>" + esc(s.name) + "</td><td>" + esc(s.rec) + "</td><td>" + esc(s.rule) + "</td><td>" + esc(s.point) + "</td>"
-          + '<td class="rw-nowrap">'
-          + '<button class="rw-op" type="button" data-rw-act="entry-batch" data-source="' + s.key + '">按此来源导入</button>'
-          + '<button class="rw-op" type="button" data-rw-act="entry-manual" data-source="' + s.key + '">手动录入</button>'
-          + "</td></tr>";
-      }).join("")
-      + "</tbody></table></div></div>";
+      + "</div>";
+    /* 2026-10-08：圈红删除——工作台下方的「数据来源/推荐录入方式/识别规则/人工介入点」来源规则表不再展示，
+       数据来源仍在「批量导入 / 单条录入」弹窗内选择，录入功能不受影响。 */
 
     var sub = '<div class="rw-subtabs">'
       + '<button class="rw-subtab' + (e.view === "todo" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="todo">待录入数据（' + todo.length + "）</button>"
@@ -1946,6 +2290,9 @@
     var body = e.view === "audit" ? renderAuditView(queue)
       : e.view === "done" ? renderEntryDoneView(done)
       : e.view === "spec" ? renderEntrySpec()
+      : e.view === "stats" ? renderEntryStats()
+      : e.view === "perm" ? renderEntryPerm()
+      : e.view === "flow" ? renderEntryFlow()
       : renderEntryTodoView(todo);
 
     return actions + sub + body;
@@ -1977,7 +2324,7 @@
   function renderAuditView(queue) {
     if (!queue.length) {
       return '<div class="rw-card"><div class="rw-card-head"><div><h3>录入审核队列</h3></div></div>'
-        + '<div class="rw-empty"><b>✓</b>暂无待审核记录，请先通过「批量导入」或「新增材料」提交数据</div></div>'
+        + '<div class="rw-empty"><b>✓</b>暂无待审核记录，请先通过「新增材料」提交数据</div></div>'
         + auditFlowCard();
     }
     var rows = queue.map(function (r) {
@@ -1985,12 +2332,17 @@
         + '<td class="rw-id">' + esc(r.id) + "</td>"
         + "<td><b>" + esc(r.formula || "-") + "</b><div class=\"rw-field-tip\">" + esc(r.dataType || "-") + " · " + esc(r.sourceName || "-") + "</div></td>"
         + listTds(r)
-        + '<td><span class="rw-tag ' + auditStatusTag(r.status) + '">' + esc(r.status) + "</span></td>"
+        + '<td><span class="rw-tag ' + auditStatusTag(r.status) + '">' + esc(r.status) + "</span>"
+        + (r.audit && (r.audit.opinion || r.audit.adminResult)
+          ? '<div class="rw-field-tip">审核' + esc(r.audit.adminResult || "-") + "：" + esc(r.audit.opinion || "（无建议）")
+            + (r.audit.adminAt ? "（" + esc(r.audit.adminBy || "管理员") + " · " + esc(r.audit.adminAt) + "）" : "") + "</div>"
+          : "")
+        + "</td>"
         + "<td>" + esc(r.createdAt) + "</td>"
         + '<td class="rw-nowrap">' + auditOps(r) + "</td></tr>";
     }).join("");
     return '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>录入审核队列</h3><p>多级审核：提交 → 自动校验 → 数据管理员初审 → 数据审核员终审 → 入库 / 退回。</p></div></div>'
+      + '<div class="rw-card-head"><div><h3>录入审核队列</h3><p>一次审批：提交 → 自动校验 → 管理员审核 → 入库 / 退回。</p></div></div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl rw-audit-table"><thead><tr><th>材料唯一标识</th><th>标识 / 数据类型</th>' + listThs()
       + "<th>审核状态</th><th>提交时间</th><th>操作</th></tr></thead><tbody>" + rows + "</tbody></table></div>"
       + "</div>" + auditFlowCard();
@@ -2008,24 +2360,19 @@
 
   function auditOps(r) {
     var out = [];
-    if (r.status === "待审核" || r.status === "自动校验未通过") {
+    /* 2026-10-08：一次审批制——待审核 / 自动校验未通过的记录只提供「审核」与「退回」 */
+    if (["待审核", "自动校验未通过"].indexOf(r.status) >= 0) {
+      out.push('<button class="rw-op rw-op--primary" type="button" data-rw-act="entry-audit-open" data-id="' + esc(r.id) + '">审核</button>');
       out.push('<button class="rw-op" type="button" data-rw-act="audit-auto" data-id="' + esc(r.id) + '">自动校验</button>');
-    }
-    if (r.status === "待初审") {
-      out.push('<button class="rw-op" type="button" data-rw-act="audit-first-ok" data-id="' + esc(r.id) + '">初审通过</button>');
-      out.push('<button class="rw-op rw-op--danger" type="button" data-rw-act="audit-back" data-id="' + esc(r.id) + '" data-stage="初审">退回</button>');
-    }
-    if (r.status === "待终审") {
-      out.push('<button class="rw-op" type="button" data-rw-act="audit-final-ok" data-id="' + esc(r.id) + '">终审通过</button>');
-      out.push('<button class="rw-op rw-op--danger" type="button" data-rw-act="audit-back" data-id="' + esc(r.id) + '" data-stage="终审">退回</button>');
+      out.push('<button class="rw-op rw-op--danger" type="button" data-rw-act="audit-back" data-id="' + esc(r.id) + '" data-stage="审核">退回</button>');
     }
     out.push('<button class="rw-op" type="button" data-rw-act="audit-detail" data-id="' + esc(r.id) + '">详情</button>');
     return out.join("");
   }
 
   function auditFlowCard() {
-    return '<div class="rw-card"><div class="rw-card-head"><div><h3>数据录入审核流程（2.2.4）</h3><p>提交 → 自动校验 → 数据管理员初审 → 数据审核员终审 → 入库 / 退回</p></div></div>'
-      + chainHtml([{ text: "提交", cls: "" }, { text: "自动校验", cls: "" }, { text: "数据管理员初审", cls: "" }, { text: "数据审核员终审", cls: "" }, { text: "入库", cls: "is-end" }, { text: "退回", cls: "is-back" }])
+    return '<div class="rw-card"><div class="rw-card-head"><div><h3>数据录入审核流程（2.2.4）</h3><p>提交 → 自动校验 → 管理员审核 → 入库 / 退回（一次审批）</p></div></div>'
+      + chainHtml([{ text: "提交", cls: "" }, { text: "自动校验", cls: "" }, { text: "管理员审核", cls: "" }, { text: "入库", cls: "is-end" }, { text: "退回", cls: "is-back" }])
       + "</div>";
   }
 
@@ -2077,7 +2424,8 @@
       calcIssues: [],
       file: "",
       previewId: C().code + "-" + (DATA_TYPE_CODES[firstDataType()] || "GEN") + "-" + ("000" + (e.seq + 1)).slice(-4),
-      lowPrecision: false
+      lowPrecision: false,
+      stdRules: []
     };
     if (task) {
       /* 从采集任务进入时，用该材料的示例数据预填，避免用户从零开始敲 */
@@ -2108,14 +2456,17 @@
       + '<div class="rw-banner"><span>ⓘ</span><div>系统按录入规范表（1.2 节）实时校验字段；计算参数将与标准阈值（1.4 节）自动对比，不合规项会给出提示。</div></div>'
       + '<div class="rw-section-title">① 材料基本信息（必填项已标 *）</div>'
       + manualFormHtml(m)
-      + '<div style="margin-top:18px"><div class="rw-section-title">② 上传结构文件（CIF / POSCAR）</div>'
+      + '<div style="margin-top:18px"><div class="rw-section-title">② 关联配置规范（勾选本次录入适用的标准化处理规则）</div>'
+      + '<div class="rw-card-note">规则来自「数据标准化处理」模块规则库；勾选后随记录一并提交，录入审核时逐条对照。</div>'
+      + renderStdRulesHtml(m) + "</div>"
+      + '<div style="margin-top:18px"><div class="rw-section-title">③ 上传结构文件（CIF / POSCAR）</div>'
       + '<div class="rw-upload-zone"><strong>' + (m.file ? esc(m.file) : "拖拽或点击选择结构文件，解析后自动填充晶格常数与原子坐标") + "</strong>"
       + '<span>支持 CIF / POSCAR；原型中点击「填充示例结构」可直接体验自动填充</span>'
       + '<div style="margin-top:10px;display:flex;gap:10px;justify-content:center">'
       + '<button class="rw-btn rw-btn--sm rw-btn--ghost" type="button" data-rw-act="entry-demo-cif">填充示例结构（' + esc(C().demoFile) + '）</button>'
       + '<button class="rw-btn rw-btn--sm" type="button" data-rw-act="entry-parse-cif">解析并填充字段</button>'
       + "</div></div></div>"
-      + '<div style="margin-top:18px"><div class="rw-section-title">③ 计算参数（与标准阈值自动对比）</div>'
+      + '<div style="margin-top:18px"><div class="rw-section-title">④ 计算参数（与标准阈值自动对比）</div>'
       + calcParamHtml(m) + "</div>"
       + '<div style="margin-top:14px"><div class="rw-field-tip">提交后系统生成唯一标识（格式：' + esc(C().code) + '-数据类型-序号），并进入第 2.2.4 节审核流程。</div>'
       + '<div class="rw-banner" style="margin-top:8px"><span>#</span><div>预生成唯一标识：<b>' + esc(m.previewId || "（选择数据类型后生成）") + "</b></div></div></div>"
@@ -2127,6 +2478,84 @@
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-submit">提交审核</button></div>'
       + "</div>";
     document.body.appendChild(mask);
+  }
+
+  /* ================================================== 关联配置规范（2026-10-08 新增）
+     勾选项取自「数据标准化处理」模块的规则库（LOWDIM_STD_LIBRARY），按分类分组展示，
+     勾选结果随记录提交，供录入审核时逐条对照。 */
+  function stdLibrary() {
+    try { return (window.LOWDIM_STD_LIBRARY || {})[CFG_KEY] || null; } catch (e) { return null; }
+  }
+
+  function stdRuleGroups() {
+    var L = stdLibrary();
+    var out = [];
+    if (L && Array.isArray(L.categories)) {
+      L.categories.forEach(function (cat) {
+        (cat.sections || []).forEach(function (sec) {
+          (sec.rules || []).forEach(function (r) {
+            out.push({
+              id: r.id || ((cat.key || "cat") + "-" + out.length),
+              cat: cat.label || "规范分类",
+              item: r.item || r.field || "-",
+              desc: r.basis || r.value || ""
+            });
+          });
+        });
+      });
+    }
+    /* 规则库未就绪时的兜底：用本库通用字段规则 */
+    if (!out.length) {
+      TABLE_RULES.forEach(function (r, i) {
+        out.push({ id: "fb-" + i, cat: "通用字段规范", item: r[0], desc: r[2] });
+      });
+    }
+    return out;
+  }
+
+  function stdRuleName(id) {
+    var g = stdRuleGroups().filter(function (x) { return x.id === id; })[0];
+    return g ? g.item : id;
+  }
+
+  function renderStdRulesHtml(m) {
+    var groups = stdRuleGroups();
+    var sel = m.stdRules || [];
+    var byCat = {};
+    groups.forEach(function (g) { (byCat[g.cat] = byCat[g.cat] || []).push(g); });
+    var cats = Object.keys(byCat).map(function (cat) {
+      var list = byCat[cat];
+      var items = list.map(function (r) {
+        var on = sel.indexOf(r.id) >= 0;
+        return '<label class="rw-std-item' + (on ? " is-on" : "") + '">'
+          + '<input type="checkbox" data-rw-es="' + esc(r.id) + '"' + (on ? " checked" : "") + ">"
+          + '<div><div class="rw-std-item-title">' + esc(r.item) + "</div>"
+          + '<div class="rw-std-item-desc">' + esc(r.desc) + "</div></div></label>";
+      }).join("");
+      return '<div class="rw-std-cat"><div class="rw-std-cat-head"><b>' + esc(cat) + "</b>"
+        + '<span class="rw-std-cat-count">' + list.length + " 条</span></div>"
+        + '<div class="rw-std-items">' + items + "</div></div>";
+    }).join("");
+    return '<div class="rw-std-wrap">'
+      + '<div class="rw-std-top"><span>已关联 <b>' + sel.length + "</b> / " + groups.length + " 条规范</span>"
+      + '<span><button class="rw-btn rw-btn--sm" type="button" data-rw-act="std-all">全选</button>'
+      + '<button class="rw-btn rw-btn--sm" type="button" data-rw-act="std-none">清空</button></span></div>'
+      + cats
+      + "</div>";
+  }
+
+  /* 勾选后只更新计数与高亮，不做整弹窗重渲染（避免滚动位置丢失） */
+  function refreshStdCount() {
+    var m = entryState().manual;
+    if (!m) return;
+    var mask = document.getElementById("rwEntryMask");
+    if (!mask) return;
+    var b = mask.querySelector(".rw-std-top b");
+    if (b) b.textContent = String((m.stdRules || []).length);
+    Array.prototype.forEach.call(mask.querySelectorAll(".rw-std-item"), function (el) {
+      var cb = el.querySelector('input[data-rw-es]');
+      if (cb) el.classList.toggle("is-on", !!cb.checked);
+    });
   }
 
   function manualFormHtml(m) {
@@ -2268,6 +2697,9 @@
     rec.sourceName = (ENTRY_SOURCES.filter(function (x) { return x.key === m.sourceKey; })[0] || {}).name || "-";
     rec.sourceType = m.sourceKey;
     rec.taskId = m.taskId;
+    /* 关联配置规范：勾选的标准化处理规则随记录落库，审核时逐条对照 */
+    rec.stdRules = (m.stdRules || []).slice();
+    rec.stdRuleNames = rec.stdRules.map(stdRuleName);
     rec.status = "待审核";
     rec.audit = { auto: "", first: "", final: "", reason: "" };
     rec.createdAt = nowText();
@@ -2279,6 +2711,304 @@
     closeMask("rwEntryMask");
     renderRwPage();
     toast("已提交审核：" + rec.id + "（唯一标识已生成）", "ok");
+  }
+
+  /* ==========================================================================
+     资源管理三模块：数据统计 / 权限管理 / 流程管理（2026-10-08 新增）
+     内容对应功能描述第（3）（4）（5）条原文要求。
+     ========================================================================== */
+
+  /* ---------------------------------------------- （3）数据统计：库容监测口径 */
+  /* 与 64-ingest-closure.js 的招标量与容量口径保持一致，避免各页数字自相矛盾 */
+  var ENTRY_STATS = {
+    twod: { entries: 30600, used: 1.42, total: 5.0, periodic: 1240 },
+    opto: { entries: 3880, used: 0.36, total: 5.0, periodic: 260 },
+    electrolyte: { entries: 10250, used: 0.88, total: 5.0, periodic: 520 },
+    mlff: { entries: 25200, used: 1.65, total: 5.0, periodic: 980 },
+    catalyst: { entries: 34920, used: 1.94, total: 5.0, periodic: 1360 }
+  };
+  function statOf() { return ENTRY_STATS[CFG_KEY] || ENTRY_STATS.twod; }
+
+  function fmtNum(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+  function usageBar(pct, warn) {
+    return '<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#5b7292">'
+      + "<span>硬件空间占用率</span><b style=\"color:" + (warn ? "#b26a00" : "#165DFF") + "\">" + pct + "%</b></div>"
+      + '<div style="height:10px;border-radius:999px;background:#eef3fb;overflow:hidden;margin-top:4px">'
+      + '<div style="height:100%;width:' + pct + "%;background:linear-gradient(90deg," + (warn ? "#ff9a2e,#ffc069" : "#165DFF,#4d8bff") + ')"></div></div></div>';
+  }
+
+  function renderEntryStats() {
+    var st = statOf();
+    var e = entryState();
+    var free = Math.max(0, st.total - st.used);
+    var pct = Math.round(st.used / st.total * 100);
+    var warn = pct >= 80;
+    var dedup = {
+      head: ["去重机制", "执行周期", "上期执行", "上期删除重复", "下次执行", "状态"],
+      rows: [
+        ["重复数据辨别与删除", LOOP_DEDUP_CYCLE, "2026-09-08 02:00", "126 条", "2026-10-08 02:00", "运行中"],
+        ["条目数量实时统计", "实时", nowText(), "-", "持续", "运行中"],
+        ["占用空间采样", "每日", "2026-10-08 01:00", "-", "2026-10-09 01:00", "运行中"]
+      ]
+    };
+    return '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>（3）数据统计 · 数据库容量与条目监测</h3>'
+      + "<p>随着大量数据逐步入库，数据库大小快速增长；监测系统实时统计条目数量与占用空间，并按固定周期（"
+      + esc(LOOP_DEDUP_CYCLE) + "）辨别和删除重复数据，向数据库维护人员汇报。</p></div>"
+      + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="todo">← 返回待录入数据</button></div></div>'
+
+      + '<div class="rw-banner"><span>ⓘ</span><div>监测系统实时统计库内现有数据，并以固定周期（'
+      + esc(LOOP_DEDUP_CYCLE) + '）对可能存在的重复数据进行辨别和删除，防止库容被冗余数据占用。</div></div>'
+
+      + '<div class="rw-section-title">① 实时统计结果</div>'
+      + '<div class="rw-kv">'
+      + "<div><b>现有数据条目</b>" + fmtNum(st.entries) + " 条</div>"
+      + "<div><b>本周期新增</b>" + fmtNum(st.periodic) + " 条</div>"
+      + "<div><b>当前占用硬件空间</b>" + st.used.toFixed(2) + " TB</div>"
+      + "<div><b>剩余硬件空间</b>" + free.toFixed(2) + " TB / " + st.total.toFixed(2) + " TB</div>"
+      + "<div><b>本页已录入记录</b>" + e.records.length + " 条</div>"
+      + "<div><b>统计时间</b>" + esc(nowText()) + "</div>"
+      + "</div>"
+      + usageBar(pct, warn)
+      + (warn
+        ? '<div class="rw-banner rw-banner--warn" style="margin-top:12px"><span>⚠</span><div>占用率已达 '
+          + pct + '%，请维护人员及时管控数据录入并评估硬件扩容。</div></div>'
+        : '<div class="rw-banner" style="margin-top:12px"><span>✓</span><div>当前占用率 '
+          + pct + '%，硬件空间充足；维护人员仍可按月度趋势提前规划扩容。</div></div>')
+
+      + '<div class="rw-section-title" style="margin-top:16px">② 定期去重（固定周期 ' + esc(LOOP_DEDUP_CYCLE) + '）</div>'
+      + tableHtml(dedup)
+
+      + '<div class="rw-section-title" style="margin-top:16px">③ 向数据库维护人员汇报</div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>汇报项</th><th>当前值</th><th>处置建议</th></tr></thead><tbody>'
+      + "<tr><td><b>现有数据总量</b></td><td>" + fmtNum(st.entries) + " 条</td><td>作为录入与扩容的基础口径，按周复核</td></tr>"
+      + "<tr><td><b>当前占用硬件空间总量</b></td><td>" + st.used.toFixed(2) + " TB</td><td>超过 80% 时启动扩容评估</td></tr>"
+      + "<tr><td><b>剩余硬件空间总量</b></td><td>" + free.toFixed(2) + " TB</td><td>低于 1 TB 时限制大规模录入</td></tr>"
+      + "</tbody></table></div>"
+      + '<div class="rw-card-note" style="margin-top:12px">维护人员需根据当前硬件使用状况，及时管理对数据库的录入和硬件扩容。</div>'
+      + "</div>";
+  }
+
+  /* ---------------------------------------------- （4）权限管理：分级权限 */
+  function renderEntryPerm() {
+    var perm = getS().approvals && getS().approvals["perm"];
+    var permBanner = perm
+      ? '<div class="rw-banner" style="margin-bottom:14px"><span>✓</span><div>数据录入权限申请已于 ' + esc(perm.at) + ' 提交，当前状态：' + esc(perm.status) + "；管理员审核通过后即可执行录入。</div></div>"
+      : '<div class="rw-banner" style="margin-bottom:14px"><span>ⓘ</span><div>大规模录入前，请先提交权限申请，由管理员按角色授予相应读写权限。</div></div>';
+
+    return '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>（4）权限管理 · 用户分级与授权</h3>'
+      + "<p>不同用户对数据库的访问与修改取决于被赋予的权限；为防止数据丢失、以及过于密集的数据请求对数据库造成过大压力，按等级区分用户权限。</p></div>"
+      + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="todo">← 返回待录入数据</button></div></div>'
+
+      + permBanner
+      + '<div class="rw-section-title">① 用户等级与权限矩阵</div>'
+      + tableHtml(LOOP_PERM)
+
+      + '<div class="rw-section-title" style="margin-top:16px">② 权限分级说明</div>'
+      + '<div class="rw-steps">'
+      + [
+        ["系统管理员拥有对于数据库的最高读写权限", "可读取、修改、删除全部数据，并配置其他角色权限"],
+        ["管理员又可授予数据库维护员读取和修改相应数据库的权限", "授权范围限定到具体数据库，到期自动回收"],
+        ["高级用户拥有对数据库密集读取数据的权限", "允许高频 / 批量检索与下载，需限制并发峰值"],
+        ["普通用户仅拥有对数据库的正常频次的读取权限", "无写入权限，超出频次触发限流"]
+      ].map(function (x, i) {
+        return '<div class="rw-step-row"><div class="rw-step-idx">' + (i + 1) + '</div><div><div><b style="font-size:14px;color:#22364f">'
+          + esc(x[0]) + '</b></div><div class="rw-field-tip">' + esc(x[1]) + "</div></div></div>";
+      }).join("")
+      + "</div>"
+
+      + '<div class="rw-section-title" style="margin-top:16px">③ 权限授予链路</div>'
+      + chainHtml(["系统管理员（内置最高权限）", "授予数据库维护员读取 / 修改权限", "授予高级用户密集读取权限", "普通用户默认正常频次读取", "到期 / 任务完成后回收"])
+      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-apply-perm">提交数据录入权限申请</button></div>'
+      + "</div>";
+  }
+
+  /* ---------------------------------------------- （5）流程管理：四类日常流程 */
+  function renderEntryFlow() {
+    var perm = getS().approvals && getS().approvals["perm"];
+    return '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>（5）流程管理 · 数据库日常运行流程</h3>'
+      + "<p>为维护数据库正常运行，对日常运行建立流程管理：人员权限审批、数据录入审批、操作工单备案、定期备份。</p></div>"
+      + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="todo">← 返回待录入数据</button></div></div>'
+
+      /* 1）人员权限审批 */
+      + '<div class="rw-card" style="margin:0 0 14px;border-color:#e6ecf5">'
+      + '<div class="rw-card-head"><div><h3>① 人员权限审批</h3>'
+      + "<p>对拥有修改数据库权限的工作人员进行相应培训，确保其满足维护数据库的技术要求及安全意识。</p></div>"
+      + '<div style="flex:0 0 auto"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-apply-perm">提交权限申请</button></div></div>'
+      + (perm
+        ? '<div class="rw-banner" style="margin-bottom:12px"><span>✓</span><div>最近一次权限申请：' + esc(perm.at) + "，当前状态：" + esc(perm.status) + "。</div></div>"
+        : "")
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>审批环节</th><th>要求</th><th>责任人</th><th>结果</th></tr></thead><tbody>'
+      + "<tr><td><b>技术培训</b></td><td>掌握数据库结构、字段规范与录入工具使用</td><td>数据库维护员</td><td>培训记录归档</td></tr>"
+      + "<tr><td><b>技术能力考核</b></td><td>满足维护数据库的技术要求（参数合规、异常处理）</td><td>系统管理员</td><td>考核通过</td></tr>"
+      + "<tr><td><b>安全意识审核</b></td><td>数据备份、误操作防范与保密要求</td><td>系统管理员</td><td>签署承诺书</td></tr>"
+      + "<tr><td><b>权限授予</b></td><td>按最小必要原则授予读取 / 修改权限</td><td>系统管理员</td><td>到期自动回收</td></tr>"
+      + "</tbody></table></div>"
+      + '<div style="margin-top:12px">' + chainHtml(["提出申请", "技术培训与考核", "安全意识审核", "管理员审批", "授予权限", "到期回收"]) + "</div>"
+      + "</div>"
+
+      /* 2）数据录入审批 */
+      + '<div class="rw-card" style="margin:0 0 14px;border-color:#e6ecf5">'
+      + '<div class="rw-card-head"><div><h3>② 数据录入审批</h3>'
+      + "<p>对于大规模的数据录入，应该进行事先的数据质量审核，防止错误数据污染数据库。</p></div></div>"
+      + '<div style="margin-bottom:12px">' + chainHtml(["提交大规模录入申请", "事先数据质量审核", "管理员审批通过", "执行数据录入", "结果复核", "归档备案"]) + "</div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>审核项</th><th>审核内容</th><th>判定</th><th>处置</th></tr></thead><tbody>'
+      + "<tr><td><b>来源准确性</b></td><td>第三方数据库每批次抽样调查对比</td><td>偏差 &lt; 5%</td><td>不达标则退回</td></tr>"
+      + "<tr><td><b>录入汇总整合性</b></td><td>统一存储格式，确保可检索</td><td>格式一致</td><td>转格式后重录</td></tr>"
+      + "<tr><td><b>数据及时性</b></td><td>计算结果 30 天内更新入库</td><td>在有效期内</td><td>超期重新计算</td></tr>"
+      + "<tr><td><b>字段完整性</b></td><td>必填字段齐全、单位与量纲统一</td><td>缺失率 &lt; 3%</td><td>标记待补充</td></tr>"
+      + "</tbody></table></div>"
+      + "</div>"
+
+      /* 3）操作工单备案 */
+      + '<div class="rw-card" style="margin:0 0 14px;border-color:#e6ecf5">'
+      + '<div class="rw-card-head"><div><h3>③ 操作工单备案</h3>'
+      + "<p>对于数据录入和删除操作，要进行操作行为和工单号的具体对应，从而在数据出错时更好地回溯错误发生的时间及相应负责人员。</p></div></div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>工单号</th><th>操作类型</th><th>操作对象</th><th>操作人</th><th>审批人</th><th>操作时间</th><th>状态</th></tr></thead><tbody>'
+      + workOrderRows().map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("")
+      + "</tbody></table></div>"
+      + '<div class="rw-card-note" style="margin-top:10px">录入 / 删除操作与工单号一一对应，出错时可按工单号回溯操作时间与责任人。</div>'
+      + "</div>"
+
+      /* 4）定期备份 */
+      + '<div class="rw-card" style="margin:0;border-color:#e6ecf5">'
+      + '<div class="rw-card-head"><div><h3>④ 定期备份</h3>'
+      + "<p>为尽量减少硬件故障和人员误操作给数据库带来的伤害，应当定期对数据库进行备份工作。</p></div></div>"
+      + tableHtml(LOOP_BACKUP)
+      + '<div style="margin-top:12px">' + chainHtml(["定时触发备份", "全量 / 增量快照", "完整性校验", "异地留存", "恢复演练"]) + "</div>"
+      + "</div>"
+      + "</div>";
+  }
+
+  /* ================================================== 录入审核弹窗（2026-10-08 新增）
+     管理员点击列表「审核」→ 弹窗展示该条录入的全部内容（基本信息 / 字段值 / 计算参数 /
+     关联配置规范 / 已有审核结果），填写审核是否通过 + 审核建议后提交，记录状态随之流转。 */
+  function entryAuditRec() {
+    var e = entryState();
+    if (!e.auditId) return null;
+    return e.records.filter(function (r) { return r.id === e.auditId; })[0] || null;
+  }
+
+  function entryKv(label, value) {
+    return "<div><b>" + esc(label) + "</b>" + esc(value == null || value === "" ? "-" : value) + "</div>";
+  }
+
+  function renderEntryAuditModal() {
+    ensureStyle();
+    var r = entryAuditRec();
+    if (!r) return;
+    closeMask("rwEntryAuditMask");
+    var mask = document.createElement("div");
+    mask.className = "rw-mask";
+    mask.id = "rwEntryAuditMask";
+    mask.setAttribute("data-rw-root", "entryAudit");
+    mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwEntryAuditMask"); });
+
+    /* 字段明细：按当前材料的列定义展示 */
+    var fieldRows = listCols().map(function (c) {
+      var v = r[c.key];
+      return "<tr><td><b>" + esc(c.label) + "</b></td><td>" + esc(v == null || v === "" ? "-" : v) + esc(c.unit || "") + "</td></tr>";
+    }).join("");
+    var calcRows = Object.keys(r.calc || {}).map(function (k) {
+      return "<tr><td><b>" + esc(k) + "</b></td><td>" + esc(r.calc[k]) + "</td></tr>";
+    }).join("");
+    var stdHtml = (r.stdRuleNames && r.stdRuleNames.length)
+      ? '<div class="rw-std-wrap"><div class="rw-std-top"><span>已关联 <b>' + r.stdRuleNames.length + "</b> 条规范</span></div>"
+        + '<div class="rw-std-items">' + r.stdRuleNames.map(function (n) {
+            return '<div class="rw-std-item is-on"><div><div class="rw-std-item-title">' + esc(n) + "</div></div></div>";
+          }).join("") + "</div></div>"
+      : '<div class="rw-empty" style="padding:18px 0">本条记录未关联配置规范</div>';
+    var prev = (r.audit && (r.audit.adminResult || r.audit.opinion))
+      ? '<div class="rw-banner' + (r.audit.adminResult === "不通过" ? " rw-banner--warn" : "") + '" style="margin-top:14px"><span>'
+        + (r.audit.adminResult === "不通过" ? "✕" : "✓") + "</span><div>已有审核结果：<b>" + esc(r.audit.adminResult || "-") + "</b>"
+        + "，审核建议：" + esc(r.audit.opinion || "（无）")
+        + (r.audit.adminAt ? "（" + esc(r.audit.adminBy || "管理员") + " · " + esc(r.audit.adminAt) + "）" : "")
+        + "。重新提交将覆盖原结果。</div></div>"
+      : "";
+
+    mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
+      + '<div class="rw-modal-head"><div><h3>录入审核 · ' + esc(r.id) + "</h3>"
+      + "<p>展示该条录入的全部内容，管理员填写审核是否通过及审核建议后提交。审核只需一次：通过后记录直接入库，无需二次审批。</p></div>"
+      + '<div class="rw-modal-head-side"><button class="rw-modal-close" type="button" data-rw-act="entry-audit-close" aria-label="关闭">×</button></div></div>'
+      + '<div class="rw-modal-body">'
+      + '<div class="rw-section-title">录入内容</div>'
+      + '<div class="rw-kv">'
+      + entryKv("材料唯一标识", r.id)
+      + entryKv("化学式 / 标识", r.formula)
+      + entryKv("数据类型", r.dataType)
+      + entryKv("数据来源", r.sourceName)
+      + entryKv("录入方式", r.source)
+      + entryKv("质量等级", r.quality)
+      + entryKv("提交时间", r.createdAt)
+      + entryKv("当前状态", r.status)
+      + entryKv("关联采集任务", r.taskId)
+      + "</div>"
+      + '<div class="rw-section-title" style="margin-top:14px">字段明细</div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>字段</th><th>取值</th></tr></thead><tbody>' + fieldRows + "</tbody></table></div>"
+      + (calcRows
+        ? '<div class="rw-section-title" style="margin-top:14px">计算参数</div>'
+          + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>参数</th><th>取值</th></tr></thead><tbody>' + calcRows + "</tbody></table></div>"
+        : "")
+      + '<div class="rw-section-title" style="margin-top:14px">关联配置规范</div>' + stdHtml
+      + prev
+      + '<div class="rw-section-title" style="margin-top:16px">审核结果</div>'
+      + '<div class="rw-form">'
+      + '<div class="rw-field"><label>审核是否通过<i>*</i></label>'
+      + '<div class="rw-methods" style="margin-top:2px">'
+      + '<label class="rw-method"><div class="rw-method-top">'
+      + '<input type="radio" name="rwEntryAuditResult" value="通过">'
+      + '<span class="rw-method-title">审核通过</span></div>'
+      + '<div class="rw-method-desc">审核通过后记录直接入库，无需二次审批。</div></label>'
+      + '<label class="rw-method"><div class="rw-method-top">'
+      + '<input type="radio" name="rwEntryAuditResult" value="不通过">'
+      + '<span class="rw-method-title">审核不通过</span></div>'
+      + '<div class="rw-method-desc">记录退回修改，需重新提交审核。</div></label>'
+      + "</div></div>"
+      + '<div class="rw-field is-full"><label>审核建议</label>'
+      + '<textarea id="rwEntryAuditOpinion" placeholder="请输入审核建议，例如字段合规性、规范对照结论或退回原因…"></textarea>'
+      + "</div>"
+      + "</div>"
+      + "</div>"
+      + '<div class="rw-modal-foot">'
+      + '<button class="rw-btn" type="button" data-rw-act="entry-audit-close">取消</button>'
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-audit-submit">提交审核结果</button>'
+      + "</div>"
+      + "</div>";
+    document.body.appendChild(mask);
+  }
+
+  function submitEntryAudit() {
+    var e = entryState();
+    var r = entryAuditRec();
+    if (!r) return;
+    var mask = document.getElementById("rwEntryAuditMask");
+    if (!mask) return;
+    var sel = mask.querySelector('input[name="rwEntryAuditResult"]:checked');
+    if (!sel) { toast("请先选择审核是否通过", "err"); return; }
+    var op = mask.querySelector("#rwEntryAuditOpinion");
+    var pass = sel.value === "通过";
+    var at = nowText();
+    r.audit = r.audit || {};
+    r.audit.adminResult = pass ? "通过" : "不通过";
+    r.audit.opinion = op ? op.value.trim() : "";
+    r.audit.adminAt = at;
+    r.audit.adminBy = "管理员9527";
+    if (pass) {
+      /* 一次审批：审核通过即入库 */
+      r.status = "已入库";
+      r.auditedAt = at;
+    } else {
+      r.status = "已退回";
+      r.audit.reason = r.audit.opinion;
+    }
+    closeMask("rwEntryAuditMask");
+    e.auditId = "";
+    e.view = "audit";
+    renderRwPage();
+    toast("录入审核已提交：" + r.id + " → " + r.status, pass ? "ok" : "err");
   }
 
   /* ---------------------------------------------------------- 批量导入弹窗 */
@@ -2412,7 +3142,7 @@
           + listTds(r) + "<td>" + esc(r.quality) + "</td></tr>";
       }).join("") + "</tbody></table></div>"
       + '<div class="rw-form" style="margin-top:14px"><div class="rw-field"><label>入库后审核入口</label>'
-      + '<input type="text" readonly value="数据管理员初审 → 数据审核员终审"></div>'
+      + '<input type="text" readonly value="管理员审核（一次审批，通过即入库）"></div>'
       + '<div class="rw-field"><label>本次批量导入条数</label><input type="text" readonly value="' + okRows2.length + ' 条"></div></div>';
   }
 
@@ -2633,29 +3363,10 @@
       r.audit.auto = "未通过：" + errs.join("；");
       toast("自动校验未通过：" + errs[0], "err");
     } else {
-      r.status = "待初审";
+      r.status = "待审核";
       r.audit.auto = "通过（字段完整性 + 值域合法性校验）";
-      toast("自动校验通过，已流转至数据管理员初审", "ok");
+      toast("自动校验通过，等待管理员审核", "ok");
     }
-    renderRwPage();
-  }
-
-  function auditFirstOk(id) {
-    var r = findRecord(id);
-    if (!r) return;
-    r.status = "待终审";
-    r.audit.first = "初审通过" + "（" + nowText() + "）";
-    toast("数据管理员初审通过，已流转至数据审核员终审", "ok");
-    renderRwPage();
-  }
-
-  function auditFinalOk(id) {
-    var r = findRecord(id);
-    if (!r) return;
-    r.status = "已入库";
-    r.auditedAt = nowText();
-    r.audit.final = "终审通过" + "（" + nowText() + "）";
-    toast(r.id + " 终审通过，已正式入库", "ok");
     renderRwPage();
   }
 
@@ -2700,8 +3411,11 @@
       + '<div class="rw-kv">' + kv.map(function (p) { return "<div><b>" + esc(p[0]) + "</b>" + esc(String(p[1])) + "</div>"; }).join("") + "</div>"
       + '<div class="rw-section-title" style="margin-top:14px">审核流程进度</div>' + chain
       + (r.audit.auto ? '<div class="rw-banner" style="margin-top:12px"><span>◉</span><div>自动校验：' + esc(r.audit.auto) + "</div></div>" : "")
-      + (r.audit.first ? '<div class="rw-banner" style="margin-top:8px"><span>◉</span><div>初审：' + esc(r.audit.first) + "</div></div>" : "")
-      + (r.audit.final ? '<div class="rw-banner" style="margin-top:8px"><span>◉</span><div>终审：' + esc(r.audit.final) + "</div></div>" : "")
+      + (r.audit.adminResult
+        ? '<div class="rw-banner' + (r.audit.adminResult === "不通过" ? " rw-banner--err" : "") + '" style="margin-top:8px"><span>◉</span><div>管理员审核：' + esc(r.audit.adminResult)
+          + (r.audit.opinion ? "，审核建议：" + esc(r.audit.opinion) : "")
+          + (r.audit.adminAt ? "（" + esc(r.audit.adminBy || "管理员") + " · " + esc(r.audit.adminAt) + "）" : "") + "</div></div>"
+        : "")
       + (r.audit.reason ? '<div class="rw-banner rw-banner--err" style="margin-top:8px"><span>✕</span><div>' + esc(r.audit.reason) + "</div></div>" : "")
       + '<div class="rw-section-title" style="margin-top:14px">计算参数与标准阈值</div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>参数</th><th>取值</th><th>标准阈值</th></tr></thead><tbody>' + calcRows + "</tbody></table></div>"
@@ -2742,7 +3456,12 @@
 
   function procState() {
     var s = getS();
-    if (!s.proc) s.proc = { view: "jobs", seq: 0, jobs: [], activeId: "" };
+    if (!s.proc) {
+      s.proc = { view: "jobs", seq: 0, jobs: [], activeId: "" };
+      /* 2026-10-08：演示用样例数据——加工任务列表预置若干任务，避免空态 */
+      s.proc.jobs = seedProcJobs();
+      s.proc.seq = s.proc.jobs.length;
+    }
     return s.proc;
   }
 
@@ -2751,6 +3470,168 @@
   function activeJob() {
     var p = procState();
     return p.jobs.filter(function (j) { return j.id === p.activeId; })[0] || null;
+  }
+
+  /* ------------------------------------------------------------------------
+     2026-10-08：演示用样例数据——「加工任务」列表预置 4 条任务，
+     覆盖「六步已完成 / 进行到产品生产 / 进行到标准化预处理 / 仅完成数据策划」四种进度，
+     版本按规则推进（步骤 3 完成 → V1.0，步骤 5 完成 → V2.0），数据集取自数据库配置。
+     ------------------------------------------------------------------------ */
+
+  /* 加工模型执行结果样例（与 procRun(4) 的兜底逻辑保持一致） */
+  function procPresetRows(key) {
+    var preset = ((C().modelRows || {})[key] || []).map(function (r) { return Object.assign({}, r); });
+    if (preset.length) return preset;
+    if (key === "stat") {
+      return [
+        { item: "带隙（示例）", input: "1.62 / 1.70 / 1.72 eV", logic: "计算均值、标准差、置信区间", out: "1.68 ± 0.05 eV（95% CI：1.64 ~ 1.72）" },
+        { item: "形成能（示例）", input: "-1.20 / -1.26 / -1.26 eV/atom", logic: "计算均值、标准差、置信区间", out: "-1.24 ± 0.03 eV/atom" }
+      ];
+    }
+    if (key === "image") {
+      return [
+        { item: "能带图", input: "band_raw.png（1024×768，坐标轴不一致）", logic: "统一坐标轴、分辨率、标注、格式", out: "band_std.png（1600×1200，统一标注）" },
+        { item: "态密度图", input: "dos_raw.png（800×600）", logic: "统一坐标轴、分辨率、标注、格式", out: "dos_std.png（1600×1200，统一标注）" }
+      ];
+    }
+    return [
+      { item: "结构文件校验", input: "structure_raw.cif", logic: "校验原子坐标合理性、键长范围", out: "structure_verified.cif（键长合理）" }
+    ];
+  }
+
+  function procJobSkeleton(id, createdAt) {
+    return {
+      id: id,
+      name: "",
+      step: 1,
+      version: "V0.0",
+      sourceIds: [],
+      spec: { purpose: "机器学习模型训练", format: "CSV / JSON + 数据字典", precision: "", productForm: "数据集（CSV / JSON）", desc: "" },
+      basis: [],
+      filter: { levels: ["A级", "B级"], groupByFormula: true, minPerGroup: 3, executed: false, rows: [], groups: [] },
+      pre: {
+        opts: { format: true, unit: true, missing: true, outlier: true },
+        executed: false,
+        missing: { rate: "3.4%", pass: true },
+        outliers: (C().outliers || []).map(function (o) { return Object.assign({}, o); })
+      },
+      model: { key: "", executed: false, rows: [] },
+      product: { key: "", executed: false, result: "", datasets: [] },
+      quality: { items: PROC_QUALITY.map(function (q) { return { key: q.key, measured: "", ok: null, handled: "" }; }), executed: false },
+      done: {},
+      createdAt: createdAt,
+      log: []
+    };
+  }
+
+  /* 按已入库记录回填筛选结果（与 procRun(2) 同口径） */
+  function procFillFilter(j, e) {
+    j.filter.rows = (j.sourceIds || []).map(function (id, i) {
+      var r = e.records.filter(function (x) { return x.id === id; })[0] || {};
+      var v = r[C().metric.key];
+      return {
+        formula: r.formula || "-",
+        id: id,
+        dataType: r.dataType || "-",
+        level: ["A级", "B级"][i % 2],
+        metric: v ? (v + C().metric.unit) : "-"
+      };
+    });
+    var map = {};
+    j.filter.rows.forEach(function (r) { map[r.formula] = (map[r.formula] || 0) + 1; });
+    j.filter.groups = Object.keys(map).map(function (k) {
+      return { formula: k, count: map[k], pass: map[k] >= Number(j.filter.minPerGroup || 3) };
+    });
+    j.filter.executed = true;
+  }
+
+  function seedProcJobs() {
+    var e = entryState();
+    var ids = e.records.filter(function (r) { return r.status === "已入库"; }).map(function (r) { return r.id; });
+    var code = C().code || "2D";
+    var short = C().short || "材料";
+    var ds = procDatasets();
+    var pick = function (n, off) {
+      return ds.slice(off || 0, (off || 0) + n).map(function (d) { return d.key; });
+    };
+    var T = ["2026-09-24 09:12", "2026-09-25 10:40", "2026-09-26 14:18", "2026-09-27 16:02"];
+    var seqNo = 1;
+    var mk = function (at) {
+      var j = procJobSkeleton(code + "-PRC-2026-000" + seqNo, at);
+      j.sourceIds = ids.slice(0, 3);
+      seqNo += 1;
+      return j;
+    };
+
+    /* ① 六步全部完成：版本 V2.0，已产出数据集并完成质量评价 */
+    var j1 = mk(T[0]);
+    j1.name = short + "电子结构与能带数据加工";
+    j1.spec.purpose = "机器学习模型训练";
+    j1.spec.desc = "对已入库的结构与计算数据统一格式与单位，产出可直接用于模型训练的数据集；验收标准：抽样缺陷率 < 1%，来源可信度 1~2 级。";
+    j1.spec.precision = "带隙保留 2 位小数；能量单位统一为 eV/atom";
+    j1.basis = ["calc", "file", "integ"];
+    procFillFilter(j1, e);
+    j1.pre.executed = true;
+    j1.pre.missing = { rate: "2.1%", pass: true };
+    j1.model = { key: "stat", executed: true, rows: procPresetRows("stat") };
+    j1.product = {
+      key: "",
+      executed: true,
+      datasets: pick(2, 0),
+      result: pick(2, 0).map(function (k) { var d = procDatasetOf(k); return d ? d.title : k; }).join("、")
+    };
+    j1.quality = {
+      executed: true,
+      items: [
+        { key: "source", measured: "来源可信度 1 级", ok: true, handled: "" },
+        { key: "model", measured: "调整模型参数后偏差 3.1%", ok: true, handled: "已调整模型参数" },
+        { key: "product", measured: "抽样缺陷率 0.4%", ok: true, handled: "" }
+      ]
+    };
+    j1.done = { 1: T[0], 2: "2026-09-24 09:40", 3: "2026-09-24 10:05", 4: "2026-09-24 10:52", 5: "2026-09-24 11:26", 6: "2026-09-24 14:08" };
+    j1.step = 6;
+    j1.version = "V2.0";
+
+    /* ② 进行到「产品生产」：前四步已完成，版本 V1.0 */
+    var j2 = mk(T[1]);
+    j2.name = short + "图谱与文件数据标准化加工";
+    j2.spec.purpose = "科研人员查阅";
+    j2.spec.desc = "对能带图、态密度图等图谱数据统一坐标轴、分辨率与标注，产出可直接查阅的图谱数据集。";
+    j2.spec.precision = "图谱分辨率统一为 1600×1200；文件格式统一为 PNG";
+    j2.basis = ["calc", "file"];
+    procFillFilter(j2, e);
+    j2.pre.executed = true;
+    j2.pre.missing = { rate: "3.4%", pass: true };
+    j2.model = { key: "image", executed: true, rows: procPresetRows("image") };
+    j2.done = { 1: T[1], 2: "2026-09-25 11:02", 3: "2026-09-25 11:35", 4: "2026-09-25 15:20" };
+    j2.step = 5;
+    j2.version = "V1.0";
+
+    /* ③ 进行到「标准化预处理」：筛选已完成，版本 V0.0 */
+    var j3 = mk(T[2]);
+    j3.name = short + "结构数据校验与清洗";
+    j3.spec.purpose = "与主平台融通";
+    j3.spec.desc = "校验结构文件原子坐标与键长合理性，输出符合 OPTIMADE 格式的交换数据集。";
+    j3.spec.precision = "坐标保留 6 位小数；长度单位统一为 Å";
+    j3.spec.format = "JSON（OPTIMADE）";
+    j3.spec.productForm = "结构模型库";
+    j3.basis = ["file", "integ"];
+    procFillFilter(j3, e);
+    j3.done = { 1: T[2], 2: "2026-09-26 14:50" };
+    j3.step = 3;
+    j3.version = "V0.0";
+
+    /* ④ 刚创建：仅完成数据策划前的信息填写，停在步骤 1 */
+    var j4 = mk(T[3]);
+    j4.name = short + "性质数据集成加工（待执行）";
+    j4.spec.purpose = "内部质量分析";
+    j4.spec.desc = "汇总多来源性质数据做一致性比对，用于内部数据质量分析。";
+    j4.spec.precision = "统一保留 3 位有效数字";
+    j4.basis = ["integ"];
+    j4.step = 1;
+    j4.version = "V0.0";
+
+    return [j4, j3, j2, j1];
   }
 
   function newJob() {
@@ -2764,7 +3645,8 @@
       step: 1,
       version: "V0.0",
       sourceIds: ready.slice(0, 3).map(function (r) { return r.id; }),
-      spec: { purpose: "", format: "", precision: "", desc: "" },
+      spec: { purpose: "", format: "", precision: "", productForm: "", desc: "" },
+      basis: [],
       filter: { levels: ["A级", "B级"], groupByFormula: true, minPerGroup: 3, executed: false, rows: [], groups: [] },
       pre: {
         opts: { format: true, unit: true, missing: true, outlier: true },
@@ -2773,7 +3655,8 @@
         outliers: (C().outliers || []).map(function (o) { return Object.assign({}, o); })
       },
       model: { key: "", executed: false, rows: [] },
-      product: { key: "", executed: false, result: "" },
+      /* 2026-10-08：数据产品按数据集划分——datasets 存本次产出归入的数据集 key 列表 */
+      product: { key: "", executed: false, result: "", datasets: [] },
       quality: { items: PROC_QUALITY.map(function (q) { return { key: q.key, measured: "", ok: null, handled: "" }; }), executed: false },
       done: {},
       createdAt: nowText(),
@@ -2792,7 +3675,8 @@
       + '<button class="rw-subtab' + (p.view === "jobs" ? " is-active" : "") + '" type="button" data-rw-act="proc-view" data-view="jobs">加工任务（' + p.jobs.length + "）</button>"
       + '<button class="rw-subtab' + (p.view === "spec" ? " is-active" : "") + '" type="button" data-rw-act="proc-view" data-view="spec">加工规范说明</button>'
       + "</div>";
-    return sub + (p.view === "spec" ? renderProcessSpec() : renderProcJobs()) + procClosureCards(p.view);
+    /* 2026-10-08：圈红删除——「加工流程总览」与「加工产物交接（对外出口）」两块不再展示 */
+    return sub + (p.view === "spec" ? renderProcessSpec() : renderProcJobs());
   }
 
   function renderProcJobs() {
@@ -2822,7 +3706,7 @@
       + "<p>已入库数据 " + ready + " 条可参与加工；每个加工任务按「数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价」六步执行，版本随阶段推进 V0.0 → V1.0 → V2.0。</p></div>"
       + '<div style="flex:0 0 auto"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-new">＋ 新建加工任务</button></div></div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl rw-jobs-table"><thead><tr><th>任务ID</th><th>加工任务名称</th><th>版本</th><th>当前步骤</th><th>数据量</th><th>创建时间</th><th>操作</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
-      + "</div>" + procFlowOverview();
+      + "</div>";
   }
 
   function procFlowOverview() {
@@ -2882,8 +3766,14 @@
   }
 
   function procFoot(j) {
-    var canNext = j.done[j.step];
-    var tip = canNext ? "本步骤已完成，可进入下一步" : "<span style=\"color:#b8720f\">请先执行本步骤操作后再进入下一步</span>";
+    /* 2026-10-08：步骤 1/2 改为点击「下一步」时校验（填写 / 勾选完成即可前进），按钮不再预禁用 */
+    var autoOk = j.step <= 2;
+    var canNext = !!j.done[j.step] || autoOk;
+    var tip = j.done[j.step]
+      ? "本步骤已完成，可进入下一步"
+      : (autoOk
+        ? (j.step === 1 ? "填写完成后点击「下一步」" : "勾选基础数据后点击「下一步」")
+        : "<span style=\"color:#b8720f\">请先执行本步骤操作后再进入下一步</span>");
     return '<div class="rw-modal-foot"><span class="rw-foot-tip">' + tip + "</span>"
       + '<button class="rw-btn" type="button" data-rw-act="proc-close">关闭</button>'
       + '<button class="rw-btn" type="button" data-rw-act="proc-prev"' + (j.step === 1 ? " disabled" : "") + ">上一步</button>"
@@ -2902,22 +3792,14 @@
     return procStep6(j);
   }
 
-  /* 步骤 1 数据策划 */
+  /* 步骤 1 数据策划 —— 2026-10-08 精简：只保留 加工任务名称 / 目标用途 / 输出格式 /
+     数据产品形式 / 内容 五项；删除原「选择参与加工的数据源」「生成规格文档」按钮与
+     「前往资源录入」按钮（基础数据改在步骤 2 勾选）。 */
   function procStep1(j) {
-    var e = entryState();
-    var cand = e.records.filter(function (r) { return r.status === "已入库"; });
-    var pick = cand.length
-      ? '<div class="rw-ds-list" style="padding-left:0">' + cand.map(function (r) {
-        var on = (j.sourceIds || []).indexOf(r.id) >= 0;
-        return '<label class="rw-ds' + (on ? " is-on" : "") + '"><input type="checkbox" data-rw-pf="source" data-id="' + esc(r.id) + '"' + (on ? " checked" : "") + ">"
-          + '<div><div class="rw-ds-name">' + esc(r.formula) + "　" + esc(r.id) + "</div>"
-          + '<div class="rw-ds-desc">' + esc(r.dataType) + " · " + esc(C().metric.label) + " " + esc(r[C().metric.key] || "-") + esc(C().metric.unit) + " · " + esc(r.quality) + "</div></div>"
-          + '<span class="rw-ds-count">' + esc(r.sourceName) + "</span></label>";
-      }).join("") + "</div>"
-      : '<div class="rw-empty" style="padding:18px 0">暂无已入库数据，请先在「资源录入」完成审核入库'
-        + '<div style="margin-top:12px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-goto-entry">前往「资源录入」</button></div></div>';
-
-    return '<div class="rw-section-title">需求分析（数据加工工程师）</div>'
+    if (!j.spec.purpose) j.spec.purpose = "机器学习模型训练";
+    if (!j.spec.format) j.spec.format = "CSV / JSON + 数据字典";
+    if (!j.spec.productForm) j.spec.productForm = "数据集（CSV / JSON）";
+    return '<div class="rw-section-title">数据策划</div>'
       + '<div class="rw-form">'
       + '<div class="rw-field"><label>加工任务名称<i>*</i></label><input type="text" data-rw-pf="name" placeholder="' + esc(C().procNamePh) + '" value="' + esc(j.name) + '"></div>'
       + '<div class="rw-field"><label>目标用途<i>*</i></label><select data-rw-pf="purpose">'
@@ -2926,33 +3808,34 @@
       + '<div class="rw-field"><label>输出格式<i>*</i></label><select data-rw-pf="format">'
       + ["CSV / JSON + 数据字典", "PDF 报告 + JSON", "JSON（OPTIMADE）"].map(function (o) { return '<option' + (j.spec.format === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
       + "</select></div>"
-      + '<div class="rw-field"><label>精度要求<i>*</i></label><select data-rw-pf="precision">'
-      + ["高（偏差 < 5%）", "中（偏差 < 10%）", "低（仅格式统一）"].map(function (o) { return '<option' + (j.spec.precision === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
+      + '<div class="rw-field"><label>数据产品形式<i>*</i></label><select data-rw-pf="productForm">'
+      + ["数据集（CSV / JSON）", "结构模型库", "图谱集", "可视化分析报告"].map(function (o) { return '<option' + (j.spec.productForm === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
       + "</select></div>"
-      + '<div class="rw-field is-full"><label>需求描述</label><textarea data-rw-pf="desc" placeholder="描述本次数据产品的目标、覆盖范围与验收标准…">' + esc(j.spec.desc) + "</textarea></div>"
+      + '<div class="rw-field is-full"><label>内容<i>*</i></label><textarea data-rw-pf="desc" placeholder="描述本次数据产品的内容、覆盖范围与验收标准…">' + esc(j.spec.desc) + "</textarea></div>"
       + "</div>"
-      + '<div style="margin-top:16px"><div class="rw-section-title">选择参与加工的数据源（已入库数据）</div>' + pick + "</div>"
-      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-1">生成数据产品规格文档</button></div>'
       + (j.done[1] ? procDoneCard(j, 1) : "");
   }
 
-  /* 步骤 2 基础数据筛选 */
+  /* 步骤 2 基础数据筛选 —— 2026-10-08 重做：展示三类基础数据，勾选后进入下一步 */
+  var BASIS_DATA_TYPES = [
+    { key: "calc", name: "计算数据", desc: "VASP / 量子化学等计算输出数据（能量、带隙、形成能、态密度等）" },
+    { key: "file", name: "文件数据", desc: "结构文件（CIF / POSCAR）、图谱与图像等文件类数据" },
+    { key: "integ", name: "集成化基础数据", desc: "已入库的结构化基础数据（字段完整、格式统一、可直接检索）" }
+  ];
+
   function procStep2(j) {
-    var f = j.filter;
-    var lvls = ["A级", "B级", "C级"];
-    return '<div class="rw-section-title">筛选条件配置</div>'
-      + '<div class="rw-form">'
-      + '<div class="rw-field"><label>质量等级</label><div class="rw-checks">'
-      + lvls.map(function (l) {
-        return '<label class="rw-check' + (f.levels.indexOf(l) >= 0 ? " is-on" : "") + '"><input type="checkbox" data-rw-pf="level" data-v="' + l + '"' + (f.levels.indexOf(l) >= 0 ? " checked" : "") + ">" + esc(l) + "</label>";
-      }).join("") + "</div></div>"
-      + '<div class="rw-field"><label>按化学式分组</label>'
-      + '<label class="rw-check' + (f.groupByFormula ? " is-on" : "") + '"><input type="checkbox" data-rw-pf="groupBy"' + (f.groupByFormula ? " checked" : "") + ">启用（按化学式分组）</label></div>"
-      + '<div class="rw-field"><label>每组最少条数</label><input type="text" data-rw-pf="minGroup" value="' + esc(String(f.minPerGroup)) + '"><span class="rw-field-tip">标准：每组至少 3 条</span></div>'
-      + '<div class="rw-field"><label>系统行为</label><input type="text" readonly value="执行 SQL 查询 + 质量过滤"></div>'
-      + "</div>"
-      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-2">执行筛选</button></div>'
-      + (f.executed ? procFilterResult(f) : "")
+    var sel = j.basis || [];
+    var cards = BASIS_DATA_TYPES.map(function (b) {
+      var on = sel.indexOf(b.key) >= 0;
+      return '<label class="rw-ds' + (on ? " is-on" : "") + '" style="padding:13px 15px">'
+        + '<input type="checkbox" data-rw-pf="basis" data-v="' + b.key + '"' + (on ? " checked" : "") + ">"
+        + '<div><div class="rw-ds-name">' + esc(b.name) + "</div>"
+        + '<div class="rw-ds-desc">' + esc(b.desc) + "</div></div></label>";
+    }).join("");
+    return '<div class="rw-section-title">基础数据筛选</div>'
+      + '<div class="rw-card-note">勾选本次加工需要纳入的基础数据类型（可多选）；勾选后点击「下一步」进入标准化预处理。</div>'
+      + '<div class="rw-ds-list" style="padding-left:0">' + cards + "</div>"
+      + '<div class="rw-field-tip rw-basis-count" style="margin-top:10px">已勾选 <b>' + sel.length + "</b> 类基础数据</div>"
       + (j.done[2] ? procDoneCard(j, 2) : "");
   }
 
@@ -3020,32 +3903,68 @@
       + m.rows.map(function (r) { return "<tr><td>" + esc(r.item) + "</td><td>" + esc(r.input) + "</td><td>" + esc(r.logic) + "</td><td>" + esc(r.out) + "</td></tr>"; }).join("")
       + "</tbody></table></div></div>"
       : "";
+    /* 2026-10-08：模型加工完成后，产出按数据集划分，数据集清单与数据库保持一致 */
+    var nextTip = m.executed
+      ? '<div class="rw-field-tip" style="margin-top:10px">加工结果将在步骤「产品生产」中按数据集划分生成数据产品，数据集清单与'
+        + esc(procDbName()) + "保持一致（如：" + esc(procDatasets().slice(0, 3).map(function (d) { return d.title; }).join("、")) + "）。</div>"
+      : "";
     return '<div class="rw-section-title">选择加工模型 / 算法</div>'
       + '<div class="rw-methods">' + cards + "</div>"
       + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-4">执行数据加工</button></div>'
-      + result
+      + result + nextTip
       + (j.done[4] ? procDoneCard(j, 4) : "");
   }
 
-  /* 步骤 5 产品生产 */
+  /* 步骤 5 产品生产
+     2026-10-08：数据产品按「数据集」划分——勾选本次产出归入哪些数据集，
+     数据集清单与数据库（04.js LOWDIM_DB_OVERVIEW_CONFIGS）逐项对齐，字段 / 输出格式 / 存量口径一致。
+     2026-10-08 圈红删除：原「选择数据产品形态」（AI 训练 / 科研参考 / 跨库融通）三卡下线，产品生产只按数据集划分。 */
+  function procDbName() { return (C().short || "材料") + "数据库"; }
+  function procDatasets() { return C().datasets || []; }
+  function procDatasetOf(key) {
+    return procDatasets().filter(function (d) { return d.key === key; })[0] || null;
+  }
+
   function procStep5(j) {
     var pr = j.product;
-    var cards = PROC_PRODUCTS.map(function (p2) {
-      return '<label class="rw-method' + (pr.key === p2.key ? " is-on" : "") + '">'
-        + '<div class="rw-method-top"><input type="radio" name="rwProcProduct" data-rw-pf="product" value="' + p2.key + '"' + (pr.key === p2.key ? " checked" : "") + ">"
-        + '<span class="rw-method-title">' + esc(p2.name) + "</span></div>"
-        + '<div class="rw-method-desc">加工操作：' + esc(p2.op) + "<br>输出格式：" + esc(p2.format) + "<br>输出用途：" + esc(p2.use) + "</div></label>";
-    }).join("");
+    var picked = pr.datasets || [];
+    var ds = procDatasets();
+    var dbName = procDbName();
+    var dsCards = ds.length
+      ? ds.map(function (d) {
+        var on = picked.indexOf(d.key) >= 0;
+        return '<label class="rw-pds' + (on ? " is-on" : "") + '">'
+          + '<div class="rw-pds-top"><input type="checkbox" data-rw-pf="productDs" data-v="' + esc(d.key) + '"' + (on ? " checked" : "") + ">"
+          + "<b>" + esc(d.title) + "</b></div>"
+          + '<div class="rw-pds-desc">入库位置：' + esc(dbName) + " · " + esc(d.title)
+          + "<br>核心字段：" + esc(d.fields.join("、"))
+          + "<br>输出格式：" + esc(d.format) + " ｜ 数据集存量：" + esc(String(d.volume).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) + " 条</div>"
+          + '<div class="rw-field-tip">' + esc(d.desc) + "</div></label>";
+      }).join("")
+      : '<div class="rw-empty" style="padding:22px 0">当前材料未配置数据集</div>';
+
     var result = pr.executed
-      ? '<div class="rw-result" style="margin-top:16px"><div class="rw-result-title">✓ 数据产品已生成</div>'
-      + '<div class="rw-kv"><div><b>产品名称</b>' + esc((PROC_PRODUCTS.filter(function (x) { return x.key === pr.key; })[0] || {}).name) + "</div>"
-      + "<div><b>输出格式</b>" + esc((PROC_PRODUCTS.filter(function (x) { return x.key === pr.key; })[0] || {}).format) + "</div>"
-      + "<div><b>输出用途</b>" + esc((PROC_PRODUCTS.filter(function (x) { return x.key === pr.key; })[0] || {}).use) + "</div>"
+      ? '<div class="rw-result" style="margin-top:16px"><div class="rw-result-title">✓ 数据产品已生成（按数据集划分）</div>'
+      + '<div class="rw-kv"><div><b>产出数据集</b>' + esc((pr.datasets || []).length) + " 个</div>"
       + "<div><b>版本标记</b>" + esc(j.version) + "</div></div>"
-      + '<div class="rw-field-tip">元数据字段 data_version 已更新为 ' + esc(j.version) + "</div></div>"
+      + '<div style="margin-top:14px"><div class="rw-section-title">本次产出的数据集（' + (pr.datasets || []).length + " 个）"
+      + '</div><div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>数据集</th><th>核心字段</th><th>输出格式</th><th>本次产出</th><th>入库位置</th></tr></thead><tbody>'
+      + (pr.datasets || []).map(function (k2) {
+        var d = procDatasetOf(k2);
+        if (!d) return "";
+        /* 本次产出条数：已执行筛选取筛选结果条数，否则回退到参与加工的记录数，避免出现 0 条的误读 */
+        var outN = (j.filter.executed && (j.filter.rows || []).length) ? j.filter.rows.length : (j.sourceIds || []).length;
+        return "<tr><td><b>" + esc(d.title) + "</b></td><td>" + esc(d.fields.join("、")) + "</td><td>" + esc(d.format) + "</td>"
+          + "<td>" + esc(outN) + " 条</td><td>" + esc(dbName) + " · " + esc(d.title) + "</td></tr>";
+      }).join("")
+      + "</tbody></table></div></div>"
+      + '<div class="rw-field-tip">元数据字段 data_version 已更新为 ' + esc(j.version) + "；各数据集按上述入库位置归档，字段与数据库保持一致。</div></div>"
       : "";
-    return '<div class="rw-section-title">选择数据产品类型</div>'
-      + '<div class="rw-methods">' + cards + "</div>"
+
+    return '<div class="rw-section-title">数据产品按数据集划分（可多选，与' + esc(dbName) + '数据集一致）</div>'
+      + '<div class="rw-field-tip" style="margin-bottom:10px">已勾选 <b class="rw-ds-count">' + picked.length + "</b> / " + ds.length
+      + " 个数据集；加工产出将分别归入所选数据集，字段口径与数据库保持一致。</div>"
+      + '<div class="rw-ds-wrap">' + dsCards + "</div>"
       + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-5">生产数据产品</button></div>'
       + result
       + (j.done[5] ? procDoneCard(j, 5) : "");
@@ -3077,7 +3996,7 @@
       2: "已按质量等级与材料类型完成筛选，输出筛选后数据集合与分组清单。",
       3: "标准化预处理完成：格式与单位统一、缺失值标注、异常值已复核；版本推进至 V1.0。",
       4: "加工模型执行完成，输出加工后属性数据 / 标准化图谱 / 验证后结构文件。",
-      5: "数据产品生产完成，输出格式与用途已确定；版本推进至 V2.0。",
+      5: "数据产品生产完成，已按数据集划分归档（输出格式、用途与入库数据集均已确定）；版本推进至 V2.0。",
       6: "质量评价完成，来源 / 模型 / 产品三维度均已给出判定与处理动作。"
     };
     return '<div class="rw-banner" style="margin-top:14px"><span>✓</span><div>' + esc(text[step]) + "</div></div>";
@@ -3146,11 +4065,16 @@
       toast(mo.name + " 执行完成", "ok");
     } else if (step === 5) {
       if (!j.done[4]) { toast("请先完成步骤 4 数据加工", "err"); return; }
-      if (!j.product.key) { toast("请选择数据产品类型", "err"); return; }
+      /* 2026-10-08：数据产品必须明确归入至少一个数据集（产品形态卡已按圈红删除） */
+      if (!(j.product.datasets || []).length) { toast("请勾选本次产出归入的数据集", "err"); return; }
       j.product.executed = true;
       j.version = "V2.0";
+      j.product.result = (j.product.datasets || []).map(function (k3) {
+        var d2 = procDatasetOf(k3);
+        return d2 ? d2.title : k3;
+      }).join("、");
       procDone(j, 5);
-      toast("数据产品生产完成，版本推进至 V2.0", "ok");
+      toast("数据产品生产完成：" + j.product.datasets.length + " 个数据集，版本推进至 V2.0", "ok");
     } else if (step === 6) {
       if (!j.done[5]) { toast("请先完成步骤 5 产品生产", "err"); return; }
       j.quality.items = [
@@ -3211,7 +4135,10 @@
       + "<div><b>精度要求</b>" + esc(j.spec.precision || "-") + "</div><div><b>数据源</b>" + (j.sourceIds || []).length + " 条</div>"
       + "<div><b>筛选结果</b>" + (j.filter.executed ? j.filter.rows.length + " 条 / " + j.filter.groups.length + " 组" : "未执行") + "</div>"
       + "<div><b>加工模型</b>" + esc((PROC_MODELS.filter(function (x) { return x.key === j.model.key; })[0] || {}).name || "-") + "</div>"
-      + "<div><b>数据产品</b>" + esc((PROC_PRODUCTS.filter(function (x) { return x.key === j.product.key; })[0] || {}).name || "-") + "</div>"
+      + "<div><b>数据产品</b>" + esc((j.product.datasets || []).length ? (j.product.datasets || []).map(function (k4) {
+          var d4 = procDatasetOf(k4);
+          return d4 ? d4.title : k4;
+        }).join("、") : "-") + "</div>"
       + "<div><b>当前版本</b>" + esc(j.version) + "</div></div>"
       + '<div class="rw-section-title">执行进度</div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>加工步骤</th><th>状态</th><th>完成时间</th></tr></thead><tbody>' + steps + "</tbody></table></div>"
@@ -3585,7 +4512,7 @@
       ["第一性原理计算", "本库自主计算所得", "输入文件（INCAR / POSCAR / gjf）+ 计算参数", "参数合规性复核 + 结果比对"],
       ["采样计算", "分子动力学采样所得", "采样系综 + 温度 + 时长 + 软件版本", "同体系不同来源能量比对"],
       ["实验实测", "实测物性与表征数据", "测试条件 + 仪器 + 原始图谱", "标准样复核"],
-      ["人工补录", "无法自动化解析时人工录入", "录入人 + 工单号", "管理员初审 + 审核员终审"]
+      ["人工补录", "无法自动化解析时人工录入", "录入人 + 工单号", "管理员一次审核（通过即入库）"]
     ]
   };
 
@@ -3733,24 +4660,27 @@
     var selectedShardIds = x.shards.filter(function (sh) { return sh.taskId === selectedId; }).map(function (sh) { return sh.id; });
     var taskIssues = issue.filter(function (r) { return selectedShardIds.indexOf(r[1]) >= 0; });
 
-    /* 摘要条：当前任务 + 全局关键指标 */
-    var summaryHead = '<div class="rw-card-head"><div><h3>采集任务列表</h3>'
-      + '<p>当前本库：' + s.tasks.length + ' 个任务 · ' + totAcc + ' 条已接收 · '
+    /* 摘要条：当前任务 + 全局关键指标（2026-10-08 改为「采集任务执行记录」） */
+    var summaryHead = '<div class="rw-card-head"><div><h3>采集任务执行记录</h3>'
+      + '<p>当前本库：' + s.tasks.length + ' 个采集任务 · ' + totAcc + ' 条已接收 · '
       + totPend + ' 条待补 · ' + issue.length + ' 个未闭环异常 · '
       + (s.handoffDone ? s.handoffDone.length : 0) + ' 个产物已交接</p></div>'
       + '<div style="display:flex;gap:10px;flex:0 0 auto">'
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button>'
+      + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="open-audit">数据采集审核</button>'
       + '<button class="rw-btn" type="button" data-rw-act="tab" data-rw-tab="entry">进入资源录入 →</button></div></div>';
 
     /* 任务列表行：点击行可切换选中，操作按钮互不干扰 */
     var taskRows = s.tasks.map(function (t) {
-      var m = methodMeta(t.method);
+      var src = t.sourceType || t.source || methodMeta(t.method).label;
+      var dbName = t.dbName || t.name;
+      var report = t.integrationReport || "表字段规则校验通过 · 格式统一完成";
       var isSel = t.id === selectedId;
       return "<tr" + (isSel ? ' style="background:#f0f7ff"' : "") + ' data-rw-act="select-task" data-id="' + esc(t.id) + '">'
         + '<td class="rw-id">' + esc(t.id) + "</td>"
-        + "<td><b>" + esc(t.name) + "</b>" + (isSel ? ' <span class="rw-tag rw-tag--run">当前选中</span>' : "") + "</td>"
-        + '<td><span class="rw-tag ' + m.tag + '">' + esc(m.label) + "</span></td>"
-        + "<td>" + esc(t.desc) + "</td>"
+        + "<td>" + esc(src) + "</td>"
+        + "<td><b>" + esc(dbName) + "</b>" + (isSel ? ' <span class="rw-tag rw-tag--run">当前选中</span>' : "") + "</td>"
+        + "<td>" + esc(report) + "</td>"
         + '<td><span class="rw-tag ' + tagFor(t.status) + '">' + esc(t.status) + "</span></td>"
         + '<td class="rw-nowrap">'
         + '<button class="rw-op" type="button" data-rw-act="view-task" data-id="' + esc(t.id) + '">查看详情</button>'
@@ -3855,19 +4785,11 @@
       ? taskShardHtml + conserveBanner
       : view === "issue" ? taskIssueTable : traceHtml;
 
+    /* 2026-10-08：圈红删除——「全库未闭环异常单」警示条与「当前任务」详情卡不再展示，
+       任务详情可通过列表行「查看详情」弹窗查看；下方规范说明折叠区保留。 */
     return '<div class="rw-card">'
       + summaryHead
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>采集ID</th><th>采集任务名称</th><th>采集方式</th><th>采集说明</th><th>状态</th><th>操作</th></tr></thead><tbody>' + taskRows + "</tbody></table></div>"
-      + (issue.length
-        ? '<div class="rw-banner rw-banner--warn" style="margin-top:12px"><span>⚠</span><div>全库尚有 '
-          + issue.length + " 条未闭环异常单；切到对应任务 →「异常单」子页签可查看原因与处理动作。</div></div>"
-        : "")
-      + "</div>"
-
-      + '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>当前任务 · ' + esc(selectedId) + "</h3>"
-      + '<p>点击上方任务列表中的行可切换任务；来源追溯、分片状态、异常单随任务联动。</p></div></div>'
-      + subTabs + detailBody
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>采集ID</th><th>数据来源</th><th>入库名称</th><th>数据整合报告</th><th>采集状态</th><th>操作</th></tr></thead><tbody>' + taskRows + "</tbody></table></div>"
       + "</div>"
 
       + '<details style="margin-top:8px;background:#fff;border-radius:8px;border:1px solid #e6ecf5;overflow:hidden">'
@@ -4018,8 +4940,25 @@
     switch (act) {
       case "tab":
         s.tab = node.getAttribute("data-rw-tab") || "collect";
+        s.auditOpen = false;
         if (s.tab === "collect") s.focusTaskId = "";
         renderRwPage();
+        return;
+      case "open-audit":
+        s.auditOpen = true;
+        renderRwPage();
+        return;
+      /* 注意：act 名用 collect-audit-back，避免和资源录入页录入审核的「退回」（audit-back）撞车 */
+      case "collect-audit-back":
+        s.auditOpen = false;
+        renderRwPage();
+        return;
+      case "open-audit-modal":
+        s.auditId = node.getAttribute("data-id") || "";
+        renderAuditModal();
+        return;
+      case "submit-audit":
+        submitAudit();
         return;
       case "shard-retry":
         /* 失败分片定向重试：待补归零、接收补满，对应异常单自动关闭 */
@@ -4130,10 +5069,39 @@
         rerenderBody();
         return;
       case "entry-batch":
+        /* 2026-10-08：批量导入功能暂时下线，动作入口一并拦下 */
+        if (HIDE_ENTRY_BATCH) { toast("批量导入功能暂未开放，请使用「新增材料（单条录入）」", "err"); return; }
         openBatchEntry(node.getAttribute("data-source") || "mp");
         return;
       case "entry-manual":
         openManualEntry(node.getAttribute("data-source") || "", node.getAttribute("data-task") || "");
+        return;
+      case "std-all":
+        (function () {
+          var m = entryState().manual;
+          if (!m) return;
+          m.stdRules = stdRuleGroups().map(function (r) { return r.id; });
+          renderManualEntry();
+        })();
+        return;
+      case "std-none":
+        (function () {
+          var m = entryState().manual;
+          if (!m) return;
+          m.stdRules = [];
+          renderManualEntry();
+        })();
+        return;
+      case "entry-audit-open":
+        entryState().auditId = node.getAttribute("data-id") || "";
+        renderEntryAuditModal();
+        return;
+      case "entry-audit-close":
+        closeMask("rwEntryAuditMask");
+        entryState().auditId = "";
+        return;
+      case "entry-audit-submit":
+        submitEntryAudit();
         return;
       case "entry-form-close":
         entryState().manual = null;
@@ -4248,12 +5216,6 @@
       case "audit-auto":
         auditAuto(node.getAttribute("data-id") || "");
         return;
-      case "audit-first-ok":
-        auditFirstOk(node.getAttribute("data-id") || "");
-        return;
-      case "audit-final-ok":
-        auditFinalOk(node.getAttribute("data-id") || "");
-        return;
       case "audit-back":
         auditBack(node.getAttribute("data-id") || "", node.getAttribute("data-stage") || "审核");
         return;
@@ -4316,6 +5278,18 @@
         (function () {
           var j = activeJob();
           if (!j) return;
+          /* 步骤 1：数据策划必填校验；步骤 2：至少勾选一类基础数据 */
+          if (j.step === 1) {
+            if (!String(j.name || "").trim()) { toast("请填写加工任务名称", "err"); return; }
+            if (!String(j.spec.purpose || "").trim()) { toast("请选择目标用途", "err"); return; }
+            if (!String(j.spec.format || "").trim()) { toast("请选择输出格式", "err"); return; }
+            if (!String(j.spec.productForm || "").trim()) { toast("请选择数据产品形式", "err"); return; }
+            if (!String(j.spec.desc || "").trim()) { toast("请填写内容", "err"); return; }
+            if (!j.done[1]) procDone(j, 1);
+          } else if (j.step === 2) {
+            if (!(j.basis || []).length) { toast("请至少勾选一类基础数据（计算数据 / 文件数据 / 集成化基础数据）", "err"); return; }
+            if (!j.done[2]) procDone(j, 2);
+          }
           j.step = Math.min(6, j.step + 1);
           renderProcWizard();
         })();
@@ -4388,11 +5362,10 @@
       case "next":
         syncFromDom();
         if (c.step === 1) {
-          if (!String(c.name || "").trim()) { c.error = "请填写采集任务名称"; renderCreateModal(); return; }
+          if (!String(c.name || "").trim()) { c.error = "请填写入库名称"; renderCreateModal(); return; }
           c.error = "";
           c.step = 2;
         } else if (c.step === 2) {
-          if (!c.result || c.result.kind === "fail") { c.error = "请先完成采集 / 校验后再进入确认"; renderCreateModal(); return; }
           c.error = "";
           c.step = 3;
         }
@@ -4488,7 +5461,7 @@
       handleAct(node.getAttribute("data-rw-act"), node);
     }, true);
 
-    var FIELD_SEL = "[data-rw-f],[data-rw-ef],[data-rw-ec],[data-rw-bf],[data-rw-pf]";
+    var FIELD_SEL = "[data-rw-f],[data-rw-ef],[data-rw-ec],[data-rw-bf],[data-rw-pf],[data-rw-es]";
 
     document.addEventListener("change", function (event) {
       var el = event.target && event.target.closest ? event.target.closest(FIELD_SEL) : null;
@@ -4500,7 +5473,7 @@
       if (el.hasAttribute("data-rw-f")) {
         var f = el.getAttribute("data-rw-f");
         syncFromDom();
-        if (f === "method" || f === "materialType" || f === "dbAll" || f === "ds" || f === "calcOut" || f === "calcFiles") renderCreateModal();
+        if (f === "method" || f === "materialType" || f === "dbAll" || f === "ds" || f === "calcOut" || f === "calcFiles" || f === "collectObject") renderCreateModal();
         return;
       }
       if (el.hasAttribute("data-rw-ef")) {
@@ -4525,6 +5498,18 @@
         refreshManualErrors();
         return;
       }
+      if (el.hasAttribute("data-rw-es")) {
+        /* 关联配置规范的勾选 */
+        var m4 = entryState().manual;
+        if (!m4) return;
+        var rid = el.getAttribute("data-rw-es");
+        if (!m4.stdRules) m4.stdRules = [];
+        var ix4 = m4.stdRules.indexOf(rid);
+        if (el.checked && ix4 < 0) m4.stdRules.push(rid);
+        if (!el.checked && ix4 >= 0) m4.stdRules.splice(ix4, 1);
+        refreshStdCount();
+        return;
+      }
       if (el.hasAttribute("data-rw-bf")) {
         var b = entryState().batch;
         if (b) b[el.getAttribute("data-rw-bf")] = v;
@@ -4538,6 +5523,20 @@
         else if (kp === "purpose") j.spec.purpose = v;
         else if (kp === "format") j.spec.format = v;
         else if (kp === "precision") j.spec.precision = v;
+        else if (kp === "productForm") j.spec.productForm = v;
+        else if (kp === "basis") {
+          /* 步骤 2 基础数据勾选（计算数据 / 文件数据 / 集成化基础数据） */
+          j.basis = j.basis || [];
+          var bv = el.getAttribute("data-v");
+          var bi = j.basis.indexOf(bv);
+          if (v && bi < 0) j.basis.push(bv);
+          if (!v && bi >= 0) j.basis.splice(bi, 1);
+          /* 实时刷新卡片高亮与计数，不重渲染整个弹窗 */
+          var lb = el.closest ? el.closest(".rw-ds") : null;
+          if (lb) lb.classList.toggle("is-on", !!v);
+          var cnt = document.querySelector("#rwProcMask .rw-basis-count b");
+          if (cnt) cnt.textContent = String(j.basis.length);
+        }
         else if (kp === "desc") j.spec.desc = v;
         else if (kp === "minGroup") j.filter.minPerGroup = v;
         else if (kp === "groupBy") j.filter.groupByFormula = v;
@@ -4554,6 +5553,18 @@
           if (!v && il >= 0) j.filter.levels.splice(il, 1);
         } else if (kp === "preOpt") {
           j.pre.opts[el.getAttribute("data-v")] = v;
+        } else if (kp === "productDs") {
+          /* 步骤 5：数据产品按数据集划分，勾选本次产出归入的数据集 */
+          j.product.datasets = j.product.datasets || [];
+          var dv = el.getAttribute("data-v");
+          var di = j.product.datasets.indexOf(dv);
+          if (v && di < 0) j.product.datasets.push(dv);
+          if (!v && di >= 0) j.product.datasets.splice(di, 1);
+          /* 实时刷新卡片高亮与计数，不重渲染整个弹窗 */
+          var dl = el.closest ? el.closest(".rw-pds") : null;
+          if (dl) dl.classList.toggle("is-on", !!v);
+          var dc = document.querySelector("#rwProcMask .rw-ds-count");
+          if (dc) dc.textContent = String(j.product.datasets.length);
         } else if (kp === "model") j.model.key = v;
         else if (kp === "product") j.product.key = v;
         else if (kp === "outlierFix") {
@@ -4705,6 +5716,18 @@
       { formula: "WS2", dataType: "电子结构", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "1.98", quality: "高精度" },
       { formula: "CrI3", dataType: "磁学性质", crystal: "Trigonal", spaceGroup: "R-3", bandGap: "0.85", quality: "低精度" },
       { formula: "Ti3C2", dataType: "电学性质", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "0.00", quality: "高精度" }
+    ],
+    /* 2026-10-08：数据产品按数据集划分，清单与数据库（04.js LOWDIM_DB_OVERVIEW_CONFIGS）逐项对齐，
+       加工产出的每个数据产品都明确归入所属数据集，字段/格式/存量均与数据库一致。 */
+    datasets: [
+      { key: "structure", title: "结构特征数据集", format: "Parquet / CIF", volume: 9460, fields: ["原子结构图", "化学式", "晶胞参数", "层厚", "原子坐标", "键长键角", "晶系", "空间群"], desc: "收录二维材料结构特征相关标准化数据，涵盖原子结构图、化学式、晶胞参数、原子坐标、键长键角、晶系和空间群等信息。" },
+      { key: "electronic", title: "电子结构数据集", format: "CSV / DAT", volume: 4200, fields: ["能带结构", "态密度", "有效质量"], desc: "收录二维材料电子结构相关标准化数据，提供能带结构、态密度和电子有效质量等可追溯数据。" },
+      { key: "electrical", title: "电学性质数据集", format: "CSV / JSON", volume: 4560, fields: ["铁电性质", "压电性质"], desc: "收录二维材料电学性质相关标准化数据，覆盖铁电性质与压电性质及其测试条件信息。" },
+      { key: "magnetic", title: "磁学性质数据集", format: "CSV / JSON", volume: 4980, fields: ["磁基态构型", "磁转变温度"], desc: "收录二维材料磁学性质相关标准化数据，包含磁基态构型和磁转变温度（居里温度）。" },
+      { key: "thermal", title: "热学性质数据集", format: "CSV / DAT", volume: 2480, fields: ["形成能", "声子谱", "声子态密度"], desc: "收录二维材料热学性质相关标准化数据，包含形成能、声子谱和声子态密度。" },
+      { key: "mechanical", title: "力学性质数据集", format: "CSV / JSON", volume: 1680, fields: ["弹性常数", "杨氏模量", "泊松比"], desc: "收录二维材料力学性质相关标准化数据，包含弹性常数、杨氏模量和泊松比。" },
+      { key: "optical", title: "光学性质数据集", format: "CSV / DAT", volume: 2160, fields: ["介电函数", "光吸收系数", "反射率", "折射率", "消光系数"], desc: "收录二维材料光学性质相关标准化数据，涵盖介电函数、光吸收系数、反射率、折射率和消光系数。" },
+      { key: "defect", title: "缺陷性质数据集", format: "CSV / JSON", volume: 1080, fields: ["空位缺陷", "反位缺陷"], desc: "收录二维材料缺陷性质相关标准化数据，包含空位缺陷与反位缺陷的构型和形成能。" }
     ],
     tasks: null
   };
@@ -4942,6 +5965,12 @@
       { id: "OP-CL-2026-0922-001", name: "OLED 发光分子（DPP-DTT）激发能数据采集", method: "open", desc: "从 PubChem 开放 API 采集 DPP-DTT 分子基础信息与物性数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "PubChem（化合物数据库）", version: "2026.08", rawFiles: "JSON / MOL", security: "第1级" },
       { id: "OP-CL-2026-0923-002", name: "有机光伏受体（PM6:Y6）物性数据采集", method: "buy", desc: "从已购买 SciFinder 商用数据包导入受体分子熔点、闪点与溶解性数据", status: "已完成", createdAt: "2026-09-23 09:12", source: "SciFinder（化学文献数据库）", version: "2026.09", rawFiles: "JSON / CSV", security: "第1级" },
       { id: "OP-CL-2026-0923-003", name: "有机半导体聚合物（P3HT）激发态数据计算", method: "calc", desc: "基于 Gaussian16 计算输出文件提取激发能、发射能与 HOMO-LUMO 能级", status: "待确认", createdAt: "2026-09-23 16:48", source: "本地计算输出（LOG / FCHK）", version: "V0.0", rawFiles: "JSON", security: "第2级" }
+    ],
+    datasets: [
+      { key: "basic", title: "有机光电基础数据集", format: "PDB / MOL / SDF", volume: 1000, fields: ["中英文名称", "分子编号", "分子式", "分子量", "三维结构"], desc: "收录有机分子中英文名称、CAS/InChI 分子编号、分子式、分子量和三维结构等基础信息。" },
+      { key: "physical", title: "有机光电物性数据集", format: "CSV / JSON", volume: 1860, fields: ["相对密度", "熔点", "沸点", "闪点"], desc: "收录有机分子相对密度、熔点、沸点、闪点等物理性质数据，支撑热稳定性与使用场景筛选。" },
+      { key: "spectral", title: "有机光电表征图谱数据集", format: "JPG / CSV", volume: 2400, fields: ["红外光谱", "拉曼光谱", "核磁共振谱"], desc: "收录红外光谱、拉曼光谱和核磁共振谱等表征图谱，包含原始数据与图谱图片。" },
+      { key: "computed", title: "有机光电计算数据集", format: "CSV / JSON / JPG", volume: 3160, fields: ["基态/激发态结构", "激发能", "发射能", "跃迁偶极矩", "HOMO-LUMO", "溶剂化自由能", "斯托克斯位移", "简正模式", "态密度"], desc: "收录量子化学计算数据：基态/激发态结构、激发能、发射能、跃迁偶极矩、HOMO-LUMO、溶剂化自由能、斯托克斯位移、简正模式和态密度。" }
     ]
   };
 
@@ -5183,6 +6212,11 @@
       { id: "EL-CL-2026-0922-001", name: "固态无机电解质（LLZO）晶体结构数据采集", method: "open", desc: "从 Materials Project 开放 API 采集 LLZO 晶格常数、带隙与能带结构数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "Materials Project（材料项目数据库）", version: "v2025.03", rawFiles: "JSON / CIF", security: "第1级" },
       { id: "EL-CL-2026-0923-002", name: "有机电解液（LiFSI-DME）物性数据采集", method: "buy", desc: "从已购买 Reaxys 电解质应用数据包导入电解液与电极兼容性数据", status: "已完成", createdAt: "2026-09-23 09:12", source: "Reaxys 电解质应用数据包", version: "2026.07", rawFiles: "JSON", security: "第1级" },
       { id: "EL-CL-2026-0923-003", name: "硫化物固态电解质（Li6PS5Cl）输运性质计算", method: "calc", desc: "基于 VASP 计算输出文件提取带隙、态密度与离子迁移能垒", status: "待确认", createdAt: "2026-09-23 16:48", source: "本地计算输出（OUTCAR / DOSCAR）", version: "V0.0", rawFiles: "JSON", security: "第2级" }
+    ],
+    datasets: [
+      { key: "liquid", title: "有机电解液数据集", format: "PDB / CSV", volume: 3150, fields: ["基础信息", "物性数据", "表征图谱", "安全信息", "HOMO-LUMO", "电荷分布", "溶剂化能"], desc: "按醚类、酯类、环状和其他四类子数据集组织，涵盖基础信息、物性数据、表征图谱、安全信息和计算数据五大模块。" },
+      { key: "solid-organic", title: "固态有机电解质数据集", format: "PDB / CSV / JSON", volume: 2400, fields: ["单体信息", "摩尔体积", "密度", "玻璃化转变温度", "电导率", "摩尔热容", "结合能"], desc: "按醚类、酮类、腈类和其他官能团分类，涵盖基础信息、物性数据和计算数据三大模块。" },
+      { key: "solid-inorganic", title: "固态无机电解质数据集", format: "CIF / POSCAR / CSV", volume: 4700, fields: ["晶体结构", "形成能", "费米能级", "带隙", "能带/态密度", "XRD", "XAS"], desc: "按氧化物、硫化物、卤化物和其他类型分类，涵盖基础信息、计算数据和图谱数据三大模块。" }
     ]
   };
 
@@ -5423,6 +6457,11 @@
       { id: "ML-CL-2026-0922-001", name: "有机小分子（H2O）CCSD(T) 能量数据采集", method: "open", desc: "从 QM9 开放数据集采集 H2O、CH4 的 CCSD(T) 能量与原子受力数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "QM9（量子化学小分子数据集）", version: "v2024", rawFiles: "CSV / XYZ", security: "第1级" },
       { id: "ML-CL-2026-0923-002", name: "高分子片段（PEO）相互作用能数据采集", method: "buy", desc: "从已购买 Reaxys 高分子数据包导入 PEO / PET 片段分子间相互作用能", status: "已完成", createdAt: "2026-09-23 09:12", source: "Reaxys 高分子片段数据包", version: "2026.07", rawFiles: "CSV / XML", security: "第1级" },
       { id: "ML-CL-2026-0923-003", name: "蛋白质二肽（甘氨酸）构象采样数据计算", method: "calc", desc: "基于 Gromacs NVT 采样与 Q-Chem 计算提取构象、能量与原子受力", status: "待确认", createdAt: "2026-09-23 16:48", source: "本地计算输出（PDB / CSV）", version: "V0.0", rawFiles: "CSV", security: "第2级" }
+    ],
+    datasets: [
+      { key: "basic", title: "机器学习力场基础数据集", format: "PDB / CSV / XML", volume: 9600, fields: ["原子电荷", "偶极矩", "极化率", "色散系数", "单分子能量", "相互作用能", "原子受力"], desc: "收录单分子、双分子和多分子团簇的结构、能量、原子受力，以及原子电荷、偶极矩、极化率、色散系数等力场参数。" },
+      { key: "small-molecule", title: "有机小分子机器学习力场数据集", format: "PDB / XYZ / CSV", volume: 8400, fields: ["醚类小分子", "酰胺类小分子", "构象采样", "能量与受力"], desc: "收录醚类、酰胺类有机小分子的构象采样数据与第一性原理计算的能量、受力等训练集数据。" },
+      { key: "polymer", title: "高分子机器学习力场数据集", format: "PDB / HDF5", volume: 7200, fields: ["高分子片段", "蛋白质构象", "片段能量", "相互作用能"], desc: "收录高分子片段（重复单元、官能团）与蛋白质（二肽/三肽）构象采样和能量数据，用于机器学习力场训练。" }
     ]
   };
 
@@ -5655,6 +6694,14 @@
       { id: "CA-CL-2026-0922-001", name: "Cu(211) 表面 CO2 还原吸附能数据采集", method: "open", desc: "从 Catalysis-Hub 开放数据集采集 Cu 基表面吸附构型与吸附能数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "Catalysis-Hub（催化反应数据库）", version: "2026.05", rawFiles: "JSON / CIF", security: "第1级" },
       { id: "CA-CL-2026-0923-002", name: "单原子催化剂（Cu-Ag）活性数据采集", method: "buy", desc: "从文献催化性能专题库导入掺杂原子参数与活性位点表征数据", status: "已完成", createdAt: "2026-09-23 09:12", source: "文献催化性能专题库", version: "2026.06", rawFiles: "CSV / CIF", security: "第1级" },
       { id: "CA-CL-2026-0923-003", name: "Cu(111) 表面 *COOH 反应路径计算", method: "calc", desc: "基于 VASP 计算输出文件提取过渡态构型、反应能与活化能", status: "待确认", createdAt: "2026-09-23 16:48", source: "本地计算输出（OUTCAR / CONTCAR）", version: "V0.0", rawFiles: "JSON", security: "第2级" }
+    ],
+    datasets: [
+      { key: "element", title: "催化材料元素特征数据集", format: "CSV / JSON", volume: 520, fields: ["周期数和族数", "元素电荷", "相对原子质量", "原子半径", "价电子数", "d/p轨道电子数", "第一电离能", "电子亲和势", "电负性", "d带中心"], desc: "收录催化材料相关元素的周期数和族数、元素电荷、相对原子质量、原子半径、价电子数、轨道电子数、第一电离能、电子亲和势、电负性和 d 带中心。" },
+      { key: "structure", title: "催化材料结构特征数据集", format: "PNG / CIF / DAE", volume: 600, fields: ["形貌结构图", "点群和空间群", "活性位点配位数", "对称性函数"], desc: "收录形貌结构图、点群和空间群、活性位点配位数、对称性函数及其他结构特征描述符。" },
+      { key: "single-atom", title: "单原子催化剂数据集", format: "POSCAR / CSV", volume: 14000, fields: ["41种掺杂元素", "5种铜表面", "6种中间产物", "吸附能"], desc: "以铜单质为基底、41 种元素掺杂，覆盖 Cu(100)/(110)/(111)/(210)/(411) 五种表面共 75 种吸附结构，提供 CO2 还原 6 种中间产物吸附能数据约 1.4 万条。" },
+      { key: "alloy", title: "二元合金数据集", format: "POSCAR / CSV", volume: 15000, fields: ["127种二元合金", "5种铜表面", "6种中间产物", "吸附构型"], desc: "基于 Materials Project 筛选的 127 种铜基二元合金材料，覆盖 5 种铜表面与 6 种中间产物的吸附构型和吸附能数据。" },
+      { key: "grain-boundary", title: "晶界数据集", format: "POSCAR / CSV", volume: 4800, fields: ["5种晶界结构", "41种元素", "4种位点", "中间产物吸附"], desc: "收录铜中 5 种典型晶界结构，41 种元素置于晶界 4 个不同位点，针对 6 种中间产物共 4,800 条催化材料数据。" },
+      { key: "system", title: "体系特征数据集", format: "CSV / DAT / JSON", volume: 6000, fields: ["费米面位置", "掺杂形成能", "体系磁矩", "反应路径", "催化性能"], desc: "收录费米面位置、掺杂形成能（晶界能）、体系磁矩等体系特征，以及催化反应路径、催化产物与催化性能数据。" }
     ]
   };
 

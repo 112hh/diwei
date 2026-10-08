@@ -173,7 +173,7 @@
           </div>
           <div class="twod-platform-actions electrolyte-property-actions">
             <div class="twod-detail-actions">
-              <button class="btn twod-search-reset" type="button" data-ely-reset>清空条件</button>
+              <button class="btn twod-search-reset" type="button" data-ely-reset>重置</button>
               <button class="btn-primary" type="button" data-ely-apply ${hasElectrolyteOrganicPropertyFilters(filters) ? "" : "disabled"}>检索</button>
             </div>
           </div>

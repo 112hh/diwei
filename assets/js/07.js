@@ -733,8 +733,54 @@
           .material-convert-summary {
             margin-top: 14px;
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
+          }
+          /* 2026-10-08：文件转换「源文件格式 / 目标文件格式」配置卡（twod 工作台） */
+          .material-convert-format-row {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+          }
+          .material-convert-format-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 74px;
+            padding: 12px 14px;
+            border: 1px solid #e3ebf8;
+            border-radius: 12px;
+            background: #f8fbff;
+          }
+          .material-convert-format-label {
+            color: #7185a5;
+            font-size: 12px;
+            line-height: 18px;
+          }
+          .material-convert-format-value {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            min-height: 24px;
+          }
+          .material-convert-format-value strong {
+            color: #18325d;
+            font-size: 15px;
+            line-height: 22px;
+            word-break: break-all;
+          }
+          .material-convert-format-value em {
+            font-style: normal;
+            color: #98aac8;
+            font-size: 12px;
+            line-height: 18px;
+          }
+          /* 下拉控件完全继承全站设计系统对 select 的统一规范（高度/圆角/边框/聚焦态），
+             只补齐卡片内宽度与手型光标，避免和全局控件规范打架 */
+          .material-convert-format-select {
+            width: 100%;
+            cursor: pointer;
           }
           .material-convert-summary-item {
             min-height: 74px;
@@ -773,6 +819,7 @@
             .material-convert-grid,
             .material-convert-form,
             .material-convert-summary,
+            .material-convert-format-row,
             .material-convert-record-tools,
             .material-convert-record-toolbar,
             .material-convert-detail-grid {
@@ -1200,8 +1247,7 @@
                     </div>
                   </div>
                   ${buildMaterialConvertSummary([
-                    { label: "转换类型", value: draft.fileType },
-                    { label: "源文件", value: draft.fileName || "待上传" },
+                    /* 2026-10-08：圈红删除——「转换类型」「源文件」两张摘要卡不再展示（与下方生效版本保持一致） */
                     { label: "源格式", value: draft.sourceFormat || "自动识别" },
                     { label: "目标格式", value: draft.targetFormat || "-" }
                   ])}
@@ -1723,28 +1769,44 @@ function renderElectrolyteCategoryTabs() {
                     </div>
                   `}
                   <p class="material-convert-type-note">${materialConversionTypeDescriptions[draft.fileType]}</p>
-                  <div class="material-convert-form" style="margin-top:14px;">
-                    <div class="field">
-                      <label>${isTwodConvert ? "源文件格式" : config.materialLabel}</label>
-                      ${isTwodConvert
-                        ? `<input type="text" value="${draft.sourceFormat || "自动识别"}" readonly aria-readonly="true" data-material-convert-source-format="${moduleKey}">`
-                        : `<select data-material-convert-field="materialId" data-module="${moduleKey}">
-                            ${options.map((item) => `<option value="${item.id}"${draft.materialId === item.id ? " selected" : ""}>${item.label}</option>`).join("")}
-                          </select>`}
+                  ${isTwodConvert ? `
+                    <!-- 2026-10-08：圈红重构——去掉重复的表单行与摘要卡，只保留「源文件格式 / 目标文件格式」两张卡，
+                         目标文件格式做成下拉选择，排版对齐全站 UI 规范 -->
+                    <div class="material-convert-format-row">
+                      <div class="material-convert-format-card">
+                        <span class="material-convert-format-label">源文件格式</span>
+                        <div class="material-convert-format-value">
+                          <strong>${draft.sourceFormat || "自动识别"}</strong>
+                          <em>${draft.sourceFormat ? "上传后自动识别" : "等待上传文件"}</em>
+                        </div>
+                      </div>
+                      <div class="material-convert-format-card">
+                        <span class="material-convert-format-label">目标文件格式</span>
+                        <select class="material-convert-format-select" data-material-convert-field="targetFormat" data-module="${moduleKey}" aria-label="目标文件格式">
+                          ${targetFormats.map((format) => `<option value="${format}"${draft.targetFormat === format ? " selected" : ""}>${format}</option>`).join("")}
+                        </select>
+                      </div>
                     </div>
-                    <div class="field">
-                      <label>${isTwodConvert ? "目标文件格式" : "目标格式"}</label>
-                      <select data-material-convert-field="targetFormat" data-module="${moduleKey}">
-                        ${targetFormats.map((format) => `<option value="${format}"${draft.targetFormat === format ? " selected" : ""}>${format}</option>`).join("")}
-                      </select>
+                  ` : `
+                    <div class="material-convert-form" style="margin-top:14px;">
+                      <div class="field">
+                        <label>${config.materialLabel}</label>
+                        <select data-material-convert-field="materialId" data-module="${moduleKey}">
+                          ${options.map((item) => `<option value="${item.id}"${draft.materialId === item.id ? " selected" : ""}>${item.label}</option>`).join("")}
+                        </select>
+                      </div>
+                      <div class="field">
+                        <label>目标格式</label>
+                        <select data-material-convert-field="targetFormat" data-module="${moduleKey}">
+                          ${targetFormats.map((format) => `<option value="${format}"${draft.targetFormat === format ? " selected" : ""}>${format}</option>`).join("")}
+                        </select>
+                      </div>
                     </div>
-                  </div>
-                  ${buildMaterialConvertSummary([
-                    { label: "转换类型", value: draft.fileType },
-                    { label: "源文件", value: draft.fileName || "待上传" },
-                    { label: isTwodConvert ? "源文件格式" : "源格式", value: draft.sourceFormat || "自动识别" },
-                    { label: isTwodConvert ? "目标文件格式" : "目标格式", value: draft.targetFormat || "-" }
-                  ])}
+                    ${buildMaterialConvertSummary([
+                      { label: "源格式", value: draft.sourceFormat || "自动识别" },
+                      { label: "目标格式", value: draft.targetFormat || "-" }
+                    ])}
+                  `}
                   <div class="twod-convert-actions" style="margin-top:16px;">
                     <button class="btn-primary" type="button" data-material-convert-start="${moduleKey}" ${draft.fileName ? "" : "disabled"}>开始转换</button>
                     <button class="btn" type="button" data-material-convert-clear="${moduleKey}">${isTwodConvert ? "清空文件" : "清空"}</button>

@@ -53,7 +53,7 @@
               <input type="text" ${inputAttr}="${html(mode)}" value="${html(value || "")}" placeholder="${html(config.placeholder || "请输入检索条件")}">
             </label>
             <button class="btn-primary twod-search-submit" type="button" ${applyAttr}>检索</button>
-            <button class="btn twod-search-reset" type="button" ${resetAttr}>清空条件</button>
+            <button class="btn twod-search-reset" type="button" ${resetAttr}>重置</button>
           </div>
           <div class="twod-platform-actions">
             <div class="twod-status-text">${html(config.helper || "输入条件后点击检索，结果列表将按当前条件更新。")}</div>
@@ -253,7 +253,7 @@
               </label>
               ${renderOptoMatchSelect(mode)}
               <button class="btn-primary cross-db-search-btn" type="button" data-opto-apply>检索</button>
-              <button class="btn cross-db-clear-btn" type="button" data-opto-reset>清空条件</button>
+              <button class="btn cross-db-clear-btn" type="button" data-opto-reset>重置</button>
             </div>
             <div class="twod-platform-actions"><div class="twod-status-text">${html(config.helper || "输入条件后点击检索，结果列表将按当前条件更新。")}</div></div>
           </div>
@@ -325,7 +325,7 @@
                 </div>
                 <div class="cross-db-search-row">
                   <button class="btn-primary cross-db-search-btn" type="button" data-opto-apply>检索</button>
-                  <button class="btn cross-db-clear-btn" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn cross-db-clear-btn" type="button" data-opto-reset>重置</button>
                 </div>
               </div>
               <div class="twod-platform-actions"><div class="twod-status-text">${html(OPTO_MODE_CONFIG.combo.helper)}</div></div>
@@ -342,7 +342,7 @@
               <div class="twod-platform-actions">
                 <div class="twod-status-text">${html(OPTO_MODE_CONFIG.property.helper)}</div>
                 <div class="twod-detail-actions">
-                  <button class="btn twod-search-reset" type="button" data-opto-reset>清空条件</button>
+                  <button class="btn twod-search-reset" type="button" data-opto-reset>重置</button>
                   <button class="btn-primary" type="button" data-opto-apply>检索</button>
                 </div>
               </div>
@@ -364,7 +364,7 @@
                 </select>
                 <input class="cross-db-input" id="mlffPropertyKeyword" type="text" value="${html(state.mlffSearchDraft.propertyKeyword || "")}" placeholder="${html(MLFF_PROPERTY_PLACEHOLDERS[currentField] || "请输入对应内容")}">
                 <button class="btn-primary cross-db-search-btn" type="button" data-mlff-apply>检索</button>
-                <button class="btn cross-db-clear-btn" type="button" data-mlff-reset>清空条件</button>
+                <button class="btn cross-db-clear-btn" type="button" data-mlff-reset>重置</button>
               </div>
               <div class="twod-platform-actions"><div class="twod-status-text">${html(getMlffModeLabel(mode))}支持按参数、方法、能量和结构信息筛选。</div></div>
             </div>
@@ -396,7 +396,7 @@
               <div class="catalyst-element-input-row">
                 <input class="cross-db-input" type="text" data-catalyst-mode-input="elements" value="${html(state.catalystSearchDraft.elements || "")}" placeholder="请输入元素组成，如 Pt、Fe,N,C 或 Ni+Mo">
                 <button class="btn-primary cross-db-search-btn" type="button" data-catalyst-platform-apply>检索</button>
-                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>清空条件</button>
+                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>重置</button>
               </div>
               <details class="catalyst-periodic-dropdown">
                 <summary>元素周期表选择</summary>
@@ -423,7 +423,7 @@
                 </select>
                 <input class="cross-db-input" id="catalystPropertyKeywordPlatform" type="text" value="${html(state.catalystSearchDraft.propertyKeyword || "")}" placeholder="请输入性质详情检索值">
                 <button class="btn-primary cross-db-search-btn" type="button" data-catalyst-platform-apply>检索</button>
-                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>清空条件</button>
+                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>重置</button>
               </div>
               <div class="twod-platform-actions"><div class="twod-status-text">${html(getCatalystSearchLabel(mode))}支持按元素组成、结构特征、晶格参数、电子性质和催化性能筛选。</div></div>
             </div>
@@ -436,7 +436,7 @@
                 <input class="cross-db-input" id="catalystRouteReactant" type="text" value="${html(state.catalystSearchDraft.routeReactant || "")}" placeholder="请输入反应物，如 O2、H2O、H+">
                 <input class="cross-db-input" id="catalystRouteProduct" type="text" value="${html(state.catalystSearchDraft.routeProduct || "")}" placeholder="请输入生成物，如 H2O、O2、H2">
                 <button class="btn-primary cross-db-search-btn" type="button" data-catalyst-platform-apply>检索</button>
-                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>清空条件</button>
+                <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>重置</button>
               </div>
               <div class="twod-platform-actions"><div class="twod-status-text">${html(getCatalystSearchLabel(mode))}用于定位反应路线对应的催化材料记录。</div></div>
             </div>

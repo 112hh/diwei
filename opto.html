@@ -148,7 +148,6 @@
         </button>
         <div class="nav">
           <button class="nav-btn" data-group="monitor" data-page="dashboard" data-label="数据看板"><span>数据看板</span></button>
-          <button class="nav-btn" data-group="monitor" data-page="data-statistics" data-label="数据统计"><span>数据统计</span></button>
         </div>
       </div>
       <div class="sidebar-group" data-group="standards">
@@ -488,14 +487,14 @@
         <div class="page-head">
           <div>
             <h2>文件格式转换</h2>
-            <p>将二维材料结构文件在不同格式之间转换，支持 CIF、POSCAR、XYZ、VASP 等常见格式。</p>
+            <p>按文件类别限制上传格式：结构文件支持 CIF / XYZ，计算数据支持 POTCAR，可视化文件支持 XYZ。</p>
           </div>
         </div>
         <div class="card pad" style="margin-bottom:16px;">
           <h3 class="section-title">选择源文件</h3>
           <div class="upload-dropzone">
             <p>从系统内已有结构文件记录中选择源文件进行格式转换。</p>
-            <p style="font-size:12px;color:var(--muted);">支持 .cif / .vasp / .poscar / .xyz / .pdb 格式。</p>
+            <p style="font-size:12px;color:var(--muted);">结构文件：.cif / .xyz；计算数据：.potcar；可视化文件：.xyz</p>
           </div>
         </div>
         <div class="card pad" style="margin-bottom:16px;">
@@ -503,11 +502,11 @@
           <div class="form-grid">
             <div class="field">
               <label class="form-label">源格式</label>
-              <select class="page-select"><option>CIF</option><option>POSCAR</option><option>XYZ</option><option>VASP</option><option>PDB</option></select>
+              <select class="page-select"><option>CIF</option><option>XYZ</option><option>POTCAR</option></select>
             </div>
             <div class="field">
               <label class="form-label">目标格式</label>
-              <select class="page-select"><option>POSCAR</option><option>CIF</option><option>XYZ</option><option>VASP</option><option>PDB</option></select>
+              <select class="page-select"><option>POSCAR</option><option>XYZ</option><option>ORCA</option><option>CIF</option><option>PDB</option></select>
             </div>
             <div class="field">
               <label class="form-label">超胞扩展</label>
@@ -1049,12 +1048,11 @@
                 <tr><td>有机光电材料</td><td>OP</td><td>opto</td><td>-</td><td>2</td><td>全部</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
                 <tr><td>入库审核</td><td>RV</td><td>twod-review</td><td>数据管理</td><td>3</td><td>admin, reviewer</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
                 <tr><td>数据看板</td><td>DB</td><td>dashboard</td><td>监控统计</td><td>1</td><td>admin, reviewer</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
-                <tr><td>数据统计</td><td>DS</td><td>data-statistics</td><td>监控统计</td><td>2</td><td>admin, reviewer</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
                 <tr><td>用户管理</td><td>UM</td><td>sys-user</td><td>系统管理</td><td>2</td><td>admin</td><td><span class="status-badge success">启用</span></td><td><button class="btn btn-sm">编辑</button></td></tr>
               </tbody>
             </table>
           </div>
-          <div class="result-footer"><span>共 6 条菜单记录</span></div>
+          <div class="result-footer"><span>共 5 条菜单记录</span></div>
         </div>
       </section>
       <section class="page" id="page-sys-dict">
@@ -2667,21 +2665,21 @@
                 <input type="radio" name="twodUploadCategory" value="structure">
                 <div>
                   <strong>结构文件</strong>
-                  <span>支持 POSCAR / CIF / XYZ</span>
+                  <span>仅支持 CIF / XYZ</span>
                 </div>
               </label>
               <label class="twod-upload-type-item">
                 <input type="radio" name="twodUploadCategory" value="compute">
                 <div>
                   <strong>计算数据</strong>
-                  <span>支持 OUTCAR / log / 能带文件</span>
+                  <span>仅支持 POTCAR</span>
                 </div>
               </label>
               <label class="twod-upload-type-item">
                 <input type="radio" name="twodUploadCategory" value="visual">
                 <div>
                   <strong>可视化文件</strong>
-                  <span>支持图谱 / 渲染结果</span>
+                  <span>仅支持 XYZ</span>
                 </div>
               </label>
             </div>
@@ -3372,6 +3370,7 @@
   <script src="assets/js/01.js"></script>
   <script src="assets/js/02.js"></script>
   <script src="assets/js/03.js"></script>
+  <script src="assets/js/68-standard-catalog.js"></script>
   <script src="assets/js/04.js"></script>
   <script src="assets/js/05.js"></script>
   <script src="assets/js/06.js"></script>
@@ -3387,6 +3386,7 @@
   <script src="assets/js/16.js"></script>
   <script src="assets/js/17.js"></script>
   <script src="assets/js/18.js"></script>
+  <script src="assets/js/69-hide-data-statistics.js"></script>
   <script src="assets/js/19.js"></script>
   <script src="assets/js/20.js"></script>
   <script src="assets/js/21.js"></script>
@@ -3425,7 +3425,12 @@
   <script src="assets/js/54.js"></script>
   <script src="assets/js/55.js"></script>
   <script src="assets/js/99-layer.js"></script>
+    <script src="assets/js/63-standardization-exec.js"></script>
+    <script src="assets/js/64-ingest-closure.js"></script>
+    <script src="assets/js/67-flow-nav.js"></script>
 <script src="assets/js/61-ingest-twod.js"></script>
+  <script src="assets/js/65-unified-column-settings.js"></script>
+  <script src="assets/js/66-property-type-hint.js"></script>
   <script>
     /* 独立页面引导：以管理员身份直达本页（普通角色会被角色守卫回落到首页） */
     (function () {

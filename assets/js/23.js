@@ -275,7 +275,7 @@
               </div>
               <div class="cross-db-search-row">
                 <button class="btn-primary cross-db-search-btn" type="button" data-opto-apply>检索</button>
-                <button class="btn cross-db-clear-btn" type="button" data-opto-reset>清空条件</button>
+                <button class="btn cross-db-clear-btn" type="button" data-opto-reset>重置</button>
               </div>
             </div>
             <div class="twod-platform-actions"><div class="twod-status-text">先选择性质类型，再选择对应字段或输入数值进行检索。</div></div>

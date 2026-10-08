@@ -1,0 +1,40 @@
+==== lowdim-ingest-twod.html
+errors: []
+typeof window.renderLowdimIngestPage = function
+typeof window.renderLowdimDatabasePage = function
+typeof window.renderLowdimStandardizationPage = function
+typeof window.renderLowdimStandardSystemPage = function
+typeof window.goToPage = undefined
+state.page = lowdim-ingest-twod
+ic-bar present: False
+ic-dbbar present: False
+==== lowdim-database-twod.html
+errors: []
+typeof window.renderLowdimIngestPage = function
+typeof window.renderLowdimDatabasePage = function
+typeof window.renderLowdimStandardizationPage = function
+typeof window.renderLowdimStandardSystemPage = function
+typeof window.goToPage = undefined
+state.page = lowdim-database-twod
+ic-bar present: False
+ic-dbbar present: False
+==== lowdim-standardization-twod.html
+errors: []
+typeof window.renderLowdimIngestPage = function
+typeof window.renderLowdimDatabasePage = function
+typeof window.renderLowdimStandardizationPage = function
+typeof window.renderLowdimStandardSystemPage = function
+typeof window.goToPage = undefined
+state.page = lowdim-standardization-twod
+ic-bar present: False
+ic-dbbar present: False
+==== standard-twod.html
+errors: []
+typeof window.renderLowdimIngestPage = function
+typeof window.renderLowdimDatabasePage = function
+typeof window.renderLowdimStandardizationPage = function
+typeof window.renderLowdimStandardSystemPage = function
+typeof window.goToPage = undefined
+state.page = standard-twod
+ic-bar present: False
+ic-dbbar present: False

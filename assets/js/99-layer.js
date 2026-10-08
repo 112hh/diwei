@@ -1077,7 +1077,16 @@
           XDF("atomic_number", "元素电荷", "INT", true, "", ""),
           XDF("atomic_radius", "原子半径", "DECIMAL(5,0)", true, "", ""),
           XDF("valence_electrons", "价电子数", "INT", true, "", ""),
+          XDF("atomic_mass", "相对原子质量", "DECIMAL(8,3)", true, "", ""),
+          XDF("p_electrons", "p轨道电子数", "INT", false, "NULL", ""),
+          XDF("d_electrons", "d轨道电子数", "INT", false, "NULL", ""),
+          XDF("ionization_energy", "第一电离能", "DECIMAL(6,2)", false, "NULL", ""),
+          XDF("electron_affinity", "电子亲和势", "DECIMAL(6,2)", false, "NULL", ""),
+          XDF("electronegativity", "电负性", "DECIMAL(4,2)", false, "NULL", ""),
           XDF("d_band_center", "d带中心", "DECIMAL(5,2)", false, "NULL", ""),
+          XDF("fermi_level", "费米能级", "DECIMAL(6,3)", false, "NULL", ""),
+          XDF("doping_formation_energy", "掺杂形成能", "DECIMAL(6,3)", false, "NULL", ""),
+          XDF("magnetic_moment", "体系磁矩", "DECIMAL(6,3)", false, "NULL", ""),
           XDF("structure_file_path", "结构文件", "VARCHAR(256)", true, "", ""),
           XDF("space_group", "空间群", "VARCHAR(32)", false, "NULL", ""),
           XDF("coordination_number", "配位数", "INT", false, "NULL", ""),
@@ -1089,6 +1098,66 @@
           XDF("selectivity", "选择性", "DECIMAL(4,1)", false, "NULL", ""),
           XDF("quality_grade", "质量等级", "VARCHAR(4)", true, "", ""),
           XDF("sec_level", "敏感度等级", "VARCHAR(8)", true, "", ""),
+          XDF("created_at", "创建时间", "DATETIME", true, "", ""),
+          XDF("updated_at", "更新时间", "DATETIME", true, "", "")
+        ]
+      },
+      {
+        name: "material_catalyst_structure",
+        cn: "催化材料结构特征表",
+        comment: "存储催化材料结构特征：形貌结构图、点群与空间群、活性位点配位数、广义配位数与对称性函数描述符",
+        keys: [
+          "PRIMARY KEY (`id`)",
+          "UNIQUE KEY `uk_cat_struct` (`structure_id`)",
+          "KEY `idx_cats_cat` (`catalyst_id`)",
+          "KEY `idx_cats_facet` (`facet_index`)"
+        ],
+        fields: [
+          XDF("id", "主键ID", "BIGINT", true, "AUTO_INCREMENT", "PRIMARY KEY"),
+          XDF("structure_id", "结构标识", "VARCHAR(32)", true, "", "uk_cat_struct"),
+          XDF("catalyst_id", "催化材料标识", "VARCHAR(32)", true, "", "idx_cats_cat"),
+          XDF("morphology_image", "形貌结构图", "VARCHAR(256)", false, "NULL", ""),
+          XDF("point_group", "点群", "VARCHAR(16)", false, "NULL", ""),
+          XDF("space_group", "空间群", "VARCHAR(32)", false, "NULL", ""),
+          XDF("crystal_system", "晶系", "VARCHAR(16)", false, "NULL", ""),
+          XDF("coordination_number", "活性位点配位数", "INT", false, "NULL", ""),
+          XDF("gcn", "广义配位数", "DECIMAL(6,3)", false, "NULL", ""),
+          XDF("symmetry_function", "对称性函数", "TEXT", false, "NULL", ""),
+          XDF("descriptor_type", "结构描述符类型", "VARCHAR(32)", false, "NULL", ""),
+          XDF("facet_index", "晶面指数", "VARCHAR(16)", true, "", "idx_cats_facet"),
+          XDF("created_at", "创建时间", "DATETIME", true, "", ""),
+          XDF("updated_at", "更新时间", "DATETIME", true, "", "")
+        ]
+      },
+      {
+        name: "material_catalyst_reaction",
+        cn: "催化反应路径表",
+        comment: "存储催化表面分子吸附与反应路径数据：吸附构型、过渡态构型、反应能、活化能与产物选择性",
+        keys: [
+          "PRIMARY KEY (`id`)",
+          "UNIQUE KEY `uk_cat_react` (`reaction_id`)",
+          "KEY `idx_catr_cat` (`catalyst_id`)",
+          "KEY `idx_catr_ads` (`adsorption_energy`)",
+          "KEY `idx_catr_inter` (`intermediate`)"
+        ],
+        fields: [
+          XDF("id", "主键ID", "BIGINT", true, "AUTO_INCREMENT", "PRIMARY KEY"),
+          XDF("reaction_id", "反应标识", "VARCHAR(32)", true, "", "uk_cat_react"),
+          XDF("catalyst_id", "催化材料标识", "VARCHAR(32)", true, "", "idx_catr_cat"),
+          XDF("surface_facet", "催化表面晶面", "VARCHAR(16)", true, "", ""),
+          XDF("dopant_element", "掺杂原子参数", "VARCHAR(32)", false, "NULL", ""),
+          XDF("adsorbate", "吸附分子种类", "VARCHAR(64)", true, "", ""),
+          XDF("adsorption_config", "分子吸附构型", "VARCHAR(256)", false, "NULL", ""),
+          XDF("adsorption_site", "分子吸附位置", "VARCHAR(32)", false, "NULL", ""),
+          XDF("adsorption_energy", "分子吸附能", "DECIMAL(5,3)", true, "", "idx_catr_ads"),
+          XDF("initial_config", "反应初始构型", "VARCHAR(256)", false, "NULL", ""),
+          XDF("product", "反应产物", "VARCHAR(64)", false, "NULL", ""),
+          XDF("product_adsorption_config", "产物吸附构型", "VARCHAR(256)", false, "NULL", ""),
+          XDF("transition_state_config", "过渡态吸附构型", "VARCHAR(256)", false, "NULL", ""),
+          XDF("reaction_energy", "反应能", "DECIMAL(6,3)", false, "NULL", ""),
+          XDF("activation_energy", "活化能", "DECIMAL(5,2)", false, "NULL", ""),
+          XDF("intermediate", "中间产物", "VARCHAR(100)", false, "NULL", "idx_catr_inter"),
+          XDF("selectivity", "选择性", "DECIMAL(4,1)", false, "NULL", ""),
           XDF("created_at", "创建时间", "DATETIME", true, "", ""),
           XDF("updated_at", "更新时间", "DATETIME", true, "", "")
         ]
@@ -1192,11 +1261,11 @@
       tables: tables,
       tableOptions: mkOpts(tables),
       datasets: [
-        { key: "cat_element", label: "催化材料元素特征数据集", tables: ["material_catalyst"], group: "元素特征类", coverage: "1,200 种元素特征", rows: 1200, size: 18.6, desc: "催化材料的元素特征：周期数与族数、元素电荷、相对原子质量、原子半径、价电子数、d 带中心等。" },
-        { key: "cat_structure", label: "催化材料结构特征数据集", tables: ["material_catalyst"], group: "结构特征类", coverage: "8,600 种表面结构", rows: 8600, size: 246.8, desc: "催化材料的结构特征：形貌结构图、点群与空间群、活性位点配位数、晶面指数与对称性函数。" },
-        { key: "cat_single_atom", label: "单原子催化剂数据集", tables: ["material_catalyst"], group: "单原子类", coverage: "9,200 组吸附构型", rows: 9200, size: 312.4, desc: "单原子催化剂的吸附与反应路径数据：吸附能、活化能、反应路径、中间产物与选择性。" },
-        { key: "cat_alloy", label: "二元合金数据集", tables: ["material_catalyst"], group: "二元合金类", coverage: "8,600 组吸附构型", rows: 8600, size: 298.5, desc: "二元合金催化剂的吸附与反应路径数据：吸附能、活化能、反应路径、中间产物与选择性。" },
-        { key: "cat_grain", label: "晶界数据集", tables: ["material_catalyst"], group: "晶界类", coverage: "4,220 组晶界构型", rows: 4220, size: 186.2, desc: "不同晶粒取向分界面（晶界）处的吸附与反应路径数据。" },
+        { key: "cat_element", label: "催化材料元素特征数据集", tables: ["material_catalyst"], group: "元素特征类", coverage: "1,200 种元素特征", rows: 1200, size: 18.6, desc: "催化材料的元素特征：周期数与族数、元素电荷、相对原子质量、原子半径、价电子数、p/d 轨道电子数、第一电离能、电子亲和势、电负性、d 带中心。" },
+        { key: "cat_structure", label: "催化材料结构特征数据集", tables: ["material_catalyst_structure"], group: "结构特征类", coverage: "8,600 种表面结构", rows: 8600, size: 246.8, desc: "催化材料的结构特征：形貌结构图、点群与空间群、晶系、活性位点配位数、广义配位数、对称性函数等结构描述符。" },
+        { key: "cat_single_atom", label: "单原子催化剂数据集", tables: ["material_catalyst_reaction"], group: "单原子类", coverage: "9,200 组吸附构型", rows: 9200, size: 312.4, desc: "单原子催化剂的吸附与反应路径数据：掺杂原子参数、吸附分子种类与构型、吸附位点、吸附能、活化能、反应路径、中间产物与选择性。" },
+        { key: "cat_alloy", label: "二元合金数据集", tables: ["material_catalyst_reaction"], group: "二元合金类", coverage: "8,600 组吸附构型", rows: 8600, size: 298.5, desc: "二元合金催化剂的吸附与反应路径数据：掺杂原子参数、吸附分子种类与构型、吸附位点、吸附能、活化能、反应路径、中间产物与选择性。" },
+        { key: "cat_grain", label: "晶界数据集", tables: ["material_catalyst_reaction"], group: "晶界类", coverage: "4,220 组晶界构型", rows: 4220, size: 186.2, desc: "不同晶粒取向分界面（晶界）处的吸附与反应路径数据：晶界取向、晶界处吸附原子、吸附能与反应路径。" },
         { key: "cat_system", label: "体系特征数据集", tables: ["material_catalyst"], group: "体系特征类", coverage: "3,100 个体系", rows: 3100, size: 62.4, desc: "催化体系的电子特征：费米能级、掺杂形成能与体系磁矩。" }
       ],
       materials: materials,
@@ -1335,25 +1404,43 @@
   /* ==========================================================================
      2. 页面状态
      ========================================================================== */
+  /* 页签口径（20260930 二次改造后）：
+       库级    ① 字段信息（默认；全部字段平铺成一张表，不再按物理库表分组）
+               ② 信息概览
+               —— 原「数据内容」页签、字段搜索工具条、按表分组折叠头均已按需求移除。
+       数据集级 ① 数据样例（默认）② 信息概览
+               —— 原「数据内容」「字段信息」页签已按需求移除，数据集级只保留这两个页签。 */
   var DB_TABS = ["fields", "overview"];
-  var DS_TABS = ["info", "overview"];
+  var DS_TABS = ["sample", "overview"];
 
   function getState() {
     var blank = function () {
-      return { open: { "db-root": true }, node: "db-root", tab: "fields", q1: "", q1b: "", page: {}, per: 10, customDs: [], hidden: {} };
+      return {
+        open: { "db-root": true }, node: "db-root", tab: "fields",
+        q1: "", q1b: "", qc: "", grpOpen: {},
+        page: {}, per: 10, customDs: [], hidden: {}
+      };
     };
     if (typeof state === "undefined") return blank();
     if (!state[STATE_KEY]) state[STATE_KEY] = blank();
     var s = state[STATE_KEY];
     if (!s.open) s.open = { "db-root": true };
     if (!s.node) s.node = "db-root";
-    /* 页签口径迁移：tables → fields（库级）、sample → info（数据集级） */
+    /* 页签口径迁移：
+         早期 tables/sample → fields/info；
+         上次改造 info → sample（数据集级样例）、fields 仍为字段信息；
+         20260930 二次改造：数据集级只剩「数据样例 / 信息概览」，旧的 content / fields
+         状态按当前节点回落（库级 → fields，数据集级 → sample）。 */
     if (s.tab === "tables") s.tab = "fields";
-    if (s.tab === "sample") s.tab = "info";
+    if (s.tab === "info") s.tab = "sample";
+    if (s.tab === "content") s.tab = (!s.node || s.node === "db-root") ? "fields" : "sample";
+    if (s.tab === "fields" && s.node && String(s.node).indexOf("ds:") === 0) s.tab = "sample";
     if (!s.tab) s.tab = "fields";
     if (typeof s.q1 !== "string") s.q1 = "";
     if (typeof s.q1b !== "string") s.q1b = "";
+    if (typeof s.qc !== "string") s.qc = "";
     if (!s.page || typeof s.page !== "object") s.page = {};
+    if (!s.grpOpen || typeof s.grpOpen !== "object") s.grpOpen = {};
     if (typeof s.per !== "number") s.per = 10;
     if (!s.customDs || typeof s.customDs.push !== "function") s.customDs = [];
     if (!s.hidden || typeof s.hidden !== "object") s.hidden = {};
@@ -1517,6 +1604,64 @@
       P + ".t2d-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 4px 0; color:#93a8c4; font-size:12.5px; }",
       P + ".t2d-foot b { color:#4e6b8d; }",
 
+      /* ---- 数据内容（默认视图）：指标条 + 数据集卡片 + 性质清单 ---- */
+      P + ".t2d-stat { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin:0 0 14px; }",
+      P + ".t2d-stat-item { padding:14px 16px; border:1px solid #e6eef9; border-radius:10px; background:linear-gradient(180deg,#fbfdff,#f6faff); }",
+      P + ".t2d-stat-item b { display:block; color:#0b2a63; font-size:21px; font-weight:800; line-height:1.25; font-variant-numeric:tabular-nums; }",
+      P + ".t2d-stat-item span { display:block; margin-top:4px; color:#8ba0bb; font-size:12.5px; }",
+      P + ".t2d-stat-item i { font-style:normal; color:#165DFF; font-size:12px; font-weight:700; }",
+      P + ".t2d-dsgrid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }",
+      P + ".t2d-dscard { display:flex; flex-direction:column; padding:16px 18px; border:1px solid #e6eef9; border-radius:11px; background:#fff; transition:border-color .15s ease, box-shadow .15s ease; }",
+      P + ".t2d-dscard:hover { border-color:#a9c6ee; box-shadow:0 6px 18px rgba(22,93,255,.08); }",
+      P + ".t2d-dscard-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }",
+      P + ".t2d-dscard-title { display:flex; align-items:center; gap:8px; min-width:0; }",
+      P + ".t2d-dscard-title b { color:#12315e; font-size:14px; font-weight:800; }",
+      P + ".t2d-dscard-title button { border:0; background:transparent; padding:0; color:#12315e; font-size:14px; font-weight:800; font-family:inherit; cursor:pointer; text-align:left; }",
+      P + ".t2d-dscard-title button:hover { color:#165DFF; text-decoration:underline; }",
+      P + ".t2d-dscard-grp { flex:0 0 auto; padding:1px 8px; border-radius:5px; background:#eef4fd; color:#5c86c9; font-size:11.5px; font-weight:700; white-space:nowrap; }",
+      P + ".t2d-dscard-meta { display:flex; gap:16px; flex-wrap:wrap; margin:9px 0 0; color:#7c90ab; font-size:12px; }",
+      P + ".t2d-dscard-meta b { color:#31527d; font-weight:700; font-variant-numeric:tabular-nums; }",
+      P + ".t2d-dscard-desc { margin:9px 0 0; color:#6f8298; font-size:12.5px; line-height:1.7; }",
+      P + ".t2d-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:11px; }",
+      P + ".t2d-chip { display:inline-flex; align-items:center; gap:4px; max-width:100%; padding:2px 9px; border-radius:20px; background:#f4f8fd; border:1px solid #e4ecf8; color:#4e6b8d; font-size:11.5px; }",
+      P + ".t2d-chip em { font-style:normal; color:#a3b4ca; font-size:10.5px; }",
+      P + ".t2d-chip.is-img { background:#fff4e8; border-color:#ffe0bd; color:#b26a00; }",
+      P + ".t2d-chip.is-num { background:#eaf6ef; border-color:#c8ecd8; color:#1e7e45; }",
+      P + ".t2d-chip.is-json { background:#f3efff; border-color:#e0d6fb; color:#6b46c9; }",
+      P + ".t2d-chip.is-time { background:#eaf3ff; border-color:#cfe3ff; color:#165DFF; }",
+      P + ".t2d-chip.is-more { background:#f1f5fb; border-color:#e3e9f2; color:#8ba0bb; }",
+      P + ".t2d-acts { display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding:11px 14px; margin-bottom:12px; border:1px solid #e6eef9; border-radius:10px; background:#fafcff; }",
+      P + ".t2d-acts .t2d-acts-label { margin-right:auto; color:#8ba0bb; font-size:12.5px; }",
+      P + ".t2d-act { min-height:32px; padding:0 13px; border:1px solid #ccd9ea; border-radius:8px; background:#fff; color:#3d5678; font-size:12.5px; font-family:inherit; font-weight:600; cursor:pointer; }",
+      P + ".t2d-act:hover { border-color:#a9c6ee; color:#165DFF; background:#f5f9ff; }",
+      P + ".t2d-act.is-primary { border-color:#165DFF; background:#165DFF; color:#fff; }",
+      P + ".t2d-act.is-primary:hover { background:#0b47c8; color:#fff; }",
+      P + ".t2d-sec { margin-top:16px; }",
+      P + ".t2d-sec-title { display:flex; align-items:center; gap:8px; margin:0 0 10px; color:#12315e; font-size:14px; font-weight:800; }",
+      P + ".t2d-sec-title::before { content:''; width:3px; height:13px; border-radius:2px; background:#165DFF; }",
+      P + ".t2d-sec-title small { color:#a3b4ca; font-size:12px; font-weight:600; }",
+      P + ".t2d-kind { display:inline-flex; align-items:center; padding:1px 8px; border-radius:5px; font-size:11.5px; font-weight:700; white-space:nowrap; }",
+      P + ".t2d-kind.is-img { background:#fff4e8; color:#b26a00; }",
+      P + ".t2d-kind.is-num { background:#eaf6ef; color:#1e7e45; }",
+      P + ".t2d-kind.is-json { background:#f3efff; color:#6b46c9; }",
+      P + ".t2d-kind.is-time { background:#eaf3ff; color:#165DFF; }",
+      P + ".t2d-kind.is-str { background:#f1f5fb; color:#6b829e; }",
+      P + ".t2d-kind.is-enum { background:#fdf0f4; color:#c03a68; }",
+
+      /* ---- 字段信息：按数据表分组折叠 ---- */
+      P + ".t2d-grp { border:1px solid #e6eef9; border-radius:11px; overflow:hidden; background:#fff; }",
+      P + ".t2d-grp + .t2d-grp { margin-top:10px; }",
+      P + ".t2d-grp-head { display:flex; align-items:center; gap:9px; width:100%; padding:12px 16px; border:0; border-bottom:1px solid #eef3fa; background:#fafcff; color:#12315e; font-size:13.5px; font-weight:800; font-family:inherit; text-align:left; cursor:pointer; }",
+      P + ".t2d-grp-head:hover { background:#f4f9ff; }",
+      P + ".t2d-grp-caret { flex:0 0 auto; color:#8ba0bb; font-size:10px; transition:transform .18s ease; }",
+      P + ".t2d-grp-head.is-open .t2d-grp-caret { transform:rotate(90deg); }",
+      P + ".t2d-grp-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }",
+      P + ".t2d-grp-name em { font-style:normal; color:#a3b4ca; font-size:12px; font-weight:600; margin-left:6px; }",
+      P + ".t2d-grp-cnt { flex:0 0 auto; padding:1px 8px; border-radius:20px; background:#eef3fa; color:#7b90ad; font-size:11.5px; font-weight:700; }",
+      P + ".t2d-grp-body.is-folded { display:none; }",
+      P + ".t2d-grp-body .t2d-table thead th { background:#fbfdff; }",
+      P + ".t2d-grp-empty { padding:16px; color:#a3b4ca; font-size:12.5px; }",
+
       /* ---- 信息概览 ---- */
       P + ".t2d-sec-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px 12px; border-bottom:1px solid #eef3fa; }",
       P + ".t2d-sec-head h4 { display:flex; align-items:center; gap:7px; margin:0; color:#12315e; font-size:14px; font-weight:800; }",
@@ -1558,6 +1703,25 @@
       ".t2d-form-item input::placeholder { color:#a8b9d0; }",
       ".t2d-form-tip { margin:7px 0 0; color:#a3b4ca; font-size:12px; line-height:1.7; }",
       ".t2d-form-err { margin:7px 0 0; color:#d63864; font-size:12px; }",
+
+      /* ---- 只读弹窗（质量报告 / 版本历史）：挂在 body 下，必须用全局选择器 ---- */
+      ".t2d-tag { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11.5px; line-height:1.75; white-space:nowrap; border:1px solid transparent; }",
+      ".t2d-tag.t-gray { background:#f2f5fa; border-color:#e3e9f2; color:#6f8298; }",
+      ".t2d-mini-info { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px 24px; padding:2px 0 16px; border-bottom:1px dashed #e9eff8; }",
+      ".t2d-mini-info > div { min-width:0; }",
+      ".t2d-mini-info dt { margin:0 0 3px; color:#8ba0bb; font-size:12px; }",
+      ".t2d-mini-info dd { margin:0; color:#2f4a70; font-size:13px; line-height:1.6; word-break:break-word; }",
+      ".t2d-mini-sec { display:flex; align-items:center; gap:7px; margin:16px 0 10px; color:#12315e; font-size:13.5px; font-weight:800; }",
+      ".t2d-mini-sec::before { content:''; width:3px; height:12px; border-radius:2px; background:#165DFF; }",
+      ".t2d-mini-table { width:100%; border-collapse:separate; border-spacing:0; }",
+      ".t2d-mini-table th, .t2d-mini-table td { padding:9px 11px; border-bottom:1px solid #f0f4fa; font-size:12.5px; color:#4e6b8d; text-align:left; vertical-align:middle; }",
+      ".t2d-mini-table th { background:#f7fafe; color:#33527a; font-weight:700; font-size:12px; white-space:nowrap; }",
+      ".t2d-mini-table td.num { text-align:right; font-variant-numeric:tabular-nums; color:#33527a; font-weight:600; }",
+      ".t2d-mini-table th.num { text-align:right; }",
+      ".t2d-mini-table td.mono { font-family:Consolas,\"Courier New\",monospace; font-size:12px; color:#1e3c66; white-space:nowrap; }",
+      ".t2d-mini-table td.wrap { white-space:normal; min-width:140px; }",
+      ".t2d-qbar { position:relative; height:7px; min-width:96px; border-radius:20px; background:#eef3fa; overflow:hidden; }",
+      ".t2d-qbar > i { position:absolute; left:0; top:0; bottom:0; border-radius:20px; }",
       ".t2d-form-item.is-error input[data-t2d-f-name], .t2d-form-item.is-error select { border-color:#d63864 !important; box-shadow:0 0 0 2px rgba(214,56,100,.1); }",
 
       /* ---- 关联数据表多选下拉（面板内联展开，避免被 modal-body 的 overflow 裁切） ---- */
@@ -1782,13 +1946,11 @@
         + '</tr>';
     }).join("");
 
-    /* 指标卡片 + 页脚来源说明已按需求移除，页面直接从工具条开始 */
-    return '<div class="t2d-bar">'
-      + '<div class="t2d-bar-input"><input type="text" placeholder="请输入字段英文名 / 中文名搜索" value="' + esc(s.q1b || "") + '" data-t2d-q1b><span class="t2d-search-ico">⌕</span></div>'
-      + '</div>'
-      + '<div class="t2d-card"><div class="t2d-tw"><table class="t2d-table"><thead><tr>'
+    /* 20260930 二次改造：字段搜索工具条与「按表分组显示」提示已按需求移除，
+       全部字段直接平铺成一张表（用「所属数据表」列标识字段来自哪张库表）。 */
+    return '<div class="t2d-card"><div class="t2d-tw"><table class="t2d-table"><thead><tr>'
       + '<th class="num">序号</th><th class="mono">所属数据表</th><th class="mono">字段英文名</th><th>字段中文名</th><th>数据类型</th><th>是否非空</th><th class="mono">默认值</th>'
-      + '</tr></thead><tbody>' + (rows || '<tr><td colspan="7"><div class="t2d-empty">没有匹配的字段，请调整搜索关键词。</div></td></tr>') + '</tbody></table></div>'
+      + '</tr></thead><tbody>' + (rows || '<tr><td colspan="7"><div class="t2d-empty">该库暂无字段定义。</div></td></tr>') + '</tbody></table></div>'
       + (list.length ? renderPager(p, "个字段") : '') + '</div>';
   }
 
@@ -1813,7 +1975,19 @@
   }
 
   /* ==========================================================================
-     8. 右侧：数据集级视图（数据信息 / 信息概览）
+     7.5 数据内容（数据集级视图）—— 已下线
+
+     20260930 二次改造：数据集级页签收敛为「数据样例 / 信息概览」，原「数据内容」
+     页签（收录内容清单 + 数据集级操作按钮）已按需求整体移除，其专属渲染函数
+     kindOfField / contentItemsOf / renderContentTable / renderDatasetContent 一并删除。
+     ========================================================================== */
+
+  /* 20260930 二次改造：库级「字段信息」不再按物理库表分组，改为全部字段平铺展示
+     （见上方 renderDbFields，用「所属数据表」列标识来源表）；分组渲染 groupFieldsHtml、
+     数据集级 renderDatasetFields 已一并删除。 */
+
+  /* ==========================================================================
+     8. 右侧：数据集级视图（数据样例 / 信息概览）
      ========================================================================== */
   function renderDatasetInfo(ds) {
     var s = getState();
@@ -1863,7 +2037,10 @@
 
     /* 数据集「数据信息」工具条提示已按需求移除，直接从表格开始 */
     return '<div class="t2d-card"><div class="t2d-tw"><table class="t2d-table is-sample"><thead>' + head + '</thead><tbody>'
-      + (body || '<tr><td colspan="' + (cols.length + 2) + '"><div class="t2d-empty">该数据集暂无数据信息。</div></td></tr>')
+      /* E14：数据集为空不能只写「暂无」，必须给出上游出口 */
+      + (body || '<tr><td colspan="' + (cols.length + 2) + '"><div class="t2d-empty">该数据集暂无数据，等待「数据标准化」归档后推送入库。' +
+        '<div style="margin-top:12px"><button type="button" class="t2d-act is-primary" data-t2d-goto-std="1">查看上游标准化任务 →</button></div>' +
+        '</div></td></tr>')
       + '</tbody></table></div>'
       + renderPager(p, "条记录") + '</div>'
       /* 页脚左半句「数据来源：…」已按需求移除，仅保留右侧列顺序说明 */
@@ -2031,6 +2208,114 @@
     document.body.appendChild(mask);
   }
 
+  /* ==========================================================================
+     9.1 数据集级只读弹窗：质量报告 / 版本历史
+
+     需求 28-51 只要求数据集在库内可检索、可下载；质量与版本是验收时常被追问的两项，
+     因此以只读弹窗的形式补齐，不新增页面。数值按数据集 key 做确定性派生，
+     保证同一数据集每次打开一致，不同数据集之间有区分度。
+     ========================================================================== */
+  function seedOf(str, span) {
+    var h = 0, i;
+    for (i = 0; i < String(str).length; i++) h = (h * 31 + String(str).charCodeAt(i)) % 100000;
+    return h % (span || 100);
+  }
+
+  function openInfoModal(title, sub, bodyHtml, width) {
+    closeModal();
+    var mask = document.createElement("div");
+    mask.className = "t2d-modal-mask";
+    mask.id = "t2dModalMask";
+    mask.innerHTML = '<div class="t2d-modal" role="dialog" aria-modal="true" style="width:min('
+        + (width || 620) + 'px,96vw);">'
+      + '<div class="t2d-modal-head">'
+      + '<div><h3>' + esc(title) + '</h3><p>' + esc(sub || "") + '</p></div>'
+      + '<button type="button" data-t2d-modal-close aria-label="关闭">×</button>'
+      + '</div>'
+      + '<div class="t2d-modal-body">' + bodyHtml + '</div>'
+      + '<div class="t2d-modal-foot">'
+      + '<button class="t2d-btn" type="button" data-t2d-modal-close>关闭</button>'
+      + '</div></div>';
+    mask.setAttribute("data-t2d-mode", "info");
+    mask.setAttribute("data-t2d-page", PAGE_ID);
+    mask.addEventListener("click", function (e) { if (e.target === mask) closeModal(); });
+    document.body.appendChild(mask);
+  }
+
+  function openQualityReport(ds) {
+    if (!ds) return;
+    var base = seedOf(ds.key, 40);   /* 0~39，用于派生各维度得分 */
+    var dims = [
+      { name: "完整性", score: 96 + (base % 4), tip: "必填字段非空比例", weight: "30%" },
+      { name: "唯一性", score: 97 + (base % 3), tip: "材料业务标识去重后占比", weight: "20%" },
+      { name: "有效性", score: 92 + (base % 7), tip: "取值落在标准口径 / 量纲区间内的比例", weight: "25%" },
+      { name: "一致性", score: 94 + (base % 5), tip: "与上游标准化归档产物逐条比对一致率", weight: "15%" },
+      { name: "时效性", score: 88 + (base % 9), tip: "近 12 个月内入库或复核的数据占比", weight: "10%" }
+    ];
+    var total = 0;
+    dims.forEach(function (d) { total += d.score * (parseInt(d.weight, 10) / 100); });
+    total = Math.round(total * 10) / 10;
+    var grade = total >= 95 ? "A 级（可直接交付）" : total >= 90 ? "B 级（可交付，需备注偏差）" : "C 级（需返工）";
+
+    var rows = dims.map(function (d) {
+      var cls = d.score >= 95 ? "#1e7e45" : d.score >= 90 ? "#b26a00" : "#d63864";
+      return '<tr><td>' + esc(d.name) + '</td><td class="mono">' + esc(d.weight) + '</td>'
+        + '<td class="wrap" style="color:#7c90ab;font-size:12.5px;">' + esc(d.tip) + '</td>'
+        + '<td><div class="t2d-qbar"><i style="width:' + d.score + '%;background:' + cls + '"></i></div></td>'
+        + '<td class="num" style="color:' + cls + ';font-weight:800;">' + d.score + '</td></tr>';
+    }).join("");
+
+    var body = ''
+      + '<div class="t2d-mini-info">'
+      + '<div><dt>数据集</dt><dd>' + esc(ds.label) + '</dd></div>'
+      + '<div><dt>数据量</dt><dd>' + fmt(ds.rows) + ' 条</dd></div>'
+      + '<div><dt>覆盖规模</dt><dd>' + esc(ds.coverage) + '</dd></div>'
+      + '<div><dt>综合得分</dt><dd><b style="color:#165DFF;font-size:16px;">' + total + '</b> / 100</dd></div>'
+      + '<div><dt>质量等级</dt><dd>' + esc(grade) + '</dd></div>'
+      + '<div><dt>最近质检</dt><dd>' + esc(DB_META.updated) + '</dd></div>'
+      + '</div>'
+      + '<div class="t2d-mini-sec">质检维度明细</div>'
+      + '<table class="t2d-mini-table"><thead><tr><th>维度</th><th>权重</th><th>口径</th><th>达成情况</th><th class="num">得分</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + '<p class="t2d-form-tip" style="margin-top:14px;">质检规则取自「数据标准化 → 标准规则库」中的数据质量衡量标准；'
+      + '得分低于 90 的维度会在标准化执行环节生成待补数据单，回到「数据录入」环节补齐。</p>';
+
+    openInfoModal("数据质量报告", esc(ds.label) + " · 功能清单编号 28-51", body, 660);
+  }
+
+  function openVersionHistory(ds) {
+    if (!ds) return;
+    var types = [
+      { v: "v1.3", t: "增量入库", d: "本周期标准化归档产物入库，新增 " + fmt(Math.max(1, Math.round(ds.rows * 0.04))) + " 条", delta: "+" + fmt(Math.max(1, Math.round(ds.rows * 0.04))) },
+      { v: "v1.2", t: "字段口径修订", d: "对齐标准规则库 R-07（单位统一为 eV / Å）", delta: "0" },
+      { v: "v1.1", t: "数据修正", d: "修正 " + (3 + seedOf(ds.key, 12)) + " 条异常量纲记录", delta: "0" },
+      { v: "v1.0", t: "全量入库", d: "首次完成数据集入库并发布检索", delta: fmt(ds.rows) }
+    ];
+    var rows = types.map(function (it, i) {
+      return '<tr>'
+        + '<td class="mono">' + esc(it.v) + '</td>'
+        + '<td>' + esc(it.t) + '</td>'
+        + '<td class="wrap">' + esc(it.d) + '</td>'
+        + '<td class="num">' + esc(it.delta) + '</td>'
+        + '<td>' + esc(DB_META.creator || "系统") + '</td>'
+        + '<td class="mono">' + esc(DB_META.updated) + '</td>'
+        + '<td>' + (i === 0 ? '<span class="t2d-tag" style="background:#eaf6ef;color:#1e7e45;">当前版本</span>' : '<span class="t2d-tag t-gray">已归档</span>') + '</td>'
+        + '</tr>';
+    }).join("");
+
+    var body = ''
+      + '<div class="t2d-mini-info">'
+      + '<div><dt>数据集</dt><dd>' + esc(ds.label) + '</dd></div>'
+      + '<div><dt>当前版本</dt><dd><b style="color:#165DFF;">v1.3</b></dd></div>'
+      + '<div><dt>当前数据量</dt><dd>' + fmt(ds.rows) + ' 条</dd></div>'
+      + '<div><dt>关联数据表</dt><dd class="mono" style="font-size:12px;">' + esc(ds.tableText) + '</dd></div>'
+      + '</div>'
+      + '<div class="t2d-mini-sec">版本记录</div>'
+      + '<table class="t2d-mini-table"><thead><tr><th>版本</th><th>变更类型</th><th>变更说明</th><th class="num">数据量变化</th><th>操作人</th><th>发布时间</th><th>状态</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + '<p class="t2d-form-tip" style="margin-top:14px;">每次标准化执行归档后自动生成新版本；历史版本保留可追溯，不做物理删除。</p>';
+
+    openInfoModal("版本历史", esc(ds.label) + " · 变更可追溯", body, 760);
+  }
+
   function formError(el, msg) {
     var item = el.closest(".t2d-form-item");
     if (!item) return;
@@ -2097,7 +2382,7 @@
       s.customDs.push(def);
       s.open["db-root"] = true;
       s.node = "ds:" + nk;
-      s.tab = "info";
+      s.tab = "sample";
       closeModal();
       renderPage();
       toast("数据集「" + name + "」已新增");
@@ -2171,12 +2456,12 @@
     } else {
       var ds = DS[s.node.slice(3)];
       if (!ds) { s.node = "db-root"; s.tab = "fields"; return renderPage(); }
-      if (DS_TABS.indexOf(s.tab) < 0) s.tab = "info";
+      if (DS_TABS.indexOf(s.tab) < 0) s.tab = "sample";
       /* 数据集标题区按需求精简：去掉「数据集」徽标、库表徽标与标题下描述段 */
       right = '<div class="t2d-crumb"><span>低维材料主题库</span><span>／</span><span>低维材料数据库</span><span>／</span><span>' + esc(DB_META.name) + '</span><span>／</span><b>' + esc(ds.label) + '</b></div>'
         + '<div class="t2d-title-row"><h2>' + esc(ds.label) + '</h2></div>'
         + '<div class="t2d-tabs">'
-        + '<button class="t2d-tab' + (s.tab === "info" ? " is-active" : "") + '" type="button" data-t2d-tab="info">数据信息</button>'
+        + '<button class="t2d-tab' + (s.tab === "sample" ? " is-active" : "") + '" type="button" data-t2d-tab="sample">数据样例</button>'
         + '<button class="t2d-tab' + (s.tab === "overview" ? " is-active" : "") + '" type="button" data-t2d-tab="overview">信息概览</button>'
         + '</div>'
         + (s.tab === "overview" ? renderDatasetOverview(ds) : renderDatasetInfo(ds));
@@ -2258,25 +2543,56 @@
         return;
       }
 
+      /* ---- 数据集级操作：导出 / 质量报告 / 版本历史 ---- */
+      hit = el.closest("[data-t2d-dsact]");
+      if (hit) {
+        var actKey = hit.getAttribute("data-t2d-dskey");
+        var actDs = DS[actKey];
+        var actName = actDs ? actDs.label : actKey;
+        var act = hit.getAttribute("data-t2d-dsact");
+        if (act === "export") {
+          toast("已提交「" + actName + "」导出任务，完成后可在下载中心获取（" + fmt(actDs ? actDs.rows : 0) + " 条）");
+        } else if (act === "quality") {
+          openQualityReport(actDs);
+        } else if (act === "version") {
+          openVersionHistory(actDs);
+        }
+        return;
+      }
+
+      /* ---- 空态出口：跳上游标准化页 ---- */
+      hit = el.closest("[data-t2d-goto-std]");
+      if (hit) {
+        var stdPid = "lowdim-standardization-" + (cfg.key || "twod");
+        try {
+          if (typeof switchPage === "function") switchPage(stdPid);
+          else if (typeof goToPage === "function") goToPage(stdPid);
+        } catch (err) { /* ignore */ }
+        return;
+      }
+
       /* ---- 页签 ---- */
       hit = el.closest("[data-t2d-tab]");
-      if (hit) { s.tab = hit.getAttribute("data-t2d-tab"); s.q1b = ""; renderPage(); return; }
+      if (hit) { s.tab = hit.getAttribute("data-t2d-tab"); s.q1b = ""; s.qc = ""; renderPage(); return; }
 
       /* ---- 目录节点 ---- */
       hit = el.closest("[data-t2d-node]");
       if (hit) {
         node = hit.getAttribute("data-t2d-node");
         s.node = node;
-        s.tab = node === "db-root" ? "fields" : "info";
+        s.tab = "sample";       /* 20260930：数据集级默认落在「数据样例」 */
         s.q1b = "";
+        s.qc = "";
         renderPage(); return;
       }
 
       hit = el.closest("[data-t2d-toggle]");
       if (hit) {
         var id = hit.getAttribute("data-t2d-toggle");
-        if (s.node === id) { s.node = "db-root"; s.tab = "fields"; }
-        else { s.node = id; s.tab = "fields"; }
+        if (s.node === id) { s.node = "db-root"; }
+        else { s.node = id; }
+        /* 20260930：库级只有「字段信息 / 信息概览」，数据集级只有「数据样例 / 信息概览」 */
+        s.tab = s.node === "db-root" ? "fields" : "sample";
         s.open[id] = !s.open[id];
         renderPage(); return;
       }
@@ -2291,6 +2607,10 @@
         s.q1b = el.value;
         s.page["dbFields"] = 1;
         renderPage(); keepFocus("[data-t2d-q1b]"); return;
+      }
+      if (el.matches("[data-t2d-qc]")) {
+        s.qc = el.value;
+        renderPage(); keepFocus("[data-t2d-qc]"); return;
       }
       /* 表单输入：清除该项错误态 */
       if (el.matches("[data-t2d-f-name]")) clearFormError(el);
