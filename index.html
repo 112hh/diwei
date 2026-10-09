@@ -2,94 +2,23 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>低维材料主题库 · 页面导航</title>
+  <meta http-equiv="refresh" content="0; url=%E4%BD%8E%E7%BB%B4%E6%9D%90%E6%96%99%E4%B8%BB%E9%A2%98%E5%BA%93.html">
+  <title>低维材料主题库</title>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 32px 28px 56px; background: #f5f8fc; color: #22395c;
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+           background: #f5f8fc; color: #22395c;
            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
-    .wrap { max-width: 1180px; margin: 0 auto; }
-    h1 { margin: 0 0 6px; font-size: 26px; }
-    .sub { margin: 0 0 26px; color: #6b7f9c; font-size: 14px; }
-    .quick { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
-    .quick a { padding: 9px 16px; border-radius: 10px; background: #165DFF; color: #fff;
-               font-size: 14px; text-decoration: none; }
-    .quick a.gray { background: #fff; color: #3d4d68; border: 1px solid #cbd8eb; }
-    .nav-group { margin-bottom: 22px; }
-    .nav-group h2 { margin: 0 0 10px; font-size: 15px; color: #165DFF; }
-    .nav-items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-    .nav-item { display: flex; align-items: center; justify-content: space-between; gap: 10px;
-                padding: 12px 14px; border: 1px solid #dde6f2; border-radius: 10px; background: #fff;
-                color: #22395c; text-decoration: none; font-size: 14px; }
-    .nav-item:hover { border-color: #165DFF; box-shadow: 0 4px 14px rgba(22,93,255,.12); }
-    .nav-item code { color: #94a5bd; font-size: 12px; }
-    @media (max-width: 900px) { .nav-items { grid-template-columns: 1fr; } }
+    .box { text-align: center; font-size: 15px; }
+    .box a { color: #165DFF; text-decoration: none; }
+    .box a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>低维材料主题库 · 页面导航</h1>
-    <p class="sub">按左侧菜单栏拆分为 36 个独立页面，每个页面打开后直达对应功能；<code>low-dim-materials.html</code> 为完整应用入口（登录后可切换全部页面）。</p>
-    <div class="quick">
-      <a href="low-dim-materials.html">完整应用入口（含登录）</a>
-      <a class="gray" href="portal.html">门户首页</a>
-    </div>
-    <section class="nav-group"><h2>监控统计</h2><div class="nav-items">
-      <a class="nav-item" href="dashboard.html"><span>数据看板</span><code>dashboard.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>低维材料标准体系</h2><div class="nav-items">
-      <a class="nav-item" href="standard-twod.html"><span>低维材料标准体系</span><code>standard-twod.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>低维材料数据入库</h2><div class="nav-items">
-      <a class="nav-item" href="lowdim-ingest-twod.html"><span>二维材料数据采集加工处理</span><code>lowdim-ingest-twod.html</code></a>
-      <a class="nav-item" href="lowdim-ingest-opto.html"><span>有机光电材料数据采集加工处理</span><code>lowdim-ingest-opto.html</code></a>
-      <a class="nav-item" href="lowdim-ingest-electrolyte.html"><span>电解质材料数据采集加工处理</span><code>lowdim-ingest-electrolyte.html</code></a>
-      <a class="nav-item" href="lowdim-ingest-mlff.html"><span>机器学习力场数据采集加工处理</span><code>lowdim-ingest-mlff.html</code></a>
-      <a class="nav-item" href="lowdim-ingest-catalyst.html"><span>催化材料数据采集加工处理</span><code>lowdim-ingest-catalyst.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>低维材料数据标准化</h2><div class="nav-items">
-      <a class="nav-item" href="lowdim-standardization-twod.html"><span>二维材料数据库标准化</span><code>lowdim-standardization-twod.html</code></a>
-      <a class="nav-item" href="lowdim-standardization-opto.html"><span>有机光电材料数据库标准化</span><code>lowdim-standardization-opto.html</code></a>
-      <a class="nav-item" href="lowdim-standardization-electrolyte.html"><span>电解质材料数据库标准化</span><code>lowdim-standardization-electrolyte.html</code></a>
-      <a class="nav-item" href="lowdim-standardization-mlff.html"><span>机器学习力场数据库标准化</span><code>lowdim-standardization-mlff.html</code></a>
-      <a class="nav-item" href="lowdim-standardization-catalyst.html"><span>催化材料数据库标准化</span><code>lowdim-standardization-catalyst.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>低维材料数据库</h2><div class="nav-items">
-      <a class="nav-item" href="lowdim-database-twod.html"><span>二维材料数据库</span><code>lowdim-database-twod.html</code></a>
-      <a class="nav-item" href="lowdim-database-opto.html"><span>有机光电材料数据库</span><code>lowdim-database-opto.html</code></a>
-      <a class="nav-item" href="lowdim-database-electrolyte.html"><span>电解质材料数据库</span><code>lowdim-database-electrolyte.html</code></a>
-      <a class="nav-item" href="lowdim-database-mlff.html"><span>机器学习力场数据库</span><code>lowdim-database-mlff.html</code></a>
-      <a class="nav-item" href="lowdim-database-catalyst.html"><span>催化材料数据库</span><code>lowdim-database-catalyst.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>低维材料主题应用</h2><div class="nav-items">
-      <a class="nav-item" href="twod.html"><span>二维材料数据应用</span><code>twod.html</code></a>
-      <a class="nav-item" href="electrolyte.html"><span>电解质材料数据应用</span><code>electrolyte.html</code></a>
-      <a class="nav-item" href="opto.html"><span>有机光电材料应用</span><code>opto.html</code></a>
-      <a class="nav-item" href="mlff.html"><span>机器学习力场应用</span><code>mlff.html</code></a>
-      <a class="nav-item" href="catalyst.html"><span>催化材料数据应用</span><code>catalyst.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>低维材料数据库分析预测</h2><div class="nav-items">
-      <a class="nav-item" href="algorithms.html"><span>数据应用算法</span><code>algorithms.html</code></a>
-      <a class="nav-item" href="tools.html"><span>数据工具开发</span><code>tools.html</code></a>
-      <a class="nav-item" href="prediction-tasks.html"><span>预测任务管理</span><code>prediction-tasks.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>数据管理</h2><div class="nav-items">
-      <a class="nav-item" href="data-submit.html"><span>数据上传</span><code>data-submit.html</code></a>
-      <a class="nav-item" href="my-submissions.html"><span>我的提交</span><code>my-submissions.html</code></a>
-      <a class="nav-item" href="twod-review.html"><span>入库审核</span><code>twod-review.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>算法/工具管理</h2><div class="nav-items">
-      <a class="nav-item" href="sys-algorithm.html"><span>算法/接口管理</span><code>sys-algorithm.html</code></a>
-    </div></section>
-    <section class="nav-group"><h2>系统管理</h2><div class="nav-items">
-      <a class="nav-item" href="sys-permission.html"><span>权限审批</span><code>sys-permission.html</code></a>
-      <a class="nav-item" href="sys-user.html"><span>用户管理</span><code>sys-user.html</code></a>
-      <a class="nav-item" href="sys-role.html"><span>角色管理</span><code>sys-role.html</code></a>
-      <a class="nav-item" href="sys-menu.html"><span>菜单管理</span><code>sys-menu.html</code></a>
-      <a class="nav-item" href="sys-dict.html"><span>字典管理</span><code>sys-dict.html</code></a>
-      <a class="nav-item" href="system-config.html"><span>平台配置</span><code>system-config.html</code></a>
-      <a class="nav-item" href="sys-log.html"><span>操作日志</span><code>sys-log.html</code></a>
-    </div></section>
+  <div class="box">
+    正在进入 <a href="低维材料主题库.html">低维材料主题库</a>…
   </div>
+  <script>
+    location.replace('低维材料主题库.html');
+  </script>
 </body>
 </html>
