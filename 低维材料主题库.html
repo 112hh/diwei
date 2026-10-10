@@ -112856,6 +112856,26 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     lib.categories.forEach((category) => { total += stdCategoryRules(category).length; });
     return total;
   }
+  /* 2026-10-10：标准规则与体系文档关联 —— 从全局标准目录取本材料对应体系文档 */
+  function stdDocList(key) {
+    var typeMap = {
+      twod: "二维材料数据库标准",
+      opto: "有机光电材料数据库标准",
+      el: "电解质材料数据库标准",
+      electrolyte: "电解质材料数据库标准",
+      mlff: "机器学习力场数据库标准",
+      ca: "催化材料数据库标准",
+      catalyst: "催化材料数据库标准"
+    };
+    var cat = window.LOWDIM_STANDARD_CATALOG || [];
+    return cat.filter(function (x) { return x.standardType === typeMap[key]; });
+  }
+  function stdDocName(key, docId) {
+    if (!docId) return "-";
+    var list = stdDocList(key);
+    var doc = list.find(function (x) { return x.id === docId; });
+    return doc ? (doc.standardNo + " " + doc.standardName) : "-";
+  }
   function stdState(pageId) {
     if (!state.lowdimStd) state.lowdimStd = {};
     if (!state.lowdimStd[pageId]) {
@@ -113268,19 +113288,20 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           "<td>" + stdCell(record.type) + "</td>" +
           "<td>" + stdCell(record.basis, "wrap") + "</td>" +
           '<td><span class="lstd-clause">' + esc(clause) + "</span></td>" +
+          '<td>' + esc(stdDocName(stdKey(pageId), record.docId)) + '</td>' +
           '<td><div class="lstd-mod"><b>' + esc(mod.by) + "</b><span>" + esc(mod.at) + "</span></div></td>" +
           '<td><div class="lstd-row-actions">' +
             '<button type="button" data-lstd-rule-edit="' + esc(record.id) + '">编辑</button>' +
             '<button type="button" class="danger" data-lstd-rule-delete="' + esc(record.id) + '">删除</button>' +
           "</div></td></tr>";
       }).join("");
-      const header = section.title ? '<tr class="lstd-section-row"><td colspan="8">' + esc(section.title) + "</td></tr>" : "";
+      const header = section.title ? '<tr class="lstd-section-row"><td colspan="9">' + esc(section.title) + "</td></tr>" : "";
       return header + body;
     }).join("");
     return '<div class="lstd-table-wrap"><table class="lstd-table">' +
-      '<colgroup><col class="c-item"><col class="c-field"><col class="c-value"><col class="c-type"><col class="c-basis"><col class="c-req"><col class="c-mod"><col class="c-op"></colgroup>' +
+      '<colgroup><col class="c-item"><col class="c-field"><col class="c-value"><col class="c-type"><col class="c-basis"><col class="c-req"><col class="c-doc"><col class="c-mod"><col class="c-op"></colgroup>' +
       "<thead><tr><th>标准项</th><th>数据字段</th><th>标准值</th><th>数据类型</th><th>依据 / 说明</th>" +
-      "<th>来源条款</th><th>最近修改</th><th>操作</th></tr></thead>" +
+      "<th>来源条款</th><th>关联体系文档</th><th>最近修改</th><th>操作</th></tr></thead>" +
       "<tbody>" + sections + "</tbody></table></div>";
   }
 
@@ -113401,6 +113422,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     if (body) {
       const field = (label, id, value, placeholder) =>
         '<label><span>' + label + '</span><input id="' + id + '" type="text" value="' + esc(value || "") + '" placeholder="' + esc(placeholder || "") + '"></label>';
+      const docs = stdDocList(stdKey(pageId));
+      const docOptions = '<option value="">— 不关联 —</option>' + docs.map(function (d) {
+        return '<option value="' + esc(d.id) + '"' + ((record && record.docId === d.id) ? " selected" : "") + '>' + esc(d.standardNo + " " + d.standardName) + "</option>";
+      }).join("");
       body.innerHTML = '<div class="lstd-rule-form">' +
         '<div class="lstd-rule-form-row">' +
           field("标准项", "twodStdRuleItem", record && record.item, "如：截断能ENCUT") +
@@ -113409,6 +113434,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         '<div class="lstd-rule-form-row">' +
           field("标准值", "twodStdRuleValue", record && record.value, "如：500ev") +
           field("数据类型", "twodStdRuleType", record && record.type, "如：数字+单位") +
+        "</div>" +
+        '<div class="lstd-rule-form-row">' +
+          '<label><span>关联体系文档</span><select id="twodStdRuleDoc">' + docOptions + "</select></label>" +
         "</div>" +
         '<label><span>依据 / 说明</span><textarea id="twodStdRuleNote" rows="3" placeholder="请输入规则依据或说明">' + esc((record && record.basis) || "") + "</textarea></label>" +
         "</div>";
@@ -113426,12 +113454,13 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     const value = (document.getElementById("twodStdRuleValue") || {}).value || "";
     const type = (document.getElementById("twodStdRuleType") || {}).value || "";
     const basis = (document.getElementById("twodStdRuleNote") || {}).value || "";
+    const docId = (document.getElementById("twodStdRuleDoc") || {}).value || "";
     if (!item.trim() || !value.trim() || !type.trim()) {
       toast("标准规则校验", "请填写标准项、标准值和数据类型。");
       return;
     }
     const rows = st.rules[categoryKey] || (st.rules[categoryKey] = []);
-    const draft = { item: item.trim(), field: field.trim() || item.trim(), value: value.trim(), type: type.trim(), basis: basis.trim() };
+    const draft = { item: item.trim(), field: field.trim() || item.trim(), value: value.trim(), type: type.trim(), basis: basis.trim(), docId: docId.trim() };
     if (editing.mode === "edit") {
       const index = rows.findIndex((row) => row.id === editing.ruleId);
       if (index >= 0) rows[index] = Object.assign({}, rows[index], draft);
