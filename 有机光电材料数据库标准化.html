@@ -110434,7 +110434,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     document.getElementById("materialModalSubtitle").textContent = `${material.materialNumber} · ${material.englishName}`;
     sectionNav.hidden = false;
     sectionNav.innerHTML = [
-      ["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]
+      ["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["dos", "态密度信息"], ["external", "外部数据关联"]
     ].map(([key, label]) => `<button class="twod-detail-nav-btn${activePage === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button>`).join("");
 
     let container = modalBody.querySelector("#optoCustomDetail");
@@ -110469,6 +110469,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         <h5 class="opto-section-title">物性数据</h5><div class="opto-parameter-grid">${parameterMarkup("相对密度", material.relativeDensity)}${parameterMarkup("熔点", material.meltingPoint)}${parameterMarkup("沸点", material.boilingPoint)}${parameterMarkup("闪点", material.flashPoint)}</div>
         <h5 class="opto-section-title">计算数据</h5><div class="opto-parameter-grid">${parameterMarkup("激发能", material.excitedEnergy)}${parameterMarkup("放射能", material.emissionEnergy)}${parameterMarkup("跃迁偶极矩", material.transitionDipole)}${parameterMarkup("HOMO能级", `${shown(material.homo)} eV`)}${parameterMarkup("LUMO能级", `${shown(material.lumo)} eV`)}${parameterMarkup("溶剂化自由能", material.solvationFreeEnergy)}${parameterMarkup("斯托克斯位移", material.stokesShift)}${parameterMarkup("简正模式", material.normalModes)}</div>
       </section>
+      <section class="opto-detail-page${activePage === "dos" ? " active" : ""}" data-opto-detail-page="dos">${typeof window.renderOptoDosPageContent === "function" ? window.renderOptoDosPageContent(material) : ""}</section>
       <section class="opto-detail-page${activePage === "external" ? " active" : ""}" data-opto-detail-page="external">
         <div class="opto-detail-page-head"><div><h4>外部数据关联</h4><p>汇总论文检索系统与外部化学数据库的关联记录。</p></div></div>
         <div class="opto-detail-card opto-external-table-wrap"><table class="opto-external-table"><colgroup><col style="width:12%"><col style="width:16%"><col style="width:19%"><col style="width:25%"><col style="width:20%"><col style="width:8%"></colgroup><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${externalRows.map((row) => `<tr><td>${esc(row.type)}</td><td>${esc(row.platform)}</td><td>${esc(row.id)}</td><td class="opto-external-url">${esc(row.url)}</td><td>${esc(row.note)}</td><td><button class="opto-link-button" type="button" data-opto-external-url="${esc(row.url)}">打开链接</button></td></tr>`).join("")}</tbody></table></div>
@@ -110746,6 +110747,10 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     </section>`;
   }
 
+  function dosPage(material) {
+    return `<section class="opto-detail-page active" data-opto-detail-page="dos">${typeof window.renderOptoDosPageContent === "function" ? window.renderOptoDosPageContent(material) : ""}</section>`;
+  }
+
   function externalPage(material) {
     return `<section class="opto-detail-page active" data-opto-detail-page="external">
       <div class="opto-detail-page-head"><div><h4>外部数据关联</h4><p>汇总论文检索系统与外部化学数据库的关联记录。</p></div></div>
@@ -110764,10 +110769,10 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     page.dataset.source = "opto";
     if (title) title.textContent = `${material.chineseName} 材料详情`;
     if (subtitle) subtitle.textContent = `材料编号 ${material.materialNumber} · 分子编号 ${material.moleculeNumber} · CAS号 ${material.casNumber}`;
-    const section = ["basic", "spectra", "params", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
+    const section = ["basic", "spectra", "params", "dos", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
     state.selectedTwodDetailSection = section;
-    tree.innerHTML = [["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
-    const renderers = { basic: basicPage, spectra: spectraPage, params: paramsPage, external: externalPage };
+    tree.innerHTML = [["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["dos", "态密度信息"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+    const renderers = { basic: basicPage, spectra: spectraPage, params: paramsPage, dos: dosPage, external: externalPage };
     content.innerHTML = `<div class="opto-custom-detail">${renderers[section](material)}</div>`;
   }
 
@@ -110789,7 +110794,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       state.selectedMaterialSource = "opto";
       state.selectedMaterialId = material.id;
       state.twodDetailReturnPage = state.page === "twod-detail" ? "opto" : (state.page || "opto");
-      const targetMap = { spectra: "spectra", params: "params", properties: "params", external: "external" };
+      const targetMap = { spectra: "spectra", params: "params", properties: "params", dos: "dos", visualization: "dos", external: "external" };
       state.selectedTwodDetailSection = targetMap[targetView] || "basic";
       document.getElementById("materialModal")?.classList.remove("show");
       if (typeof switchPage === "function") switchPage("twod-detail");
@@ -110814,6 +110819,502 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     event.stopImmediatePropagation();
     openOptoDetailSection(button.dataset.optoDetailNav);
   }, true);
+})();
+
+</script>
+  <script>
+
+/* ================= 有机光电材料 · 态密度信息（DOS）模块 ================= */
+(() => {
+  const DOS_E_MIN = -20;
+  const DOS_E_MAX = 6;
+  const DOS_E_STEP = 0.1;
+  const DOS_SIGMA = 0.28;
+
+  const VALENCE_ELECTRONS = { H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, Si: 4, P: 5, S: 6, Cl: 7, Se: 6, Br: 7, I: 7 };
+  const CHANNEL_DEF = [
+    { element: "C", orbital: "2s", color: "#7a49ff", base: 0.16, deep: 0.52 },
+    { element: "C", orbital: "2p", color: "#2554c7", base: 0.46, deep: -0.22 },
+    { element: "H", orbital: "1s", color: "#8b9aaf", base: 0.15, deep: 0.10 },
+    { element: "N", orbital: "2p", color: "#1c9b73", base: 0.42, deep: -0.14 },
+    { element: "O", orbital: "2p", color: "#e25353", base: 0.42, deep: -0.16 },
+    { element: "S", orbital: "3p", color: "#e08a1a", base: 0.40, deep: -0.10 },
+    { element: "F", orbital: "2p", color: "#00b0c7", base: 0.40, deep: -0.12 }
+  ];
+
+  const esc = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const fixed = (value, digits = 2) => (Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "--");
+
+  function seededRandom(seedText) {
+    let hash = 2166136261;
+    const text = String(seedText || "OPM-DOS");
+    for (let i = 0; i < text.length; i += 1) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return function next() {
+      hash += 0x6D2B79F5;
+      let t = hash;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function parseFormula(formula) {
+    const source = String(formula || "");
+    const pattern = /([A-Z][a-z]?)(\d*\.?\d*)/g;
+    const atoms = [];
+    let match = pattern.exec(source);
+    while (match) {
+      const element = match[1];
+      if (element) {
+        const count = Number(match[2] || 1);
+        if (Number.isFinite(count) && count > 0) {
+          const hit = atoms.find((row) => row.element === element);
+          if (hit) hit.count += count;
+          else atoms.push({ element, count });
+        }
+      }
+      match = pattern.exec(source);
+      if (match && match.index === pattern.lastIndex) pattern.lastIndex += 1;
+    }
+    return atoms;
+  }
+
+  function buildChannels(formula, rand) {
+    const atoms = parseFormula(formula);
+    const present = atoms.map((atom) => atom.element);
+    const pool = present.length ? present : ["C", "H", "N"];
+    const channels = [];
+    CHANNEL_DEF.forEach((def) => {
+      if (def.orbital === "2s") {
+        if (pool.includes(def.element)) channels.push(Object.assign({}, def));
+        return;
+      }
+      if (pool.includes(def.element)) channels.push(Object.assign({}, def));
+    });
+    if (!channels.length) channels.push(Object.assign({}, CHANNEL_DEF[0]), Object.assign({}, CHANNEL_DEF[1]));
+    return { atoms, channels };
+  }
+
+  /* 分子体系的 DOS 由离散分子轨道能级高斯展宽得到，HOMO/LUMO 之间为禁带 */
+  function buildOrbitals(homo, lumo, rand) {
+    const levels = [];
+    let energy = homo;
+    while (energy > DOS_E_MIN - 1) {
+      levels.push({ energy, weight: 0.85 + rand() * 0.45, kind: "occupied" });
+      const depth = Math.max(homo - energy, 0);
+      energy -= 0.16 + Math.pow(depth / 16, 1.35) * 1.05 + rand() * 0.14;
+    }
+    energy = lumo;
+    while (energy < DOS_E_MAX + 1) {
+      levels.push({ energy, weight: 0.85 + rand() * 0.45, kind: "virtual" });
+      const height = Math.max(energy - lumo, 0);
+      energy += 0.26 + Math.pow(height / 9, 1.25) * 0.95 + rand() * 0.16;
+    }
+    return levels;
+  }
+
+  function buildDosModel(material) {
+    const safe = material || {};
+    const seed = `${safe.materialNumber || safe.code || safe.id || ""}${safe.formula || ""}${safe.chineseName || safe.name || ""}`;
+    const rand = seededRandom(seed);
+    const homo = Number.isFinite(Number(safe.homo)) ? Number(safe.homo) : -5.2;
+    const lumo = Number.isFinite(Number(safe.lumo)) ? Number(safe.lumo) : -2.1;
+    const gap = Number.isFinite(Number(safe.bandGap)) ? Number(safe.bandGap) : Number((lumo - homo).toFixed(2));
+    const { atoms, channels } = buildChannels(safe.formula, rand);
+    const levels = buildOrbitals(homo, lumo, rand);
+
+    const energy = [];
+    for (let e = DOS_E_MIN; e <= DOS_E_MAX + 1e-9; e += DOS_E_STEP) energy.push(Number(e.toFixed(2)));
+
+    const tdos = [];
+    const perLevelWeights = levels.map((level) => {
+      const deep = Math.min(Math.max((homo - level.energy) / 14, 0), 1);
+      const raw = channels.map((channel) => Math.max(0.03, channel.base + channel.deep * deep + (rand() - 0.5) * 0.14));
+      const total = raw.reduce((sum, item) => sum + item, 0) || 1;
+      return raw.map((item) => item / total);
+    });
+    const pdos = channels.map(() => []);
+    const spinUp = [];
+    const spinDown = [];
+
+    energy.forEach((e) => {
+      let total = 0;
+      const parts = channels.map(() => 0);
+      levels.forEach((level, index) => {
+        const value = level.weight * Math.exp(-Math.pow(e - level.energy, 2) / (2 * DOS_SIGMA * DOS_SIGMA));
+        if (value < 1e-5) return;
+        total += value;
+        perLevelWeights[index].forEach((weight, channelIndex) => { parts[channelIndex] += value * weight; });
+      });
+      tdos.push(total);
+      parts.forEach((part, channelIndex) => pdos[channelIndex].push(part));
+      const jitter = 1 + (Math.sin(e * 7.3) * 0.006);
+      spinUp.push(total * jitter);
+      spinDown.push(total * (2 - jitter));
+    });
+
+    /* 积分态密度标定到体系价电子总数 */
+    const valenceTotal = atoms.reduce((sum, atom) => sum + (VALENCE_ELECTRONS[atom.element] || 4) * atom.count, 0) || 120;
+    let raw = 0;
+    const rawIntegrated = tdos.map((value) => { raw += value * DOS_E_STEP; return raw; });
+    const full = rawIntegrated[rawIntegrated.length - 1] || 1;
+    const idos = rawIntegrated.map((value) => (value / full) * valenceTotal);
+
+    const maxTdos = Math.max.apply(null, tdos.concat([1]));
+    const peakIndex = tdos.indexOf(maxTdos);
+    const occupiedCount = levels.filter((level) => level.kind === "occupied").length;
+    const virtualCount = levels.filter((level) => level.kind === "virtual").length;
+    const composition = channels.map((channel, index) => {
+      const contribution = pdos[index].reduce((sum, value) => sum + value, 0);
+      const overall = tdos.reduce((sum, value) => sum + value, 0) || 1;
+      return { name: `${channel.element}-${channel.orbital}`, color: channel.color, ratio: (contribution / overall) * 100 };
+    });
+
+    return {
+      material: safe,
+      energy,
+      tdos,
+      channels: channels.map((channel, index) => ({ name: `${channel.element}-${channel.orbital}`, color: channel.color, values: pdos[index] })),
+      spinUp,
+      spinDown,
+      idos,
+      composition,
+      meta: {
+        homo, lumo, gap,
+        fermi: Number(((homo + lumo) / 2).toFixed(2)),
+        vbm: homo,
+        cbm: lumo,
+        gapType: "分子轨道禁带（HOMO–LUMO）",
+        spinState: "闭壳层单重态（S₀，α/β 简并）",
+        peakEnergy: energy[peakIndex] != null ? energy[peakIndex] : homo,
+        peakValue: maxTdos,
+        occupiedCount,
+        virtualCount,
+        valenceTotal,
+        sigma: DOS_SIGMA,
+        software: "Gaussian 16 Rev. C.01",
+        functional: "B3LYP-D3(BJ)",
+        basisSet: "6-31G(d,p)",
+        smearing: `高斯展宽 σ = ${DOS_SIGMA} eV`,
+        kpoints: "分子体系（单 Γ 点）",
+        convergence: "能量 1×10⁻⁶ Ha / 梯度 3×10⁻⁴ Ha·Bohr⁻¹",
+        updatedAt: "2026-04-22"
+      }
+    };
+  }
+
+  /* ---------- SVG 绘图 ---------- */
+  function dosChartSvg(options) {
+    const width = 920;
+    const height = 320;
+    const margin = { top: 24, right: 24, bottom: 48, left: 66 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+    const { energy, series, xMin = DOS_E_MIN, xMax = DOS_E_MAX, yMin = 0, markers = [], bands = [], axisX = "能量 E (eV)", axisY = "态密度 (states/eV)", stacked = false } = options;
+
+    let yMax = options.yMax;
+    if (!Number.isFinite(yMax)) {
+      let ceiling = 1;
+      if (stacked) {
+        const sums = energy.map((_, index) => series.reduce((sum, item) => sum + (item.values[index] || 0), 0));
+        ceiling = Math.max.apply(null, sums.concat([1]));
+      } else {
+        series.forEach((item) => { ceiling = Math.max(ceiling, Math.max.apply(null, item.values.concat([0]))); });
+      }
+      yMax = ceiling * 1.12;
+    }
+    const spanX = (xMax - xMin) || 1;
+    const spanY = (yMax - yMin) || 1;
+    const xOf = (value) => margin.left + ((value - xMin) / spanX) * innerWidth;
+    const yOf = (value) => margin.top + innerHeight - ((value - yMin) / spanY) * innerHeight;
+
+    const gridX = [];
+    for (let tick = Math.ceil(xMin / 4) * 4; tick <= xMax; tick += 4) gridX.push(tick);
+    const rowsY = 5;
+    const gridY = Array.from({ length: rowsY + 1 }, (_, index) => yMin + (spanY / rowsY) * index);
+
+    const gridMarkup = gridY.map((value) => `<line class="dos-grid" x1="${margin.left}" y1="${yOf(value).toFixed(1)}" x2="${width - margin.right}" y2="${yOf(value).toFixed(1)}"/>`).join("")
+      + gridX.map((value) => `<line class="dos-grid" x1="${xOf(value).toFixed(1)}" y1="${margin.top}" x2="${xOf(value).toFixed(1)}" y2="${height - margin.bottom}"/>`).join("");
+
+    const bandMarkup = bands.map((band) => {
+      const left = xOf(band.from);
+      const right = xOf(band.to);
+      return `<rect class="dos-band" x="${left.toFixed(1)}" y="${margin.top}" width="${Math.max(right - left, 1).toFixed(1)}" height="${innerHeight}" fill="${band.fill || "rgba(255,196,64,0.16)"}"/>`
+        + (band.label ? `<text class="dos-band-label" x="${((left + right) / 2).toFixed(1)}" y="${(margin.top + 14).toFixed(1)}" text-anchor="middle">${esc(band.label)}</text>` : "");
+    }).join("");
+
+    const pathOf = (values) => values.map((value, index) => `${index === 0 ? "M" : "L"}${xOf(energy[index]).toFixed(1)},${yOf(value).toFixed(1)}`).join(" ");
+    const areaOf = (values, base) => `${pathOf(values)} L${xOf(energy[energy.length - 1]).toFixed(1)},${yOf(base).toFixed(1)} L${xOf(energy[0]).toFixed(1)},${yOf(base).toFixed(1)} Z`;
+
+    let seriesMarkup = "";
+    if (stacked) {
+      const stack = energy.map(() => 0);
+      series.forEach((item) => {
+        const top = stack.map((base, index) => base + (item.values[index] || 0));
+        seriesMarkup += `<path d="${areaOf(top, 0)}" fill="${item.color}" opacity="0.30"/>`;
+        seriesMarkup += `<path d="${pathOf(top)}" fill="none" stroke="${item.color}" stroke-width="1.6"/>`;
+        top.forEach((value, index) => { stack[index] = value; });
+      });
+    } else {
+      series.forEach((item) => {
+        if (item.area) seriesMarkup += `<path d="${areaOf(item.values, item.base || 0)}" fill="${item.color}" opacity="${item.opacity || 0.16}"/>`;
+        seriesMarkup += `<path d="${pathOf(item.values)}" fill="none" stroke="${item.color}" stroke-width="${item.width || 2}" ${item.dash ? `stroke-dasharray="${item.dash}"` : ""}/>`;
+      });
+    }
+
+    const zeroLine = yMin < 0 && yMax > 0 ? `<line class="dos-zero" x1="${margin.left}" y1="${yOf(0).toFixed(1)}" x2="${width - margin.right}" y2="${yOf(0).toFixed(1)}"/>` : "";
+
+    const markerMarkup = markers.map((marker) => {
+      const x = xOf(marker.value);
+      const anchor = marker.anchor || "middle";
+      const labelY = marker.labelY ? marker.labelY : margin.top - 8;
+      return `<line class="dos-marker" x1="${x.toFixed(1)}" y1="${margin.top}" x2="${x.toFixed(1)}" y2="${height - margin.bottom}" stroke="${marker.color}" stroke-dasharray="5 4"/>`
+        + `<text class="dos-marker-text" x="${(x + (marker.offset || 0)).toFixed(1)}" y="${labelY}" text-anchor="${anchor}" fill="${marker.color}">${esc(marker.label)}</text>`;
+    }).join("");
+
+    const axisMarkup = `<line class="dos-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"/>`
+      + `<line class="dos-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"/>`
+      + gridX.map((value) => `<text class="dos-tick" x="${xOf(value).toFixed(1)}" y="${height - margin.bottom + 20}" text-anchor="middle">${value}</text>`).join("")
+      + gridY.map((value) => `<text class="dos-tick" x="${margin.left - 10}" y="${(yOf(value) + 4).toFixed(1)}" text-anchor="end">${fixed(value, 2)}</text>`).join("")
+      + `<text class="dos-axis-title" x="${margin.left + innerWidth / 2}" y="${height - 8}" text-anchor="middle">${esc(axisX)}</text>`
+      + `<text class="dos-axis-title" x="16" y="${margin.top + innerHeight / 2}" text-anchor="middle" transform="rotate(-90 16 ${margin.top + innerHeight / 2})">${esc(axisY)}</text>`;
+
+    const legendMarkup = `<g class="dos-legend" transform="translate(${width - margin.right - 8}, ${margin.top + 6})">`
+      + series.slice().reverse().map((item, index) => {
+        const y = index * 17;
+        return `<rect x="-14" y="${y}" width="11" height="9" rx="2" fill="${item.color}"/><text x="-20" y="${(y + 8).toFixed(0)}" text-anchor="end">${esc(item.name)}</text>`;
+      }).join("")
+      + `</g>`;
+
+    return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" role="img" aria-label="态密度谱图">
+      <rect x="0" y="0" width="${width}" height="${height}" fill="#fbfcfe"/>
+      ${gridMarkup}${bandMarkup}${zeroLine}${seriesMarkup}${markerMarkup}${axisMarkup}${legendMarkup}
+    </svg>`;
+  }
+
+  /* ---------- 页面渲染 ---------- */
+  function dosDownloadButton(kind, label, primary) {
+    return `<button class="${primary ? "btn-primary" : "twod-detail-link-btn"}" type="button" data-opto-dos-download="${kind}">${esc(label)}</button>`;
+  }
+
+  function renderOptoDosPageContent(material) {
+    const model = buildDosModel(material);
+    const m = model.meta;
+    const name = model.material.chineseName || model.material.name || model.material.fullName || "有机光电材料";
+    const code = model.material.materialNumber || model.material.code || model.material.id || "";
+
+    const tdosChart = dosChartSvg({
+      energy: model.energy,
+      series: [{ name: "总态密度 TDOS", color: "#165dff", values: model.tdos, area: true, opacity: 0.18 }],
+      axisY: "总态密度 (states/eV)",
+      yMax: Math.max.apply(null, model.tdos) * 1.18,
+      bands: [{ from: m.homo, to: m.lumo, label: `禁带 E_g = ${fixed(m.gap)} eV` }],
+      markers: [
+        { value: m.homo, color: "#e25353", label: `HOMO ${fixed(m.homo)} eV`, anchor: "end", offset: -6, labelY: 34 },
+        { value: m.lumo, color: "#1c9b73", label: `LUMO ${fixed(m.lumo)} eV`, anchor: "start", offset: 6, labelY: 34 },
+        { value: m.fermi, color: "#86909c", label: "E_F", anchor: "middle", labelY: 52 }
+      ]
+    });
+
+    const pdosChart = dosChartSvg({
+      energy: model.energy,
+      series: model.channels.map((channel) => ({ name: channel.name, color: channel.color, values: channel.values })),
+      axisY: "分波态密度 (states/eV)",
+      stacked: true
+    });
+
+    const spinChart = dosChartSvg({
+      energy: model.energy,
+      series: [
+        { name: "α 自旋 (spin up)", color: "#e25353", values: model.spinUp, area: true, opacity: 0.2 },
+        { name: "β 自旋 (spin down)", color: "#2554c7", values: model.spinDown.map((value) => -value), area: true, opacity: 0.2 }
+      ],
+      yMin: -Math.max.apply(null, model.spinDown) * 1.15,
+      yMax: Math.max.apply(null, model.spinUp) * 1.15,
+      axisY: "自旋态密度 (states/eV)",
+      markers: [{ value: m.fermi, color: "#86909c", label: "E_F", anchor: "middle", labelY: 34 }]
+    });
+
+    const idosChart = dosChartSvg({
+      energy: model.energy,
+      series: [{ name: "积分态密度 IDOS", color: "#7a49ff", values: model.idos, area: true, opacity: 0.16 }],
+      yMax: Math.max.apply(null, model.idos) * 1.08,
+      axisY: "累积电子数 (e)",
+      markers: [
+        { value: m.homo, color: "#e25353", label: `占据电子数 ${fixed(model.idos[model.energy.findIndex((e) => e >= m.homo)] || m.valenceTotal, 1)} e`, anchor: "end", offset: -6, labelY: 34 },
+        { value: m.fermi, color: "#86909c", label: "E_F", anchor: "middle", labelY: 52 }
+      ]
+    });
+
+    const infoRows = [
+      ["带隙 E_g", `${fixed(m.gap)} eV`],
+      ["HOMO 能级", `${fixed(m.homo)} eV`],
+      ["LUMO 能级", `${fixed(m.lumo)} eV`],
+      ["费米能级 E_F", `${fixed(m.fermi)} eV`],
+      ["价带顶 VBM / 导带底 CBM", `${fixed(m.vbm)} / ${fixed(m.cbm)} eV`],
+      ["禁带类型", m.gapType],
+      ["自旋态", m.spinState],
+      ["TDOS 主峰位置", `${fixed(m.peakEnergy)} eV`],
+      ["占据轨道数 / 空轨道数", `${m.occupiedCount} / ${m.virtualCount}`],
+      ["体系价电子总数", `${m.valenceTotal} e`],
+      ["计算软件", m.software],
+      ["泛函 / 基组", `${m.functional} / ${m.basisSet}`],
+      ["展宽方式", m.smearing],
+      ["K 点设置", m.kpoints],
+      ["收敛判据", m.convergence],
+      ["数据更新时间", m.updatedAt]
+    ];
+
+    const chartCard = (title, chart, caption, kind) => `<section class="twod-detail-chart-card opto-dos-chart-card">
+      <div class="opto-dos-chart-head"><h5>${esc(title)}</h5>${dosDownloadButton(kind, "下载谱图数据", false)}</div>
+      <div class="line-chart">${chart}</div>
+      <div class="chart-caption">${esc(caption)}</div>
+    </section>`;
+
+    return `
+      <div class="twod-detail-page-head">
+        <div>
+          <h4>${esc(name)}态密度信息</h4>
+          <p>展示该有机光电材料的电子结构信息与多种电子态密度（DOS）总谱图，数据均为演示用模拟计算结果。</p>
+        </div>
+        <div class="twod-detail-page-action">
+          ${dosDownloadButton("all", "数据下载", true)}
+        </div>
+      </div>
+      <section class="twod-detail-section-card opto-dos-summary-card">
+        <h5>电子结构概览</h5>
+        <div class="twod-detail-property-grid">
+          <article class="twod-detail-property-item"><span>带隙 E_g</span><strong>${fixed(m.gap)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>HOMO 能级</span><strong>${fixed(m.homo)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>LUMO 能级</span><strong>${fixed(m.lumo)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>费米能级 E_F</span><strong>${fixed(m.fermi)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>自旋态</span><strong>${esc(m.spinState)}</strong></article>
+          <article class="twod-detail-property-item"><span>价电子总数</span><strong>${m.valenceTotal} e</strong></article>
+        </div>
+      </section>
+      <div class="opto-dos-chart-grid">
+        ${chartCard("总态密度 TDOS（DOS 总谱图）", tdosChart, `横轴为相对真空能级的电子能量，纵轴为总态密度；HOMO 与 LUMO 之间 ${fixed(m.gap)} eV 区间为禁带，态密度为零。`, "tdos")}
+        ${chartCard("分波态密度 PDOS（轨道投影）", pdosChart, "按元素与角动量通道分解的投影态密度，堆叠显示各轨道对总态密度的贡献。", "pdos")}
+        ${chartCard("自旋极化态密度（α / β）", spinChart, "自旋向上（α，正向）与自旋向下（β，负向）分别绘制；闭壳层单重态体系两者在数值误差范围内简并。", "spin")}
+        ${chartCard("积分态密度 IDOS", idosChart, `对总态密度自低能端累积积分，并标定到体系价电子总数 ${m.valenceTotal} e；HOMO 处对应全部占据电子。`, "idos")}
+      </div>
+      <section class="twod-detail-section-card">
+        <h5>电子结构信息</h5>
+        <div class="twod-detail-property-grid opto-dos-info-grid">
+          ${infoRows.map(([label, value]) => `<article class="twod-detail-property-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></article>`).join("")}
+        </div>
+      </section>
+      <section class="twod-detail-section-card">
+        <h5>轨道贡献占比</h5>
+        <div class="opto-dos-composition">
+          ${model.composition.map((row) => `<div class="opto-dos-composition-row"><span class="opto-dos-composition-name"><i style="background:${row.color}"></i>${esc(row.name)}</span><span class="opto-dos-composition-bar"><b style="width:${Math.max(row.ratio, 1).toFixed(1)}%;background:${row.color}"></b></span><span class="opto-dos-composition-value">${fixed(row.ratio, 1)}%</span></div>`).join("")}
+        </div>
+      </section>`;
+  }
+
+  /* ---------- 数据下载 ---------- */
+  function buildDosCsv(model, kind) {
+    const m = model.meta;
+    const material = model.material;
+    const name = material.chineseName || material.name || material.fullName || "有机光电材料";
+    const code = material.materialNumber || material.code || material.id || "";
+    const header = [
+      `# 有机光电材料电子态密度（DOS）数据`,
+      `# 材料名称: ${name}`,
+      `# 材料编号: ${code}`,
+      `# 分子式: ${material.formula || "--"}`,
+      `# HOMO: ${fixed(m.homo)} eV`,
+      `# LUMO: ${fixed(m.lumo)} eV`,
+      `# 带隙 Eg: ${fixed(m.gap)} eV`,
+      `# 费米能级 EF: ${fixed(m.fermi)} eV`,
+      `# 计算条件: ${m.software} / ${m.functional} / ${m.basisSet}`,
+      `# 展宽: ${m.smearing}`,
+      `# 数据类型: 模拟演示数据`,
+      `# 导出时间: ${new Date().toLocaleString("zh-CN")}`
+    ];
+    const columns = [];
+    columns.push({ title: "Energy(eV)", values: model.energy.map((value) => fixed(value, 2)) });
+    if (kind === "all" || kind === "tdos") columns.push({ title: "TDOS", values: model.tdos.map((value) => fixed(value, 4)) });
+    if (kind === "all" || kind === "pdos") model.channels.forEach((channel) => columns.push({ title: `PDOS_${channel.name.replace("-", "_")}`, values: channel.values.map((value) => fixed(value, 4)) }));
+    if (kind === "all" || kind === "spin") {
+      columns.push({ title: "DOS_spin_up", values: model.spinUp.map((value) => fixed(value, 4)) });
+      columns.push({ title: "DOS_spin_down", values: model.spinDown.map((value) => fixed(value, 4)) });
+    }
+    if (kind === "all" || kind === "idos") columns.push({ title: "IDOS(e)", values: model.idos.map((value) => fixed(value, 4)) });
+
+    const lines = header.slice();
+    lines.push(columns.map((column) => column.title).join(","));
+    for (let index = 0; index < model.energy.length; index += 1) {
+      lines.push(columns.map((column) => column.values[index]).join(","));
+    }
+    return lines.join("\r\n");
+  }
+
+  function downloadDosData(material, kind) {
+    const model = buildDosModel(material);
+    const materialName = model.material.chineseName || model.material.name || "有机光电材料";
+    const code = model.material.materialNumber || model.material.code || model.material.id || "opto";
+    const labels = { all: "态密度数据集", tdos: "总态密度数据", pdos: "分波态密度数据", spin: "自旋态密度数据", idos: "积分态密度数据" };
+    const content = "\ufeff" + buildDosCsv(model, kind);
+    const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${code}_dos_${kind}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 600);
+    if (typeof showToast === "function") showToast("下载数据", `${materialName} 的${labels[kind] || "态密度数据"}已开始下载。`);
+  }
+
+  /* ---------- 样式 ---------- */
+  if (!document.getElementById("optoDosModuleStyle")) {
+    const style = document.createElement("style");
+    style.id = "optoDosModuleStyle";
+    style.textContent = `
+      .opto-dos-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 16px; }
+      .opto-dos-chart-card .opto-dos-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .opto-dos-chart-card .opto-dos-chart-head h5 { margin: 0; }
+      .opto-dos-chart-card .line-chart { padding: 6px 4px; }
+      .opto-dos-info-grid .twod-detail-property-item span { min-width: 132px; }
+      .opto-dos-composition { display: grid; gap: 10px; }
+      .opto-dos-composition-row { display: grid; grid-template-columns: 92px 1fr 62px; align-items: center; gap: 12px; font-size: 13px; }
+      .opto-dos-composition-name { display: inline-flex; align-items: center; gap: 6px; color: #4e5969; }
+      .opto-dos-composition-name i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+      .opto-dos-composition-bar { height: 8px; border-radius: 4px; background: #f0f2f5; overflow: hidden; }
+      .opto-dos-composition-bar b { display: block; height: 100%; border-radius: 4px; }
+      .opto-dos-composition-value { text-align: right; color: #1d2129; font-weight: 600; }
+      .dos-grid { stroke: #e9edf3; stroke-width: 1; }
+      .dos-axis { stroke: #b9c2cf; stroke-width: 1.2; }
+      .dos-zero { stroke: #c9d1dc; stroke-width: 1.2; }
+      .dos-tick { font-size: 11px; fill: #86909c; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-axis-title { font-size: 12px; fill: #4e5969; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-marker { stroke-width: 1.4; opacity: .9; }
+      .dos-marker-text { font-size: 11px; font-weight: 600; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-band-label { font-size: 11px; fill: #a2660a; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-legend text { font-size: 11px; fill: #4e5969; font-family: Arial, "Microsoft YaHei", sans-serif; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  document.body.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-opto-dos-download]");
+    if (!button) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const source = (typeof optoMaterials !== "undefined" && Array.isArray(optoMaterials))
+      ? (optoMaterials.find((item) => item.id === state?.selectedMaterialId) || optoMaterials[0])
+      : null;
+    downloadDosData(source, button.dataset.optoDosDownload || "all");
+  }, true);
+
+  window.renderOptoDosPageContent = renderOptoDosPageContent;
+  window.buildOptoDosModel = buildDosModel;
+  window.downloadOptoDosData = downloadDosData;
 })();
 
 </script>
@@ -110860,11 +111361,11 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     const content = document.getElementById("twodDetailPageContent");
     if (!page || !tree || !content || !material) return;
     page.dataset.source = "opto";
-    const section = ["basic", "spectra", "params", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
+    const section = ["basic", "spectra", "params", "dos", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
     state.selectedTwodDetailSection = section;
     if (title) title.textContent = `${material.chineseName || material.name} 材料详情`;
     if (subtitle) subtitle.textContent = `材料编号 ${material.materialNumber || material.code || material.id} · 分子编号 ${material.moleculeNumber || material.code || material.id} · CAS号 ${display(material.casNumber)}`;
-    tree.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+    tree.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["dos", "态密度信息"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
 
     if (section === "basic") {
       content.innerHTML = `<div class="twod-detail-page-head"><div><h4>基础信息</h4><p>展示材料基础身份信息与右侧 3D 分子结构图。</p></div></div><div class="twod-basic-card-grid">${systemBasicTable(material)}${systemStructureCard(material)}</div>`;
@@ -110872,6 +111373,8 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       content.innerHTML = `${systemMetaSection(material)}${typeof renderOptoSpectraPageContent === "function" ? renderOptoSpectraPageContent(material) : ""}`;
     } else if (section === "params") {
       content.innerHTML = typeof renderOptoParamsPageContent === "function" ? renderOptoParamsPageContent(material) : "";
+    } else if (section === "dos") {
+      content.innerHTML = typeof window.renderOptoDosPageContent === "function" ? window.renderOptoDosPageContent(material) : (typeof renderOptoDosPageContent === "function" ? renderOptoDosPageContent(material) : "");
     } else {
       content.innerHTML = typeof renderOptoExternalPageContent === "function" ? renderOptoExternalPageContent(material) : "";
     }
@@ -110901,7 +111404,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       state.selectedMaterialSource = "opto";
       state.selectedMaterialId = material.id;
       state.twodDetailReturnPage = state.page === "twod-detail" ? "opto" : (state.page || "opto");
-      state.selectedTwodDetailSection = ({ spectra: "spectra", params: "params", properties: "params", external: "external" })[targetView] || "basic";
+      state.selectedTwodDetailSection = ({ spectra: "spectra", params: "params", properties: "params", dos: "dos", visualization: "dos", external: "external" })[targetView] || "basic";
       document.getElementById("materialModal")?.classList.remove("show");
       if (typeof switchPage === "function") switchPage("twod-detail");
       window.setTimeout(() => renderSystemOptoDetailPage(material), 60);
@@ -110925,7 +111428,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     if (!wrap || state.selectedMaterialSource !== "opto") return oldTree(material);
     wrap.dataset.systemOptoTree = "true";
     const active = state.selectedTwodDetailSection === "structure" ? "basic" : state.selectedTwodDetailSection;
-    wrap.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${active === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+    wrap.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["dos", "态密度信息"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${active === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
   };
 })();
 
@@ -112857,6 +113360,26 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     lib.categories.forEach((category) => { total += stdCategoryRules(category).length; });
     return total;
   }
+  /* 2026-10-10：标准规则与体系文档关联 —— 从全局标准目录取本材料对应体系文档 */
+  function stdDocList(key) {
+    var typeMap = {
+      twod: "二维材料数据库标准",
+      opto: "有机光电材料数据库标准",
+      el: "电解质材料数据库标准",
+      electrolyte: "电解质材料数据库标准",
+      mlff: "机器学习力场数据库标准",
+      ca: "催化材料数据库标准",
+      catalyst: "催化材料数据库标准"
+    };
+    var cat = window.LOWDIM_STANDARD_CATALOG || [];
+    return cat.filter(function (x) { return x.standardType === typeMap[key]; });
+  }
+  function stdDocName(key, docId) {
+    if (!docId) return "-";
+    var list = stdDocList(key);
+    var doc = list.find(function (x) { return x.id === docId; });
+    return doc ? (doc.standardNo + " " + doc.standardName) : "-";
+  }
   function stdState(pageId) {
     if (!state.lowdimStd) state.lowdimStd = {};
     if (!state.lowdimStd[pageId]) {
@@ -113269,19 +113792,20 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           "<td>" + stdCell(record.type) + "</td>" +
           "<td>" + stdCell(record.basis, "wrap") + "</td>" +
           '<td><span class="lstd-clause">' + esc(clause) + "</span></td>" +
+          '<td>' + esc(stdDocName(stdKey(pageId), record.docId)) + '</td>' +
           '<td><div class="lstd-mod"><b>' + esc(mod.by) + "</b><span>" + esc(mod.at) + "</span></div></td>" +
           '<td><div class="lstd-row-actions">' +
             '<button type="button" data-lstd-rule-edit="' + esc(record.id) + '">编辑</button>' +
             '<button type="button" class="danger" data-lstd-rule-delete="' + esc(record.id) + '">删除</button>' +
           "</div></td></tr>";
       }).join("");
-      const header = section.title ? '<tr class="lstd-section-row"><td colspan="8">' + esc(section.title) + "</td></tr>" : "";
+      const header = section.title ? '<tr class="lstd-section-row"><td colspan="9">' + esc(section.title) + "</td></tr>" : "";
       return header + body;
     }).join("");
     return '<div class="lstd-table-wrap"><table class="lstd-table">' +
-      '<colgroup><col class="c-item"><col class="c-field"><col class="c-value"><col class="c-type"><col class="c-basis"><col class="c-req"><col class="c-mod"><col class="c-op"></colgroup>' +
+      '<colgroup><col class="c-item"><col class="c-field"><col class="c-value"><col class="c-type"><col class="c-basis"><col class="c-req"><col class="c-doc"><col class="c-mod"><col class="c-op"></colgroup>' +
       "<thead><tr><th>标准项</th><th>数据字段</th><th>标准值</th><th>数据类型</th><th>依据 / 说明</th>" +
-      "<th>来源条款</th><th>最近修改</th><th>操作</th></tr></thead>" +
+      "<th>来源条款</th><th>关联体系文档</th><th>最近修改</th><th>操作</th></tr></thead>" +
       "<tbody>" + sections + "</tbody></table></div>";
   }
 
@@ -113336,7 +113860,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
               '<span class="lstd-chip green">' + esc(lib.short) + "采集加工处理</span>" +
             "</div>" +
           "</div>" +
-          '<button class="btn-primary" type="button" data-lstd-goto-ingest="' + esc(ingestPageId) + '">前往采集加工处理</button>' +
+          /* 2026-10-10：删除「前往采集加工处理」跳转按钮 */
         "</div>" +
 
         /* —— 标准更新影响存量数据 —— */
@@ -113402,6 +113926,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     if (body) {
       const field = (label, id, value, placeholder) =>
         '<label><span>' + label + '</span><input id="' + id + '" type="text" value="' + esc(value || "") + '" placeholder="' + esc(placeholder || "") + '"></label>';
+      const docs = stdDocList(stdKey(pageId));
+      const docOptions = '<option value="">— 不关联 —</option>' + docs.map(function (d) {
+        return '<option value="' + esc(d.id) + '"' + ((record && record.docId === d.id) ? " selected" : "") + '>' + esc(d.standardNo + " " + d.standardName) + "</option>";
+      }).join("");
       body.innerHTML = '<div class="lstd-rule-form">' +
         '<div class="lstd-rule-form-row">' +
           field("标准项", "twodStdRuleItem", record && record.item, "如：截断能ENCUT") +
@@ -113410,6 +113938,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         '<div class="lstd-rule-form-row">' +
           field("标准值", "twodStdRuleValue", record && record.value, "如：500ev") +
           field("数据类型", "twodStdRuleType", record && record.type, "如：数字+单位") +
+        "</div>" +
+        '<div class="lstd-rule-form-row">' +
+          '<label><span>关联体系文档</span><select id="twodStdRuleDoc">' + docOptions + "</select></label>" +
         "</div>" +
         '<label><span>依据 / 说明</span><textarea id="twodStdRuleNote" rows="3" placeholder="请输入规则依据或说明">' + esc((record && record.basis) || "") + "</textarea></label>" +
         "</div>";
@@ -113427,12 +113958,13 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     const value = (document.getElementById("twodStdRuleValue") || {}).value || "";
     const type = (document.getElementById("twodStdRuleType") || {}).value || "";
     const basis = (document.getElementById("twodStdRuleNote") || {}).value || "";
+    const docId = (document.getElementById("twodStdRuleDoc") || {}).value || "";
     if (!item.trim() || !value.trim() || !type.trim()) {
       toast("标准规则校验", "请填写标准项、标准值和数据类型。");
       return;
     }
     const rows = st.rules[categoryKey] || (st.rules[categoryKey] = []);
-    const draft = { item: item.trim(), field: field.trim() || item.trim(), value: value.trim(), type: type.trim(), basis: basis.trim() };
+    const draft = { item: item.trim(), field: field.trim() || item.trim(), value: value.trim(), type: type.trim(), basis: basis.trim(), docId: docId.trim() };
     if (editing.mode === "edit") {
       const index = rows.findIndex((row) => row.id === editing.ruleId);
       if (index >= 0) rows[index] = Object.assign({}, rows[index], draft);
@@ -119933,12 +120465,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
   /* ------------------------------ 子视图切换条 ------------------------------ */
+  /* 2026-10-10：删除顶部「标准规则库 / 标准化执行 / 输出与归档」切换 tab */
   function barHtml(pageId, key, view) {
     var libObj = lib(key);
     return '<div class="stdex-bar" data-stdex-page="' + esc(pageId) + '">' +
-      '<button type="button" class="' + (view === "rules" ? "active" : "") + '" data-stdex-view="rules">标准规则库</button>' +
-      '<button type="button" class="' + (view === "exec" ? "active" : "") + '" data-stdex-view="exec">标准化执行</button>' +
-      '<button type="button" class="' + (view === "output" ? "active" : "") + '" data-stdex-view="output">输出与归档</button>' +
       '<span class="stdex-hint">来源：采集加工处理产物交接 · 依据《' +
         esc((libObj && libObj.standardName) || "") + '》</span>' +
       "</div>";
@@ -119967,7 +120497,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           '<div class="stdex-card-head"><div><h3>' + esc((libObj && libObj.standardizationName) || "数据标准化") + "</h3>" +
           "<p>依据《" + esc((libObj && libObj.standardName) || "") + "》对" + esc(SHORT[key] || "") +
           "数据执行标准化加工服务，覆盖" + esc((libObj && libObj.cover) || "") + "。</p></div>" +
-          '<button type="button" class="stdex-btn ghost" data-stdex-goto="lowdim-ingest-' + esc(key) + '">前往采集加工处理 →</button>' +
+          /* 2026-10-10：删除「前往采集加工处理」跳转按钮 */
           "</div>" +
           barHtml(pageId, key, st.view) +
         "</div>" +
@@ -120485,132 +121015,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     });
   }
 
-  /* ------------------------------ 数据库页：入库记录 ------------------------------ */
-  /* 2026-10-08：演示用样例数据——按「元数据目录」里的真实数据集逐条生成入库记录，
-     数据集名称与条目数同 04.js LOWDIM_DB_OVERVIEW_CONFIGS 保持一致，
-     另补一条「增量更新批次（入库中）」体现进行中的入库，方便直接演示。 */
-  var DB_CODES = { twod: "2D", opto: "OP", electrolyte: "EL", mlff: "ML", catalyst: "CA" };
-  var DB_DATASETS = {
-    twod: [
-      { title: "结构特征数据集", entries: 9460 },
-      { title: "电子结构数据集", entries: 4200 },
-      { title: "电学性质数据集", entries: 4560 },
-      { title: "磁学性质数据集", entries: 4980 },
-      { title: "热学性质数据集", entries: 2480 },
-      { title: "力学性质数据集", entries: 1680 },
-      { title: "光学性质数据集", entries: 2160 },
-      { title: "缺陷性质数据集", entries: 1080 }
-    ],
-    opto: [
-      { title: "有机光电基础数据集", entries: 1000 },
-      { title: "有机光电物性数据集", entries: 1860 },
-      { title: "有机光电表征图谱数据集", entries: 2400 },
-      { title: "有机光电计算数据集", entries: 3160 }
-    ],
-    electrolyte: [
-      { title: "有机电解液数据集", entries: 3150 },
-      { title: "固态有机电解质数据集", entries: 2400 },
-      { title: "固态无机电解质数据集", entries: 4700 }
-    ],
-    mlff: [
-      { title: "机器学习力场基础数据集", entries: 9600 },
-      { title: "有机小分子机器学习力场数据集", entries: 8400 },
-      { title: "高分子机器学习力场数据集", entries: 7200 }
-    ],
-    catalyst: [
-      { title: "催化材料元素特征数据集", entries: 520 },
-      { title: "催化材料结构特征数据集", entries: 600 },
-      { title: "单原子催化剂数据集", entries: 14000 },
-      { title: "二元合金数据集", entries: 15000 },
-      { title: "晶界数据集", entries: 4800 },
-      { title: "体系特征数据集", entries: 6000 }
-    ]
-  };
-
-  function dbNameOf(key) {
-    return (lib(key) && lib(key).database) || (SHORT[key] + "数据库");
-  }
-
-  function dbSeedRecords(key) {
-    var list = DB_DATASETS[key] || [];
-    var code = DB_CODES[key] || String(key).slice(0, 2).toUpperCase();
-    var dbName = dbNameOf(key);
-    var days = ["2026-07-02", "2026-07-09", "2026-07-15", "2026-07-21", "2026-07-28", "2026-08-04", "2026-08-11", "2026-08-18"];
-    var hours = ["09:35", "10:12", "14:26", "15:08", "16:44", "11:20", "17:02", "09:48"];
-    var out = list.map(function (d, i) {
-      return {
-        id: "DS-" + code + "-" + days[i % days.length].replace(/-/g, "") + "-00" + (i + 1),
-        name: d.title + "（V2.0）",
-        dataset: dbName,
-        entries: d.entries,
-        time: days[i % days.length] + " " + hours[i % hours.length],
-        status: "已入库",
-        from: "数据标准化"
-      };
-    });
-    /* 进行中的增量批次：挂在第一个数据集下，体现「入库中」状态 */
-    if (list.length) {
-      out.push({
-        id: "DS-" + code + "-20260825-00" + (list.length + 1),
-        name: list[0].title + "（增量更新批次 V2.1）",
-        dataset: dbName,
-        entries: Math.round(list[0].entries * 0.12),
-        time: "2026-08-25 10:06",
-        status: "入库中",
-        from: "数据标准化"
-      });
-    }
-    return out;
-  }
-
-  function dbRecords(key) {
-    var out = [];
-    var arc = (window.__STD_ARCHIVE__ || {})[key] || [];
-    arc.forEach(function (a) {
-      out.push({
-        id: a.id, name: a.name, entries: a.entries, time: a.time,
-        dataset: dbNameOf(key),
-        status: "已入库", from: "数据标准化"
-      });
-    });
-    /* 种子记录：按真实数据集清单生成，避免空态 */
-    return out.concat(dbSeedRecords(key));
-  }
-
-  function renderDbRecords(pageId, key) {
-    var rows = dbRecords(key).map(function (r) {
-      return "<tr><td>" + esc(r.id) + "</td><td>" + esc(r.name) + "</td><td>" + esc(r.dataset) + "</td>" +
-        "<td>" + fmt(r.entries) + " 条</td><td>" + esc(r.from) + "</td><td>" + esc(r.time) + "</td>" +
-        '<td><span class="ic-tag' + (r.status === "已入库" ? "" : " wait") + '">' + esc(r.status) + "</span></td>" +
-        '<td><button type="button" class="ic-btn" data-ic-goto="' + esc(stdPage(key)) + '">查看标准化单</button>' +
-        '<button type="button" class="ic-btn" data-ic-goto="lowdim-ingest-' + esc(key) + '">查看采集加工</button></td></tr>';
-    }).join("");
-
-    return '<div class="ic-rec">' +
-      "<h3>数据集入库记录</h3>" +
-      '<p class="sub">承接「数据标准化」归档后推送的数据集（功能清单编号 28-51），入库完成即可在主题应用中检索与下载。</p>' +
-      '<table class="ic-table"><thead><tr><th>入库单号</th><th>数据集名称</th><th>所属数据库</th><th>条目数</th>' +
-      "<th>来源环节</th><th>入库时间</th><th>状态</th><th>操作</th></tr></thead><tbody>" +
-      /* E15：空态不能只写「暂无」，必须给出上游出口 */
-      (rows || '<tr><td colspan="8" class="ic-empty">暂无入库记录：本页承接「数据标准化」归档推送，' +
-        '请先到标准化页完成比对与归档。<div style="margin-top:10px">' +
-        '<button type="button" class="ic-btn" data-ic-goto="' + esc(stdPage(key)) + '">前往数据标准化 →</button>' +
-        '<button type="button" class="ic-btn" data-ic-goto="lowdim-ingest-' + esc(key) + '">前往采集加工处理 →</button>' +
-        "</div></td></tr>") +
-      "</tbody></table>" +
-      '<div class="ic-note">闭环路径：采集加工处理 → 加工产物交接 → 数据标准化（编号 23-27）→ <b>本页数据集入库（编号 28-51）</b> → 主题应用（编号 52-86）。</div>' +
-      "</div>";
-  }
-  function stdPage(key) { return "lowdim-standardization-" + key; }
-
+  /* ------------------------------ 数据库页：顶部页签（仅保留元数据目录） ------------------------------ */
+  /* 2026-10-10：删除数据库页顶部「元数据目录」按钮 */
   function dbBarHtml(pageId, key, view) {
-    return '<div class="ic-dbbar" data-ic-dbpage="' + esc(pageId) + '">' +
-      '<button type="button" class="' + (view === "meta" ? "active" : "") + '" data-ic-dbview="meta">元数据目录</button>' +
-      '<button type="button" class="' + (view === "records" ? "active" : "") + '" data-ic-dbview="records">入库记录</button>' +
-      '<span class="hint">入库记录承接标准化归档推送 · 功能清单编号 28-51</span>' +
-      "</div>";
+    return "";
   }
-
   /* ------------------------------ 注入（幂等，抗重渲染冲刷） ------------------------------ */
   function currentPageId() {
     var sec = document.querySelector("section.page.active");
@@ -120635,13 +121044,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var key = keyOfDb(pageId);
     var page = document.getElementById("page-" + pageId);
     if (!key || !page) return;
-    if (S().dbView === "records") {
-      if (!page.querySelector(".ic-rec")) renderDb(pageId);
-      return;
-    }
     if (page.querySelector(".ic-dbbar")) return;
+    var bar = dbBarHtml(pageId, key, "meta");
+    if (!bar) return;
     ensureStyle();
-    page.insertAdjacentHTML("afterbegin", dbBarHtml(pageId, key, "meta"));
+    page.insertAdjacentHTML("afterbegin", bar);
   }
 
   /* 页面内容被原始渲染逻辑重写后重新补挂：加工环切换页签、延迟渲染等场景 */
@@ -120677,16 +121084,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   var BASE_DB = null;
   function renderDb(pageId) {
     var key = keyOfDb(pageId);
-    var st = S();
-    if (st.dbView === "meta") {
-      if (typeof BASE_DB === "function") BASE_DB(pageId);
-      injectDbBar(pageId);
-      return;
-    }
-    ensureStyle();
-    var page = document.getElementById("page-" + pageId);
-    if (!page) return;
-    page.innerHTML = dbBarHtml(pageId, key, "records") + renderDbRecords(pageId, key);
+    if (typeof BASE_DB === "function") BASE_DB(pageId);
+    injectDbBar(pageId);
   }
 
   /* ------------------------------ 事件 ------------------------------ */
@@ -121464,7 +121863,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   /* 资源加工 —— 流程总览 */
   var PROC_FLOW = [
     { n: "数据策划", d: "明确数据产品目标用途、格式与精度要求" },
-    { n: "基础数据筛选", d: "按质量等级与材料类型筛选可用数据集合" },
+    { n: "基础数据筛选", d: "按数据类型筛选可用数据集合" },
     { n: "标准化预处理", d: "格式 / 单位统一、缺失值与异常值处理" },
     { n: "数据加工", d: "属性统计、图谱标准化、结构优化验证" },
     { n: "产品生产", d: "AI 训练集、科研参考集、跨库融通集" },
@@ -123249,7 +123648,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     /* 2026-10-08：圈红删除——工作台下方的「数据来源/推荐录入方式/识别规则/人工介入点」来源规则表不再展示，
        数据来源仍在「批量导入 / 单条录入」弹窗内选择，录入功能不受影响。 */
 
-    var sub = '<div class="rw-subtabs">'
+    /* 2026-10-10：页签按视图显隐——点开「数据统计 / 权限管理 / 流程管理」时不展示这排页签，
+       返回数据录入列表（待录入 / 录入审核 / 已入库 / 规范说明）时照常展示。 */
+    var sub = (e.view === "stats" || e.view === "perm" || e.view === "flow")
+      ? ""
+      : '<div class="rw-subtabs">'
       + '<button class="rw-subtab' + (e.view === "todo" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="todo">待录入数据（' + todo.length + "）</button>"
       + '<button class="rw-subtab' + (e.view === "audit" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="audit">录入审核（' + queue.length + "）</button>"
       + '<button class="rw-subtab' + (e.view === "done" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="done">已入库数据（' + done.length + "）</button>"
@@ -123794,47 +124197,17 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "</div>";
   }
 
-  /* ---------------------------------------------- （5）流程管理：四类日常流程 */
+  /* ---------------------------------------------- （5）流程管理：两类日常流程 */
   function renderEntryFlow() {
     var perm = getS().approvals && getS().approvals["perm"];
     return '<div class="rw-card">'
       + '<div class="rw-card-head"><div><h3>（5）流程管理 · 数据库日常运行流程</h3>'
-      + "<p>为维护数据库正常运行，对日常运行建立流程管理：人员权限审批、数据录入审批、操作工单备案、定期备份。</p></div>"
+      + "<p>为维护数据库正常运行，对日常运行建立流程管理：操作工单备案、定期备份。</p></div>"
       + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="todo">← 返回待录入数据</button></div></div>'
 
-      /* 1）人员权限审批 */
+      /* 1）操作工单备案 */
       + '<div class="rw-card" style="margin:0 0 14px;border-color:#e6ecf5">'
-      + '<div class="rw-card-head"><div><h3>① 人员权限审批</h3>'
-      + "<p>对拥有修改数据库权限的工作人员进行相应培训，确保其满足维护数据库的技术要求及安全意识。</p></div>"
-      + '<div style="flex:0 0 auto"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-apply-perm">提交权限申请</button></div></div>'
-      + (perm
-        ? '<div class="rw-banner" style="margin-bottom:12px"><span>✓</span><div>最近一次权限申请：' + esc(perm.at) + "，当前状态：" + esc(perm.status) + "。</div></div>"
-        : "")
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>审批环节</th><th>要求</th><th>责任人</th><th>结果</th></tr></thead><tbody>'
-      + "<tr><td><b>技术培训</b></td><td>掌握数据库结构、字段规范与录入工具使用</td><td>数据库维护员</td><td>培训记录归档</td></tr>"
-      + "<tr><td><b>技术能力考核</b></td><td>满足维护数据库的技术要求（参数合规、异常处理）</td><td>系统管理员</td><td>考核通过</td></tr>"
-      + "<tr><td><b>安全意识审核</b></td><td>数据备份、误操作防范与保密要求</td><td>系统管理员</td><td>签署承诺书</td></tr>"
-      + "<tr><td><b>权限授予</b></td><td>按最小必要原则授予读取 / 修改权限</td><td>系统管理员</td><td>到期自动回收</td></tr>"
-      + "</tbody></table></div>"
-      + '<div style="margin-top:12px">' + chainHtml(["提出申请", "技术培训与考核", "安全意识审核", "管理员审批", "授予权限", "到期回收"]) + "</div>"
-      + "</div>"
-
-      /* 2）数据录入审批 */
-      + '<div class="rw-card" style="margin:0 0 14px;border-color:#e6ecf5">'
-      + '<div class="rw-card-head"><div><h3>② 数据录入审批</h3>'
-      + "<p>对于大规模的数据录入，应该进行事先的数据质量审核，防止错误数据污染数据库。</p></div></div>"
-      + '<div style="margin-bottom:12px">' + chainHtml(["提交大规模录入申请", "事先数据质量审核", "管理员审批通过", "执行数据录入", "结果复核", "归档备案"]) + "</div>"
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>审核项</th><th>审核内容</th><th>判定</th><th>处置</th></tr></thead><tbody>'
-      + "<tr><td><b>来源准确性</b></td><td>第三方数据库每批次抽样调查对比</td><td>偏差 &lt; 5%</td><td>不达标则退回</td></tr>"
-      + "<tr><td><b>录入汇总整合性</b></td><td>统一存储格式，确保可检索</td><td>格式一致</td><td>转格式后重录</td></tr>"
-      + "<tr><td><b>数据及时性</b></td><td>计算结果 30 天内更新入库</td><td>在有效期内</td><td>超期重新计算</td></tr>"
-      + "<tr><td><b>字段完整性</b></td><td>必填字段齐全、单位与量纲统一</td><td>缺失率 &lt; 3%</td><td>标记待补充</td></tr>"
-      + "</tbody></table></div>"
-      + "</div>"
-
-      /* 3）操作工单备案 */
-      + '<div class="rw-card" style="margin:0 0 14px;border-color:#e6ecf5">'
-      + '<div class="rw-card-head"><div><h3>③ 操作工单备案</h3>'
+      + '<div class="rw-card-head"><div><h3>① 操作工单备案</h3>'
       + "<p>对于数据录入和删除操作，要进行操作行为和工单号的具体对应，从而在数据出错时更好地回溯错误发生的时间及相应负责人员。</p></div></div>"
       + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>工单号</th><th>操作类型</th><th>操作对象</th><th>操作人</th><th>审批人</th><th>操作时间</th><th>状态</th></tr></thead><tbody>'
       + workOrderRows().map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("")
@@ -123842,9 +124215,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-card-note" style="margin-top:10px">录入 / 删除操作与工单号一一对应，出错时可按工单号回溯操作时间与责任人。</div>'
       + "</div>"
 
-      /* 4）定期备份 */
+      /* 2）定期备份 */
       + '<div class="rw-card" style="margin:0;border-color:#e6ecf5">'
-      + '<div class="rw-card-head"><div><h3>④ 定期备份</h3>'
+      + '<div class="rw-card-head"><div><h3>② 定期备份</h3>'
       + "<p>为尽量减少硬件故障和人员误操作给数据库带来的伤害，应当定期对数据库进行备份工作。</p></div></div>"
       + tableHtml(LOOP_BACKUP)
       + '<div style="margin-top:12px">' + chainHtml(["定时触发备份", "全量 / 增量快照", "完整性校验", "异地留存", "恢复演练"]) + "</div>"
@@ -124477,16 +124850,29 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       sourceIds: [],
       spec: { purpose: "机器学习模型训练", format: "CSV / JSON + 数据字典", precision: "", productForm: "数据集（CSV / JSON）", desc: "" },
       basis: [],
-      filter: { levels: ["A级", "B级"], groupByFormula: true, minPerGroup: 3, executed: false, rows: [], groups: [] },
+      filter: { levels: [], dtypes: [], selRows: [], groupByFormula: true, minPerGroup: 3, executed: false, rows: [], groups: [] },
       pre: {
         opts: { format: true, unit: true, missing: true, outlier: true },
         executed: false,
+        running: false,
+        progress: 0,
+        stage: "",
+        logs: [],
+        rules: [],
         missing: { rate: "3.4%", pass: true },
         outliers: (C().outliers || []).map(function (o) { return Object.assign({}, o); })
       },
       model: { key: "", executed: false, rows: [] },
+      /* 2026-10-10：数据集类型单选——datasets 最多 1 个元素 */
       product: { key: "", executed: false, result: "", datasets: [] },
-      quality: { items: PROC_QUALITY.map(function (q) { return { key: q.key, measured: "", ok: null, handled: "" }; }), executed: false },
+      quality: {
+        items: PROC_QUALITY.map(function (q) { return { key: q.key, measured: "", ok: null, handled: "" }; }),
+        executed: false,
+        qa: {},
+        security: { executed: false, at: "", batches: [], summary: "" }
+      },
+      collectTaskId: "",
+      savedAt: "",
       done: {},
       createdAt: createdAt,
       log: []
@@ -124528,6 +124914,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var mk = function (at) {
       var j = procJobSkeleton(code + "-PRC-2026-000" + seqNo, at);
       j.sourceIds = ids.slice(0, 3);
+      try {
+        var tl = collectTaskList();
+        j.collectTaskId = tl.length ? tl[0].id : "";
+      } catch (e2) { j.collectTaskId = ""; }
       seqNo += 1;
       return j;
     };
@@ -124710,6 +125100,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwProcMask"); });
       document.body.appendChild(mask);
     }
+    var prevBody = mask.querySelector(".rw-modal-body");
+    var keepScroll = prevBody ? prevBody.scrollTop : 0;
     mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
       + '<div class="rw-modal-head"><div><h3>数据加工 · ' + esc(PROC_STEP_TITLES[j.step - 1]) + "</h3>"
       + "<p>任务 " + esc(j.id) + "　当前版本 " + esc(j.version) + "　已完成 " + Object.keys(j.done).length + " / 6 步</p></div>"
@@ -124717,11 +125109,15 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<span class="rw-tag rw-tag--open">' + esc(j.version) + "</span>"
       + '<button class="rw-modal-close" type="button" data-rw-act="proc-close">×</button></div></div>'
       + procStepbar(j)
-      + '<div class="rw-modal-body">' + procStepBody(j) + "</div>"
+      + procAnchorBar(j)
+      + '<div class="rw-modal-body">' + procAllSteps(j) + "</div>"
       + procFoot(j)
       + "</div>";
     var body = mask.querySelector(".rw-modal-body");
-    if (body && j.autoScroll) { j.autoScroll = false; setTimeout(function () { body.scrollTop = body.scrollHeight; }, 40); }
+    if (body) {
+      body.scrollTop = keepScroll;
+      if (j.autoScroll) { j.autoScroll = false; setTimeout(function () { body.scrollTop = body.scrollHeight; }, 40); }
+    }
   }
 
   function procStepbar(j) {
@@ -124735,30 +125131,112 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
   function procFoot(j) {
-    /* 2026-10-08：步骤 1/2 改为点击「下一步」时校验（填写 / 勾选完成即可前进），按钮不再预禁用 */
-    var autoOk = j.step <= 2;
-    var canNext = !!j.done[j.step] || autoOk;
-    var tip = j.done[j.step]
-      ? "本步骤已完成，可进入下一步"
-      : (autoOk
-        ? (j.step === 1 ? "填写完成后点击「下一步」" : "勾选基础数据后点击「下一步」")
-        : "<span style=\"color:#b8720f\">请先执行本步骤操作后再进入下一步</span>");
+    var tip = procFootTip(j);
+    var canNext = procCanForward(j);
+    var canFinish = !!j.done[5];
     return '<div class="rw-modal-foot"><span class="rw-foot-tip">' + tip + "</span>"
+      + '<button class="rw-btn" type="button" data-rw-act="proc-save">保存进度</button>'
       + '<button class="rw-btn" type="button" data-rw-act="proc-close">关闭</button>'
       + '<button class="rw-btn" type="button" data-rw-act="proc-prev"' + (j.step === 1 ? " disabled" : "") + ">上一步</button>"
       + (j.step < 6
         ? '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-next"' + (canNext ? "" : " disabled") + ">下一步</button>"
-        : '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-finish"' + (canNext ? "" : " disabled") + '>完成加工</button>')
+        : "")
+      /* 2026-10-10：六步同页展示后，「完成加工」常驻底部；步骤 5 未完成时禁用并给出原因 */
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-finish"'
+      + (canFinish ? "" : " disabled")
+      + ' style="' + (canFinish ? "" : "opacity:.55;cursor:not-allowed;") + 'margin-left:8px"'
+      + ' title="' + (canFinish ? "完成本次加工任务" : "需先完成步骤 5「产品生产」并填写质量评价表后方可完成加工") + '"'
+      + ">完成加工</button>"
       + "</div>";
   }
 
+  /* 底部提示：步骤 3 未执行完时明确要求在当前页等待 */
+  function procFootTip(j) {
+    if (j.pre.running) {
+      return '<span style="color:#b8720f">标准化预处理执行中（' + (j.pre.progress || 0) + '%），请在当前页等待执行完成…</span>';
+    }
+    if (j.step === 3 && !j.pre.executed) {
+      return '<span style="color:#b8720f">请先执行「标准化预处理」，执行完成后才能进行下一步操作；执行期间请停留在当前页等待</span>';
+    }
+    if (j.done[j.step]) return "本步骤已完成，可进入下一步";
+    if (j.step === 1) return "填写完成后点击「下一步」";
+    if (j.step === 2) return "勾选采集数据后点击「应用筛选」，再进入下一步";
+    if (j.step === 4) return "选择加工模型并执行「执行数据加工」后再进入下一步";
+    if (j.step === 5) return "选择 1 个数据集类型并执行「生产数据产品」后再进入下一步";
+    if (j.step === 6) return "填写下方质量评价表后点击「完成加工」";
+    return '<span style="color:#b8720f">请先执行本步骤操作后再进入下一步</span>';
+  }
+
+  function procCanForward(j) {
+    if (j.pre.running) return false;
+    if (j.step <= 2) return true;
+    return !!j.done[j.step];
+  }
+
+  var PROC_STEP_BODY = [null, procStep1, procStep2, procStep3, procStep4, procStep5, procStep6];
+
   function procStepBody(j) {
-    if (j.step === 1) return procStep1(j);
-    if (j.step === 2) return procStep2(j);
-    if (j.step === 3) return procStep3(j);
-    if (j.step === 4) return procStep4(j);
-    if (j.step === 5) return procStep5(j);
-    return procStep6(j);
+    var fnb = PROC_STEP_BODY[j.step];
+    return fnb ? fnb(j) : procStep6(j);
+  }
+
+  /* ------------------------------------------------------------------
+     2026-10-10：六步内容同页展示 + 锚点导航（步骤条保留，点击即跳转锚点）
+     ------------------------------------------------------------------ */
+  function procAnchorBar(j) {
+    var btns = PROC_STEP_TITLES.map(function (t, i) {
+      var n = i + 1;
+      var lock = procStepLocked(j, n);
+      var active = j.step === n;
+      var bd = active ? "#1f63ff" : "#d5dee8";
+      return '<button type="button" data-rw-act="proc-goto" data-step="' + n + '"'
+        + ' style="padding:6px 12px;border-radius:16px;border:1px solid ' + bd
+        + ";background:" + (active ? "#eaf2ff" : "#ffffff")
+        + ";color:" + (active ? "#1f63ff" : "#475569")
+        + ';font-size:12.5px;cursor:pointer;line-height:18px">'
+        + n + ". " + esc(t)
+        + (j.done[n] ? " ✓" : (lock ? " 锁" : ""))
+        + "</button>";
+    }).join("");
+    return '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 18px;border-bottom:1px solid #e8eef6;background:#f8fafc">'
+      + '<span style="font-size:12px;color:#7c8b9c;align-self:center;margin-right:2px">锚点</span>' + btns + "</div>";
+  }
+
+  /* 步骤 3（标准化预处理）未执行完成时，步骤 4 及之后锁定 */
+  function procStepLocked(j, n) {
+    if (n <= 3) return null;
+    if (!j.done[3]) return "标准化预处理（步骤 3）执行完成后，才能进行步骤 4 及之后的操作";
+    if (n >= 5 && !j.done[4]) return "请先完成步骤 4 数据加工";
+    if (n >= 6 && !j.done[5]) return "请先完成步骤 5 产品生产";
+    return null;
+  }
+
+  function procAllSteps(j) {
+    return PROC_STEP_TITLES.map(function (t, i) {
+      var n = i + 1;
+      var lock = procStepLocked(j, n);
+      var body = lock
+        ? '<div class="rw-banner" style="margin-top:10px"><span>ⓘ</span><div>' + esc(lock) + "；完成后本区域自动解锁。</div></div>"
+        : (PROC_STEP_BODY[n] ? PROC_STEP_BODY[n](j) : "");
+      return '<div id="rwProcAnchor' + n + '" style="padding:14px 0;border-bottom:1px dashed #e8eef6">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        + '<span style="width:22px;height:22px;border-radius:50%;background:' + (j.done[n] ? "#0d9b70" : "#1f63ff")
+        + ';color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">'
+        + (j.done[n] ? "✓" : n) + "</span>"
+        + '<span style="font-size:14.5px;font-weight:700;color:#0f172a">' + esc(t) + "</span>"
+        + (j.done[n] ? '<span class="rw-tag rw-tag--done">已完成</span>' : '<span class="rw-tag rw-tag--gray">待完成</span>')
+        + '<span data-rw-act="proc-goto" data-step="' + n + '" style="margin-left:auto;font-size:12px;color:#1f63ff;cursor:pointer">回到此处 ↑</span>'
+        + "</div>" + body + "</div>";
+    }).join("");
+  }
+
+  function procScrollToAnchor(n) {
+    var mk = document.getElementById("rwProcMask");
+    if (!mk) return;
+    var bd2 = mk.querySelector(".rw-modal-body");
+    var sc = mk.querySelector("#rwProcAnchor" + n);
+    if (!bd2 || !sc) return;
+    bd2.scrollTop = bd2.scrollTop + (sc.getBoundingClientRect().top - bd2.getBoundingClientRect().top) - 6;
   }
 
   /* 步骤 1 数据策划 —— 2026-10-08 精简：只保留 加工任务名称 / 目标用途 / 输出格式 /
@@ -124780,6 +125258,14 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-field"><label>数据产品形式<i>*</i></label><select data-rw-pf="productForm">'
       + ["数据集（CSV / JSON）", "结构模型库", "图谱集", "可视化分析报告"].map(function (o) { return '<option' + (j.spec.productForm === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
       + "</select></div>"
+      + '<div class="rw-field"><label>关联采集任务ID<i>*</i></label><select data-rw-pf="collectTaskId">'
+      + '<option value="">请选择采集任务ID</option>'
+      + collectTaskList().map(function (t) {
+        return '<option value="' + esc(t.id) + '"' + (j.collectTaskId === t.id ? " selected" : "") + ">"
+          + esc(t.id) + " · " + esc(t.name || "未命名采集任务") + "</option>";
+      }).join("")
+      + "</select></div>"
+      + '<div class="rw-field is-full"><label>关联数据概况</label><div class="rw-card-note">' + esc(procCollectSummary(j)) + "</div></div>"
       + '<div class="rw-field is-full"><label>内容<i>*</i></label><textarea data-rw-pf="desc" placeholder="描述本次数据产品的内容、覆盖范围与验收标准…">' + esc(j.spec.desc) + "</textarea></div>"
       + "</div>"
       + (j.done[1] ? procDoneCard(j, 1) : "");
@@ -124792,6 +125278,192 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     { key: "integ", name: "集成化基础数据", desc: "已入库的结构化基础数据（字段完整、格式统一、可直接检索）" }
   ];
 
+  /* ==================================================================
+     2026-10-10 新增：关联采集任务 / 批次数据 / 标准规则对齐 / 安全等级判断
+     ================================================================== */
+  var ROW_LEVELS = ["A级", "B级", "C级"];
+
+  function collectTaskList() {
+    try { return getS().tasks || []; } catch (e) { return []; }
+  }
+
+  function collectTaskOf(id) {
+    if (!id) return null;
+    return collectTaskList().filter(function (t) { return t.id === id; })[0] || null;
+  }
+
+  function procTaskBatches(j) {
+    var t = collectTaskOf(j.collectTaskId);
+    if (!t) return [];
+    if (t.batches && t.batches.length) return t.batches;
+    try { return buildSeedBatches(t) || []; } catch (e) { return []; }
+  }
+
+  function procBatchRows(j) {
+    var out = [];
+    procTaskBatches(j).forEach(function (b) {
+      (b.rows || []).forEach(function (r, i) {
+        var o = { _k: b.batch + "#" + (i + 1), _b: b.batch, _bi: b.seq, _t: b.time };
+        (b.fields || []).forEach(function (f) { o[f.name] = r[f.name]; });
+        out.push(o);
+      });
+    });
+    return out;
+  }
+
+  function procRowField(row, re) {
+    var ks = Object.keys(row);
+    for (var i = 0; i < ks.length; i++) {
+      if (ks[i].charAt(0) === "_") continue;
+      if (re.test(ks[i])) return String(row[ks[i]] || "");
+    }
+    return "";
+  }
+
+  function procRowDataType(row, b) {
+    return procRowField(row, /数据类型|数据类别|数据种类/) || "结构化数据";
+  }
+
+  function procDataTypeList(j) {
+    var seen = {}, out = [];
+    procTaskBatches(j).forEach(function (b) {
+      (b.rows || []).forEach(function (r) {
+        var dt = procRowDataType(r, b);
+        if (!seen[dt]) { seen[dt] = 1; out.push(dt); }
+      });
+    });
+    return out.slice(0, 8);
+  }
+
+  function procPickedCount(j) {
+    var picked = j.filter.selRows || [];
+    var all = procBatchRows(j);
+    if (!picked.length) return all.length;
+    return all.filter(function (r) { return picked.indexOf(r._k) >= 0; }).length;
+  }
+
+  function procCollectSummary(j) {
+    var t = collectTaskOf(j.collectTaskId);
+    if (!t) return "尚未关联采集任务ID：请在上方下拉框选择一个采集任务ID，「基础数据筛选」将按批次展示该任务已采集的数据。";
+    var bs = procTaskBatches(j);
+    var n = bs.reduce(function (a, b) { return a + (b.count || 0); }, 0);
+    var rows = bs.reduce(function (a, b) { return a + (b.rows || []).length; }, 0);
+    return "已关联 " + t.id + "（" + (t.name || "-") + "）· " + bs.length + " 个采集批次 · 累计 "
+      + n + " 条数据（页面按批次示例展示 " + rows + " 条）· 数据来源：" + (t.sourceType || t.source || "-");
+  }
+
+  /* ---------------- 安全等级判断（按采集数据批次评级：第1级 / 第2级） ---------------- */
+  function procSecurityLevel(b) {
+    var s = String((b && b.source) || "");
+    var abnormal = b && b.status && b.status !== "成功";
+    if (abnormal) return { lv: 2, why: "本批次存在异常记录，按第2级（受限）管理并需人工复核" };
+    if (/商业|购买|授权|订购|buy/.test(s)) return { lv: 2, why: "来源为商业授权 / 购买数据，按第2级（受限）管理" };
+    if (/开源|公开|open|自主计算|计算数据/.test(s)) return { lv: 1, why: "来源为开源 / 公开渠道，批次完整且无异常，按第1级（可公开）管理" };
+    return { lv: 2, why: "来源未标注公开授权，默认按第2级（受限）管理" };
+  }
+
+  function procSecurityRows(j) {
+    var bs = procTaskBatches(j);
+    if (!bs.length) {
+      var rs = j.filter.rows || [];
+      if (!rs.length) return [];
+      var half = Math.ceil(rs.length / 2);
+      bs = [
+        { batch: (j.collectTaskId || j.id) + "-B01", seq: 1, time: "-", count: half, source: "-", status: "成功" },
+        { batch: (j.collectTaskId || j.id) + "-B02", seq: 2, time: "-", count: rs.length - half, source: "-", status: "成功" }
+      ];
+    }
+    return bs.map(function (b) {
+      var r = procSecurityLevel(b);
+      return {
+        batch: b.batch, seq: b.seq, time: b.time, count: b.count,
+        source: b.source || "-", status: b.status || "成功",
+        lv: r.lv, why: r.why, manual: false
+      };
+    });
+  }
+
+  function procSecurityRun() {
+    var j = activeJob();
+    if (!j) return;
+    var rs = procSecurityRows(j);
+    if (!rs.length) { toast("暂无可评级的采集批次，请先关联采集任务ID 并完成基础数据筛选", "err"); return; }
+    j.quality.security = {
+      executed: true,
+      at: nowText(),
+      batches: rs,
+      summary: rs.filter(function (x) { return x.lv === 1; }).length + " 个批次为第1级（可公开），"
+        + rs.filter(function (x) { return x.lv === 2; }).length + " 个批次为第2级（受限）"
+    };
+    renderProcWizard();
+    toast("安全等级判断完成：" + j.quality.security.summary, "ok");
+  }
+
+  function procSecurityHtml(j) {
+    var sec = j.quality.security || { executed: false, batches: [], summary: "", at: "" };
+    var rs = sec.executed ? (sec.batches || []) : procSecurityRows(j);
+    if (!rs.length) {
+      return '<div style="margin-top:16px"><div class="rw-section-title">安全等级判断（按采集数据批次评级）</div>'
+        + '<div class="rw-banner" style="margin-top:8px"><span>ⓘ</span><div>暂无采集批次数据；请先在步骤 1 关联采集任务ID，并完成步骤 2 基础数据筛选。</div></div></div>';
+    }
+    var tb = rs.map(function (b) {
+      return "<tr><td>" + esc(b.batch) + "</td><td>第 " + b.seq + " 期</td><td>" + esc(b.time) + "</td><td>" + b.count + " 条</td>"
+        + "<td>" + esc(b.source) + "</td>"
+        + "<td>" + (b.status === "成功" ? '<span class="rw-tag rw-tag--done">成功</span>' : '<span class="rw-tag rw-tag--warn">' + esc(b.status) + "</span>") + "</td>"
+        + '<td><select data-rw-pf="secLv" data-v="' + esc(b.batch) + '" style="min-height:30px;border:1px solid #d5dee8;border-radius:6px;padding:3px 6px">'
+        + '<option value="1"' + (b.lv === 1 ? " selected" : "") + ">第1级（可公开）</option>"
+        + '<option value="2"' + (b.lv === 2 ? " selected" : "") + ">第2级（受限）</option></select>"
+        + ' <span class="rw-tag ' + (b.lv === 1 ? "rw-tag--done" : "rw-tag--warn") + '">' + (b.lv === 1 ? "第1级" : "第2级") + "</span></td>"
+        + '<td style="line-height:18px">' + esc(b.why) + (b.manual ? '<div class="rw-field-tip">已人工调整</div>' : "") + "</td></tr>";
+    }).join("");
+    return '<div style="margin-top:16px"><div class="rw-section-title">安全等级判断（按采集数据批次评级）</div>'
+      + '<div class="rw-card-note">按「关联采集任务ID」的批次维度逐批评级：来源为开源 / 公开且批次完整 → 第1级（可公开）；来源为商业授权、自采或批次存在异常 → 第2级（受限）。评级可人工下拉调整。</div>'
+      + '<div style="margin-top:10px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-sec">'
+      + (sec.executed ? "重新执行安全等级判断" : "执行安全等级判断") + "</button></div>"
+      + (sec.executed
+        ? '<div class="rw-banner" style="margin-top:10px"><span>✓</span><div>判定时间 ' + esc(sec.at) + "：" + esc(sec.summary) + "</div></div>"
+        : '<div class="rw-field-tip" style="margin-top:8px">尚未执行判定，下表为系统预评级；点击按钮后写入加工记录。</div>')
+      + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
+      + "<th>批次ID</th><th>期次</th><th>采集时间</th><th>数据量</th><th>数据来源</th><th>批次状态</th><th>安全等级</th><th>判定依据</th>"
+      + "</tr></thead><tbody>" + tb + "</tbody></table></div></div>";
+  }
+
+  /* ---------------- 数据产品全部字段清单 ---------------- */
+  function procProductFields(j) {
+    var out = [];
+    var r0 = (j.filter.rows || [])[0] || {};
+    var m0 = (j.model.rows || [])[0] || {};
+    var keys = j.product.datasets || [];
+    var d = keys.length ? procDatasetOf(keys[0]) : null;
+    var sample = function (name) {
+      var n = String(name || "");
+      if (/化学式|分子式/.test(n)) return r0.formula || "-";
+      if (/唯一标识|标识|ID$/.test(n)) return r0.id || "-";
+      if (/数据类型|类别/.test(n)) return r0.dataType || "-";
+      if (/质量等级|等级/.test(n)) return r0.level || "-";
+      if (/带隙|能带|态密度|有效质量|形成能|能量|模量|常数|电导|熔点|沸点/.test(n)) return r0.metric || (m0.out || "-");
+      if (/图谱|图像|图片|结构|文件/.test(n)) return m0.out || "标准化文件（PNG / CIF）";
+      return m0.out || "按标准值回写";
+    };
+    if (d) {
+      d.fields.forEach(function (f) { out.push({ field: f, type: "业务字段", value: sample(f), from: d.title + " · 核心字段" }); });
+    }
+    out.push({ field: "材料唯一标识", type: "元数据字段", value: r0.id || "-", from: "采集数据主键" });
+    out.push({ field: "化学式", type: "元数据字段", value: r0.formula || "-", from: "采集数据 · 结构字段" });
+    out.push({ field: "数据类型", type: "元数据字段", value: r0.dataType || "-", from: "采集数据 · 分类字段" });
+    out.push({ field: "质量等级", type: "元数据字段", value: r0.level || "-", from: "基础数据筛选 · 分级标签" });
+    out.push({ field: "采集批次ID", type: "元数据字段", value: r0.batch || "-", from: "关联采集任务批次" });
+    out.push({ field: "source_task_id", type: "元数据字段", value: j.collectTaskId || "-", from: "关联采集任务ID" });
+    out.push({ field: "data_version", type: "元数据字段", value: j.version || "V0.0", from: "版本标记（元数据字段）" });
+    var sec3 = j.quality.security || {};
+    var lvText = "-";
+    if (sec3.executed && (sec3.batches || []).length) {
+      lvText = (sec3.batches || []).map(function (x) { return x.batch + "：第" + x.lv + "级"; }).join("；");
+    }
+    out.push({ field: "security_level", type: "元数据字段", value: lvText, from: "安全等级判断结果" });
+    return out;
+  }
+
   function procStep2(j) {
     var sel = j.basis || [];
     var cards = BASIS_DATA_TYPES.map(function (b) {
@@ -124801,60 +125473,194 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + '<div><div class="rw-ds-name">' + esc(b.name) + "</div>"
         + '<div class="rw-ds-desc">' + esc(b.desc) + "</div></div></label>";
     }).join("");
+    var t = collectTaskOf(j.collectTaskId);
+    if (!t) {
+      return '<div class="rw-section-title">基础数据筛选</div>'
+        + '<div class="rw-banner" style="margin-top:10px"><span>ⓘ</span><div>请先在步骤 1「数据策划」中选择「关联采集任务ID」；选择后本区域按批次展示该任务已采集的数据供筛选。</div></div>'
+        + (j.done[2] ? procDoneCard(j, 2) : "");
+    }
+    var batches = procTaskBatches(j);
+    var picked = j.filter.selRows || [];
+    var dts = j.filter.dtypes || [];
+    /* 2026-10-10：按需求彻底移除「质量等级」——筛选条件、采集数据表列、筛选结果列均已删除 */
+    var tables = batches.map(function (b) {
+      var th = '<th style="width:44px">选择</th><th style="width:52px">序号</th>'
+        + (b.fields || []).map(function (f) { return '<th style="text-align:left">' + esc(f.name) + "</th>"; }).join("");
+      var tb = (b.rows || []).map(function (r, i) {
+        var k = b.batch + "#" + (i + 1);
+        var dt = procRowDataType(r, b);
+        if (dts.length && dts.indexOf(dt) < 0) return "";
+        var on = picked.length ? picked.indexOf(k) >= 0 : true;
+        return "<tr><td><input type=\"checkbox\" data-rw-pf=\"srcRow\" data-v=\"" + esc(k) + "\"" + (on ? " checked" : "") + "></td>"
+          + "<td>" + (i + 1) + "</td>"
+          + (b.fields || []).map(function (f) { return "<td>" + esc(r[f.name]) + "</td>"; }).join("")
+          + "</tr>";
+      }).join("");
+      return '<div class="rw-section-title" style="font-size:14px;margin-top:14px">批次 ' + esc(b.batch)
+        + "（第 " + b.seq + " 期 · " + esc(b.time) + " · " + b.count + " 条"
+        + '　<span class="rw-tag ' + ((b.status || "成功") === "成功" ? "rw-tag--done" : "rw-tag--warn") + '">' + esc(b.status || "成功") + "</span>）</div>"
+        + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr>' + th + "</tr></thead><tbody>"
+        + (tb || '<tr><td colspan="8"><div class="rw-empty" style="padding:14px 0">当前筛选条件下无数据</div></td></tr>')
+        + "</tbody></table></div>";
+    }).join("");
+    var dtBox = procDataTypeList(j).map(function (dt) {
+      var on = dts.length ? dts.indexOf(dt) >= 0 : true;
+      return '<label class="rw-check" style="margin-right:12px"><input type="checkbox" data-rw-pf="dtype" data-v="' + esc(dt) + '"' + (on ? " checked" : "") + "><span>" + esc(dt) + "</span></label>";
+    }).join("");
     return '<div class="rw-section-title">基础数据筛选</div>'
-      + '<div class="rw-card-note">勾选本次加工需要纳入的基础数据类型（可多选）；勾选后点击「下一步」进入标准化预处理。</div>'
-      + '<div class="rw-ds-list" style="padding-left:0">' + cards + "</div>"
-      + '<div class="rw-field-tip rw-basis-count" style="margin-top:10px">已勾选 <b>' + sel.length + "</b> 类基础数据</div>"
+      + '<div class="rw-card-note">下列数据由「关联采集任务ID」按批次拉取，勾选需要参与加工的记录后点击「应用筛选」。</div>'
+      + '<div class="rw-kv"><div><b>关联采集任务</b>' + esc(t.id) + "</div>"
+      + "<div><b>任务名称</b>" + esc(t.name || "-") + "</div>"
+      + "<div><b>采集批次</b>" + batches.length + " 个</div>"
+      + "<div><b>已选记录</b>" + procPickedCount(j) + " 条</div></div>"
+      + '<div style="margin-top:12px"><div class="rw-section-title" style="font-size:14px">筛选条件</div>'
+      /* 2026-10-10：按需求移除「质量等级」「分组方式（按化学式分组 / 每组最少条数）」两项筛选条件，仅保留「数据类型」 */
+      + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px">'
+      + '<span style="font-size:12.5px;color:#64748b;margin-right:4px">数据类型</span>' + dtBox + "</div></div>"
+      + tables
+      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-2">应用筛选</button></div>'
+      + (j.filter.executed ? procFilterResult(j.filter) : "")
       + (j.done[2] ? procDoneCard(j, 2) : "");
   }
 
   function procFilterResult(f) {
     var rows = f.rows.map(function (r) {
-      return "<tr><td>" + esc(r.formula) + "</td><td>" + esc(r.id) + "</td><td>" + esc(r.dataType) + "</td><td>" + esc(r.level) + "</td><td>" + esc(r.metric || "-") + "</td></tr>";
+      return "<tr><td>" + esc(r.formula) + "</td><td>" + esc(r.id) + "</td><td>" + esc(r.dataType) + "</td><td>" + esc(r.metric || "-") + "</td></tr>";
     }).join("");
     var groups = f.groups.map(function (g) {
       return "<tr><td>" + esc(g.formula) + "</td><td>" + g.count + " 条</td><td>" + (g.pass ? '<span class="rw-tag rw-tag--done">满足</span>' : '<span class="rw-tag rw-tag--warn">不足（每组至少 3 条）</span>') + "</td></tr>";
     }).join("");
     return '<div style="margin-top:16px"><div class="rw-section-title">筛选后的数据集合</div>'
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>化学式</th><th>材料唯一标识</th><th>数据类型</th><th>质量等级</th><th>' + esc(C().metric.label) + '</th></tr></thead><tbody>' + rows + "</tbody></table></div></div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>化学式</th><th>材料唯一标识</th><th>数据类型</th><th>' + esc(C().metric.label) + '</th></tr></thead><tbody>' + rows + "</tbody></table></div></div>\""
       + '<div style="margin-top:14px"><div class="rw-section-title">分组清单（按化学式）</div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>化学式</th><th>条数</th><th>分组校验</th></tr></thead><tbody>' + groups + "</tbody></table></div></div>";
   }
 
-  /* 步骤 3 标准化预处理 */
+  /* 步骤 3 标准化预处理
+     2026-10-10：预处理项与「数据标准化处理 → 标准规则库」逐条对齐（不再自造四项）；
+     执行期间停留在当前页等待，可随时保存进度；执行完成才解锁步骤 4 及之后。 */
+  function procPreCats() {
+    var groups = stdRuleGroups();
+    var byCat = {};
+    groups.forEach(function (g) { (byCat[g.cat] = byCat[g.cat] || []).push(g); });
+    return Object.keys(byCat).map(function (cat) { return { cat: cat, items: byCat[cat] }; });
+  }
+
+  function procPreRules(j) {
+    var all = stdRuleGroups().map(function (r) { return r.id; });
+    var sel = j.pre.rules || [];
+    return sel.length ? sel : all;
+  }
+
+  function procOutlierRows(j) {
+    var os = j.pre.outliers || [];
+    if (!os.length) return '<tr><td colspan="5"><div class="rw-empty" style="padding:18px 0">未检测到异常值</div></td></tr>';
+    return os.map(function (o) {
+      return "<tr><td>" + esc(o.name) + "</td><td>" + esc(o.value) + "</td><td>" + esc(o.sigma) + "</td>"
+        + '<td><input type="text" data-rw-pf="outlierFix" data-v="' + esc(o.key) + '" placeholder="输入修正值" value="' + esc(o.fixed) + '" style="width:100%;box-sizing:border-box;min-height:32px;border:1px solid #d5dee8;border-radius:6px;padding:4px 8px"></td>'
+        + '<td class="rw-nowrap">'
+        + (o.keep ? '<span class="rw-tag rw-tag--warn">已标注保留</span>' : '<button class="rw-op" type="button" data-rw-act="proc-outlier-keep" data-v="' + esc(o.key) + '">标注保留</button>')
+        + '<button class="rw-op" type="button" data-rw-act="proc-outlier-fix" data-v="' + esc(o.key) + '">确认修正</button>'
+        + "</td></tr>";
+    }).join("");
+  }
+
   function procStep3(j) {
     var p = j.pre;
-    var opts = [["format", "格式统一", "CIF/POSCAR → 标准 CIF"], ["unit", "单位统一", "非标准单位 → 标准单位（第 1.4 节单位表）"],
-      ["missing", "缺失值", "缺失率 ≤ 5% 时标注 “N/A”；> 5% 退回"], ["outlier", "异常值检测", "超出 3σ 范围或物理不合理"]];
-    var optHtml = opts.map(function (o) {
-      return '<label class="rw-check' + (p.opts[o[0]] ? " is-on" : "") + '" style="display:block;margin-bottom:8px">'
-        + '<input type="checkbox" data-rw-pf="preOpt" data-v="' + o[0] + '"' + (p.opts[o[0]] ? " checked" : "") + ">"
-        + "<div><b>" + esc(o[1]) + "</b><div class=\"rw-field-tip\">" + esc(o[2]) + "</div></div></label>";
+    var sel = procPreRules(j);
+    var cats = procPreCats();
+    var catHtml = cats.map(function (c) {
+      var items = c.items.map(function (r) {
+        var on = sel.indexOf(r.id) >= 0;
+        return '<label class="rw-check' + (on ? " is-on" : "") + '" style="display:block;margin-bottom:6px">'
+          + '<input type="checkbox" data-rw-pf="preRule" data-v="' + esc(r.id) + '"' + (on ? " checked" : "") + ">"
+          + "<div><b>" + esc(r.item) + '</b><div class="rw-field-tip">' + esc(r.desc) + "</div></div></label>";
+      }).join("");
+      var n = c.items.filter(function (r) { return sel.indexOf(r.id) >= 0; }).length;
+      return '<div class="rw-std-cat"><div class="rw-std-cat-head"><b>' + esc(c.cat) + "</b>"
+        + '<span class="rw-std-cat-count">' + n + " / " + c.items.length + " 条</span></div>"
+        + '<div class="rw-std-items">' + items + "</div></div>";
     }).join("");
 
-    var outlierRows = p.outliers.length
-      ? p.outliers.map(function (o) {
-        return "<tr><td>" + esc(o.name) + "</td><td>" + esc(o.value) + "</td><td>" + esc(o.sigma) + "</td>"
-          + '<td><input type="text" data-rw-pf="outlierFix" data-v="' + esc(o.key) + '" placeholder="输入修正值" value="' + esc(o.fixed) + '" style="width:100%;box-sizing:border-box;min-height:32px;border:1px solid #d5dee8;border-radius:6px;padding:4px 8px"></td>'
-          + '<td class="rw-nowrap">'
-          + (o.keep ? '<span class="rw-tag rw-tag--warn">已标注保留</span>' : '<button class="rw-op" type="button" data-rw-act="proc-outlier-keep" data-v="' + esc(o.key) + '">标注保留</button>')
-          + '<button class="rw-op" type="button" data-rw-act="proc-outlier-fix" data-v="' + esc(o.key) + '">确认修正</button>'
-          + "</td></tr>";
-      }).join("")
-      : '<tr><td colspan="5"><div class="rw-empty" style="padding:18px 0">未检测到异常值</div></td></tr>';
+    var runBtn = p.running
+      ? '<button class="rw-btn rw-btn--primary" type="button" disabled style="opacity:.6;cursor:not-allowed">预处理执行中…</button>'
+      : '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-3">'
+        + (p.executed ? "重新执行标准化预处理" : "执行标准化预处理") + "</button>";
 
-    return '<div class="rw-section-title">预处理项（系统自动执行 + 人工复核）</div>'
-      + optHtml
-      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-3">执行标准化预处理</button></div>'
-      + (p.executed
-        ? '<div style="margin-top:16px"><div class="rw-section-title">缺失值报告</div>'
-        + '<div class="rw-kv"><div><b>缺失率</b>' + esc(p.missing.rate) + "</div>"
-        + "<div><b>判定</b>" + (p.missing.pass ? '<span class="rw-tag rw-tag--done">≤ 5%，标注 “N/A”</span>' : '<span class="rw-tag rw-tag--fail">> 5%，退回数据源</span>') + "</div>"
-        + "<div><b>处理人</b>系统（自动执行）</div></div></div>"
-        + '<div style="margin-top:14px"><div class="rw-section-title">异常值清单（人工复核）</div>'
-        + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>数据项</th><th>原始值</th><th>偏离</th><th>修正值</th><th>操作</th></tr></thead><tbody>' + outlierRows + "</tbody></table></div></div>"
-        : "")
+    var waitHtml = p.running
+      ? '<div class="rw-banner" style="margin-top:12px"><span>◔</span><div>'
+        + "<b>标准化预处理执行中，请在当前页等待，不要切换到其他步骤。</b>"
+        + '<div class="rw-progress" style="margin-top:8px"><i style="width:' + (p.progress || 0) + '%"></i></div>'
+        + '<div class="rw-field-tip" style="margin-top:6px">当前阶段：' + esc(p.stage || "初始化")
+        + "　进度 " + (p.progress || 0) + "%"
+        + "　（可点击底部「保存进度」随时保存；关闭后可从列表「继续加工」回到本步骤）</div></div></div>"
+      : "";
+
+    var logHtml = (p.logs && p.logs.length)
+      ? '<div class="rw-log" style="margin-top:10px">' + p.logs.map(function (l) {
+        return '<div class="rw-log-line' + (l.kind ? " is-" + l.kind : "") + '"><span class="rw-log-time">' + esc(l.time) + "</span>" + esc(l.text) + "</div>";
+      }).join("") + "</div>"
+      : "";
+
+    var resultHtml = p.executed
+      ? '<div style="margin-top:16px"><div class="rw-section-title">预处理执行结果</div>'
+      + '<div class="rw-kv"><div><b>已应用规则</b>' + sel.length + " 条</div>"
+      + "<div><b>缺失率</b>" + esc(p.missing.rate) + "</div>"
+      + "<div><b>判定</b>" + (p.missing.pass ? '<span class="rw-tag rw-tag--done">≤ 5%，标注 “N/A”</span>' : '<span class="rw-tag rw-tag--fail">> 5%，退回数据源</span>') + "</div>"
+      + "<div><b>处理人</b>系统（自动执行）</div><div><b>版本</b>" + esc(j.version) + "</div></div>"
+      + '<div style="margin-top:14px"><div class="rw-section-title" style="font-size:14px">异常值清单（人工复核）</div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>数据项</th><th>原始值</th><th>偏离</th><th>修正值</th><th>操作</th></tr></thead><tbody>'
+      + procOutlierRows(j) + "</tbody></table></div></div></div>"
+      : "";
+
+    var allN = stdRuleGroups().length;
+    return '<div class="rw-section-title">标准化预处理</div>'
+      + '<div class="rw-card-note">预处理项与「数据标准化处理 → 标准规则库」逐条对齐（共 ' + allN + " 条规则 / "
+      + cats.length + " 个标准化类别）；勾选后点击「执行标准化预处理」，执行完成后才能进入下一步。</div>"
+      + '<div class="rw-std-wrap">' + catHtml + "</div>"
+      + '<div style="margin-top:14px">' + runBtn + "</div>"
+      + waitHtml + logHtml + resultHtml
       + (j.done[3] ? procDoneCard(j, 3) : "");
+  }
+
+  /* 按标准化类别逐类推进，未跑完前停留在当前页 */
+  function runPreprocess() {
+    var j = activeJob();
+    if (!j) return;
+    if (!j.done[2]) { toast("请先完成步骤 2 基础数据筛选", "err"); return; }
+    if (j.pre.running) return;
+    var cats = procPreCats();
+    if (!cats.length) { toast("未加载到标准化规则，请刷新页面后重试", "err"); return; }
+    j.pre.running = true;
+    j.pre.progress = 0;
+    j.pre.stage = "初始化";
+    j.pre.logs = [];
+    renderProcWizard();
+    var i = 0;
+    var total = cats.length;
+    var timer = setInterval(function () {
+      var cur = activeJob();
+      if (!cur) { clearInterval(timer); return; }
+      if (i >= total) {
+        clearInterval(timer);
+        cur.pre.running = false;
+        cur.pre.progress = 100;
+        cur.pre.stage = "执行完成";
+        cur.pre.executed = true;
+        cur.version = "V1.0";
+        cur.pre.logs.push({ time: nowText(), text: "标准化预处理全部完成，版本推进至 V1.0，可进入下一步", kind: "ok" });
+        procDone(cur, 3);
+        renderProcWizard();
+        toast("标准化预处理完成，版本推进至 V1.0", "ok");
+        return;
+      }
+      var c = cats[i];
+      cur.pre.stage = c.cat + "（" + c.items.length + " 条规则）";
+      cur.pre.progress = Math.round((i + 1) / total * 100);
+      cur.pre.logs.push({ time: nowText(), text: "已应用「" + c.cat + "」" + c.items.length + " 条标准化规则", kind: "ok" });
+      i += 1;
+      renderProcWizard();
+    }, 800);
   }
 
   /* 步骤 4 数据加工 */
@@ -124903,7 +125709,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ? ds.map(function (d) {
         var on = picked.indexOf(d.key) >= 0;
         return '<label class="rw-pds' + (on ? " is-on" : "") + '">'
-          + '<div class="rw-pds-top"><input type="checkbox" data-rw-pf="productDs" data-v="' + esc(d.key) + '"' + (on ? " checked" : "") + ">"
+          + '<div class="rw-pds-top"><input type="radio" name="rwProcDs" data-rw-pf="productDs" data-v="' + esc(d.key) + '" value="' + esc(d.key) + '"' + (on ? " checked" : "") + ">"
           + "<b>" + esc(d.title) + "</b></div>"
           + '<div class="rw-pds-desc">入库位置：' + esc(dbName) + " · " + esc(d.title)
           + "<br>核心字段：" + esc(d.fields.join("、"))
@@ -124930,39 +125736,56 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-field-tip">元数据字段 data_version 已更新为 ' + esc(j.version) + "；各数据集按上述入库位置归档，字段与数据库保持一致。</div></div>"
       : "";
 
-    return '<div class="rw-section-title">数据产品按数据集划分（可多选，与' + esc(dbName) + '数据集一致）</div>'
-      + '<div class="rw-field-tip" style="margin-bottom:10px">已勾选 <b class="rw-ds-count">' + picked.length + "</b> / " + ds.length
-      + " 个数据集；加工产出将分别归入所选数据集，字段口径与数据库保持一致。</div>"
+    return '<div class="rw-section-title">选择数据集类型（单选，与' + esc(dbName) + '数据集一致）</div>'
+      + '<div class="rw-field-tip" style="margin-bottom:10px">本次产出只能归入 <b>1</b> 个数据集类型；已选 <b class="rw-ds-count">' + picked.length + "</b> / " + ds.length
+      + " 个数据集，重新选择会自动替换上一个。</div>"
       + '<div class="rw-ds-wrap">' + dsCards + "</div>"
       + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-5">生产数据产品</button></div>'
       + result
       + (j.done[5] ? procDoneCard(j, 5) : "");
   }
 
-  /* 步骤 6 质量评价 */
+  /* 步骤 6 质量评价
+     2026-10-10：① 删除「执行质量评价」按钮；② 列表改为数据产品呈现（展示全部数据字段）；
+     ③ 新增按采集批次的安全等级判断；④ 列表下方新增质量评价表（评价维度 / 评价结果 / 评价建议）。 */
   function procStep6(j) {
     var q = j.quality;
-    var rows = PROC_QUALITY.map(function (item, i) {
-      var r = q.items[i] || {};
-      var okTag = r.ok === null ? '<span class="rw-tag rw-tag--gray">未评价</span>'
-        : (r.ok ? '<span class="rw-tag rw-tag--done">合格</span>' : '<span class="rw-tag rw-tag--fail">不合格</span>');
-      return "<tr><td>" + esc(item.dim) + "</td><td>" + esc(item.method) + "</td><td>" + esc(item.std) + "</td>"
-        + "<td>" + (r.measured ? esc(r.measured) : "—") + "</td><td>" + okTag + "</td>"
-        + '<td class="rw-nowrap">' + (r.ok === false ? '<button class="rw-op" type="button" data-rw-act="proc-quality-fix" data-key="' + esc(item.key) + '">' + esc(item.fix) + "</button>" : (r.handled ? '<span class="rw-tag rw-tag--warn">' + esc(r.handled) + "</span>" : "—")) + "</td></tr>";
+    var qa = q.qa || {};
+    var fields = procProductFields(j);
+    var fieldRows = fields.map(function (f) {
+      return "<tr><td><b>" + esc(f.field) + "</b></td><td>" + esc(f.type) + "</td><td>" + esc(f.value) + "</td><td>" + esc(f.from) + "</td></tr>";
     }).join("");
-    return '<div class="rw-section-title">质量评价（三维度）</div>'
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>评价维度</th><th>评价方法</th><th>合格标准</th><th>实测值</th><th>判定</th><th>不合格处理</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
-      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-6">执行质量评价</button></div>'
-      + (q.executed ? '<div class="rw-field-tip" style="margin-top:10px">评价完成：'
-      + q.items.filter(function (x) { return x.ok; }).length + " 项合格，"
-      + q.items.filter(function (x) { return !x.ok; }).length + " 项不合格（不合格项按上表处理动作执行）。</div>" : "")
+
+    var qaRows = PROC_QUALITY.map(function (item) {
+      var r = qa[item.key] || {};
+      return '<tr><td style="line-height:19px"><b>' + esc(item.dim) + "</b>"
+        + '<div class="rw-field-tip">评价方法：' + esc(item.method) + "</div>"
+        + '<div class="rw-field-tip">合格标准：' + esc(item.std) + "</div></td>"
+        + '<td><input type="text" data-rw-pf="qaResult" data-v="' + esc(item.key) + '" placeholder="请输入评价结果" value="' + esc(r.result || "") + '" style="width:100%;box-sizing:border-box;min-height:60px;border:1px solid #d5dee8;border-radius:6px;padding:6px 8px"></td>'
+        + '<td><input type="text" data-rw-pf="qaAdvice" data-v="' + esc(item.key) + '" placeholder="请输入评价建议" value="' + esc(r.advice || "") + '" style="width:100%;box-sizing:border-box;min-height:60px;border:1px solid #d5dee8;border-radius:6px;padding:6px 8px"></td></tr>';
+    }).join("");
+
+    return '<div class="rw-section-title">数据产品呈现（数据字段全量列表）</div>'
+      + '<div class="rw-card-note">' + (j.product.executed
+        ? "本次产出归入：" + esc((j.product.datasets || []).map(function (k6) { var d6 = procDatasetOf(k6); return d6 ? d6.title : k6; }).join("、") || "-")
+          + "；下表列出该数据产品的全部字段（含业务字段与元数据字段）。"
+        : "尚未生产数据产品，下表按当前已选 / 已加工结果预览字段；完成步骤 5 后展示最终归档字段。") + "</div>"
+      + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
+      + "<th>数据字段</th><th>字段类型</th><th>示例值 / 取值</th><th>字段来源</th>"
+      + "</tr></thead><tbody>" + fieldRows + "</tbody></table></div>"
+      + procSecurityHtml(j)
+      + '<div style="margin-top:16px"><div class="rw-section-title">质量评价表</div>'
+      + '<div class="rw-card-note">按三维度填写评价结果与评价建议；填写完成后点击底部「完成加工」提交。</div>'
+      + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
+      + "<th>评价维度</th><th>评价结果</th><th>评价建议</th>"
+      + "</tr></thead><tbody>" + qaRows + "</tbody></table></div></div>"
       + (j.done[6] ? procDoneCard(j, 6) : "");
   }
 
   function procDoneCard(j, step) {
     var text = {
       1: "数据产品规格文档已生成，明确目标用途、输出格式与精度要求。",
-      2: "已按质量等级与材料类型完成筛选，输出筛选后数据集合与分组清单。",
+      2: "已按数据类型完成筛选，输出筛选后数据集合与分组清单。",
       3: "标准化预处理完成：格式与单位统一、缺失值标注、异常值已复核；版本推进至 V1.0。",
       4: "加工模型执行完成，输出加工后属性数据 / 标准化图谱 / 验证后结构文件。",
       5: "数据产品生产完成，已按数据集划分归档（输出格式、用途与入库数据集均已确定）；版本推进至 V2.0。",
@@ -124987,18 +125810,32 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       toast("数据产品规格文档已生成", "ok");
     } else if (step === 2) {
       if (!j.done[1]) { toast("请先完成步骤 1 数据策划", "err"); return; }
-      var e = entryState();
-      var pool = j.sourceIds.map(function (id) { return e.records.filter(function (r) { return r.id === id; })[0]; }).filter(Boolean);
-      var levels = j.filter.levels;
+      if (!j.collectTaskId) { toast("请先在步骤 1 选择「关联采集任务ID」", "err"); return; }
+      var picked = j.filter.selRows || [];
+      var all = procBatchRows(j);
+      var pool = picked.length ? all.filter(function (r) { return picked.indexOf(r._k) >= 0; }) : all;
+      if (!pool.length) { toast("请至少勾选一条采集数据", "err"); return; }
+      var levels = (j.filter.levels || []).length ? j.filter.levels : ROW_LEVELS;
       j.filter.rows = pool.map(function (r, i) {
-        return { formula: r.formula, id: r.id, dataType: r.dataType, level: levels[i % levels.length] || "A级", metric: (r[C().metric.key] || "-") + C().metric.unit };
+        return {
+          formula: procRowField(r, /化学式|分子式|材料名称|名称/) || r._b || "-",
+          id: r._k,
+          dataType: procRowDataType(r, { fields: [] }) === "结构化数据" ? (procRowField(r, /数据类型|数据类别/) || "结构化数据") : procRowDataType(r, { fields: [] }),
+          batch: r._b,
+          level: levels[i % levels.length] || "A级",
+          metric: procRowField(r, /带隙|形成能|能量|模量|常数|电导|熔点|沸点|性质|数值/) || "-"
+        };
       });
       var map = {};
-      j.filter.rows.forEach(function (r) { map[r.formula] = (map[r.formula] || 0) + 1; });
+      j.filter.rows.forEach(function (r) {
+        var kk = j.filter.groupByFormula ? r.formula : r.batch;
+        map[kk] = (map[kk] || 0) + 1;
+      });
       j.filter.groups = Object.keys(map).map(function (k) {
         return { formula: k, count: map[k], pass: map[k] >= Number(j.filter.minPerGroup || 3) };
       });
       j.filter.executed = true;
+      j.sourceIds = j.filter.rows.map(function (r) { return r.id; });
       procDone(j, 2);
       toast("筛选完成：" + j.filter.rows.length + " 条数据，" + j.filter.groups.length + " 个分组", "ok");
     } else if (step === 3) {
@@ -125079,6 +125916,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function procFinish() {
     var j = activeJob();
     if (!j) return;
+    j.quality.executed = true;
+    if (!j.done[6]) j.done[6] = nowText();
     closeMask("rwProcMask");
     procState().activeId = "";
     renderRwPage();
@@ -125709,28 +126548,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ])
       + "</div>";
 
-    /* 规则折叠区：审核与整合 + 更新策略 + 统计 */
-    var stats = x.stats.map(function (r) {
-      return '<div class="rw-step-row" style="grid-template-columns:1fr"><div><div><b style="font-size:15px;color:#22364f">'
-        + esc(r[0]) + '</b></div><div class="rw-field-tip">' + esc(r[1]) + "</div></div></div>";
-    }).join("");
-
-    var rulesHtml = '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>数据审核与整合</h3><p>数据审核保证可信度与适用性，数据整合保证标准化；三项均按清单原文执行。</p></div></div>'
-      + '<div class="rw-section-title">① 可信度审核</div>' + tableHtml(x.cred)
-      + '<div class="rw-section-title" style="margin-top:14px">② 适用性审核</div>' + tableHtml(x.appl)
-      + '<div class="rw-section-title" style="margin-top:14px">③ 数据整合（格式统一）</div>' + tableHtml(x.unify)
-      + "</div>"
-      + '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>数据更新策略</h3>'
-      + "<p>数据更新分「现有条目基础信息更新」与「新增条目」两条线，分别来自外部同步与自主计算。</p></div></div>"
-      + tableHtml(x.upd)
-      + "</div>"
-      + '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>数据录入统计</h3>'
-      + "<p>按清单「数据统计」要求，实时汇报数据总量、占用硬件空间与剩余硬件空间，并按固定周期辨别和删除重复数据。</p></div></div>"
-      + '<div class="rw-steps">' + stats + "</div>"
-      + "</div>";
+    /* 2026-10-10：删除规则折叠区（数据审核与整合 / 数据更新策略 / 数据录入统计） */
 
     /* 当前任务的三类详情用子页签分开，一次只呈现一类，避免三张表纵向堆叠 */
     var view = s.collectTaskView || "trace";
@@ -125754,16 +126572,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ? taskShardHtml + conserveBanner
       : view === "issue" ? taskIssueTable : traceHtml;
 
-    /* 2026-10-08：圈红删除——「全库未闭环异常单」警示条与「当前任务」详情卡不再展示，
-       任务详情可通过列表行「查看详情」弹窗查看；下方规范说明折叠区保留。 */
+    /* 2026-10-08 / 2026-10-10：圈红删除——「全库未闭环异常单」警示条、
+       「当前任务」详情卡、以及下方「规范说明」折叠区全部删除。 */
     return '<div class="rw-card">'
       + summaryHead
       + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>采集ID</th><th>数据来源</th><th>入库名称</th><th>数据整合报告</th><th>采集状态</th><th>操作</th></tr></thead><tbody>' + taskRows + "</tbody></table></div>"
-      + "</div>"
-
-      + '<details style="margin-top:8px;background:#fff;border-radius:8px;border:1px solid #e6ecf5;overflow:hidden">'
-      + '<summary style="padding:16px 20px;cursor:pointer;font-weight:600;color:#22364f;list-style:none;outline:none">📋 规范说明：数据审核与整合 / 数据更新策略 / 数据录入统计</summary>'
-      + '<div style="padding:0 20px 20px">' + rulesHtml + '</div></details>';
+      + "</div>";
   }
 
   /* ================================================== 页签二：录入环闭环 */
@@ -126232,8 +127046,25 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         })();
         return;
       case "proc-close":
-        procState().activeId = "";
-        closeMask("rwProcMask");
+        (function () {
+          var jc = activeJob();
+          if (jc) jc.savedAt = nowText();
+          procState().activeId = "";
+          closeMask("rwProcMask");
+          toast("加工进度已保存，可从列表「继续加工」回到当前步骤", "ok");
+        })();
+        return;
+      case "proc-save":
+        (function () {
+          var js = activeJob();
+          if (!js) return;
+          js.savedAt = nowText();
+          renderProcWizard();
+          toast("进度已保存（" + js.savedAt + "）：当前步骤 " + js.step + "「" + PROC_STEP_TITLES[js.step - 1] + "」", "ok");
+        })();
+        return;
+      case "proc-run-sec":
+        procSecurityRun();
         return;
       case "proc-prev":
         (function () {
@@ -126241,6 +127072,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           if (!j) return;
           j.step = Math.max(1, j.step - 1);
           renderProcWizard();
+          procScrollToAnchor(j.step);
         })();
         return;
       case "proc-next":
@@ -126256,11 +127088,17 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
             if (!String(j.spec.desc || "").trim()) { toast("请填写内容", "err"); return; }
             if (!j.done[1]) procDone(j, 1);
           } else if (j.step === 2) {
-            if (!(j.basis || []).length) { toast("请至少勾选一类基础数据（计算数据 / 文件数据 / 集成化基础数据）", "err"); return; }
+            /* 2026-10-10：步骤 2 已改为按关联采集任务批次勾选数据，校验随之调整 */
+            if (!j.collectTaskId) { toast("请先在步骤 1「数据策划」中选择「关联采集任务ID」", "err"); return; }
+            if (!j.filter.executed) { toast("请勾选需要参与加工的采集数据，并点击「应用筛选」", "err"); return; }
             if (!j.done[2]) procDone(j, 2);
+          } else if (j.step === 3) {
+            if (j.pre.running) { toast("标准化预处理执行中，请在当前页等待执行完成", "err"); return; }
+            if (!j.pre.executed) { toast("请先执行「标准化预处理」，执行完成后才能进入下一步", "err"); return; }
           }
           j.step = Math.min(6, j.step + 1);
           renderProcWizard();
+          procScrollToAnchor(j.step);
         })();
         return;
       case "proc-goto":
@@ -126268,15 +127106,20 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           var j = activeJob();
           if (!j) return;
           var st = Number(node.getAttribute("data-step"));
-          if (st > j.step && !j.done[j.step]) { toast("请先完成当前步骤", "err"); return; }
+          var lock = procStepLocked(j, st);
+          if (lock) { toast(lock, "err"); return; }
           j.step = st;
           renderProcWizard();
+          procScrollToAnchor(st);
         })();
         return;
       case "proc-finish":
         procFinish();
         return;
-      case "proc-run-1": case "proc-run-2": case "proc-run-3":
+      case "proc-run-3":
+        runPreprocess();
+        return;
+      case "proc-run-1": case "proc-run-2":
       case "proc-run-4": case "proc-run-5": case "proc-run-6":
         procRun(Number(String(act).replace("proc-run-", "")));
         return;
@@ -126520,20 +127363,89 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           var il = j.filter.levels.indexOf(lv);
           if (v && il < 0) j.filter.levels.push(lv);
           if (!v && il >= 0) j.filter.levels.splice(il, 1);
-        } else if (kp === "preOpt") {
+          renderProcWizard();
+          return;
+        else if (kp === "preOpt") {
           j.pre.opts[el.getAttribute("data-v")] = v;
+        } else if (kp === "collectTaskId") {
+          /* 步骤 1：关联采集任务ID——切换后按新任务重新拉取批次数据 */
+          j.collectTaskId = v;
+          j.filter.selRows = [];
+          j.filter.dtypes = [];
+          j.filter.executed = false;
+          j.filter.rows = [];
+          j.filter.groups = [];
+          renderProcWizard();
+          return;
+        } else if (kp === "srcRow") {
+          var keys = procBatchRows(j).map(function (r) { return r._k; });
+          j.filter.selRows = j.filter.selRows || [];
+          if (!j.filter.selRows.length) j.filter.selRows = keys.slice();
+          var rv = el.getAttribute("data-v");
+          var ri = j.filter.selRows.indexOf(rv);
+          if (v && ri < 0) j.filter.selRows.push(rv);
+          if (!v && ri >= 0) j.filter.selRows.splice(ri, 1);
+          renderProcWizard();
+          return;
+        } else if (kp === "dtype") {
+          j.filter.dtypes = j.filter.dtypes || [];
+          var tv = el.getAttribute("data-v");
+          var ti = j.filter.dtypes.indexOf(tv);
+          if (v && ti < 0) j.filter.dtypes.push(tv);
+          if (!v && ti >= 0) j.filter.dtypes.splice(ti, 1);
+          renderProcWizard();
+          return;
+        } else if (kp === "preRule") {
+          var allRules = stdRuleGroups().map(function (r) { return r.id; });
+          if (!j.pre.rules || !j.pre.rules.length) j.pre.rules = allRules.slice();
+          var pv = el.getAttribute("data-v");
+          var pi = j.pre.rules.indexOf(pv);
+          if (v && pi < 0) j.pre.rules.push(pv);
+          if (!v && pi >= 0) j.pre.rules.splice(pi, 1);
+          renderProcWizard();
+          return;
+        } else if (kp === "qaResult") {
+          j.quality.qa = j.quality.qa || {};
+          var qk = el.getAttribute("data-v");
+          j.quality.qa[qk] = j.quality.qa[qk] || {};
+          j.quality.qa[qk].result = v;
+          return;
+        } else if (kp === "qaAdvice") {
+          j.quality.qa = j.quality.qa || {};
+          var qk2 = el.getAttribute("data-v");
+          j.quality.qa[qk2] = j.quality.qa[qk2] || {};
+          j.quality.qa[qk2].advice = v;
+          return;
+        } else if (kp === "secLv") {
+          var sec2 = j.quality.security;
+          if (!sec2 || !sec2.executed || !(sec2.batches || []).length) {
+            sec2 = j.quality.security = { executed: true, at: nowText(), batches: procSecurityRows(j), summary: "" };
+          }
+          var sb = el.getAttribute("data-v");
+          (sec2.batches || []).forEach(function (x) {
+            if (x.batch === sb) {
+              x.lv = Number(v);
+              x.manual = true;
+              x.why = "人工调整为第" + Number(v) + "级（" + (Number(v) === 1 ? "可公开" : "受限") + "）";
+            }
+          });
+          sec2.at = nowText();
+          sec2.summary = sec2.batches.filter(function (x) { return x.lv === 1; }).length + " 个批次为第1级（可公开），"
+            + sec2.batches.filter(function (x) { return x.lv === 2; }).length + " 个批次为第2级（受限）";
+          renderProcWizard();
+          return;
         } else if (kp === "productDs") {
-          /* 步骤 5：数据产品按数据集划分，勾选本次产出归入的数据集 */
-          j.product.datasets = j.product.datasets || [];
+          /* 步骤 5：数据集类型单选——本次产出只能归入 1 个数据集 */
           var dv = el.getAttribute("data-v");
-          var di = j.product.datasets.indexOf(dv);
-          if (v && di < 0) j.product.datasets.push(dv);
-          if (!v && di >= 0) j.product.datasets.splice(di, 1);
-          /* 实时刷新卡片高亮与计数，不重渲染整个弹窗 */
+          j.product.datasets = [dv];
+          var msk = document.getElementById("rwProcMask");
+          if (msk) {
+            Array.prototype.forEach.call(msk.querySelectorAll(".rw-pds"), function (x) { x.classList.remove("is-on"); });
+          }
           var dl = el.closest ? el.closest(".rw-pds") : null;
-          if (dl) dl.classList.toggle("is-on", !!v);
+          if (dl) dl.classList.add("is-on");
           var dc = document.querySelector("#rwProcMask .rw-ds-count");
-          if (dc) dc.textContent = String(j.product.datasets.length);
+          if (dc) dc.textContent = "1";
         } else if (kp === "model") j.model.key = v;
         else if (kp === "product") j.product.key = v;
         else if (kp === "outlierFix") {
@@ -126576,6 +127488,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         else if (kp === "outlierFix") {
           var o = j.pre.outliers.filter(function (x) { return x.key === el.getAttribute("data-v"); })[0];
           if (o) o.fixed = el.value;
+        }
+        else if (kp === "qaResult" || kp === "qaAdvice") {
+          j.quality.qa = j.quality.qa || {};
+          var qk3 = el.getAttribute("data-v");
+          j.quality.qa[qk3] = j.quality.qa[qk3] || {};
+          j.quality.qa[qk3][kp === "qaResult" ? "result" : "advice"] = el.value;
         }
       }
     }, true);
