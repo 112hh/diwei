@@ -124146,8 +124146,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="todo">← 返回待录入数据</button></div></div>'
 
       + permBanner
-      + '<div class="rw-section-title">① 用户等级与权限矩阵</div>'
-      + tableHtml(LOOP_PERM)
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">'
+      + '<div class="rw-section-title" style="margin:0">① 用户等级与权限矩阵（数据录入 / 读取 / 修改 可勾选配置）</div>'
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="perm-add-acct" style="flex:0 0 auto">＋ 新增账号</button>'
+      + "</div>"
+      + permMatrixHtml(true)
 
       + '<div class="rw-section-title" style="margin-top:16px">② 权限分级说明</div>'
       + '<div class="rw-steps">'
@@ -124164,7 +124167,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
       + '<div class="rw-section-title" style="margin-top:16px">③ 权限授予链路</div>'
       + chainHtml(["系统管理员（内置最高权限）", "授予数据库维护员读取 / 修改权限", "授予高级用户密集读取权限", "普通用户默认正常频次读取", "到期 / 任务完成后回收"])
-      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-apply-perm">提交数据录入权限申请</button></div>'
+      /* 2026-10-10：按需求删除权限管理下方的「提交数据录入权限申请」按钮 */
       + "</div>";
   }
 
@@ -126296,15 +126299,113 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   };
 
   /* 编号 8「权限管理」：系统管理员 / 数据库维护员 / 高级用户 / 普通用户 */
+  /* 编号 8「权限管理」：系统管理员 / 数据库维护员 / 高级用户 / 普通用户 */
   var LOOP_PERM = {
-    head: ["角色", "数据录入", "数据读取", "数据修改", "密集读取", "授权方式", "有效期"],
+    head: ["角色", "数据库账号", "数据名称", "数据录入", "数据读取", "数据修改"],
     rows: [
-      ["系统管理员", "✔ 最高权限", "✔", "✔", "✔", "系统内置", "长期"],
-      ["数据库维护员", "✔ 需申请", "✔", "✔ 授权范围内", "✔", "管理员授予", "到期自动回收"],
-      ["高级用户", "✕", "✔", "✕", "✔ 密集读取", "管理员授予", "到期自动回收"],
-      ["普通用户", "✕", "✔ 正常频次", "✕", "✕", "注册默认", "长期"]
+      ["系统管理员", "sys_admin", "全库数据集", 1, 1, 1],
+      ["数据库维护员", "__DBA__", "__MAIN__", 1, 1, 1],
+      ["高级用户", "__ADV__", "__CALC__", 0, 1, 0],
+      ["普通用户", "__GUEST__", "__OPEN__", 0, 1, 0]
     ]
   };
+
+  /* ------------------------------------------------------------------
+     用户等级与权限矩阵（2026-10-10 调整）
+     · 新增「数据库账号」列，展示各等级对应的数据库账号
+     · 新增「数据名称」列，展示该账号可访问的数据名称
+     · 删除「密集读取 / 授权方式 / 有效期」三列
+     · 数据录入 / 数据读取 / 数据修改 改为可勾选配置
+     · 2026-10-10 追加：标题右侧「＋ 新增账号」，可新增账号行
+     ------------------------------------------------------------------ */
+  function acctOf(v) {
+    var c = String(C().code || "db").toLowerCase();
+    if (v === "__DBA__") return "dba_" + c + "_01";
+    if (v === "__ADV__") return "adv_" + c + "_01";
+    if (v === "__GUEST__") return "guest_" + c + "_01";
+    return v;
+  }
+
+  function dataNameOf(v) {
+    var s = C().short || "本库";
+    if (v === "__MAIN__") return s + "主数据集";
+    if (v === "__CALC__") return s + "计算与文献数据集";
+    if (v === "__OPEN__") return s + "公开共享数据集";
+    return v;
+  }
+
+  function permCfg() {
+    var e = entryState();
+    if (!e.permCfg) {
+      e.permCfg = {};
+      LOOP_PERM.rows.forEach(function (r) {
+        [3, 4, 5].forEach(function (i) { e.permCfg[r[0] + "::" + LOOP_PERM.head[i]] = !!r[i]; });
+      });
+    }
+    return e.permCfg;
+  }
+
+  function permAcctList() {
+    var e = entryState();
+    if (!e.permAccts) e.permAccts = [];
+    return e.permAccts;
+  }
+
+  function permAcctAdd() {
+    var list = permAcctList();
+    var id = "pa_" + Date.now().toString(36) + "_" + (list.length + 1);
+    var cfg = permCfg();
+    cfg[id + "::数据录入"] = true;
+    cfg[id + "::数据读取"] = true;
+    cfg[id + "::数据修改"] = false;
+    list.push({ id: id, role: "", acct: "", name: "" });
+    return id;
+  }
+
+  var PERM_INP_STYLE = "width:100%;padding:4px 8px;border:1px solid #d8e0ea;border-radius:4px;font-size:13px";
+
+  function permMatrixHtml(editable) {
+    var cfg = permCfg();
+    var extra = permAcctList();
+    var hasNew = extra.length > 0;
+    var head = '<tr><th>角色</th><th>数据库账号</th><th>数据名称</th><th style="width:96px">数据录入</th><th style="width:96px">数据读取</th><th style="width:96px">数据修改</th>'
+      + (hasNew ? '<th style="width:80px">操作</th>' : "") + "</tr>";
+    function cell(key) {
+      var on = !!cfg[key];
+      if (!editable) {
+        return "<td>" + (on ? '<span class="rw-tag rw-tag--done">已开启</span>' : '<span class="rw-tag rw-tag--gray">未开启</span>') + "</td>";
+      }
+      return '<td style="text-align:center"><input type="checkbox" data-rw-pm="' + esc(key) + '"' + (on ? " checked" : "") + "></td>";
+    }
+    var rows = LOOP_PERM.rows.map(function (r) {
+      var role = r[0];
+      return "<tr>"
+        + '<td class="rw-nowrap"><b>' + esc(role) + "</b></td>"
+        + '<td class="rw-nowrap"><code style="color:#165DFF">' + esc(acctOf(r[1])) + "</code></td>"
+        + "<td>" + esc(dataNameOf(r[2])) + "</td>"
+        + cell(role + "::" + LOOP_PERM.head[3]) + cell(role + "::" + LOOP_PERM.head[4]) + cell(role + "::" + LOOP_PERM.head[5])
+        + (hasNew ? "<td></td>" : "")
+        + "</tr>";
+    }).join("")
+      + extra.map(function (a) {
+        var tds = ["role", "acct", "name"].map(function (f) {
+          var ph = f === "role" ? "角色名称" : (f === "acct" ? "数据库账号" : "可访问数据名称");
+          if (!editable) return "<td>" + esc(a[f] || "-") + "</td>";
+          return '<td><input type="text" data-rw-pa="' + f + '" data-rw-pai="' + esc(a.id) + '" placeholder="' + ph + '" value="' + esc(a[f] || "") + '" style="' + PERM_INP_STYLE + '"></td>';
+        }).join("");
+        return "<tr>" + tds
+          + cell(a.id + "::数据录入") + cell(a.id + "::数据读取") + cell(a.id + "::数据修改")
+          + (editable
+            ? '<td style="text-align:center"><button class="rw-btn" type="button" data-rw-act="perm-del-acct" data-rw-pai="' + esc(a.id) + '" style="padding:2px 10px;font-size:12px">删除</button></td>'
+            : "<td></td>")
+          + "</tr>";
+      }).join("");
+    return '<div class="rw-tbl-wrap"><table class="rw-tbl rw-perm-table"><thead>' + head + "</thead><tbody>" + rows + "</tbody></table></div>"
+      + (editable
+        ? '<div class="rw-field-tip" style="margin-top:8px">勾选即授予该等级对应权限，配置即时生效，并随权限申请一并提交管理员复核；点「＋ 新增账号」可为新增成员开设数据库账号。</div>'
+        : "");
+  }
+
 
   /* 编号 8「定期备份」 */
   var LOOP_BACKUP = {
@@ -126563,7 +126664,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-card">'
       + '<div class="rw-card-head"><div><h3>数据资源录入权限</h3>'
       + "<p>管理员拥有数据录入最高权限，并可将读取 / 修改权限授予数据库工作人员；普通数据使用者不具有录入权限。</p></div></div>"
-      + tableHtml(LOOP_PERM)
+      + permMatrixHtml(false)
       + '<div style="margin-top:14px"><div class="rw-section-title">权限授予链路</div>'
       + chainHtml(["数据库工作人员提出申请", "管理员审核批准", "授予相应数据读写权限", "执行数据录入", "到期 / 任务完成后权限回收"])
       + "</div></div>"
@@ -126723,6 +126824,23 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           m[sid] = (m[sid] || 0) + 1;
           renderRwPage();
           toast("分片 " + sid + " 已重新采集，待补记录全部补回，数量守恒重新校验通过", "ok");
+        })();
+        return;
+      case "perm-add-acct":
+        /* 权限矩阵新增账号：插入一行，可编辑角色 / 数据库账号 / 数据名称 */
+        permAcctAdd();
+        renderRwPage();
+        toast("已在权限矩阵新增一个账号行，请填写角色名称、数据库账号与可访问数据名称", "ok");
+        return;
+      case "perm-del-acct":
+        (function () {
+          var did = node.getAttribute("data-rw-pai") || "";
+          var la = permAcctList();
+          for (var di = 0; di < la.length; di++) {
+            if (la[di].id === did) { la.splice(di, 1); break; }
+          }
+          renderRwPage();
+          toast("已删除该账号行", "ok");
         })();
         return;
       case "entry-apply-perm":
@@ -127244,7 +127362,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       handleAct(node.getAttribute("data-rw-act"), node);
     }, true);
 
-    var FIELD_SEL = "[data-rw-f],[data-rw-ef],[data-rw-ec],[data-rw-bf],[data-rw-pf],[data-rw-es]";
+    var FIELD_SEL = "[data-rw-f],[data-rw-ef],[data-rw-ec],[data-rw-bf],[data-rw-pf],[data-rw-es],[data-rw-pm],[data-rw-pa]";
 
     document.addEventListener("change", function (event) {
       var el = event.target && event.target.closest ? event.target.closest(FIELD_SEL) : null;
@@ -127253,6 +127371,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       var isCheck = el.type === "checkbox";
       var v = isCheck ? !!el.checked : el.value;
 
+      if (el.hasAttribute("data-rw-pa")) {
+        /* 权限矩阵新增账号：角色 / 数据库账号 / 数据名称 编辑 */
+        var paId = el.getAttribute("data-rw-pai") || "";
+        var paItem = permAcctList().filter(function (x) { return x.id === paId; })[0];
+        if (paItem) paItem[el.getAttribute("data-rw-pa")] = el.value;
+        return;
+      }
+      if (el.hasAttribute("data-rw-pm")) {
+        /* 用户等级权限矩阵：数据录入 / 读取 / 修改 勾选配置 */
+        permCfg()[el.getAttribute("data-rw-pm")] = !!el.checked;
+        return;
+      }
       if (el.hasAttribute("data-rw-f")) {
         var f = el.getAttribute("data-rw-f");
         syncFromDom();
@@ -127336,7 +127466,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           if (!v && il >= 0) j.filter.levels.splice(il, 1);
           renderProcWizard();
           return;
-        else if (kp === "preOpt") {
+        } else if (kp === "preOpt") {
           j.pre.opts[el.getAttribute("data-v")] = v;
         } else if (kp === "collectTaskId") {
           /* 步骤 1：关联采集任务ID——切换后按新任务重新拉取批次数据 */
