@@ -121247,7 +121247,33 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       "#page-" + PAGE_ID + " .rw-tab:hover { color:#1f63ff; background:#eaf1ff; }",
       "#page-" + PAGE_ID + " .rw-tab.is-active { color:#1f63ff; font-weight:600; background:#eaf1ff; }",
       "#page-" + PAGE_ID + " .rw-tab.is-active::after { content:\"\"; position:absolute; left:14px; right:14px; bottom:-1px; height:3px; border-radius:3px; background:#1f63ff; }",
-      "#page-" + PAGE_ID + " .rw-tab-count { margin-left:6px; padding:1px 7px; border-radius:9px; background:#d8e0ee; font-size:12px; color:#55637a; }",
+
+      /* 2026-10-13：标准化预处理规则下拉多选（chips + 打勾面板，对齐参考图） */
+      ".rw-msel { position:relative; margin-top:10px; }",
+      ".rw-msel-trigger { display:flex; align-items:center; gap:8px; width:100%; min-height:40px; padding:4px 34px 4px 8px; border:1px solid #dcdfe6; border-radius:4px; background:#fff; cursor:pointer; text-align:left; position:relative; box-sizing:border-box; }",
+      ".rw-msel-trigger:hover { border-color:#2b6cff; }",
+      ".rw-msel.is-open .rw-msel-trigger { border-color:#2b6cff; }",
+      ".rw-msel-chips { display:flex; flex-wrap:wrap; gap:6px; flex:1 1 auto; min-width:0; }",
+      ".rw-msel-chip { display:inline-flex; align-items:center; gap:4px; max-width:210px; height:26px; padding:0 8px; background:#f2f4f8; border-radius:3px; font-size:13px; color:#1f2d3d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }",
+      ".rw-msel-chip-x { flex:0 0 auto; font-style:normal; font-size:14px; line-height:1; color:#9aa3ad; cursor:pointer; padding:0 1px; }",
+      ".rw-msel-chip-x:hover { color:#e34d59; }",
+      ".rw-msel-ph { flex:1 1 auto; font-size:13px; color:#a8abb2; }",
+      ".rw-msel-arrow { position:absolute; right:12px; top:50%; margin-top:-7px; font-size:10px; color:#909399; }",
+      ".rw-msel-panel { position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:60; max-height:300px; overflow:auto; background:#fff; border-radius:4px; padding:4px 0; box-shadow:0 4px 16px rgba(31,45,61,.14); }",
+      ".rw-msel-group { padding:2px 0; }",
+      ".rw-msel-group-head { display:flex; justify-content:space-between; align-items:center; padding:6px 14px 4px; font-size:12px; color:#909399; }",
+      ".rw-msel-group-head b { font-weight:500; color:#909399; }",
+      ".rw-msel-group-count { font-size:12px; color:#c0c4cc; }",
+      ".rw-msel-opt { display:flex; gap:10px; align-items:center; padding:0 14px; height:36px; cursor:pointer; }",
+      ".rw-msel-opt:hover { background:#f5f7fa; }",
+      ".rw-msel-opt.is-on { background:#f5f7fa; }",
+      ".rw-msel-opt input { display:none; }",
+      ".rw-msel-box { flex:0 0 auto; width:14px; height:14px; border:1px solid #c0c4cc; border-radius:2px; background:#fff; position:relative; box-sizing:border-box; }",
+      ".rw-msel-opt.is-on .rw-msel-box { background:#2b6cff; border-color:#2b6cff; }",
+      ".rw-msel-opt.is-on .rw-msel-box::after { content:\"\"; position:absolute; left:4px; top:1px; width:4px; height:8px; border:1.5px solid #fff; border-top:0; border-left:0; transform:rotate(42deg); }",
+      ".rw-msel-txt { font-size:13px; color:#1f2d3d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }",
+      ".rw-msel-foot { display:flex; justify-content:space-between; align-items:center; padding:8px 14px 6px; margin-top:2px; border-top:1px solid #ebeef5; }",
+      ".rw-msel-sum { font-size:12px; color:#909399; }",
 
       /* 卡片 */
       "#page-" + PAGE_ID + " .rw-card { background:#fff; border:1px solid #e6ecf5; border-radius:12px; padding:18px 20px; margin-bottom:16px; }",
@@ -121882,7 +121908,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         : t.key === "entry" ? (pendingEntryCount() + eSt.records.filter(function (r) { return r.status !== "已入库" && r.status !== "已退回"; }).length)
           : pSt.jobs.length;
       return '<button type="button" class="rw-tab' + (s.tab === t.key ? " is-active" : "") + '" data-rw-act="tab" data-rw-tab="' + t.key + '">'
-        + esc(t.label) + '<span class="rw-tab-count">' + count + "</span></button>";
+        + esc(t.label) + "</button>";
     }).join("");
 
     page.innerHTML = '<div class="rw-page" data-rw-root="page">'
@@ -123902,8 +123928,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function renderAuditView(queue) {
     if (!queue.length) {
       return '<div class="rw-card"><div class="rw-card-head"><div><h3>录入审核队列</h3></div></div>'
-        + '<div class="rw-empty"><b>✓</b>暂无待审核记录，请先通过「新增材料」提交数据</div></div>'
-        + auditFlowCard();
+        + '<div class="rw-empty"><b>✓</b>暂无待审核记录，请先通过「新增材料」提交数据</div></div>';
     }
     var rows = queue.map(function (r) {
       return "<tr>"
@@ -123923,7 +123948,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-card-head"><div><h3>录入审核队列</h3><p>一次审批：提交 → 自动校验 → 管理员审核 → 入库 / 退回。</p></div></div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl rw-audit-table"><thead><tr><th>材料唯一标识</th><th>标识 / 数据类型</th>' + listThs()
       + "<th>审核状态</th><th>提交时间</th><th>操作</th></tr></thead><tbody>" + rows + "</tbody></table></div>"
-      + "</div>" + auditFlowCard();
+      + "</div>";
   }
 
   /* 列表里的「材料相关列」随材料变化，列定义来自 C().listCols */
@@ -123946,12 +123971,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     }
     out.push('<button class="rw-op" type="button" data-rw-act="audit-detail" data-id="' + esc(r.id) + '">详情</button>');
     return out.join("");
-  }
-
-  function auditFlowCard() {
-    return '<div class="rw-card"><div class="rw-card-head"><div><h3>数据录入审核流程（2.2.4）</h3><p>提交 → 自动校验 → 管理员审核 → 入库 / 退回（一次审批）</p></div></div>'
-      + chainHtml([{ text: "提交", cls: "" }, { text: "自动校验", cls: "" }, { text: "管理员审核", cls: "" }, { text: "入库", cls: "is-end" }, { text: "退回", cls: "is-back" }])
-      + "</div>";
   }
 
   function renderEntryDoneView(done) {
@@ -124988,6 +125007,56 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     { key: "struct", name: "结构优化验证模型", type: "结构数据", input: "CIF / POSCAR 文件", logic: "校验原子坐标合理性、键长范围", out: "验证后的结构文件" }
   ];
 
+  /* 2026-10-13：模型来源二选一 —— 系统内的数据加工模型 / 算法（分析预测模块的算法与工具）｜基础加工模型 / 算法 */
+  var PROC_MODEL_SOURCES = [
+    { key: "sys", name: "系统内的数据加工模型 / 算法（分析预测模块）" },
+    { key: "base", name: "基础加工模型 / 算法" }
+  ];
+
+  /* 系统内清单：分析预测模块「数据应用算法」的算法 + 「数据工具开发」的工具 */
+  var PROC_SYS_ALGOS = {
+    twod: ["晶体结构驰豫算法", "材料性质计算算法"],
+    catalyst: ["单个吸附位点催化性能预测的算法", "催化材料结构预测的算法"],
+    mlff: ["机器学习力场数据库经典力场算法", "自动可微分多极极化势能算法", "机器学习力场数据库图神经网络算法"],
+    opto: ["数据爬取算法", "数据分类算法"],
+    electrolyte: ["数据爬取算法", "数据分类算法"]
+  };
+  var PROC_SYS_TOOLS = [
+    "材料结构文件可视化生成器",
+    "第一性原理计算软件接口",
+    "第一性原理计算软件后处理接口",
+    "分子数据集智能清洗和质量控制工具",
+    "复杂系统模拟智能助手工具",
+    "吸附分子广义配位数生成器",
+    "材料结构对称性函数生成器",
+    "催化材料元素特征生成器",
+    "传统机器学习模型接口",
+    "全连接神经网络模型接口",
+    "经典图神经网络模型接口"
+  ];
+
+  function procSysModels() {
+    var algos = PROC_SYS_ALGOS[CFG_KEY] || PROC_SYS_ALGOS.twod;
+    return algos.map(function (a, i) {
+      return { key: "sys-algo-" + i, name: a, type: "系统算法", input: "参与加工的数据集", logic: "调用分析预测模块算法执行加工", out: "加工后数据 / 计算结果" };
+    }).concat(PROC_SYS_TOOLS.map(function (t, i) {
+      return { key: "sys-tool-" + i, name: t, type: "系统工具", input: "参与加工的数据集", logic: "调用分析预测模块工具执行加工", out: "加工后数据 / 文件" };
+    }));
+  }
+
+  function procModelOf(key) {
+    if (!key) return null;
+    return PROC_MODELS.filter(function (x) { return x.key === key; })[0]
+      || procSysModels().filter(function (x) { return x.key === key; })[0]
+      || null;
+  }
+
+  function procModelDesc(key) {
+    var mo = procModelOf(key);
+    if (!mo) return "请先从下拉中选择加工模型 / 算法，此处展示其输入、处理逻辑与输出说明。";
+    return mo.name + " ｜ 输入：" + mo.input + "　处理逻辑：" + mo.logic + "　输出：" + mo.out;
+  }
+
   var PROC_PRODUCTS = [
     { key: "ai", name: "AI 训练数据集", op: "数据清洗 + 特征工程 + 格式转换", format: "CSV / JSON + 数据字典", use: "机器学习模型训练" },
     { key: "sci", name: "科研参考数据集", op: "数据整理 + 可视化渲染", format: "PDF 报告 + JSON", use: "科研人员查阅" },
@@ -125065,6 +125134,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         stage: "",
         logs: [],
         rules: [],
+        rulesSet: false,
         missing: { rate: "3.4%", pass: true },
         outliers: (C().outliers || []).map(function (o) { return Object.assign({}, o); })
       },
@@ -125361,7 +125431,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     }
     if (j.done[j.step]) return "本步骤已完成，可进入下一步";
     if (j.step === 1) return "填写完成后点击「下一步」";
-    if (j.step === 2) return "勾选采集数据后点击「应用筛选」，再进入下一步";
+    if (j.step === 2) return "勾选需要参与加工的采集数据后即可进入下一步";
     if (j.step === 4) return "选择加工模型并执行「执行数据加工」后再进入下一步";
     if (j.step === 5) return "选择 1 个数据集类型并执行「生产数据产品」后再进入下一步";
     if (j.step === 6) return "填写下方质量评价表后点击「完成加工」";
@@ -125554,13 +125624,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
   /* ---------------- 安全等级判断（按采集数据批次评级：第1级 / 第2级） ---------------- */
+  /* 2026-10-13：安全等级改由人工逐批选择，不再由系统按来源自动推算 */
   function procSecurityLevel(b) {
-    var s = String((b && b.source) || "");
-    var abnormal = b && b.status && b.status !== "成功";
-    if (abnormal) return { lv: 2, why: "本批次存在异常记录，按第2级（受限）管理并需人工复核" };
-    if (/商业|购买|授权|订购|buy/.test(s)) return { lv: 2, why: "来源为商业授权 / 购买数据，按第2级（受限）管理" };
-    if (/开源|公开|open|自主计算|计算数据/.test(s)) return { lv: 1, why: "来源为开源 / 公开渠道，批次完整且无异常，按第1级（可公开）管理" };
-    return { lv: 2, why: "来源未标注公开授权，默认按第2级（受限）管理" };
+    return { lv: "", why: "待人工选择安全等级（第1级 可公开 / 第2级 受限）" };
   }
 
   function procSecurityRows(j) {
@@ -125584,20 +125650,24 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     });
   }
 
+  /* 2026-10-13：只提交人工选择的结果，未全选则拒绝执行自动判定 */
   function procSecurityRun() {
     var j = activeJob();
     if (!j) return;
-    var rs = procSecurityRows(j);
-    if (!rs.length) { toast("暂无可评级的采集批次，请先关联采集任务ID 并完成基础数据筛选", "err"); return; }
+    var cur = (j.quality.security && (j.quality.security.batches || []).length)
+      ? j.quality.security.batches : procSecurityRows(j);
+    if (!cur.length) { toast("暂无可评级的采集批次，请先关联采集任务ID 并完成基础数据筛选", "err"); return; }
+    var un = cur.filter(function (x) { return !x.lv; });
+    if (un.length) { toast("请为全部批次人工选择安全等级（还有 " + un.length + " 个批次未选择）", "err"); return; }
     j.quality.security = {
       executed: true,
       at: nowText(),
-      batches: rs,
-      summary: rs.filter(function (x) { return x.lv === 1; }).length + " 个批次为第1级（可公开），"
-        + rs.filter(function (x) { return x.lv === 2; }).length + " 个批次为第2级（受限）"
+      batches: cur,
+      summary: cur.filter(function (x) { return x.lv === 1; }).length + " 个批次为第1级（可公开），"
+        + cur.filter(function (x) { return x.lv === 2; }).length + " 个批次为第2级（受限）"
     };
     renderProcWizard();
-    toast("安全等级判断完成：" + j.quality.security.summary, "ok");
+    toast("安全等级判定已提交：" + j.quality.security.summary, "ok");
   }
 
   function procSecurityHtml(j) {
@@ -125612,18 +125682,20 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + "<td>" + esc(b.source) + "</td>"
         + "<td>" + (b.status === "成功" ? '<span class="rw-tag rw-tag--done">成功</span>' : '<span class="rw-tag rw-tag--warn">' + esc(b.status) + "</span>") + "</td>"
         + '<td><select data-rw-pf="secLv" data-v="' + esc(b.batch) + '" style="min-height:30px;border:1px solid #d5dee8;border-radius:6px;padding:3px 6px">'
+        + '<option value=""' + (b.lv ? "" : " selected") + ">请选择</option>"
         + '<option value="1"' + (b.lv === 1 ? " selected" : "") + ">第1级（可公开）</option>"
         + '<option value="2"' + (b.lv === 2 ? " selected" : "") + ">第2级（受限）</option></select>"
-        + ' <span class="rw-tag ' + (b.lv === 1 ? "rw-tag--done" : "rw-tag--warn") + '">' + (b.lv === 1 ? "第1级" : "第2级") + "</span></td>"
+        + ' <span class="rw-tag ' + (b.lv === 1 ? "rw-tag--done" : (b.lv === 2 ? "rw-tag--warn" : "rw-tag--gray")) + '">'
+        + (b.lv === 1 ? "第1级" : (b.lv === 2 ? "第2级" : "未选择")) + "</span></td>"
         + '<td style="line-height:18px">' + esc(b.why) + (b.manual ? '<div class="rw-field-tip">已人工调整</div>' : "") + "</td></tr>";
     }).join("");
     return '<div style="margin-top:16px"><div class="rw-section-title">安全等级判断（按采集数据批次评级）</div>'
-      + '<div class="rw-card-note">按「关联采集任务ID」的批次维度逐批评级：来源为开源 / 公开且批次完整 → 第1级（可公开）；来源为商业授权、自采或批次存在异常 → 第2级（受限）。评级可人工下拉调整。</div>'
+      + '<div class="rw-card-note">按「关联采集任务ID」的批次维度逐批<b>人工选择</b>安全等级：第1级（可公开）或第2级（受限）；全部选完后点击「确认安全等级判定」写入加工记录。</div>'
       + '<div style="margin-top:10px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-sec">'
-      + (sec.executed ? "重新执行安全等级判断" : "执行安全等级判断") + "</button></div>"
+      + (sec.executed ? "重新提交安全等级判定" : "确认安全等级判定") + "</button></div>"
       + (sec.executed
         ? '<div class="rw-banner" style="margin-top:10px"><span>✓</span><div>判定时间 ' + esc(sec.at) + "：" + esc(sec.summary) + "</div></div>"
-        : '<div class="rw-field-tip" style="margin-top:8px">尚未执行判定，下表为系统预评级；点击按钮后写入加工记录。</div>')
+        : '<div class="rw-field-tip" style="margin-top:8px">安全等级由人工逐批选择（第1级 可公开 / 第2级 受限）；全部选完后点击按钮写入加工记录。</div>')
       + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
       + "<th>批次ID</th><th>期次</th><th>采集时间</th><th>数据量</th><th>数据来源</th><th>批次状态</th><th>安全等级</th><th>判定依据</th>"
       + "</tr></thead><tbody>" + tb + "</tbody></table></div></div>";
@@ -125709,7 +125781,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       return '<label class="rw-check" style="margin-right:12px"><input type="checkbox" data-rw-pf="dtype" data-v="' + esc(dt) + '"' + (on ? " checked" : "") + "><span>" + esc(dt) + "</span></label>";
     }).join("");
     return '<div class="rw-section-title">基础数据筛选</div>'
-      + '<div class="rw-card-note">下列数据由「关联采集任务ID」按批次拉取，勾选需要参与加工的记录后点击「应用筛选」。</div>'
+      + '<div class="rw-card-note">下列数据由「关联采集任务ID」按批次拉取，勾选需要参与加工的记录即可，勾选后自动生效（不再单独展示筛选结果集合与分组清单）。</div>'
       + '<div class="rw-kv"><div><b>关联采集任务</b>' + esc(t.id) + "</div>"
       + "<div><b>任务名称</b>" + esc(t.name || "-") + "</div>"
       + "<div><b>采集批次</b>" + batches.length + " 个</div>"
@@ -125719,22 +125791,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px">'
       + '<span style="font-size:12.5px;color:#64748b;margin-right:4px">数据类型</span>' + dtBox + "</div></div>"
       + tables
-      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-2">应用筛选</button></div>'
-      + (j.filter.executed ? procFilterResult(j.filter) : "")
       + (j.done[2] ? procDoneCard(j, 2) : "");
-  }
-
-  function procFilterResult(f) {
-    var rows = f.rows.map(function (r) {
-      return "<tr><td>" + esc(r.formula) + "</td><td>" + esc(r.id) + "</td><td>" + esc(r.dataType) + "</td><td>" + esc(r.metric || "-") + "</td></tr>";
-    }).join("");
-    var groups = f.groups.map(function (g) {
-      return "<tr><td>" + esc(g.formula) + "</td><td>" + g.count + " 条</td><td>" + (g.pass ? '<span class="rw-tag rw-tag--done">满足</span>' : '<span class="rw-tag rw-tag--warn">不足（每组至少 3 条）</span>') + "</td></tr>";
-    }).join("");
-    return '<div style="margin-top:16px"><div class="rw-section-title">筛选后的数据集合</div>'
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>化学式</th><th>材料唯一标识</th><th>数据类型</th><th>' + esc(C().metric.label) + '</th></tr></thead><tbody>' + rows + "</tbody></table></div></div>\""
-      + '<div style="margin-top:14px"><div class="rw-section-title">分组清单（按化学式）</div>'
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>化学式</th><th>条数</th><th>分组校验</th></tr></thead><tbody>' + groups + "</tbody></table></div></div>";
   }
 
   /* 步骤 3 标准化预处理
@@ -125749,8 +125806,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
   function procPreRules(j) {
     var all = stdRuleGroups().map(function (r) { return r.id; });
-    var sel = j.pre.rules || [];
-    return sel.length ? sel : all;
+    /* 2026-10-13：rulesSet 为 true 表示用户已手动调整过；否则回退为默认全选 */
+    if (j.pre.rulesSet) return j.pre.rules || [];
+    return all;
   }
 
   function procOutlierRows(j) {
@@ -125766,22 +125824,48 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     }).join("");
   }
 
+  /* 2026-10-13：标准化预处理规则改为下拉多选，不再整块铺开 */
+  /* 2026-10-13 二次调整：改为「标签 chips + 打勾面板」样式，对齐参考图 */
+  function procRuleMultiSelect(j, cats, sel) {
+    var all = stdRuleGroups();
+    var open = !!j.pre.mselOpen;
+    var picked = all.filter(function (r) { return sel.indexOf(r.id) >= 0; });
+    var chips = picked.map(function (r) {
+      return '<span class="rw-msel-chip">' + esc(r.item)
+        + '<i class="rw-msel-chip-x" data-rw-act="proc-msel-rm" data-rw-k="' + esc(r.id) + '" title="移除">×</i></span>';
+    }).join("");
+    var box = picked.length
+      ? '<span class="rw-msel-chips">' + chips + "</span>"
+      : '<span class="rw-msel-ph">请选择标准化预处理规则条目</span>';
+    var panel = open
+      ? '<div class="rw-msel-panel">'
+        + cats.map(function (c) {
+          var items = c.items.map(function (r) {
+            var on = sel.indexOf(r.id) >= 0;
+            return '<label class="rw-msel-opt' + (on ? " is-on" : "") + '">'
+              + '<input type="checkbox" data-rw-pf="preRule" data-v="' + esc(r.id) + '"' + (on ? " checked" : "") + ">"
+              + '<span class="rw-msel-box"></span>'
+              + '<span class="rw-msel-txt">' + esc(r.item) + "</span>"
+              + "</label>";
+          }).join("");
+          var n = c.items.filter(function (r) { return sel.indexOf(r.id) >= 0; }).length;
+          return '<div class="rw-msel-group"><div class="rw-msel-group-head"><b>' + esc(c.cat) + "</b>"
+            + '<span class="rw-msel-group-count">' + n + " / " + c.items.length + " 条</span></div>" + items + "</div>";
+        }).join("")
+        + '<div class="rw-msel-foot"><span class="rw-msel-sum">已选 ' + sel.length + " / " + all.length + " 条</span>"
+        + '<button class="rw-btn rw-btn--sm" type="button" data-rw-act="proc-msel-close">收起</button></div></div>'
+      : "";
+    return '<div class="rw-msel' + (open ? " is-open" : "") + '">'
+      + '<div class="rw-msel-trigger" data-rw-act="proc-msel-toggle">' + box
+      + '<span class="rw-msel-arrow">▼</span></div>'
+      + panel + "</div>";
+  }
+
   function procStep3(j) {
     var p = j.pre;
     var sel = procPreRules(j);
     var cats = procPreCats();
-    var catHtml = cats.map(function (c) {
-      var items = c.items.map(function (r) {
-        var on = sel.indexOf(r.id) >= 0;
-        return '<label class="rw-check' + (on ? " is-on" : "") + '" style="display:block;margin-bottom:6px">'
-          + '<input type="checkbox" data-rw-pf="preRule" data-v="' + esc(r.id) + '"' + (on ? " checked" : "") + ">"
-          + "<div><b>" + esc(r.item) + '</b><div class="rw-field-tip">' + esc(r.desc) + "</div></div></label>";
-      }).join("");
-      var n = c.items.filter(function (r) { return sel.indexOf(r.id) >= 0; }).length;
-      return '<div class="rw-std-cat"><div class="rw-std-cat-head"><b>' + esc(c.cat) + "</b>"
-        + '<span class="rw-std-cat-count">' + n + " / " + c.items.length + " 条</span></div>"
-        + '<div class="rw-std-items">' + items + "</div></div>";
-    }).join("");
+    var catHtml = procRuleMultiSelect(j, cats, sel);
 
     var runBtn = p.running
       ? '<button class="rw-btn rw-btn--primary" type="button" disabled style="opacity:.6;cursor:not-allowed">预处理执行中…</button>'
@@ -125818,7 +125902,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     return '<div class="rw-section-title">标准化预处理</div>'
       + '<div class="rw-card-note">预处理项与「数据标准化处理 → 标准规则库」逐条对齐（共 ' + allN + " 条规则 / "
       + cats.length + " 个标准化类别）；勾选后点击「执行标准化预处理」，执行完成后才能进入下一步。</div>"
-      + '<div class="rw-std-wrap">' + catHtml + "</div>"
+      + '<div style="position:relative">' + catHtml + "</div>"
       + '<div style="margin-top:14px">' + runBtn + "</div>"
       + waitHtml + logHtml + resultHtml
       + (j.done[3] ? procDoneCard(j, 3) : "");
@@ -125867,12 +125951,17 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   /* 步骤 4 数据加工 */
   function procStep4(j) {
     var m = j.model;
-    var cards = PROC_MODELS.map(function (mo) {
-      return '<label class="rw-method' + (m.key === mo.key ? " is-on" : "") + '">'
-        + '<div class="rw-method-top"><input type="radio" name="rwProcModel" data-rw-pf="model" value="' + mo.key + '"' + (m.key === mo.key ? " checked" : "") + ">"
-        + '<span class="rw-method-title">' + esc(mo.name) + "</span></div>"
-        + '<div class="rw-method-desc">' + esc(mo.type) + " ｜ 输入：" + esc(mo.input) + "<br>处理逻辑：" + esc(mo.logic) + "<br>输出：" + esc(mo.out) + "</div></label>";
-    }).join("");
+    var src = m.source || "sys";
+    var list = src === "base" ? PROC_MODELS : procSysModels();
+    var srcSel = '<select data-rw-pf="modelSource" style="min-height:36px;border:1px solid #d5dee8;border-radius:8px;padding:0 10px">'
+      + PROC_MODEL_SOURCES.map(function (s) {
+        return '<option value="' + s.key + '"' + (src === s.key ? " selected" : "") + ">" + esc(s.name) + "</option>";
+      }).join("") + "</select>";
+    var modelSel = '<select data-rw-pf="model" style="min-height:36px;border:1px solid #d5dee8;border-radius:8px;padding:0 10px">'
+      + '<option value="">请选择加工模型 / 算法</option>'
+      + list.map(function (mo) {
+        return '<option value="' + esc(mo.key) + '"' + (m.key === mo.key ? " selected" : "") + ">" + esc(mo.name) + "</option>";
+      }).join("") + "</select>";
     var result = m.executed
       ? '<div style="margin-top:16px"><div class="rw-section-title">加工结果</div>'
       + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>数据项</th><th>输入</th><th>处理逻辑</th><th>加工输出</th></tr></thead><tbody>'
@@ -125885,7 +125974,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + esc(procDbName()) + "保持一致（如：" + esc(procDatasets().slice(0, 3).map(function (d) { return d.title; }).join("、")) + "）。</div>"
       : "";
     return '<div class="rw-section-title">选择加工模型 / 算法</div>'
-      + '<div class="rw-methods">' + cards + "</div>"
+      + '<div class="rw-card-note">先选择模型来源：系统内的数据加工模型 / 算法（下拉列出分析预测模块中的算法与工具），或基础加工模型 / 算法；再从下拉中选择具体的加工模型 / 算法。</div>'
+      + '<div class="rw-form" style="margin-top:10px">'
+      + '<div class="rw-field"><label>模型来源<i>*</i></label>' + srcSel + "</div>"
+      + '<div class="rw-field"><label>加工模型 / 算法<i>*</i></label>' + modelSel + "</div></div>"
+      + '<div class="rw-field-tip" style="margin-top:8px">' + esc(procModelDesc(m.key)) + "</div>"
       + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-4">执行数据加工</button></div>'
       + result + nextTip
       + (j.done[4] ? procDoneCard(j, 4) : "");
@@ -125907,16 +126000,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var ds = procDatasets();
     var dbName = procDbName();
     var dsCards = ds.length
-      ? ds.map(function (d) {
-        var on = picked.indexOf(d.key) >= 0;
-        return '<label class="rw-pds' + (on ? " is-on" : "") + '">'
-          + '<div class="rw-pds-top"><input type="radio" name="rwProcDs" data-rw-pf="productDs" data-v="' + esc(d.key) + '" value="' + esc(d.key) + '"' + (on ? " checked" : "") + ">"
-          + "<b>" + esc(d.title) + "</b></div>"
-          + '<div class="rw-pds-desc">入库位置：' + esc(dbName) + " · " + esc(d.title)
-          + "<br>核心字段：" + esc(d.fields.join("、"))
-          + "<br>输出格式：" + esc(d.format) + " ｜ 数据集存量：" + esc(String(d.volume).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) + " 条</div>"
-          + '<div class="rw-field-tip">' + esc(d.desc) + "</div></label>";
-      }).join("")
+      ? '<select data-rw-pf="productDs" style="min-height:36px;border:1px solid #d5dee8;border-radius:8px;padding:0 10px">'
+        + '<option value="">请选择数据集类型</option>'
+        + ds.map(function (d) {
+          return '<option value="' + esc(d.key) + '"' + (picked.indexOf(d.key) >= 0 ? " selected" : "") + ">" + esc(d.title) + "</option>";
+        }).join("") + "</select>"
       : '<div class="rw-empty" style="padding:22px 0">当前材料未配置数据集</div>';
 
     var result = pr.executed
@@ -125937,10 +126025,16 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-field-tip">元数据字段 data_version 已更新为 ' + esc(j.version) + "；各数据集按上述入库位置归档，字段与数据库保持一致。</div></div>"
       : "";
 
-    return '<div class="rw-section-title">选择数据集类型（单选，与' + esc(dbName) + '数据集一致）</div>'
+    var cur0 = picked.length ? procDatasetOf(picked[0]) : null;
+    return '<div class="rw-section-title">选择数据集类型（下拉单选，与' + esc(dbName) + '数据集一致）</div>'
       + '<div class="rw-field-tip" style="margin-bottom:10px">本次产出只能归入 <b>1</b> 个数据集类型；已选 <b class="rw-ds-count">' + picked.length + "</b> / " + ds.length
       + " 个数据集，重新选择会自动替换上一个。</div>"
-      + '<div class="rw-ds-wrap">' + dsCards + "</div>"
+      + '<div class="rw-form"><div class="rw-field"><label>数据集类型<i>*</i></label>' + dsCards + "</div></div>"
+      + (cur0
+        ? '<div class="rw-card-note" style="margin-top:8px">入库位置：' + esc(dbName) + " · " + esc(cur0.title)
+          + "　核心字段：" + esc((cur0.fields || []).join("、"))
+          + "　输出格式：" + esc(cur0.format || "-") + "</div>"
+        : "")
       + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-5">生产数据产品</button></div>'
       + result
       + (j.done[5] ? procDoneCard(j, 5) : "");
@@ -125974,25 +126068,57 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
       + "<th>数据字段</th><th>字段类型</th><th>示例值 / 取值</th><th>字段来源</th>"
       + "</tr></thead><tbody>" + fieldRows + "</tbody></table></div>"
-      + procSecurityHtml(j)
       + '<div style="margin-top:16px"><div class="rw-section-title">质量评价表</div>'
       + '<div class="rw-card-note">按三维度填写评价结果与评价建议；填写完成后点击底部「完成加工」提交。</div>'
       + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
       + "<th>评价维度</th><th>评价结果</th><th>评价建议</th>"
       + "</tr></thead><tbody>" + qaRows + "</tbody></table></div></div>"
+      + procSecurityHtml(j)
       + (j.done[6] ? procDoneCard(j, 6) : "");
   }
 
   function procDoneCard(j, step) {
     var text = {
       1: "数据产品规格文档已生成，明确目标用途、输出格式与精度要求。",
-      2: "已按数据类型完成筛选，输出筛选后数据集合与分组清单。",
+      2: "已按数据类型完成筛选，参与加工的记录已确定。",
       3: "标准化预处理完成：格式与单位统一、缺失值标注、异常值已复核；版本推进至 V1.0。",
       4: "加工模型执行完成，输出加工后属性数据 / 标准化图谱 / 验证后结构文件。",
       5: "数据产品生产完成，已按数据集划分归档（输出格式、用途与入库数据集均已确定）；版本推进至 V2.0。",
       6: "质量评价完成，来源 / 模型 / 产品三维度均已给出判定与处理动作。"
     };
     return '<div class="rw-banner" style="margin-top:14px"><span>✓</span><div>' + esc(text[step]) + "</div></div>";
+  }
+
+  /* 2026-10-13：步骤 2 删除「应用筛选」按钮后，勾选记录即自动完成筛选（不展示结果集合 / 分组清单） */
+  function procApplyFilter(j) {
+    if (!j) return;
+    if (!j.collectTaskId) return;
+    var picked = j.filter.selRows || [];
+    var all = procBatchRows(j);
+    var pool = picked.length ? all.filter(function (r) { return picked.indexOf(r._k) >= 0; }) : all;
+    if (!pool.length) return;
+    var levels = (j.filter.levels || []).length ? j.filter.levels : ROW_LEVELS;
+    j.filter.rows = pool.map(function (r, i) {
+      return {
+        formula: procRowField(r, /化学式|分子式|材料名称|名称/) || r._b || "-",
+        id: r._k,
+        dataType: procRowDataType(r, { fields: [] }) === "结构化数据" ? (procRowField(r, /数据类型|数据类别/) || "结构化数据") : procRowDataType(r, { fields: [] }),
+        batch: r._b,
+        level: levels[i % levels.length] || "A级",
+        metric: procRowField(r, /带隙|形成能|能量|模量|常数|电导|熔点|沸点|性质|数值/) || "-"
+      };
+    });
+    var map = {};
+    j.filter.rows.forEach(function (r) {
+      var kk = j.filter.groupByFormula ? r.formula : r.batch;
+      map[kk] = (map[kk] || 0) + 1;
+    });
+    j.filter.groups = Object.keys(map).map(function (k) {
+      return { formula: k, count: map[k], pass: map[k] >= Number(j.filter.minPerGroup || 3) };
+    });
+    j.filter.executed = true;
+    j.sourceIds = j.filter.rows.map(function (r) { return r.id; });
+    if (!j.done[2]) procDone(j, 2);
   }
 
   /* ------------------------------------------------------ 加工各步骤执行 */
@@ -126048,7 +126174,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     } else if (step === 4) {
       if (!j.done[3]) { toast("请先完成步骤 3 标准化预处理", "err"); return; }
       if (!j.model.key) { toast("请选择加工模型 / 算法", "err"); return; }
-      var mo = PROC_MODELS.filter(function (x) { return x.key === j.model.key; })[0];
+      var mo = procModelOf(j.model.key);
       var preset = (C().modelRows || {})[j.model.key] || [];
       j.model.rows = preset.map(function (r2) { return Object.assign({}, r2); });
       if (!j.model.rows.length && j.model.key === "stat") {
@@ -126069,7 +126195,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       }
       j.model.executed = true;
       procDone(j, 4);
-      toast(mo.name + " 执行完成", "ok");
+      toast((mo ? mo.name : "加工模型") + " 执行完成", "ok");
     } else if (step === 5) {
       if (!j.done[4]) { toast("请先完成步骤 4 数据加工", "err"); return; }
       /* 2026-10-08：数据产品必须明确归入至少一个数据集（产品形态卡已按圈红删除） */
@@ -126143,7 +126269,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-kv"><div><b>目标用途</b>' + esc(j.spec.purpose || "-") + "</div><div><b>输出格式</b>" + esc(j.spec.format || "-") + "</div>"
       + "<div><b>精度要求</b>" + esc(j.spec.precision || "-") + "</div><div><b>数据源</b>" + (j.sourceIds || []).length + " 条</div>"
       + "<div><b>筛选结果</b>" + (j.filter.executed ? j.filter.rows.length + " 条 / " + j.filter.groups.length + " 组" : "未执行") + "</div>"
-      + "<div><b>加工模型</b>" + esc((PROC_MODELS.filter(function (x) { return x.key === j.model.key; })[0] || {}).name || "-") + "</div>"
+      + "<div><b>加工模型</b>" + esc((procModelOf(j.model.key) || {}).name || "-") + "</div>"
       + "<div><b>数据产品</b>" + esc((j.product.datasets || []).length ? (j.product.datasets || []).map(function (k4) {
           var d4 = procDatasetOf(k4);
           return d4 ? d4.title : k4;
@@ -126775,7 +126901,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div style="display:flex;gap:10px;flex:0 0 auto">'
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="open-create">＋ 创建任务</button>'
       + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="open-audit">数据采集审核</button>'
-      + '<button class="rw-btn" type="button" data-rw-act="tab" data-rw-tab="entry">进入资源录入 →</button></div></div>';
+      + "</div></div>";
 
     /* 任务列表行：点击行可切换选中，操作按钮互不干扰 */
     var taskRows = s.tasks.map(function (t) {
@@ -127406,7 +127532,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           } else if (j.step === 2) {
             /* 2026-10-10：步骤 2 已改为按关联采集任务批次勾选数据，校验随之调整 */
             if (!j.collectTaskId) { toast("请先在步骤 1「数据策划」中选择「关联采集任务ID」", "err"); return; }
-            if (!j.filter.executed) { toast("请勾选需要参与加工的采集数据，并点击「应用筛选」", "err"); return; }
+            if (!j.filter.executed) { toast("请至少勾选一条需要参与加工的采集数据", "err"); return; }
             if (!j.done[2]) procDone(j, 2);
           } else if (j.step === 3) {
             if (j.pre.running) { toast("标准化预处理执行中，请在当前页等待执行完成", "err"); return; }
@@ -127431,6 +127557,41 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         return;
       case "proc-finish":
         procFinish();
+        return;
+      case "proc-msel-toggle":
+        (function () {
+          var jm = activeJob();
+          if (!jm) return;
+          jm.pre.mselOpen = !jm.pre.mselOpen;
+          renderProcWizard();
+          var el2 = document.querySelector("#rwProcMask .rw-msel");
+          if (el2 && el2.scrollIntoView) el2.scrollIntoView({ block: "center" });
+        })();
+        return;
+      case "proc-msel-close":
+        (function () {
+          var jc2 = activeJob();
+          if (!jc2) return;
+          jc2.pre.mselOpen = false;
+          renderProcWizard();
+        })();
+        return;
+      case "proc-msel-rm":
+        (function () {
+          /* 2026-10-13：点击 chip 上的 × 单独移除该条规则 */
+          var jr = activeJob();
+          if (!jr) return;
+          var kk = node.getAttribute("data-rw-k");
+          if (!jr.pre.rulesSet) {
+            jr.pre.rules = procPreRules(jr).slice();
+            jr.pre.rulesSet = true;
+          }
+          jr.pre.rules = jr.pre.rules.filter(function (x) { return x !== kk; });
+          jr.pre.mselOpen = true;
+          renderProcWizard();
+          var el3 = document.querySelector("#rwProcMask .rw-msel");
+          if (el3 && el3.scrollIntoView) el3.scrollIntoView({ block: "center" });
+        })();
         return;
       case "proc-run-3":
         runPreprocess();
@@ -127713,6 +127874,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           var ri = j.filter.selRows.indexOf(rv);
           if (v && ri < 0) j.filter.selRows.push(rv);
           if (!v && ri >= 0) j.filter.selRows.splice(ri, 1);
+          /* 2026-10-13：勾选即自动完成步骤 2，无需再点「应用筛选」 */
+          procApplyFilter(j);
           renderProcWizard();
           return;
         } else if (kp === "dtype") {
@@ -127725,7 +127888,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           return;
         } else if (kp === "preRule") {
           var allRules = stdRuleGroups().map(function (r) { return r.id; });
-          if (!j.pre.rules || !j.pre.rules.length) j.pre.rules = allRules.slice();
+          /* 2026-10-13：首次手动勾选把默认全选实体化，之后 rulesSet 生效 */
+          if (!j.pre.rulesSet) { j.pre.rules = j.pre.rules && j.pre.rules.length ? j.pre.rules.slice() : allRules.slice(); j.pre.rulesSet = true; }
           var pv = el.getAttribute("data-v");
           var pi = j.pre.rules.indexOf(pv);
           if (v && pi < 0) j.pre.rules.push(pv);
@@ -127745,36 +127909,39 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           j.quality.qa[qk2].advice = v;
           return;
         } else if (kp === "secLv") {
+          /* 2026-10-13：安全等级人工逐批选择，选择后不自动判定，需点击「确认安全等级判定」提交 */
           var sec2 = j.quality.security;
-          if (!sec2 || !sec2.executed || !(sec2.batches || []).length) {
-            sec2 = j.quality.security = { executed: true, at: nowText(), batches: procSecurityRows(j), summary: "" };
+          if (!sec2 || !(sec2.batches || []).length) {
+            sec2 = j.quality.security = { executed: false, at: "", batches: procSecurityRows(j), summary: "" };
           }
           var sb = el.getAttribute("data-v");
           (sec2.batches || []).forEach(function (x) {
             if (x.batch === sb) {
-              x.lv = Number(v);
+              x.lv = v ? Number(v) : "";
               x.manual = true;
-              x.why = "人工调整为第" + Number(v) + "级（" + (Number(v) === 1 ? "可公开" : "受限") + "）";
+              x.why = v ? "人工选择为第" + Number(v) + "级（" + (Number(v) === 1 ? "可公开" : "受限") + "）"
+                : "待人工选择安全等级（第1级 可公开 / 第2级 受限）";
             }
           });
-          sec2.at = nowText();
-          sec2.summary = sec2.batches.filter(function (x) { return x.lv === 1; }).length + " 个批次为第1级（可公开），"
-            + sec2.batches.filter(function (x) { return x.lv === 2; }).length + " 个批次为第2级（受限）";
           renderProcWizard();
           return;
         } else if (kp === "productDs") {
-          /* 步骤 5：数据集类型单选——本次产出只能归入 1 个数据集 */
-          var dv = el.getAttribute("data-v");
-          j.product.datasets = [dv];
-          var msk = document.getElementById("rwProcMask");
-          if (msk) {
-            Array.prototype.forEach.call(msk.querySelectorAll(".rw-pds"), function (x) { x.classList.remove("is-on"); });
-          }
-          var dl = el.closest ? el.closest(".rw-pds") : null;
-          if (dl) dl.classList.add("is-on");
-          var dc = document.querySelector("#rwProcMask .rw-ds-count");
-          if (dc) dc.textContent = "1";
-        } else if (kp === "model") j.model.key = v;
+          /* 2026-10-13：数据集类型改为下拉单选——本次产出只能归入 1 个数据集 */
+          var dv = el.getAttribute("data-v") || v;
+          j.product.datasets = dv ? [dv] : [];
+          renderProcWizard();
+          return;
+        } else if (kp === "modelSource") {
+          /* 2026-10-13：切换模型来源后清空已选模型 */
+          j.model.source = v;
+          j.model.key = "";
+          renderProcWizard();
+          return;
+        } else if (kp === "model") {
+          j.model.key = v;
+          renderProcWizard();
+          return;
+        }
         else if (kp === "product") j.product.key = v;
         else if (kp === "outlierFix") {
           var o = j.pre.outliers.filter(function (x) { return x.key === el.getAttribute("data-v"); })[0];
