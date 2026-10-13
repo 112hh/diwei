@@ -32365,37 +32365,7 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
             <p>查看和管理您提交的所有材料数据，追踪审核状态。</p>
           </div>
           <div class="page-tools">
-            <button class="btn-primary my-submissions-batch-btn" type="button" data-my-submissions-batch-open>批量导入</button>
-            <input id="mySubmissionsBatchInput" type="file" multiple hidden
-              accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5,.png,.jpg,.jpeg,.webp,.svg,.zip">
             <button class="btn-primary" type="button" onclick="MarvisRouter.go('page-data-submit')">＋ 新增提交</button>
-          </div>
-        </div>
-        <div class="my-submissions-batch-panel" id="mySubmissionsBatchPanel" hidden>
-          <div class="my-submissions-batch-head">
-            <div>
-              <strong>确认批量导入信息</strong>
-              <span>文件上传后请确认材料类型和格式识别结果，确认后将进入入库审核。</span>
-            </div>
-            <button class="btn" type="button" data-my-submissions-batch-cancel>取消</button>
-          </div>
-          <div class="my-submissions-batch-controls">
-            <label>
-              <span>导入材料类型</span>
-              <select id="mySubmissionsBatchMaterialType">
-                <option>二维材料</option>
-                <option>有机光电材料</option>
-                <option>电解质材料</option>
-                <option>机器学习力场</option>
-                <option>催化材料</option>
-              </select>
-            </label>
-            <p id="mySubmissionsBatchHint">请选择文件后确认导入信息。</p>
-          </div>
-          <div class="my-submissions-batch-body" id="mySubmissionsBatchBody"></div>
-          <div class="my-submissions-batch-actions">
-            <button class="btn" type="button" data-my-submissions-batch-cancel>取消</button>
-            <button class="btn-primary" type="button" data-my-submissions-batch-confirm>确认导入并提交审核</button>
           </div>
         </div>
         <div class="card pad filter-card">
@@ -32436,6 +32406,41 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
             </table>
           </div>
           <div class="result-footer"><span>共 5 条提交记录</span></div>
+        </div>
+      </section>
+
+      <!-- ====== 提交详情页（我的提交 / 入库审核共用） ====== -->
+      <section class="page" id="page-submission-detail">
+        <div class="page-head">
+          <div>
+            <h2>提交详情 <span class="page-role-tag mixed" id="submissionDetailSourceTag">我的提交</span></h2>
+            <p id="submissionDetailSubtitle">查看该条提交的完整字段内容、上传附件与审核结果。</p>
+          </div>
+          <div class="page-tools">
+            <button class="btn" type="button" data-submission-detail-back>返回列表</button>
+            <button class="btn-primary" type="button" id="submissionDetailReviewBtn" hidden>审核</button>
+          </div>
+        </div>
+
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">提交信息</h3>
+          <div class="record-detail-grid" id="submissionDetailBasic"></div>
+        </div>
+
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">用户上传字段信息</h3>
+          <p style="margin:0 0 12px;color:var(--muted);font-size:13px;">以下内容为提交人实际填写或上传的字段，按材料类型对应的录入表单逐项展示。</p>
+          <div class="record-detail-grid" id="submissionDetailFields"></div>
+        </div>
+
+        <div class="card pad" style="margin-bottom:16px;">
+          <h3 class="section-title">上传附件</h3>
+          <div id="submissionDetailAttachments"></div>
+        </div>
+
+        <div class="card pad">
+          <h3 class="section-title">审核信息</h3>
+          <div class="record-detail-grid" id="submissionDetailReview"></div>
         </div>
       </section>
 
@@ -32892,27 +32897,8 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
             <h2>数据上传</h2>
             <p>统一承接五类材料的数据新增、补充提交与驳回重提；提交后可在“我的提交”查看状态，并由“入库审核”统一审核。</p>
           </div>
-          <div class="page-tools">
-            <button class="btn-primary data-batch-import-btn" type="button" data-batch-import-open>批量导入</button>
-            <input id="dataBatchImportInput" type="file" multiple hidden
-              accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5,.png,.jpg,.jpeg,.webp,.svg,.zip">
-          </div>
         </div>
 
-        <div class="data-batch-import-panel" id="dataBatchImportPanel" hidden>
-          <div class="data-batch-import-head">
-            <div>
-              <strong>批量导入预览</strong>
-              <span id="dataBatchImportContext">当前按二维材料规则识别文件。</span>
-            </div>
-            <button class="btn" type="button" data-batch-import-clear>清空预览</button>
-          </div>
-          <div class="data-batch-import-body" id="dataBatchImportBody"></div>
-          <div class="data-batch-import-actions">
-            <button class="btn" type="button" data-batch-import-clear>取消</button>
-            <button class="btn-primary" type="button" data-batch-import-confirm>确认导入并提交审核</button>
-          </div>
-        </div>
 
         <!-- 第一步：选择材料类型 -->
         <div class="card pad" style="margin-bottom:24px;">
@@ -34114,6 +34100,40 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
         <button class="btn" type="button" data-close-modal="recordDetailModal">关闭</button>
         <button class="btn-primary" type="button" id="recordDetailDownloadBtn">下载文件</button>
         <button class="btn-primary" type="button" id="recordApproveBtn" hidden>模拟审核通过并入库</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 审核弹窗（入库审核 / 提交详情） ── -->
+  <div class="overlay" id="reviewDecisionModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <div>
+          <h3 id="reviewDecisionTitle">审核</h3>
+          <p id="reviewDecisionSubtitle" style="margin:4px 0 0;font-size:13px;color:var(--muted);"></p>
+        </div>
+        <button class="modal-close" type="button" data-review-decision-cancel>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom:18px;">
+          <label class="form-label">审核结果 <span class="required">*</span></label>
+          <div style="display:flex;gap:24px;align-items:center;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;">
+              <input type="radio" name="reviewDecisionResult" value="approved" checked> 通过
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;">
+              <input type="radio" name="reviewDecisionResult" value="rejected"> 不通过
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">审核意见 <span class="required" id="reviewDecisionCommentRequired">*</span></label>
+          <textarea id="reviewDecisionComment" class="page-select" style="min-height:96px;width:100%;line-height:1.6;" placeholder="请填写审核意见；审核结果为“不通过”时必填，将作为驳回原因反馈给提交人。"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" type="button" data-review-decision-cancel>取消</button>
+        <button class="btn-primary" type="button" id="reviewDecisionConfirmBtn">提交审核结果</button>
       </div>
     </div>
   </div>
@@ -36314,6 +36334,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       "catalyst-build": { group: "applications", portal: "applications", navPage: "catalyst", title: "催化构建", breadcrumbParent: "催化材料应用" },
       "data-submit": { group: "workflow", portal: "workflow", title: "数据上传", breadcrumbParent: "数据管理" },
       "my-submissions": { group: "workflow", portal: "workflow", title: "我的提交", breadcrumbParent: "数据管理" },
+      "submission-detail": { group: "workflow", portal: "workflow", navPage: "my-submissions", title: "提交详情", breadcrumbParent: "数据管理" },
       "twod-review": { group: "workflow", portal: "workflow", title: "入库审核", breadcrumbParent: "数据管理" },
       algorithms: { group: "analysis", portal: "algorithms", title: "数据应用算法", breadcrumbParent: "低维材料数据库分析预测" },
       "prediction-tasks": { group: "analysis", portal: "algorithms", title: "预测任务管理", breadcrumbParent: "低维材料数据库分析预测" },
@@ -51945,14 +51966,14 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <td>
             <div class="twod-record-inline-actions">
               <button class="twod-record-link" type="button" data-open-record="${record.id}">查看详情</button>
-              ${record.status === "pending" && record.materialName ? `<button class="btn-primary" type="button" data-approve-record="${record.id}">审核通过并入库</button>` : `<button class="twod-record-link" type="button" data-download-record="${record.id}">下载</button>`}
+              ${record.status === "pending" && record.materialName ? `<button class="btn-primary" type="button" data-review-decision="${record.id}">审核</button>` : `<button class="twod-record-link" type="button" data-download-record="${record.id}">下载</button>`}
             </div>
           </td>
         </tr>
       `).join("") : `<tr><td colspan="7" class="table-empty">当前筛选条件下暂无记录</td></tr>`;
       [...body.querySelectorAll("tr")].forEach((row) => {
-        const openButton = row.querySelector("[data-open-record], [data-approve-record]");
-        const recordId = openButton?.getAttribute("data-open-record") || openButton?.getAttribute("data-approve-record");
+        const openButton = row.querySelector("[data-open-record], [data-review-decision]");
+        const recordId = openButton?.getAttribute("data-open-record") || openButton?.getAttribute("data-review-decision");
         row.classList.toggle("twod-record-row-focus", Boolean(recordId && recordId === state.twodReviewFocusId));
       });
       const footer = document.getElementById("twodWorkflowFooter");
@@ -54607,7 +54628,6 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const openReviewWorkbenchNode = event.target.closest("[data-open-review-workbench]");
         const twodUploadOpen = event.target.closest("[data-twod-open-upload]");
         const twodReviewFilterNode = event.target.closest("[data-twod-review-filter]");
-        const twodApproveNode = event.target.closest("[data-approve-record]");
         const materialNode = event.target.closest("[data-open-material]");
         const recordNode = event.target.closest("[data-open-record]");
         const downloadRecordNode = event.target.closest("[data-download-record]");
@@ -54644,18 +54664,6 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           state.twodReviewFilter = twodReviewFilterNode.dataset.twodReviewFilter || "all";
           state.twodReviewFocusId = "";
           renderTwodRecords();
-          return;
-        }
-
-        if (twodApproveNode) {
-          const record = findRecord(twodApproveNode.dataset.approveRecord);
-          if (!record) return;
-          record.status = "approved";
-          ensureRecordInDatabase(record);
-          state.activeTwodRecordId = record.id;
-          focusTwodWorkflowRecord(record.id, "approved");
-          refreshTwodResults();
-          showToast("审核通过", `${record.materialName || record.fileName} 已写入${getMaterialDatabaseLabel(record.materialType || record.fileType || "")}。`);
           return;
         }
 
@@ -99586,6 +99594,10 @@ function renderElectrolyteCategoryTabs() {
         // 4e. 我的提交 - 操作按钮
         var subRow = target.closest('#page-my-submissions tbody tr');
         if (subRow && target.closest('button')) {
+          var legacyBtn = target.closest('button');
+          if (legacyBtn.dataset && (legacyBtn.dataset.viewDetail || legacyBtn.dataset.reedit || legacyBtn.dataset.submitSubmissionReview)) {
+            return;
+          }
           var btnText = target.textContent.trim();
           var row = subRow;
           var name = row.cells[1] ? row.cells[1].textContent.trim() : '未知';
@@ -99891,8 +99903,9 @@ function renderElectrolyteCategoryTabs() {
           if (row.querySelector('td:first-child input[type="checkbox"]')) return;
           var td = document.createElement('td');
           td.style.cssText = 'width:44px;text-align:center;';
-          var approveBtn = row.querySelector('[data-approve-record]');
-          var recId = approveBtn ? approveBtn.dataset.approveRecord : '';
+          var approveBtn = row.querySelector('[data-review-decision]');
+          var openRecBtn = row.querySelector('[data-open-record]');
+          var recId = approveBtn ? approveBtn.dataset.reviewDecision : (openRecBtn ? openRecBtn.dataset.openRecord : '');
           td.innerHTML = '<input type="checkbox" data-record-id="' + (recId || '') + '">';
           row.insertBefore(td, row.firstChild);
 
@@ -100044,15 +100057,17 @@ function renderElectrolyteCategoryTabs() {
           var sc = statusClass[s.status] || 'muted';
           var st = statusText[s.status] || s.status;
           var reason = s.rejectReason || '-';
-          var actionHtml = '';
+          var actionHtml = '<button class="btn btn-sm" data-view-detail="' + s.id + '">查看详情</button>';
           if (s.status === 'draft') {
-            actionHtml = '<button class="btn-primary btn-sm" data-submit-submission-review="' + s.id + '">提交审核</button>';
+            actionHtml += ' <button class="btn-primary btn-sm" data-submit-submission-review="' + s.id + '">提交审核</button>';
           } else if (s.status === 'rejected') {
-            actionHtml = '<button class="btn-primary btn-sm" data-reedit="' + s.id + '">重新编辑</button>';
-          } else {
-            actionHtml = '<button class="btn btn-sm" data-view-detail="' + s.id + '">查看详情</button>';
+            actionHtml += ' <button class="btn-primary btn-sm" data-reedit="' + s.id + '">修订重提</button>';
           }
-          return '<tr><td>' + s.time + '</td><td>' + s.materialName + '</td><td>' + s.materialType + '</td><td><span class="status-badge ' + sc + '">' + st + '</span></td><td>' + reason + '</td><td class="action-cell">' + actionHtml + '</td></tr>';
+          var nameHtml = s.materialName;
+          if (s.revisionRound) {
+            nameHtml += '<div style="margin-top:4px;font-size:12px;color:#7C4DFF;">第 ' + s.revisionRound + ' 次提交（基于驳回修订）</div>';
+          }
+          return '<tr><td>' + s.time + '</td><td>' + nameHtml + '</td><td>' + s.materialType + '</td><td><span class="status-badge ' + sc + '">' + st + '</span></td><td>' + reason + '</td><td class="action-cell">' + actionHtml + '</td></tr>';
         }).join('');
         if (footer) footer.textContent = '共 ' + list.length + ' 条提交记录';
       }
@@ -100091,383 +100106,6 @@ function renderElectrolyteCategoryTabs() {
         renderAllSubmissions();
       }, 200);
 
-      /* ── 2b. Batch import for five material databases ── */
-      var batchImportRules = {
-        "二维材料": {
-          code: "2DM",
-          formats: ["cif", "poscar", "vasp", "xsf", "xyz", "csv", "tsv", "json", "xml", "txt", "dat", "out", "log", "png", "jpg", "jpeg", "webp", "svg", "zip"],
-          hint: "二维材料支持结构文件、计算文本/表格、图谱图片和压缩包批量导入。"
-        },
-        "有机光电材料": {
-          code: "OPM",
-          formats: ["mol", "sdf", "cif", "xyz", "csv", "tsv", "xlsx", "xls", "json", "xml", "txt", "dat", "png", "jpg", "jpeg", "webp", "svg", "zip"],
-          hint: "有机光电材料支持分子结构、表征图谱、计算结果和文本说明批量导入。"
-        },
-        "电解质材料": {
-          code: "ELY",
-          formats: ["cif", "poscar", "vasp", "xyz", "csv", "tsv", "xlsx", "xls", "json", "xml", "txt", "dat", "png", "jpg", "jpeg", "webp", "svg", "zip"],
-          hint: "电解质材料支持结构文件、配方表、测试结果、图片和说明文件批量导入。"
-        },
-        "机器学习力场": {
-          code: "MLF",
-          formats: ["json", "npz", "h5", "hdf5", "xyz", "pdb", "mol2", "sdf", "csv", "tsv", "txt", "dat", "out", "log", "png", "jpg", "jpeg", "webp", "svg", "zip"],
-          hint: "机器学习力场支持训练样本、参数文件、拓扑/结构文件、日志文本和可视化图片批量导入。"
-        },
-        "催化材料": {
-          code: "CAT",
-          formats: ["cif", "poscar", "vasp", "xsf", "xyz", "csv", "tsv", "xlsx", "xls", "json", "xml", "txt", "dat", "out", "log", "png", "jpg", "jpeg", "webp", "svg", "zip"],
-          hint: "催化材料支持表面结构、反应路径、性质表格、文本日志和图谱图片批量导入。"
-        }
-      };
-
-      function escapeBatchHtml(value) {
-        return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) {
-          return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
-        });
-      }
-
-      function getActiveDataSubmitMaterialType() {
-        var activeChip = document.querySelector("#page-data-submit .twod-filter-chip.active");
-        return activeChip ? activeChip.textContent.trim() : "二维材料";
-      }
-
-      function getBatchFileExtension(fileName) {
-        var name = String(fileName || "").trim();
-        var lower = name.toLowerCase();
-        if (["poscar", "contcar", "incar", "outcar"].indexOf(lower) >= 0) return lower;
-        var dot = lower.lastIndexOf(".");
-        return dot >= 0 ? lower.slice(dot + 1) : "";
-      }
-
-      function getBatchFileKind(ext) {
-        if (["cif", "poscar", "contcar", "vasp", "xsf", "xyz", "mol", "sdf", "pdb", "mol2"].indexOf(ext) >= 0) return "结构文件";
-        if (["png", "jpg", "jpeg", "webp", "svg"].indexOf(ext) >= 0) return "图片/图谱";
-        if (["txt", "dat", "out", "log", "xml"].indexOf(ext) >= 0) return "文本文件";
-        if (["csv", "tsv", "xlsx", "xls", "json", "npz", "h5", "hdf5"].indexOf(ext) >= 0) return "数据文件";
-        if (ext === "zip") return "压缩包";
-        return "未知类型";
-      }
-
-      function formatBatchFileSize(bytes) {
-        var size = Number(bytes) || 0;
-        if (size >= 1024 * 1024) return (size / 1024 / 1024).toFixed(2) + " MB";
-        if (size >= 1024) return (size / 1024).toFixed(1) + " KB";
-        return size + " B";
-      }
-
-      function buildBatchImportItem(file, materialType) {
-        var rule = batchImportRules[materialType] || batchImportRules["二维材料"];
-        var ext = getBatchFileExtension(file.name);
-        var accepted = rule.formats.indexOf(ext) >= 0;
-        var baseName = String(file.name || "未命名文件").replace(/\.[^.]+$/, "");
-        return {
-          file: file,
-          fileName: file.name || "未命名文件",
-          materialName: baseName || file.name || "批量导入材料",
-          materialType: materialType,
-          ext: ext || "无扩展名",
-          fileKind: getBatchFileKind(ext),
-          sizeText: formatBatchFileSize(file.size),
-          accepted: accepted,
-          reason: accepted ? "已加入待审核队列" : "不符合当前材料类型的格式规则"
-        };
-      }
-
-      function updateBatchImportDropzone(items) {
-        var dropzone = document.querySelector("#page-data-submit .upload-dropzone");
-        if (!dropzone || !items.length) return;
-        var accepted = items.filter(function(item) { return item.accepted; });
-        dropzone.innerHTML = accepted.length
-          ? "已批量导入 " + accepted.length + " 个文件；提交记录已进入“我的提交”和“入库审核”。"
-          : "未导入文件：请选择符合当前材料类型格式要求的结构文件、图片或文本/数据文件。";
-      }
-
-      function renderBatchImportPreview(items, materialType) {
-        var panel = document.getElementById("dataBatchImportPanel");
-        var body = document.getElementById("dataBatchImportBody");
-        var context = document.getElementById("dataBatchImportContext");
-        if (!panel || !body) return;
-        var accepted = items.filter(function(item) { return item.accepted; });
-        var rejected = items.length - accepted.length;
-        var rule = batchImportRules[materialType] || batchImportRules["二维材料"];
-        if (context) context.textContent = rule.hint;
-        panel.hidden = false;
-        body.innerHTML = [
-          '<div class="data-batch-import-summary">',
-            '<div class="data-batch-import-stat"><span>识别文件</span><strong>' + items.length + '</strong></div>',
-            '<div class="data-batch-import-stat"><span>导入成功</span><strong>' + accepted.length + '</strong></div>',
-            '<div class="data-batch-import-stat"><span>待调整</span><strong>' + rejected + '</strong></div>',
-          '</div>',
-          '<table class="data-batch-import-table">',
-            '<thead><tr><th>文件名</th><th>材料类型</th><th>文件类别</th><th>格式</th><th>大小</th><th>状态</th></tr></thead>',
-            '<tbody>',
-              items.map(function(item) {
-                return '<tr>' +
-                  '<td>' + escapeBatchHtml(item.fileName) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.materialType) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.fileKind) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.ext.toUpperCase()) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.sizeText) + '</td>' +
-                  '<td><span class="data-batch-status ' + (item.accepted ? 'is-success' : 'is-warning') + '">' + escapeBatchHtml(item.reason) + '</span></td>' +
-                '</tr>';
-              }).join(''),
-            '</tbody>',
-          '</table>'
-        ].join('');
-      }
-
-      function addBatchImportRecords(items, materialType) {
-        var accepted = items.filter(function(item) { return item.accepted; });
-        accepted.forEach(function(item) {
-          var newSub = {
-            id: guid(),
-            time: ts(),
-            materialName: item.materialName,
-            materialType: materialType,
-            status: "pending",
-            rejectReason: "",
-            formula: "",
-            source: "批量导入",
-            batchImport: true,
-            fields: {
-              fileName: item.fileName,
-              fileType: item.fileKind,
-              sourceFormat: item.ext.toUpperCase(),
-              fileSize: item.sizeText,
-              source: "批量导入"
-            }
-          };
-          allSubmissions.unshift(newSub);
-          if (typeof twodUpdateRecords !== "undefined") {
-            twodUpdateRecords.unshift({
-              id: newSub.id,
-              uploadedAt: newSub.time,
-              fileName: item.fileName,
-              fileType: item.fileKind,
-              sourceFormat: item.ext.toUpperCase(),
-              category: "批量导入",
-              status: "pending",
-              materialName: item.materialName,
-              materialFormula: "",
-              materialType: materialType,
-              source: "批量导入",
-              workflowType: "批量导入",
-              fields: newSub.fields
-            });
-          }
-        });
-        return accepted.length;
-      }
-
-      var dataSubmitBatchItems = [];
-
-      function handleBatchImportFiles(fileList) {
-        var files = Array.from(fileList || []);
-        if (!files.length) return;
-        var materialType = getActiveDataSubmitMaterialType();
-        dataSubmitBatchItems = files.map(function(file) {
-          var item = buildBatchImportItem(file, materialType);
-          item.reason = item.accepted ? "待确认导入" : "不符合当前材料类型的格式规则";
-          return item;
-        });
-        renderBatchImportPreview(dataSubmitBatchItems, materialType);
-        if (typeof showToast === "function") {
-          showToast("批量导入", "文件已识别，请确认导入信息后提交审核。");
-        }
-      }
-
-      function resetDataSubmitBatchImport() {
-        dataSubmitBatchItems = [];
-        var panel = document.getElementById("dataBatchImportPanel");
-        var body = document.getElementById("dataBatchImportBody");
-        var input = document.getElementById("dataBatchImportInput");
-        if (body) body.innerHTML = "";
-        if (panel) panel.hidden = true;
-        if (input) input.value = "";
-      }
-
-      function confirmDataSubmitBatchImport() {
-        if (!dataSubmitBatchItems.length) {
-          if (typeof showToast === "function") showToast("批量导入", "请先上传需要导入的文件。");
-          return;
-        }
-        var materialType = dataSubmitBatchItems[0]?.materialType || getActiveDataSubmitMaterialType();
-        dataSubmitBatchItems = dataSubmitBatchItems.map(function(item) {
-          item.reason = item.accepted ? "已加入待审核队列" : "不符合当前材料类型的格式规则";
-          return item;
-        });
-        var importedCount = addBatchImportRecords(dataSubmitBatchItems, materialType);
-        syncReviewQueue();
-        renderAllSubmissions();
-        if (typeof renderTwodRecords === "function") renderTwodRecords();
-        renderBatchImportPreview(dataSubmitBatchItems, materialType);
-        updateBatchImportDropzone(dataSubmitBatchItems);
-        if (typeof showToast === "function") {
-          var rejectedCount = dataSubmitBatchItems.length - importedCount;
-          showToast("导入成功", "已导入 " + importedCount + " 个文件并提交审核" + (rejectedCount ? "，" + rejectedCount + " 个文件需调整格式。" : "。"));
-        }
-        if (importedCount) {
-          setTimeout(function() {
-            if (typeof MarvisRouter !== "undefined" && MarvisRouter.go) MarvisRouter.go("page-twod-review");
-          }, 600);
-        }
-      }
-
-      window.refreshDataBatchImportContext = function(materialType) {
-        var context = document.getElementById("dataBatchImportContext");
-        var button = document.querySelector("[data-batch-import-open]");
-        var rule = batchImportRules[materialType] || batchImportRules["二维材料"];
-        if (context) context.textContent = rule.hint;
-        if (button) button.title = rule.hint;
-      };
-
-      (function bindBatchImportFlow() {
-        document.body.addEventListener("click", function(ev) {
-          var openBtn = ev.target.closest("[data-batch-import-open]");
-          if (openBtn) {
-            var input = document.getElementById("dataBatchImportInput");
-            window.refreshDataBatchImportContext(getActiveDataSubmitMaterialType());
-            if (input) input.click();
-            return;
-          }
-          var clearBtn = ev.target.closest("[data-batch-import-clear]");
-          if (clearBtn) {
-            resetDataSubmitBatchImport();
-            return;
-          }
-          if (ev.target.closest("[data-batch-import-confirm]")) {
-            confirmDataSubmitBatchImport();
-          }
-        });
-        document.getElementById("dataBatchImportInput")?.addEventListener("change", function(ev) {
-          handleBatchImportFiles(ev.target.files);
-          ev.target.value = "";
-        });
-        setTimeout(function() {
-          window.refreshDataBatchImportContext(getActiveDataSubmitMaterialType());
-        }, 0);
-      })();
-
-      /* ── 2c. My submissions batch import: upload -> confirm -> review ── */
-      var mySubmissionBatchFiles = [];
-      var mySubmissionBatchItems = [];
-
-      function getActiveMySubmissionMaterialType() {
-        var activeTypeChip = document.querySelector("#page-my-submissions .filter-card .filter-row:first-child .twod-filter-chip.active");
-        var label = activeTypeChip ? activeTypeChip.textContent.trim() : "二维材料";
-        return label === "全部类型" ? "二维材料" : label;
-      }
-
-      function buildMySubmissionBatchItems(materialType) {
-        return mySubmissionBatchFiles.map(function(file) {
-          var item = buildBatchImportItem(file, materialType);
-          item.reason = item.accepted ? "待确认导入" : "格式需调整";
-          return item;
-        });
-      }
-
-      function renderMySubmissionBatchConfirm(materialType) {
-        var panel = document.getElementById("mySubmissionsBatchPanel");
-        var body = document.getElementById("mySubmissionsBatchBody");
-        var hint = document.getElementById("mySubmissionsBatchHint");
-        var select = document.getElementById("mySubmissionsBatchMaterialType");
-        if (!panel || !body) return;
-        var rule = batchImportRules[materialType] || batchImportRules["二维材料"];
-        mySubmissionBatchItems = buildMySubmissionBatchItems(materialType);
-        var accepted = mySubmissionBatchItems.filter(function(item) { return item.accepted; });
-        var rejected = mySubmissionBatchItems.length - accepted.length;
-        if (select) select.value = materialType;
-        if (hint) hint.textContent = rule.hint + " 确认后将生成待审核记录。";
-        panel.hidden = false;
-        body.innerHTML = [
-          '<div class="my-submissions-batch-summary">',
-            '<div class="my-submissions-batch-stat"><span>识别文件</span><strong>' + mySubmissionBatchItems.length + '</strong></div>',
-            '<div class="my-submissions-batch-stat"><span>可导入</span><strong>' + accepted.length + '</strong></div>',
-            '<div class="my-submissions-batch-stat"><span>需调整</span><strong>' + rejected + '</strong></div>',
-          '</div>',
-          '<table class="my-submissions-batch-table">',
-            '<thead><tr><th>文件名</th><th>材料类型</th><th>文件类别</th><th>格式</th><th>大小</th><th>确认状态</th></tr></thead>',
-            '<tbody>',
-              mySubmissionBatchItems.map(function(item) {
-                return '<tr>' +
-                  '<td>' + escapeBatchHtml(item.fileName) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.materialType) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.fileKind) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.ext.toUpperCase()) + '</td>' +
-                  '<td>' + escapeBatchHtml(item.sizeText) + '</td>' +
-                  '<td><span class="data-batch-status ' + (item.accepted ? 'is-success' : 'is-warning') + '">' + escapeBatchHtml(item.reason) + '</span></td>' +
-                '</tr>';
-              }).join(''),
-            '</tbody>',
-          '</table>'
-        ].join('');
-      }
-
-      function resetMySubmissionBatchConfirm() {
-        mySubmissionBatchFiles = [];
-        mySubmissionBatchItems = [];
-        var panel = document.getElementById("mySubmissionsBatchPanel");
-        var body = document.getElementById("mySubmissionsBatchBody");
-        var input = document.getElementById("mySubmissionsBatchInput");
-        if (body) body.innerHTML = "";
-        if (panel) panel.hidden = true;
-        if (input) input.value = "";
-      }
-
-      function confirmMySubmissionBatchImport() {
-        var materialType = document.getElementById("mySubmissionsBatchMaterialType")?.value || getActiveMySubmissionMaterialType();
-        mySubmissionBatchItems = buildMySubmissionBatchItems(materialType).map(function(item) {
-          item.reason = item.accepted ? "已加入待审核队列" : "格式需调整";
-          return item;
-        });
-        var importedCount = addBatchImportRecords(mySubmissionBatchItems, materialType);
-        var rejectedCount = mySubmissionBatchItems.length - importedCount;
-        if (!importedCount) {
-          if (typeof showToast === "function") showToast("批量导入", "当前文件均不符合格式要求，请调整后重新上传。");
-          renderMySubmissionBatchConfirm(materialType);
-          return;
-        }
-        syncReviewQueue();
-        state.prefillSubmissionMaterialType = materialType;
-        renderAllSubmissions(materialType, "待审核");
-        if (typeof renderTwodRecords === "function") renderTwodRecords();
-        resetMySubmissionBatchConfirm();
-        if (typeof showToast === "function") {
-          showToast("导入成功", "已导入 " + importedCount + " 个文件并提交审核" + (rejectedCount ? "，" + rejectedCount + " 个文件需调整格式。" : "。"));
-        }
-        setTimeout(function() {
-          if (typeof MarvisRouter !== "undefined" && MarvisRouter.go) MarvisRouter.go("page-twod-review");
-        }, 600);
-      }
-
-      (function bindMySubmissionBatchImport() {
-        document.body.addEventListener("click", function(ev) {
-          var openBtn = ev.target.closest("[data-my-submissions-batch-open]");
-          if (openBtn) {
-            var input = document.getElementById("mySubmissionsBatchInput");
-            if (input) input.click();
-            return;
-          }
-          if (ev.target.closest("[data-my-submissions-batch-cancel]")) {
-            resetMySubmissionBatchConfirm();
-            return;
-          }
-          if (ev.target.closest("[data-my-submissions-batch-confirm]")) {
-            confirmMySubmissionBatchImport();
-          }
-        });
-        document.getElementById("mySubmissionsBatchInput")?.addEventListener("change", function(ev) {
-          mySubmissionBatchFiles = Array.from(ev.target.files || []);
-          if (!mySubmissionBatchFiles.length) return;
-          renderMySubmissionBatchConfirm(getActiveMySubmissionMaterialType());
-          ev.target.value = "";
-        });
-        document.getElementById("mySubmissionsBatchMaterialType")?.addEventListener("change", function(ev) {
-          if (!mySubmissionBatchFiles.length) return;
-          renderMySubmissionBatchConfirm(ev.target.value || "二维材料");
-        });
-      })();
-
       /* ── 3. Submit Flow: data-submit → my-submissions + review queue ── */
       (function hookSubmitFlow() {
         document.body.addEventListener('click', function(ev) {
@@ -100491,29 +100129,34 @@ function renderElectrolyteCategoryTabs() {
           var formula = fieldValues.formula || '';
           var source = fieldValues.source || '自主计算';
 
-          var newSub = {
-            id: guid(), time: ts(),
-            materialName: materialName, materialType: materialType,
-            status: 'pending', rejectReason: '',
-            formula: formula, source: source,
-            fields: fieldValues
-          };
-          allSubmissions.unshift(newSub);
-
-          // All 5 material types → twodUpdateRecords
-          if (typeof twodUpdateRecords !== 'undefined') {
-            twodUpdateRecords.unshift({
-              id: newSub.id, uploadedAt: newSub.time,
-              fileName: materialName, fileType: materialType,
-              sourceFormat: source, category: '数据上传',
-              status: 'pending',
-              materialName: materialName,
-              materialFormula: formula,
-              materialType: materialType,
-              source: source,
-              fields: fieldValues
-            });
+          var newSub = null;
+          if (revisionState.baseId) {
+            newSub = allSubmissions.find(function(s) { return s.id === revisionState.baseId; }) || null;
+            if (!newSub) revisionState.baseId = '';
           }
+          if (newSub) {
+            newSub.time = ts();
+            newSub.materialName = materialName;
+            newSub.materialType = materialType;
+            newSub.status = 'pending';
+            newSub.rejectReason = '';
+            newSub.formula = formula;
+            newSub.source = source;
+            newSub.fields = fieldValues;
+          } else {
+            newSub = {
+              id: guid(), time: ts(),
+              materialName: materialName, materialType: materialType,
+              status: 'pending', rejectReason: '',
+              formula: formula, source: source,
+              fields: fieldValues
+            };
+            allSubmissions.unshift(newSub);
+          }
+          revisionState.baseId = '';
+          clearRevisionBanner();
+
+          upsertReviewRecord(newSub);
 
           syncReviewQueue();
 
@@ -100549,17 +100192,6 @@ function renderElectrolyteCategoryTabs() {
         syncReviewQueue();
         renderAllSubmissions();
       }
-
-      // Hook into approve button clicks on review workbench
-      document.addEventListener('click', function(ev) {
-        var approveBtn = ev.target.closest('[data-approve-record]');
-        if (!approveBtn) return;
-        var recordId = approveBtn.dataset.approveRecord;
-        if (!recordId) return;
-        setTimeout(function() {
-          syncReviewToSubmission(recordId, 'approved', '');
-        }, 200);
-      });
 
       /* ── 5. Role-based Sidebar Visibility (闭环四) ── */
       var adminOnlyPages = ['dashboard','data-resource-catalog','sys-permission','sys-user','sys-role',
@@ -100908,8 +100540,10 @@ function renderElectrolyteCategoryTabs() {
           if (draftSub) {
             draftSub.status = 'pending';
             draftSub.rejectReason = '';
+            upsertReviewRecord(draftSub);
             syncReviewQueue();
             renderAllSubmissions();
+            if (typeof renderTwodRecords === 'function') renderTwodRecords();
             if (typeof showToast === 'function') {
               showToast('提交审核', '记录已提交审核，等待审核通过后写入对应数据库。');
             }
@@ -100928,19 +100562,10 @@ function renderElectrolyteCategoryTabs() {
           }
           return;
         }
-        // Re-edit (rejected)
+        // 驳回重提：新建修订提交，不覆盖被驳回的原提交
         var reeditBtn = ev.target.closest('[data-reedit]');
         if (reeditBtn) {
-          var sub2 = allSubmissions.find(function(s) { return s.id === reeditBtn.dataset.reedit; });
-          if (sub2 && typeof MarvisRouter !== 'undefined') {
-            sub2.status = 'pending';
-            sub2.rejectReason = '';
-            syncReviewQueue();
-            setTimeout(function() {
-              _prefillDataSubmitForm(sub2);
-            }, 100);
-            MarvisRouter.go('page-data-submit');
-          }
+          startRevisionSubmission(reeditBtn.dataset.reedit);
           return;
         }
         // Track
@@ -100951,37 +100576,10 @@ function renderElectrolyteCategoryTabs() {
           }
           return;
         }
-        // View detail
+        // View detail → 跳转「提交详情」页
         var viewBtn = ev.target.closest('[data-view-detail]');
         if (viewBtn) {
-          var sub3 = allSubmissions.find(function(s) { return s.id === viewBtn.dataset.viewDetail; });
-          if (sub3) {
-            document.getElementById("recordBasicInfo").innerHTML =
-              '<span class="record-detail-label">材料名称</span><span class="record-detail-value">' + sub3.materialName + '</span>' +
-              '<span class="record-detail-label">化学式</span><span class="record-detail-value">' + (sub3.formula || '-') + '</span>' +
-              '<span class="record-detail-label">材料类型</span><span class="record-detail-value">' + sub3.materialType + '</span>' +
-              '<span class="record-detail-label">数据来源</span><span class="record-detail-value">' + (sub3.source || '-') + '</span>' +
-              '<span class="record-detail-label">提交时间</span><span class="record-detail-value">' + sub3.time + '</span>';
-            document.getElementById("recordExtraInfo").innerHTML =
-              '<span class="record-detail-label">材料名称</span><span class="record-detail-value">' + sub3.materialName + '</span>' +
-              '<span class="record-detail-label">化学式</span><span class="record-detail-value">' + (sub3.formula || '-') + '</span>' +
-              '<span class="record-detail-label">材料类别</span><span class="record-detail-value">' + sub3.materialType + '</span>' +
-              '<span class="record-detail-label">数据来源</span><span class="record-detail-value">' + (sub3.source || '-') + '</span>' +
-              '<span class="record-detail-label">提交时间</span><span class="record-detail-value">' + sub3.time + '</span>' +
-              '<span class="record-detail-label">入库编号</span><span class="record-detail-value">未入库</span>';
-            var statusMap = { pending:'待审核', reviewing:'审核中', approved:'已通过', rejected:'已驳回', draft:'草稿' };
-            var statusLabel = statusMap[sub3.status] || sub3.status;
-            var materialDb2 = getMaterialDatabaseLabel(sub3.materialType || '');
-            var msgMap = { pending:'数据已提交，等待审核通过后写入' + materialDb2 + '。', reviewing:'数据正在审核中，请耐心等待。', approved:'该数据已审核通过，并已写入' + materialDb2 + '。', rejected:(sub3.rejectReason ? '该数据审核未通过。原因：' + sub3.rejectReason : '该数据审核未通过，请补充必要元数据后重新提交。'), draft:'该记录为草稿状态，尚未提交审核。' };
-            var msg = msgMap[sub3.status] || msgMap.pending;
-            var statusClass = sub3.status === 'approved' ? 'approved' : sub3.status === 'rejected' ? 'rejected' : sub3.status === 'draft' ? 'draft' : 'pending';
-            document.getElementById("recordStatusBlock").innerHTML =
-              '<div class="record-detail-status-badge status-' + statusClass + '">' + statusLabel + '</div>' +
-              '<div class="record-detail-status-msg msg-' + (sub3.status === 'approved' ? 'success' : sub3.status === 'rejected' ? 'error' : 'warning') + '">' + msg + '</div>';
-            document.getElementById("recordDetailDownloadBtn").dataset.recordId = sub3.id;
-            document.getElementById("recordApproveBtn").setAttribute('hidden', '');
-            document.getElementById("recordDetailModal").classList.add('show');
-          }
+          gotoSubmissionDetail(viewBtn.dataset.viewDetail, 'my-submissions');
           return;
         }
       });
@@ -101006,13 +100604,28 @@ function renderElectrolyteCategoryTabs() {
           var materialName = fieldValues.materialName || '草稿材料';
           var formula = fieldValues.formula || '';
 
-          allSubmissions.unshift({
-            id: guid(), time: ts(),
-            materialName: materialName, materialType: materialType,
-            status: 'draft', rejectReason: '',
-            formula: formula, source: fieldValues.source || '',
-            fields: fieldValues
-          });
+          var existingDraft = revisionState.baseId
+            ? allSubmissions.find(function(s) { return s.id === revisionState.baseId; })
+            : null;
+          if (existingDraft) {
+            existingDraft.time = ts();
+            existingDraft.materialName = materialName;
+            existingDraft.materialType = materialType;
+            existingDraft.formula = formula;
+            existingDraft.source = fieldValues.source || '';
+            existingDraft.fields = fieldValues;
+          } else if (revisionState.baseId) {
+            revisionState.baseId = '';
+          }
+          if (!existingDraft) {
+            allSubmissions.unshift({
+              id: guid(), time: ts(),
+              materialName: materialName, materialType: materialType,
+              status: 'draft', rejectReason: '',
+              formula: formula, source: fieldValues.source || '',
+              fields: fieldValues
+            });
+          }
 
           if (typeof showToast === 'function') {
             showToast('草稿已保存', '您可以在「我的提交」中继续编辑此草稿。');
@@ -101062,6 +100675,503 @@ function renderElectrolyteCategoryTabs() {
 
       console.log('[闭环补全] 业务逻辑闭环修复已加载。共修复 13 个模块。');
       console.log('[闭环补全] 可通过 setUserRole("admin"/"reviewer"/"researcher"/"professional"/"contributor") 切换角色验证闭环四。');
+
+      /* ── 14. 提交详情页 / 审核弹窗 / 驳回修订重提 ── */
+      var SUBMISSION_STATUS_META = {
+        draft: { label: '草稿', badge: 'muted' },
+        pending: { label: '待审核', badge: 'info' },
+        reviewing: { label: '审核中', badge: 'warning' },
+        approved: { label: '已通过', badge: 'success' },
+        rejected: { label: '已驳回', badge: 'danger' }
+      };
+
+      var SUBMISSION_FIELD_LABELS = {
+        materialName: '材料名称',
+        formula: '化学式',
+        bandGap: '能带间隙 (eV)',
+        youngsModulus: '杨氏模量 (GPa)',
+        homo: 'HOMO (eV)',
+        lumo: 'LUMO (eV)',
+        mobility: '迁移率 (cm²/V·s)',
+        ionicConductivity: '离子电导率 (S/cm)',
+        activationEnergy: '活化能 (eV)',
+        measureTemp: '测量温度 (℃)',
+        trainSize: '训练集规模',
+        forceFieldFormat: '力场格式',
+        potentialType: '势函数类型',
+        reactionType: '催化反应类型',
+        overpotential: '过电位 (V)',
+        tafelSlope: 'Tafel 斜率 (mV/dec)',
+        source: '数据来源',
+        methodDescription: '方法与条件说明'
+      };
+
+      var SUBMISSION_MATERIAL_FIELDS = {
+        '二维材料': ['materialName', 'formula', 'bandGap', 'youngsModulus', 'source', 'methodDescription'],
+        '有机光电材料': ['materialName', 'formula', 'homo', 'lumo', 'mobility', 'source', 'methodDescription'],
+        '电解质材料': ['materialName', 'formula', 'ionicConductivity', 'activationEnergy', 'measureTemp', 'source', 'methodDescription'],
+        '机器学习力场': ['materialName', 'formula', 'trainSize', 'forceFieldFormat', 'potentialType', 'source', 'methodDescription'],
+        '催化材料': ['materialName', 'formula', 'reactionType', 'overpotential', 'tafelSlope', 'source', 'methodDescription']
+      };
+
+      var submissionDetailState = { id: '', from: 'my-submissions' };
+      var reviewDecisionState = { id: '', from: 'twod-review' };
+      var revisionState = { baseId: '' };
+
+      function escSubmission(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+        });
+      }
+
+      function submissionNow() {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
+          ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      }
+
+      function getSubmissionStatusMeta(status) {
+        return SUBMISSION_STATUS_META[status] || { label: status || '待审核', badge: 'info' };
+      }
+
+      function buildSubmissionView(id) {
+        var sub = null;
+        var rec = null;
+        if (typeof allSubmissions !== 'undefined') {
+          sub = allSubmissions.find(function(s) { return s.id === id; }) || null;
+        }
+        if (typeof twodUpdateRecords !== 'undefined') {
+          rec = twodUpdateRecords.find(function(r) { return r.id === id; }) || null;
+        }
+        if (!sub && !rec) return null;
+        var fields = (sub && sub.fields) || (rec && rec.fields) || {};
+        if (!Object.keys(fields).length) {
+          fields = {};
+          if (sub) {
+            fields.materialName = sub.materialName;
+            fields.formula = sub.formula;
+            fields.source = sub.source;
+          }
+        }
+        return {
+          id: id,
+          sub: sub,
+          record: rec,
+          materialName: (sub && sub.materialName) || (rec && rec.materialName) || (rec && rec.fileName) || '未命名材料',
+          materialType: (sub && sub.materialType) || (rec && rec.materialType) || '-',
+          time: (sub && sub.time) || (rec && rec.uploadedAt) || '-',
+          status: (sub && sub.status) || (rec && rec.status) || 'pending',
+          rejectReason: (sub && sub.rejectReason) || (rec && rec.rejectReason) || '',
+          reviewComment: (sub && sub.reviewComment) || (rec && rec.reviewComment) || '',
+          reviewedAt: (sub && sub.reviewedAt) || (rec && rec.reviewedAt) || '',
+          reviewer: (sub && sub.reviewer) || (rec && rec.reviewer) || '',
+          formula: (sub && sub.formula) || (rec && rec.materialFormula) || '',
+          source: (sub && sub.source) || (rec && rec.source) || '',
+          fields: fields,
+          fileName: (rec && rec.fileName) || fields.fileName || '',
+          fileType: (rec && rec.fileType) || fields.fileType || '',
+          sourceFormat: (rec && rec.sourceFormat) || fields.sourceFormat || '',
+          fileSize: fields.fileSize || '',
+          workflowLabel: (rec && (rec.workflowType || rec.category)) || (sub && sub.source) || '数据上传',
+          databaseId: (rec && rec.databaseLinkedId) || '',
+          revisionRound: (sub && sub.revisionRound) || 0,
+          revisionOf: (sub && sub.revisionOf) || ''
+        };
+      }
+
+      function upsertReviewRecord(sub) {
+        if (!sub || typeof twodUpdateRecords === 'undefined') return;
+        var existing = twodUpdateRecords.find(function(r) { return r.id === sub.id; });
+        if (existing) {
+          existing.uploadedAt = sub.time;
+          existing.materialName = sub.materialName;
+          existing.materialFormula = sub.formula || '';
+          existing.materialType = sub.materialType;
+          existing.source = sub.source || '';
+          existing.status = sub.status;
+          existing.rejectReason = sub.rejectReason || '';
+          existing.reviewComment = sub.reviewComment || '';
+          existing.reviewedAt = sub.reviewedAt || '';
+          existing.reviewer = sub.reviewer || '';
+          existing.fields = sub.fields || existing.fields;
+          return;
+        }
+        twodUpdateRecords.unshift({
+          id: sub.id,
+          uploadedAt: sub.time,
+          fileName: (sub.fields && sub.fields.fileName) || sub.materialName,
+          fileType: sub.materialType,
+          sourceFormat: sub.source || '数据上传',
+          category: '数据上传',
+          status: sub.status,
+          materialName: sub.materialName,
+          materialFormula: sub.formula || '',
+          materialType: sub.materialType,
+          source: sub.source || '',
+          fields: sub.fields || {},
+          revisionOf: sub.revisionOf || '',
+          revisionRound: sub.revisionRound || 0
+        });
+      }
+
+      function kvHtml(list) {
+        return list.map(function(item) {
+          return '<span class="record-detail-label">' + escSubmission(item[0]) + '</span>' +
+            '<span class="record-detail-value">' + (item[2] ? item[1] : escSubmission(item[1])) + '</span>';
+        }).join('');
+      }
+
+      function gotoSubmissionDetail(id, from) {
+        submissionDetailState.id = id;
+        submissionDetailState.from = from || 'my-submissions';
+        if (typeof MarvisRouter !== 'undefined' && MarvisRouter.go) {
+          MarvisRouter.go('page-submission-detail');
+        }
+        setTimeout(function() { renderSubmissionDetailPage(id, from); }, 60);
+      }
+
+      function renderSubmissionDetailPage(id, from) {
+        id = id || submissionDetailState.id;
+        from = from || submissionDetailState.from;
+        var view = buildSubmissionView(id);
+        if (!view) return;
+        submissionDetailState.id = id;
+        submissionDetailState.from = from;
+
+        var tag = document.getElementById('submissionDetailSourceTag');
+        if (tag) tag.textContent = from === 'twod-review' ? '入库审核' : '我的提交';
+        var sub2 = document.getElementById('submissionDetailSubtitle');
+        if (sub2) {
+          sub2.textContent = '查看该条提交的完整字段内容、上传附件与审核结果；来源页面：' +
+            (from === 'twod-review' ? '入库审核' : '我的提交') + '。';
+        }
+        var backBtn = document.querySelector('[data-submission-detail-back]');
+        if (backBtn) backBtn.textContent = from === 'twod-review' ? '返回入库审核' : '返回我的提交';
+
+        var dbLabel = '';
+        try {
+          dbLabel = typeof getMaterialDatabaseLabel === 'function' ? getMaterialDatabaseLabel(view.materialType) : '';
+        } catch (e) { dbLabel = ''; }
+
+        var meta = getSubmissionStatusMeta(view.status);
+        var basicList = [
+          ['提交编号', view.id],
+          ['提交时间', view.time],
+          ['材料名称', view.materialName],
+          ['材料类型', view.materialType],
+          ['流程类型', view.workflowLabel],
+          ['数据来源', view.source || '-'],
+          ['目标数据库', dbLabel || view.materialType],
+          ['入库编号', view.databaseId || '未入库']
+        ];
+        if (view.revisionRound) {
+          basicList.push(['提交版本', '第 ' + view.revisionRound + ' 次提交（基于被驳回提交修订）']);
+        }
+        var basicEl = document.getElementById('submissionDetailBasic');
+        if (basicEl) basicEl.innerHTML = kvHtml(basicList);
+
+        // 用户上传字段：优先按材料类型表单顺序，其次按 fields 原始顺序
+        var order = SUBMISSION_MATERIAL_FIELDS[view.materialType] || [];
+        var keys = order.slice();
+        Object.keys(view.fields).forEach(function(key) {
+          if (keys.indexOf(key) < 0) keys.push(key);
+        });
+        var fieldList = keys.map(function(key) {
+          var raw = view.fields[key];
+          var label = SUBMISSION_FIELD_LABELS[key] || key;
+          var value = (raw === '' || raw == null) ? '-' : raw;
+          return [label, value, key === 'methodDescription'];
+        });
+        if (!fieldList.length) {
+          fieldList = [
+            ['材料名称', view.materialName],
+            ['化学式', view.formula || '-'],
+            ['数据来源', view.source || '-']
+          ];
+        }
+        var fieldsEl = document.getElementById('submissionDetailFields');
+        if (fieldsEl) fieldsEl.innerHTML = kvHtml(fieldList);
+
+        var attachmentsEl = document.getElementById('submissionDetailAttachments');
+        if (attachmentsEl) {
+          var hasFile = view.fileName || view.fileType || view.sourceFormat;
+          attachmentsEl.innerHTML = hasFile
+            ? '<div class="record-detail-grid">' + kvHtml([
+                ['文件名', view.fileName || '-'],
+                ['文件分类', view.fileType || '-'],
+                ['文件格式', view.sourceFormat || '-'],
+                ['文件大小', view.fileSize || '-']
+              ]) + '</div>'
+            : '<p style="color:var(--muted);font-size:13px;margin:0;">该提交未上传附件（附件为可选项）。</p>';
+        }
+
+        var reviewEl = document.getElementById('submissionDetailReview');
+        if (reviewEl) {
+          var reviewList = [
+            ['审核状态', '<span class="status-badge ' + meta.badge + '">' + meta.label + '</span>', true],
+            ['审核结果', view.status === 'approved' ? '通过' : view.status === 'rejected' ? '不通过' : '尚未出结果']
+          ];
+          if (view.reviewer) reviewList.push(['审核人', view.reviewer]);
+          if (view.reviewedAt) reviewList.push(['审核时间', view.reviewedAt]);
+          reviewList.push(['审核意见', view.reviewComment || view.rejectReason || '暂无审核意见']);
+          if (view.status === 'rejected') {
+            reviewList.push(['驳回原因', view.rejectReason || view.reviewComment || '-']);
+            reviewList.push(['处理方式', '可在「我的提交」中点击「修订重提」，将新建一条修订提交，原提交保留为「已驳回」不被覆盖', true]);
+          }
+          reviewEl.innerHTML = kvHtml(reviewList);
+        }
+
+        var reviewBtn = document.getElementById('submissionDetailReviewBtn');
+        if (reviewBtn) {
+          var canReview = from === 'twod-review' && view.status === 'pending';
+          reviewBtn.hidden = !canReview;
+          reviewBtn.dataset.reviewDecision = id;
+        }
+      }
+
+      function openReviewDecisionModal(id, from) {
+        var view = buildSubmissionView(id);
+        if (!view) return;
+        reviewDecisionState.id = id;
+        reviewDecisionState.from = from || 'twod-review';
+        var modal = document.getElementById('reviewDecisionModal');
+        if (!modal) return;
+        var title = document.getElementById('reviewDecisionTitle');
+        if (title) title.textContent = '审核：' + view.materialName;
+        var sub = document.getElementById('reviewDecisionSubtitle');
+        if (sub) {
+          sub.textContent = '材料类型：' + view.materialType + ' | 提交时间：' + view.time + ' | 当前状态：' + getSubmissionStatusMeta(view.status).label;
+        }
+        var pass = modal.querySelector('input[name="reviewDecisionResult"][value="approved"]');
+        if (pass) pass.checked = true;
+        var comment = document.getElementById('reviewDecisionComment');
+        if (comment) comment.value = view.reviewComment || '';
+        modal.classList.add('show');
+      }
+
+      function closeReviewDecisionModal() {
+        var modal = document.getElementById('reviewDecisionModal');
+        if (modal) modal.classList.remove('show');
+      }
+
+      function submitReviewDecision() {
+        var id = reviewDecisionState.id;
+        var from = reviewDecisionState.from;
+        var modal = document.getElementById('reviewDecisionModal');
+        var checked = modal ? modal.querySelector('input[name="reviewDecisionResult"]:checked') : null;
+        var result = checked ? checked.value : 'approved';
+        var commentEl = document.getElementById('reviewDecisionComment');
+        var comment = commentEl ? (commentEl.value || '').trim() : '';
+        var view = buildSubmissionView(id);
+        if (!view) { closeReviewDecisionModal(); return; }
+
+        if (result === 'rejected' && !comment) {
+          if (typeof showToast === 'function') showToast('无法提交', '审核结果为「不通过」时必须填写审核意见。', 'warning');
+          if (commentEl) commentEl.focus();
+          return;
+        }
+
+        var now = submissionNow();
+        var status = result === 'approved' ? 'approved' : 'rejected';
+        var rejectReason = result === 'rejected' ? comment : '';
+
+        if (view.sub) {
+          view.sub.status = status;
+          view.sub.rejectReason = rejectReason;
+          view.sub.reviewComment = comment;
+          view.sub.reviewedAt = now;
+          view.sub.reviewer = '审核员';
+        }
+        if (view.record) {
+          view.record.status = status;
+          view.record.rejectReason = rejectReason;
+          view.record.reviewComment = comment;
+          view.record.reviewedAt = now;
+          view.record.reviewer = '审核员';
+          if (result === 'approved') {
+            try {
+              if (typeof ensureRecordInDatabase === 'function') ensureRecordInDatabase(view.record);
+            } catch (e) {}
+          }
+        } else if (result === 'approved' && view.sub) {
+          upsertReviewRecord(view.sub);
+          var linked = typeof twodUpdateRecords !== 'undefined'
+            ? twodUpdateRecords.find(function(r) { return r.id === view.sub.id; }) : null;
+          if (linked) {
+            try {
+              if (typeof ensureRecordInDatabase === 'function') ensureRecordInDatabase(linked);
+            } catch (e) {}
+          }
+        }
+
+        syncReviewQueue();
+        renderAllSubmissions();
+        if (typeof renderTwodRecords === 'function') renderTwodRecords();
+        try {
+          if (typeof refreshTwodResults === 'function') refreshTwodResults();
+        } catch (e) {}
+
+        closeReviewDecisionModal();
+        if (typeof showToast === 'function') {
+          if (result === 'approved') {
+            showToast('审核通过', view.materialName + ' 已审核通过并写入目标数据库。', 'success');
+          } else {
+            showToast('审核不通过', view.materialName + ' 未通过审核，意见已反馈给提交人。', 'warning');
+          }
+        }
+        if (document.getElementById('page-submission-detail') &&
+            document.getElementById('page-submission-detail').classList.contains('active')) {
+          renderSubmissionDetailPage(id, from);
+        }
+      }
+
+      function startRevisionSubmission(rejectedId) {
+        var base = allSubmissions.find(function(s) { return s.id === rejectedId; });
+        if (!base) {
+          if (typeof showToast === 'function') showToast('操作失败', '未找到该提交记录。', 'error');
+          return;
+        }
+        var chainId = base.revisionOf || base.id;
+        var round = allSubmissions.filter(function(s) { return (s.revisionOf || s.id) === chainId; }).length + 1;
+        var draft = {
+          id: guid(),
+          time: ts(),
+          materialName: base.materialName,
+          materialType: base.materialType,
+          status: 'draft',
+          rejectReason: '',
+          formula: base.formula || '',
+          source: base.source || '',
+          fields: Object.assign({}, base.fields || {}),
+          revisionOf: chainId,
+          revisionRound: round,
+          baseRejectReason: base.rejectReason || base.reviewComment || ''
+        };
+        allSubmissions.unshift(draft);
+        revisionState.baseId = draft.id;
+        renderAllSubmissions();
+        if (typeof showToast === 'function') {
+          showToast('已创建修订提交', '已基于被驳回的提交新建第 ' + round + ' 次提交，请修改后重新提交审核；原提交保持「已驳回」不变。', 'info');
+        }
+        if (typeof MarvisRouter !== 'undefined' && MarvisRouter.go) {
+          MarvisRouter.go('page-data-submit');
+          setTimeout(function() {
+            if (typeof _prefillDataSubmitForm === 'function') _prefillDataSubmitForm(draft);
+            paintRevisionBanner(draft);
+          }, 150);
+        }
+      }
+
+      function clearRevisionBanner() {
+        var banner = document.getElementById('dataSubmitRevisionBanner');
+        if (banner) banner.remove();
+      }
+
+      function paintRevisionBanner(draft) {
+        clearRevisionBanner();
+        var head = document.querySelector('#page-data-submit .page-head');
+        if (!head) return;
+        var banner = document.createElement('div');
+        banner.id = 'dataSubmitRevisionBanner';
+        banner.className = 'card pad';
+        banner.style.cssText = 'margin-bottom:16px;border-left:4px solid #7C4DFF;background:#f6f3ff;';
+        banner.innerHTML = '<strong style="color:#7C4DFF;">当前为第 ' + draft.revisionRound + ' 次提交（修订）</strong>' +
+          '<p style="margin:6px 0 0;font-size:13px;color:var(--muted);">本次修改将作为一条新的提交记录进入审核队列，之前的第 ' +
+          (draft.revisionRound - 1) + ' 次提交及其驳回记录保持不变。</p>' +
+          (draft.baseRejectReason ? '<p style="margin:6px 0 0;font-size:13px;color:#dc2626;">上次驳回意见：' + escSubmission(draft.baseRejectReason) + '</p>' : '');
+        head.insertAdjacentElement('afterend', banner);
+      }
+
+      (function bindSubmissionDetail() {
+        document.addEventListener('click', function(ev) {
+          var target = ev.target;
+          if (!target || !target.closest) return;
+
+          if (target.closest('[data-submission-detail-back]')) {
+            var backTo = submissionDetailState.from === 'twod-review' ? 'page-twod-review' : 'page-my-submissions';
+            if (typeof MarvisRouter !== 'undefined' && MarvisRouter.go) MarvisRouter.go(backTo);
+            return;
+          }
+          if (target.closest('[data-review-decision-cancel]')) {
+            closeReviewDecisionModal();
+            return;
+          }
+          if (target.closest('#reviewDecisionConfirmBtn')) {
+            submitReviewDecision();
+            return;
+          }
+          var decisionBtn = target.closest('[data-review-decision]');
+          if (decisionBtn && decisionBtn.id !== 'submissionDetailReviewBtn') {
+            ev.stopPropagation();
+            openReviewDecisionModal(decisionBtn.dataset.reviewDecision, 'twod-review');
+            return;
+          }
+          if (target.closest('#submissionDetailReviewBtn')) {
+            openReviewDecisionModal(submissionDetailState.id, submissionDetailState.from);
+            return;
+          }
+        });
+
+        var modalEl = document.getElementById('reviewDecisionModal');
+        if (modalEl) {
+          modalEl.addEventListener('change', function(ev) {
+            if (!ev.target || ev.target.name !== 'reviewDecisionResult') return;
+            var required = document.getElementById('reviewDecisionCommentRequired');
+            var comment = document.getElementById('reviewDecisionComment');
+            if (required) required.hidden = ev.target.value !== 'rejected';
+            if (comment && ev.target.value === 'rejected') {
+              comment.placeholder = '请说明不通过的原因（必填），提交后作为驳回原因展示给提交人。';
+            } else if (comment) {
+              comment.placeholder = '请填写审核意见；审核结果为“不通过”时必填，将作为驳回原因反馈给提交人。';
+            }
+          });
+          modalEl.addEventListener('click', function(ev) {
+            if (ev.target === modalEl) closeReviewDecisionModal();
+          });
+        }
+        var requiredMark = document.getElementById('reviewDecisionCommentRequired');
+        if (requiredMark) requiredMark.hidden = true;
+
+        // 旧版兜底脚本位于另一个闭包，这里显式暴露到 window 供其调用
+        window.gotoSubmissionDetail = gotoSubmissionDetail;
+        window.startRevisionSubmission = startRevisionSubmission;
+        window.renderSubmissionDetailPage = renderSubmissionDetailPage;
+        window.openReviewDecisionModal = openReviewDecisionModal;
+        window.buildSubmissionView = buildSubmissionView;
+
+        // 修复：入库审核的材料类型按钮同时带 .twod-filter-chip，会被通用处理器提前 return，
+        // 导致类型筛选始终停留在「二维材料」。这里在捕获阶段先处理，保证切换生效。
+        document.addEventListener('click', function(ev) {
+          var matBtn = ev.target && ev.target.closest ? ev.target.closest('[data-review-material]') : null;
+          if (!matBtn) return;
+          ev.stopPropagation();
+          var code = matBtn.dataset.reviewMaterial;
+          try {
+            if (typeof state !== 'undefined') state.reviewMaterialFilter = code;
+            if (typeof state !== 'undefined') state.twodReviewFocusId = '';
+          } catch (e) {}
+          document.querySelectorAll('[data-review-material]').forEach(function(btn) {
+            btn.classList.toggle('active', btn === matBtn);
+          });
+          if (typeof renderTwodRecords === 'function') renderTwodRecords();
+        }, true);
+
+        // 入库审核列表的「查看详情」统一跳转到提交详情页
+        document.addEventListener('click', function(ev) {
+          var node = ev.target.closest ? ev.target.closest('[data-open-record]') : null;
+          if (!node) return;
+          var rid = node.dataset.openRecord;
+          if (!rid) return;
+          var keepNative = node.getAttribute('data-open-record-legacy');
+          if (keepNative) return;
+          if (typeof buildSubmissionView === 'function' && buildSubmissionView(rid)) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            gotoSubmissionDetail(rid, 'twod-review');
+          }
+        }, true);
+      })();
+
 
       (function restorePortalLoginEntry() {
         var params = new URLSearchParams(window.location.search);
@@ -101466,7 +101576,6 @@ function renderElectrolyteCategoryTabs() {
               '<button class="data-submit-button is-primary" type="button" data-workbench-file-kind="structure">上传结构/数据附件</button>' +
               '<button class="data-submit-button" type="button" data-workbench-file-kind="visual">上传图谱/结果文件</button>' +
               '<span class="data-submit-format">格式要求：.cif / .vasp / .xsf / .xyz / .csv / .png</span>' +
-              '<button class="data-submit-button is-primary" type="button" data-workbench-batch>批量导入</button>' +
             '</div>' +
             '<div class="data-submit-file-zone ' + (files.length ? "has-files" : "") + '" data-workbench-dropzone>' +
               (files.length
@@ -101477,7 +101586,6 @@ function renderElectrolyteCategoryTabs() {
             "</div>" +
             '<input type="file" hidden multiple data-workbench-input="structure" accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5">' +
             '<input type="file" hidden multiple data-workbench-input="visual" accept=".png,.jpg,.jpeg,.webp,.svg,.csv,.tsv,.json,.txt,.dat,.out,.log">' +
-            '<input type="file" hidden multiple data-workbench-input="batch" accept=".cif,.poscar,.vasp,.xsf,.xyz,.mol,.sdf,.pdb,.mol2,.csv,.tsv,.xlsx,.xls,.json,.xml,.txt,.dat,.out,.log,.npz,.h5,.hdf5,.png,.jpg,.jpeg,.webp,.svg,.zip">' +
           "</div>";
         footer.innerHTML =
           '<button class="data-submit-button is-primary" type="button" data-workbench-submit>提交</button>' +
@@ -101511,21 +101619,9 @@ function renderElectrolyteCategoryTabs() {
           var kind = input.dataset.workbenchInput;
           var list = Array.from(input.files || []);
           if (!list.length) return;
-          state.batchMode = kind === "batch";
           state.files = list.map(function (file) {
             return { name: file.name, size: file.size, kind: kind === "visual" ? "图谱/结果文件" : "结构/数据附件" };
           });
-          if (kind === "batch") {
-            var legacy = document.getElementById("dataBatchImportInput");
-            if (legacy && typeof DataTransfer !== "undefined") {
-              try {
-                var transfer = new DataTransfer();
-                list.forEach(function (file) { transfer.items.add(file); });
-                legacy.files = transfer.files;
-                legacy.dispatchEvent(new Event("change", { bubbles: true }));
-              } catch (error) {}
-            }
-          }
           renderStage();
         });
       });
@@ -101675,11 +101771,6 @@ function renderElectrolyteCategoryTabs() {
           if (input) input.click();
           return;
         }
-        if (target.closest("[data-workbench-batch]")) {
-          var batchInput = page.querySelector('[data-workbench-input="batch"]');
-          if (batchInput) batchInput.click();
-          return;
-        }
         if (target.closest("[data-workbench-draft]")) {
           if (submitLegacyForm(true)) showWorkbenchToast("草稿已保存", "可在“我的提交”中继续编辑此条记录", "success");
           return;
@@ -101691,15 +101782,8 @@ function renderElectrolyteCategoryTabs() {
             renderStage();
             return;
           }
-          if (state.batchMode && state.files.length > 1) {
-            var batchConfirm = document.querySelector("[data-batch-import-confirm]");
-            if (batchConfirm) {
-              withRouteSuppressed(function () { batchConfirm.click(); });
-            }
-          } else {
-            submitLegacyForm(false);
-            window.setTimeout(attachFilesToLatestRecord, 60);
-          }
+          submitLegacyForm(false);
+          window.setTimeout(attachFilesToLatestRecord, 60);
           state.step = 4;
           renderStage();
           showWorkbenchToast("提交成功", "材料数据已进入审核流程", "success");
@@ -102340,13 +102424,13 @@ function renderElectrolyteCategoryTabs() {
 
     function patchRecordDetail() {
       document.addEventListener("click", function (event) {
-        const trigger = event.target.closest("[data-view-detail], [data-open-record], [data-approve-record]");
+        const trigger = event.target.closest("[data-view-detail], [data-open-record]");
         if (!trigger) return;
         window.setTimeout(function () {
           const extra = document.getElementById("recordExtraInfo");
           if (!extra) return;
           const records = Array.isArray(window.twodUpdateRecords) ? window.twodUpdateRecords : (typeof twodUpdateRecords !== "undefined" ? twodUpdateRecords : []);
-          const id = trigger.dataset.viewDetail || trigger.dataset.openRecord || trigger.dataset.approveRecord;
+          const id = trigger.dataset.viewDetail || trigger.dataset.openRecord;
           const record = records.find(function (item) { return item.id === id; });
           if (!record || record.materialType !== "二维材料" || !record.fields || extra.dataset.twodAligned === id) return;
           extra.dataset.twodAligned = id;
@@ -121797,6 +121881,15 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       "#page-" + PAGE_ID + " .rw-flow-name { display:block; font-size:14px; font-weight:600; color:#22364f; margin-bottom:4px; }",
       "#page-" + PAGE_ID + " .rw-flow-desc { display:block; font-size:12px; color:#7d8ca3; line-height:1.5; }",
       "#page-" + PAGE_ID + " .rw-flow-arrow { flex:0 0 30px; display:grid; place-items:center; color:#b6c3d6; font-size:18px; }",
+      /* 2026-10-13：数据加工来源标记 —— 圆圈加斜杠，hover 提示「该来源为数据加工，不会执行真实调用」 */
+      "#page-" + PAGE_ID + " .rw-mock-src { position:relative; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; margin-left:6px; border-radius:50%; background:#eef1f6; border:1px solid #d5dee8; cursor:help; vertical-align:middle; flex:0 0 auto; }",
+      "#page-" + PAGE_ID + " .rw-mock-src:hover, #page-" + PAGE_ID + " .rw-mock-src:focus { background:#fff7e8; border-color:#ffe0ac; outline:none; }",
+      "#page-" + PAGE_ID + " .rw-mock-ico { position:relative; display:block; width:9px; height:9px; border:1.5px solid #7c8b9c; border-radius:50%; }",
+      "#page-" + PAGE_ID + " .rw-mock-ico::after { content:\"\"; position:absolute; left:50%; top:50%; width:13px; height:1.5px; background:#7c8b9c; border-radius:1px; transform:translate(-50%,-50%) rotate(-45deg); }",
+      "#page-" + PAGE_ID + " .rw-mock-src:hover .rw-mock-ico, #page-" + PAGE_ID + " .rw-mock-src:focus .rw-mock-ico { border-color:#b8720f; }",
+      "#page-" + PAGE_ID + " .rw-mock-src:hover .rw-mock-ico::after, #page-" + PAGE_ID + " .rw-mock-src:focus .rw-mock-ico::after { background:#b8720f; }",
+      "#page-" + PAGE_ID + " .rw-mock-src > i.rw-mock-tip { position:absolute; left:50%; bottom:150%; transform:translateX(-50%); z-index:30; display:none; width:max-content; max-width:240px; margin:0; padding:6px 9px; border-radius:6px; background:#22364f; color:#fff; font-size:12px; font-style:normal; font-weight:400; line-height:1.5; box-shadow:0 4px 12px rgba(15,23,42,.18); }",
+      "#page-" + PAGE_ID + " .rw-mock-src:hover > i.rw-mock-tip, #page-" + PAGE_ID + " .rw-mock-src:focus > i.rw-mock-tip { display:block; }",
 
       /* 简易流程链（状态流转 / 审核流程） */
       "#page-" + PAGE_ID + " .rw-chain { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:14px; border-radius:10px; background:#f8fafd; border:1px solid #e6ecf5; }",
@@ -122504,14 +122597,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         return "<tr><td class=\"rw-nowrap\">" + esc(r[0]) + "</td><td>" + esc(r[1]) + '</td><td style="color:#d03050">' + esc(r[2]) + "</td></tr>";
       }).join("")
       + "</tbody></table></div></div>"
-
-      + '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>数据录入审核流程（2.2.4）</h3><p>一次审批：提交 → 自动校验 → 管理员审核 → 入库 / 退回。</p></div></div>'
-      + chainHtml([
-        "提交", { text: "自动校验", cls: "" }, { text: "管理员审核", cls: "" },
-        { text: "入库", cls: "is-end" }, { text: "退回", cls: "is-back" }
-      ])
-      + "</div>"
 
       + '<div class="rw-card">'
       + '<div class="rw-card-head"><div><h3>待录入数据列表</h3><p>资源采集完成后进入录入环节，确认无误后点击「确认录入」提交保存到已录入列表。</p></div></div>'
@@ -125481,6 +125566,20 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     { key: "base", name: "基础加工模型 / 算法" }
   ];
 
+  /* 2026-10-13：数据加工模块的「真实接口调用」全部改为空实现（no-op / mock）。
+     加工链路（基础数据筛选 / 标准化预处理 / 数据加工 / 产品生产 / 质量评价）统一经 procMockInvoke() 收口：
+     它只返回占位结果，绝不发起任何网络请求；所有加工动作仅更新本地演示状态。 */
+  var PROC_MOCK_ONLY = true;
+  var PROC_MOCK_API = { 1: "proc/filter", 2: "proc/filter", 3: "proc/preprocess", 4: "proc/model", 5: "proc/product", 6: "proc/quality" };
+  function procMockInvoke(step) {
+    if (!PROC_MOCK_ONLY) return null;
+    return { ok: true, mock: true, api: PROC_MOCK_API[step] || "proc/run", at: nowText() };
+  }
+  /* 来源旁的「空实现」标记：圆圈加斜杠图标 + hover / focus 提示 */
+  function procMockBadge() {
+    return '<span class="rw-mock-src" tabindex="0" role="img" aria-label="该来源为数据加工，不会执行真实调用">' + '<em class="rw-mock-ico" aria-hidden="true"></em><i class="rw-mock-tip">该来源为数据加工，不会执行真实调用</i></span>';
+  }
+
   /* 系统内清单：分析预测模块「数据应用算法」的算法 + 「数据工具开发」的工具 */
   var PROC_SYS_ALGOS = {
     twod: ["晶体结构驰豫算法", "材料性质计算算法"],
@@ -125563,7 +125662,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
      版本按规则推进（步骤 3 完成 → V1.0，步骤 5 完成 → V2.0），数据集取自数据库配置。
      ------------------------------------------------------------------------ */
 
-  /* 加工模型执行结果样例（与 procRun(4) 的兜底逻辑保持一致） */
+  /* 加工模型执行结果样例（与 procRunModel 的兜底逻辑保持一致） */
   function procPresetRows(key) {
     var preset = ((C().modelRows || {})[key] || []).map(function (r) { return Object.assign({}, r); });
     if (preset.length) return preset;
@@ -125900,7 +125999,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     if (j.done[j.step]) return "本步骤已完成，可进入下一步";
     if (j.step === 1) return "填写完成后点击「下一步」";
     if (j.step === 2) return "勾选需要参与加工的采集数据后即可进入下一步";
-    if (j.step === 4) return "选择加工模型并执行「执行数据加工」后再进入下一步";
+    if (j.step === 4) return "选择加工模型 / 算法后本步骤自动完成（空实现 / mock），即可进入下一步";
     if (j.step === 5) return "选择 1 个数据集类型并执行「生产数据产品」后再进入下一步";
     if (j.step === 6) return "填写下方质量评价表后点击「完成加工」";
     return '<span style="color:#b8720f">请先执行本步骤操作后再进入下一步</span>';
@@ -126380,6 +126479,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function runPreprocess() {
     var j = activeJob();
     if (!j) return;
+    /* 2026-10-13：空实现收口 —— 预处理为本地模拟推进，不发起真实请求 */
+    procMockInvoke(3);
     if (!j.done[2]) { toast("请先完成步骤 2 基础数据筛选", "err"); return; }
     if (j.pre.running) return;
     var cats = procPreCats();
@@ -126416,6 +126517,38 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     }, 800);
   }
 
+  /* 步骤 4 数据加工：2026-10-13 起改为空实现（no-op / mock）——
+     界面上的「执行数据加工」按钮已下线，选中加工模型 / 算法后直接按 mock 结果完成本步骤，
+     全过程不向后端发起任何真实请求。 */
+  function procRunModel(j) {
+    if (!j) return;
+    procMockInvoke(4);
+    if (!j.done[3]) { toast("请先完成步骤 3 标准化预处理", "err"); return; }
+    if (!j.model.key) { toast("请选择加工模型 / 算法", "err"); return; }
+    var mo = procModelOf(j.model.key);
+    var preset = (C().modelRows || {})[j.model.key] || [];
+    j.model.rows = preset.map(function (r2) { return Object.assign({}, r2); });
+    if (!j.model.rows.length && j.model.key === "stat") {
+      j.model.rows = [
+        { item: "带隙（MoS2）", input: "1.62 / 1.70 / 1.72 eV", logic: "计算均值、标准差、置信区间", out: "1.68 ± 0.05 eV（95% CI：1.64 ~ 1.72）" },
+        { item: "形成能（MoS2）", input: "-1.20 / -1.26 / -1.26 eV/atom", logic: "计算均值、标准差、置信区间", out: "-1.24 ± 0.03 eV/atom" }
+      ];
+    } else if (j.model.key === "image") {
+      j.model.rows = [
+        { item: "能带图", input: "band_raw.png（1024×768，坐标轴不一致）", logic: "统一坐标轴、分辨率、标注、格式", out: "band_std.png（1600×1200，统一标注）" },
+        { item: "态密度图", input: "dos_raw.png（800×600）", logic: "统一坐标轴、分辨率、标注、格式", out: "dos_std.png（1600×1200，统一标注）" }
+      ];
+    } else {
+      j.model.rows = [
+        { item: "MoS2 结构", input: "MoS2.cif", logic: "校验原子坐标合理性、键长范围", out: "MoS2_verified.cif（键长 2.41 Å，合理）" },
+        { item: "WS2 结构", input: "WS2.cif", logic: "校验原子坐标合理性、键长范围", out: "WS2_verified.cif（键长 2.42 Å，合理）" }
+      ];
+    }
+    j.model.executed = true;
+    procDone(j, 4);
+    toast((mo ? mo.name : "加工模型") + " 执行完成（空实现 / mock，未发起真实调用）", "ok");
+  }
+
   /* 步骤 4 数据加工 */
   function procStep4(j) {
     var m = j.model;
@@ -126442,12 +126575,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + esc(procDbName()) + "保持一致（如：" + esc(procDatasets().slice(0, 3).map(function (d) { return d.title; }).join("、")) + "）。</div>"
       : "";
     return '<div class="rw-section-title">选择加工模型 / 算法</div>'
-      + '<div class="rw-card-note">先选择模型来源：系统内的数据加工模型 / 算法（下拉列出分析预测模块中的算法与工具），或基础加工模型 / 算法；再从下拉中选择具体的加工模型 / 算法。</div>'
+      + '<div class="rw-card-note">先选择模型来源：系统内的数据加工模型 / 算法（下拉列出分析预测模块中的算法与工具），或基础加工模型 / 算法；再从下拉中选择具体的加工模型 / 算法。选择后本步骤自动完成（数据加工为空实现 / mock，不会执行真实调用）。</div>'
       + '<div class="rw-form" style="margin-top:10px">'
-      + '<div class="rw-field"><label>模型来源<i>*</i></label>' + srcSel + "</div>"
+      + '<div class="rw-field"><label>模型来源<i>*</i>' + procMockBadge() + "</label>" + srcSel + "</div>"
       + '<div class="rw-field"><label>加工模型 / 算法<i>*</i></label>' + modelSel + "</div></div>"
       + '<div class="rw-field-tip" style="margin-top:8px">' + esc(procModelDesc(m.key)) + "</div>"
-      + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-4">执行数据加工</button></div>'
       + result + nextTip
       + (j.done[4] ? procDoneCard(j, 4) : "");
   }
@@ -126598,6 +126730,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function procRun(step) {
     var j = activeJob();
     if (!j) return;
+    /* 2026-10-13：空实现收口 —— 加工各步骤只更新本地状态，不发起真实请求 */
+    procMockInvoke(step);
     if (step === 1) {
       if (!String(j.name || "").trim()) { toast("请填写加工任务名称", "err"); return; }
       if (!(j.sourceIds || []).length) { toast("请选择参与加工的数据源", "err"); return; }
@@ -126639,31 +126773,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       j.version = "V1.0";
       procDone(j, 3);
       toast("标准化预处理完成，版本推进至 V1.0", "ok");
-    } else if (step === 4) {
-      if (!j.done[3]) { toast("请先完成步骤 3 标准化预处理", "err"); return; }
-      if (!j.model.key) { toast("请选择加工模型 / 算法", "err"); return; }
-      var mo = procModelOf(j.model.key);
-      var preset = (C().modelRows || {})[j.model.key] || [];
-      j.model.rows = preset.map(function (r2) { return Object.assign({}, r2); });
-      if (!j.model.rows.length && j.model.key === "stat") {
-        j.model.rows = [
-          { item: "带隙（MoS2）", input: "1.62 / 1.70 / 1.72 eV", logic: "计算均值、标准差、置信区间", out: "1.68 ± 0.05 eV（95% CI：1.64 ~ 1.72）" },
-          { item: "形成能（MoS2）", input: "-1.20 / -1.26 / -1.26 eV/atom", logic: "计算均值、标准差、置信区间", out: "-1.24 ± 0.03 eV/atom" }
-        ];
-      } else if (j.model.key === "image") {
-        j.model.rows = [
-          { item: "能带图", input: "band_raw.png（1024×768，坐标轴不一致）", logic: "统一坐标轴、分辨率、标注、格式", out: "band_std.png（1600×1200，统一标注）" },
-          { item: "态密度图", input: "dos_raw.png（800×600）", logic: "统一坐标轴、分辨率、标注、格式", out: "dos_std.png（1600×1200，统一标注）" }
-        ];
-      } else {
-        j.model.rows = [
-          { item: "MoS2 结构", input: "MoS2.cif", logic: "校验原子坐标合理性、键长范围", out: "MoS2_verified.cif（键长 2.41 Å，合理）" },
-          { item: "WS2 结构", input: "WS2.cif", logic: "校验原子坐标合理性、键长范围", out: "WS2_verified.cif（键长 2.42 Å，合理）" }
-        ];
-      }
-      j.model.executed = true;
-      procDone(j, 4);
-      toast((mo ? mo.name : "加工模型") + " 执行完成", "ok");
     } else if (step === 5) {
       if (!j.done[4]) { toast("请先完成步骤 4 数据加工", "err"); return; }
       /* 2026-10-08：数据产品必须明确归入至少一个数据集（产品形态卡已按圈红删除） */
@@ -128065,7 +128174,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         runPreprocess();
         return;
       case "proc-run-1": case "proc-run-2":
-      case "proc-run-4": case "proc-run-5": case "proc-run-6":
+      case "proc-run-5": case "proc-run-6":
         procRun(Number(String(act).replace("proc-run-", "")));
         return;
       case "proc-outlier-fix":
@@ -128400,13 +128509,19 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           renderProcWizard();
           return;
         } else if (kp === "modelSource") {
-          /* 2026-10-13：切换模型来源后清空已选模型 */
+          /* 2026-10-13：切换模型来源后清空已选模型，并回退步骤 4 完成态 */
           j.model.source = v;
           j.model.key = "";
+          j.model.executed = false;
+          j.model.rows = [];
+          delete j.done[4];
           renderProcWizard();
           return;
         } else if (kp === "model") {
+          /* 2026-10-13：「执行数据加工」按钮下线 —— 选中模型 / 算法后按空实现完成本步骤 */
           j.model.key = v;
+          if (v) procRunModel(j);
+          else { j.model.executed = false; j.model.rows = []; delete j.done[4]; }
           renderProcWizard();
           return;
         }
