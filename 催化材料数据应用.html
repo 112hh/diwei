@@ -53115,7 +53115,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
               <button class="btn-primary twod-search-submit" type="button" id="twodElementSearchBtn">检索</button>
               <button class="btn twod-search-clear" type="button" id="twodClearBtn">重置</button>
             </div>
-            <div class="twod-status-text">支持输入材料名称、化学式或一个及多个元素；例如输入 Mo-S，将筛选同时包含 Mo 和 S 的二维材料。</div>
+            <div class="twod-status-text">支持输入一个或多个元素进行检索；多个元素支持按 Mo-S 格式输入，例如 Mo-S 表示筛选同时包含 Mo 和 S 的二维材料。</div>
           </div>
         `;
         return;
@@ -54834,7 +54834,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           { key: "formula", label: "分子式检索", placeholder: "请输入分子式，如 (C2H4O)n", helper: "当前模式仅保留分子式输入框，支持按聚合物骨架筛选。" },
           { key: "code", label: "分子编号检索", placeholder: "请输入材料编号，如 EL-SO-021", helper: "当前模式仅保留材料编号输入框，用于快速检索对应样品。" },
           { key: "keyword", label: "关键词检索", placeholder: "请输入关键词，如 聚合物 固态电解质", helper: "当前模式仅保留关键词输入框，可按标签和应用方向筛选。" },
-          { key: "property", label: "性质数据检索", helper: "当前模式展示固态有机电解质对应的计算信息、溶解溶剂推荐等组合条件。" }
+          { key: "property", label: "固态有机电解质性质检索", helper: "当前模式展示固态有机电解质对应的计算信息、溶解溶剂推荐等组合条件。" }
         ]
       },
       solidInorganic: {
@@ -54846,7 +54846,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           { key: "formula", label: "分子式检索", placeholder: "请输入分子式，如 Li7La3Zr2O12", helper: "当前模式仅保留分子式输入框，可按化学式关键字筛选。" },
           { key: "elements", label: "元素组成检索", placeholder: "请输入一个或多个元素进行检索，多个元素按照要求输入，例如“Mo-S”", helper: "当前模式仅保留元素组成输入框，支持以“+”组合多个元素条件；列表不单列元素构成，检索时会根据分子式解析元素组成。" },
           { key: "keyword", label: "关键词检索", placeholder: "请输入关键词，如 石榴石 氧化物", helper: "当前模式仅保留关键词输入框，可按结构家族和特征筛选。" },
-          { key: "property", label: "性质数据检索", helper: "当前模式展示固态无机电解质的图谱、计算、外部关联等组合筛选条件。" }
+          { key: "property", label: "固态无机电解质性质检索", helper: "当前模式展示固态无机电解质的图谱、计算、外部关联等组合筛选条件。" }
         ]
       }
     };
@@ -59021,7 +59021,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <td>${renderLowDimDatasetSource(item, "mlff")}</td>
           <td>
             <div class="twod-record-inline-actions">
-              <button class="twod-action-view" type="button" data-open-material="mlff:${item.id}" data-material-view="basic" data-mlff-topic-structure="${resolveMlffTopicStructure(item)}" title="查看详情（${(MLFF_STRUCTURE_META[resolveMlffTopicStructure(item)] || MLFF_STRUCTURE_META.molecule).label}）">查询详情</button>
+              <button class="twod-action-view" type="button" data-open-material="mlff:${item.id}" data-material-view="basic" data-mlff-topic-structure="${resolveMlffTopicStructure(item)}" title="查询详情（${(MLFF_STRUCTURE_META[resolveMlffTopicStructure(item)] || MLFF_STRUCTURE_META.molecule).label}）">查询详情</button>
               <button class="twod-record-link" type="button" data-open-material="mlff:${item.id}" data-material-view="prediction">发起预测</button>
             </div>
           </td>
@@ -59080,7 +59080,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                     </div>
                   </div>
                   <div class="mlff-method-card-actions">
-                    <button class="mlff-detail-btn" type="button" data-mlff-method-detail>查看详情</button>
+                    <button class="mlff-detail-btn" type="button" data-mlff-method-detail>查询详情</button>
                     <button class="mlff-fav-btn" type="button" title="收藏">☆</button>
                   </div>
                 </div>
@@ -62630,7 +62630,7 @@ function renderMlffTopicSampleTable(data) {
                   </div>
                 `).join("")}
               </div>
-              <button class="btn-primary catalyst-site-start-btn" type="button" data-catalyst-site-calc${hasMaterial ? "" : " disabled"}>开始计算</button>
+              <button class="btn-primary catalyst-site-start-btn" type="button" data-catalyst-site-calc${hasMaterial ? "" : " disabled"}>计算</button>
             </aside>
           </div>
           <div class="catalyst-site-bottom-panel">
@@ -62640,7 +62640,7 @@ function renderMlffTopicSampleTable(data) {
                   <strong>计算状态展示栏</strong>
                   <span class="catalyst-site-status-badge ${statusTone}">${statusText}</span>
                 </div>
-                <p>${hasMaterial ? `当前材料：${material.name}，请选择参数后开始计算。` : "请先从右侧材料下拉框选择平台内置材料。"}</p>
+                <p>${hasMaterial ? `当前材料：${material.name}，请选择参数后点击“计算”。` : "请先从右侧材料下拉框选择平台内置材料。"}</p>
               </section>
               <section class="catalyst-site-result-card">
                 <div class="catalyst-site-status-head">
@@ -89129,6 +89129,7 @@ if (state.selectedTwodDetailSection === "molecule") {
           <div class="catalyst-external-layout">
             <div class="catalyst-external-section">
               <h5>第三方数据库关联</h5>
+              <p class="catalyst-external-note">为特定催化材料提供指向其他第三方开源或商用数据库的链接（仅提供网页地址，不提供第三方数据库用户权限），便于用户查询第三方数据库中的催化材料结构与性质信息，支持跨库横向对比并形成整体认识。</p>
               <div class="catalyst-external-list">
                 ${externalData.databases.map((item) => `
                   <article class="catalyst-external-item">
@@ -89144,6 +89145,7 @@ if (state.selectedTwodDetailSection === "molecule") {
             </div>
             <div class="catalyst-external-section">
               <h5>论文数据关联</h5>
+              <p class="catalyst-external-note">与图书馆论文搜索系统高效连接，可提供来自论文的研究数据及原始数据论文或推荐阅读文献链接；同时支持用户关注该催化材料并留下邮箱等联系方式，用于推送后续新发表的相关论文与数据。</p>
               <div class="catalyst-external-list">
                 ${externalData.literature.map((item) => `
                   <article class="catalyst-external-item">
@@ -89155,6 +89157,10 @@ if (state.selectedTwodDetailSection === "molecule") {
                     </div>
                   </article>
                 `).join("")}
+                <article class="catalyst-external-item"><strong>示例数据 · 单原子催化剂活性位点实验研究</strong><p>Journal of Catalysis（2025）· 原始数据论文 · DOI:10.1016/j.jcat.2025.01.018</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1016/j.jcat.2025.01.018" target="_blank" rel="noreferrer noopener">https://doi.org/10.1016/j.jcat.2025.01.018</a><span>推荐阅读 · 含活性位点表征原始数据</span></div></article>
+                <article class="catalyst-external-item"><strong>示例数据 · CO₂ 还原反应路径理论计算</strong><p>ACS Catalysis（2025）· 计算输入/输出文件 · DOI:10.1021/acscatal.5c01234</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1021/acscatal.5c01234" target="_blank" rel="noreferrer noopener">https://doi.org/10.1021/acscatal.5c01234</a><span>推荐阅读 · 含反应能垒与吸附能数据</span></div></article>
+                <article class="catalyst-external-item"><strong>示例数据 · 合金催化剂 d 带中心综述</strong><p>Chemical Reviews（2024）· 汇总数据集 · DOI:10.1021/acs.chemrev.4c00567</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1021/acs.chemrev.4c00567" target="_blank" rel="noreferrer noopener">https://doi.org/10.1021/acs.chemrev.4c00567</a><span>推荐阅读 · 便于横向对比不同体系</span></div></article>
+                <div class="catalyst-external-item"><strong>关注该催化材料</strong><p>留下邮箱等联系方式后，系统将推送后续新发表的相关论文与数据。</p><div class="catalyst-external-link-row"><input class="page-input" type="text" placeholder="请输入邮箱，用于接收新论文与数据推送" style="flex:1;"><button class="btn-primary" type="button" onclick="return false;">关注并接收推送</button></div></div>
               </div>
             </div>
           </div>
@@ -106065,7 +106071,7 @@ function renderElectrolyteCategoryTabs() {
           <div class="twod-mode-panel active">
             <div class="catalyst-element-search">
               <div class="catalyst-element-input-row">
-                <input class="cross-db-input" type="text" data-catalyst-mode-input="elements" value="${html(state.catalystSearchDraft.elements || "")}" placeholder="请输入元素组成，如 Pt、Fe,N,C 或 Ni+Mo">
+                <input class="cross-db-input" type="text" data-catalyst-mode-input="elements" value="${html(state.catalystSearchDraft.elements || "")}" placeholder="请输入一个或多个元素进行检索，多个元素按照要求输入，例如“Mo-S”">
                 <button class="btn-primary cross-db-search-btn" type="button" data-catalyst-platform-apply>检索</button>
                 <button class="btn cross-db-clear-btn" type="button" data-catalyst-platform-reset>重置</button>
               </div>
@@ -106482,7 +106488,7 @@ function renderElectrolyteCategoryTabs() {
                     </div>
                   </div>
                   <div class="mlff-method-card-actions">
-                    <button class="mlff-detail-btn" type="button" data-mlff-method-detail>查看详情</button>
+                    <button class="mlff-detail-btn" type="button" data-mlff-method-detail>查询详情</button>
                     <button class="mlff-fav-btn" type="button" title="收藏">☆</button>
                   </div>
                 </div>
@@ -110681,6 +110687,462 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
 </script>
   <script>
 
+/* ================= 有机光电材料 · 态密度信息（DOS）模块 ================= */
+(() => {
+  const DOS_E_MIN = -20;
+  const DOS_E_MAX = 6;
+  const DOS_E_STEP = 0.1;
+  const DOS_SIGMA = 0.28;
+
+  const VALENCE_ELECTRONS = { H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, Si: 4, P: 5, S: 6, Cl: 7, Se: 6, Br: 7, I: 7 };
+  const CHANNEL_DEF = [
+    { element: "C", orbital: "2s", color: "#7a49ff", base: 0.16, deep: 0.52 },
+    { element: "C", orbital: "2p", color: "#2554c7", base: 0.46, deep: -0.22 },
+    { element: "H", orbital: "1s", color: "#8b9aaf", base: 0.15, deep: 0.10 },
+    { element: "N", orbital: "2p", color: "#1c9b73", base: 0.42, deep: -0.14 },
+    { element: "O", orbital: "2p", color: "#e25353", base: 0.42, deep: -0.16 },
+    { element: "S", orbital: "3p", color: "#e08a1a", base: 0.40, deep: -0.10 },
+    { element: "F", orbital: "2p", color: "#00b0c7", base: 0.40, deep: -0.12 }
+  ];
+
+  const esc = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const fixed = (value, digits = 2) => (Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "--");
+
+  function seededRandom(seedText) {
+    let hash = 2166136261;
+    const text = String(seedText || "OPM-DOS");
+    for (let i = 0; i < text.length; i += 1) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return function next() {
+      hash += 0x6D2B79F5;
+      let t = hash;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function parseFormula(formula) {
+    const source = String(formula || "");
+    const pattern = /([A-Z][a-z]?)(\d*\.?\d*)/g;
+    const atoms = [];
+    let match = pattern.exec(source);
+    while (match) {
+      const element = match[1];
+      if (element) {
+        const count = Number(match[2] || 1);
+        if (Number.isFinite(count) && count > 0) {
+          const hit = atoms.find((row) => row.element === element);
+          if (hit) hit.count += count;
+          else atoms.push({ element, count });
+        }
+      }
+      match = pattern.exec(source);
+      if (match && match.index === pattern.lastIndex) pattern.lastIndex += 1;
+    }
+    return atoms;
+  }
+
+  function buildChannels(formula, rand) {
+    const atoms = parseFormula(formula);
+    const present = atoms.map((atom) => atom.element);
+    const pool = present.length ? present : ["C", "H", "N"];
+    const channels = [];
+    CHANNEL_DEF.forEach((def) => {
+      if (def.orbital === "2s") {
+        if (pool.includes(def.element)) channels.push(Object.assign({}, def));
+        return;
+      }
+      if (pool.includes(def.element)) channels.push(Object.assign({}, def));
+    });
+    if (!channels.length) channels.push(Object.assign({}, CHANNEL_DEF[0]), Object.assign({}, CHANNEL_DEF[1]));
+    return { atoms, channels };
+  }
+
+  /* 分子体系的 DOS 由离散分子轨道能级高斯展宽得到，HOMO/LUMO 之间为禁带 */
+  function buildOrbitals(homo, lumo, rand) {
+    const levels = [];
+    let energy = homo;
+    while (energy > DOS_E_MIN - 1) {
+      levels.push({ energy, weight: 0.85 + rand() * 0.45, kind: "occupied" });
+      const depth = Math.max(homo - energy, 0);
+      energy -= 0.16 + Math.pow(depth / 16, 1.35) * 1.05 + rand() * 0.14;
+    }
+    energy = lumo;
+    while (energy < DOS_E_MAX + 1) {
+      levels.push({ energy, weight: 0.85 + rand() * 0.45, kind: "virtual" });
+      const height = Math.max(energy - lumo, 0);
+      energy += 0.26 + Math.pow(height / 9, 1.25) * 0.95 + rand() * 0.16;
+    }
+    return levels;
+  }
+
+  function buildDosModel(material) {
+    const safe = material || {};
+    const seed = `${safe.materialNumber || safe.code || safe.id || ""}${safe.formula || ""}${safe.chineseName || safe.name || ""}`;
+    const rand = seededRandom(seed);
+    const homo = Number.isFinite(Number(safe.homo)) ? Number(safe.homo) : -5.2;
+    const lumo = Number.isFinite(Number(safe.lumo)) ? Number(safe.lumo) : -2.1;
+    const gap = Number.isFinite(Number(safe.bandGap)) ? Number(safe.bandGap) : Number((lumo - homo).toFixed(2));
+    const { atoms, channels } = buildChannels(safe.formula, rand);
+    const levels = buildOrbitals(homo, lumo, rand);
+
+    const energy = [];
+    for (let e = DOS_E_MIN; e <= DOS_E_MAX + 1e-9; e += DOS_E_STEP) energy.push(Number(e.toFixed(2)));
+
+    const tdos = [];
+    const perLevelWeights = levels.map((level) => {
+      const deep = Math.min(Math.max((homo - level.energy) / 14, 0), 1);
+      const raw = channels.map((channel) => Math.max(0.03, channel.base + channel.deep * deep + (rand() - 0.5) * 0.14));
+      const total = raw.reduce((sum, item) => sum + item, 0) || 1;
+      return raw.map((item) => item / total);
+    });
+    const pdos = channels.map(() => []);
+    const spinUp = [];
+    const spinDown = [];
+
+    energy.forEach((e) => {
+      let total = 0;
+      const parts = channels.map(() => 0);
+      levels.forEach((level, index) => {
+        const value = level.weight * Math.exp(-Math.pow(e - level.energy, 2) / (2 * DOS_SIGMA * DOS_SIGMA));
+        if (value < 1e-5) return;
+        total += value;
+        perLevelWeights[index].forEach((weight, channelIndex) => { parts[channelIndex] += value * weight; });
+      });
+      tdos.push(total);
+      parts.forEach((part, channelIndex) => pdos[channelIndex].push(part));
+      const jitter = 1 + (Math.sin(e * 7.3) * 0.006);
+      spinUp.push(total * jitter);
+      spinDown.push(total * (2 - jitter));
+    });
+
+    /* 积分态密度标定到体系价电子总数 */
+    const valenceTotal = atoms.reduce((sum, atom) => sum + (VALENCE_ELECTRONS[atom.element] || 4) * atom.count, 0) || 120;
+    let raw = 0;
+    const rawIntegrated = tdos.map((value) => { raw += value * DOS_E_STEP; return raw; });
+    const full = rawIntegrated[rawIntegrated.length - 1] || 1;
+    const idos = rawIntegrated.map((value) => (value / full) * valenceTotal);
+
+    const maxTdos = Math.max.apply(null, tdos.concat([1]));
+    const peakIndex = tdos.indexOf(maxTdos);
+    const occupiedCount = levels.filter((level) => level.kind === "occupied").length;
+    const virtualCount = levels.filter((level) => level.kind === "virtual").length;
+    const composition = channels.map((channel, index) => {
+      const contribution = pdos[index].reduce((sum, value) => sum + value, 0);
+      const overall = tdos.reduce((sum, value) => sum + value, 0) || 1;
+      return { name: `${channel.element}-${channel.orbital}`, color: channel.color, ratio: (contribution / overall) * 100 };
+    });
+
+    return {
+      material: safe,
+      energy,
+      tdos,
+      channels: channels.map((channel, index) => ({ name: `${channel.element}-${channel.orbital}`, color: channel.color, values: pdos[index] })),
+      spinUp,
+      spinDown,
+      idos,
+      composition,
+      meta: {
+        homo, lumo, gap,
+        fermi: Number(((homo + lumo) / 2).toFixed(2)),
+        vbm: homo,
+        cbm: lumo,
+        gapType: "分子轨道禁带（HOMO–LUMO）",
+        spinState: "闭壳层单重态（S₀，α/β 简并）",
+        peakEnergy: energy[peakIndex] != null ? energy[peakIndex] : homo,
+        peakValue: maxTdos,
+        occupiedCount,
+        virtualCount,
+        valenceTotal,
+        sigma: DOS_SIGMA,
+        software: "Gaussian 16 Rev. C.01",
+        functional: "B3LYP-D3(BJ)",
+        basisSet: "6-31G(d,p)",
+        smearing: `高斯展宽 σ = ${DOS_SIGMA} eV`,
+        kpoints: "分子体系（单 Γ 点）",
+        convergence: "能量 1×10⁻⁶ Ha / 梯度 3×10⁻⁴ Ha·Bohr⁻¹",
+        updatedAt: "2026-04-22"
+      }
+    };
+  }
+
+  /* ---------- SVG 绘图 ---------- */
+  function dosChartSvg(options) {
+    const width = 920;
+    const height = 320;
+    const margin = { top: 24, right: 24, bottom: 48, left: 66 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+    const { energy, series, xMin = DOS_E_MIN, xMax = DOS_E_MAX, yMin = 0, markers = [], bands = [], axisX = "能量 E (eV)", axisY = "态密度 (states/eV)", stacked = false } = options;
+
+    let yMax = options.yMax;
+    if (!Number.isFinite(yMax)) {
+      let ceiling = 1;
+      if (stacked) {
+        const sums = energy.map((_, index) => series.reduce((sum, item) => sum + (item.values[index] || 0), 0));
+        ceiling = Math.max.apply(null, sums.concat([1]));
+      } else {
+        series.forEach((item) => { ceiling = Math.max(ceiling, Math.max.apply(null, item.values.concat([0]))); });
+      }
+      yMax = ceiling * 1.12;
+    }
+    const spanX = (xMax - xMin) || 1;
+    const spanY = (yMax - yMin) || 1;
+    const xOf = (value) => margin.left + ((value - xMin) / spanX) * innerWidth;
+    const yOf = (value) => margin.top + innerHeight - ((value - yMin) / spanY) * innerHeight;
+
+    const gridX = [];
+    for (let tick = Math.ceil(xMin / 4) * 4; tick <= xMax; tick += 4) gridX.push(tick);
+    const rowsY = 5;
+    const gridY = Array.from({ length: rowsY + 1 }, (_, index) => yMin + (spanY / rowsY) * index);
+
+    const gridMarkup = gridY.map((value) => `<line class="dos-grid" x1="${margin.left}" y1="${yOf(value).toFixed(1)}" x2="${width - margin.right}" y2="${yOf(value).toFixed(1)}"/>`).join("")
+      + gridX.map((value) => `<line class="dos-grid" x1="${xOf(value).toFixed(1)}" y1="${margin.top}" x2="${xOf(value).toFixed(1)}" y2="${height - margin.bottom}"/>`).join("");
+
+    const bandMarkup = bands.map((band) => {
+      const left = xOf(band.from);
+      const right = xOf(band.to);
+      return `<rect class="dos-band" x="${left.toFixed(1)}" y="${margin.top}" width="${Math.max(right - left, 1).toFixed(1)}" height="${innerHeight}" fill="${band.fill || "rgba(255,196,64,0.16)"}"/>`
+        + (band.label ? `<text class="dos-band-label" x="${((left + right) / 2).toFixed(1)}" y="${(margin.top + 14).toFixed(1)}" text-anchor="middle">${esc(band.label)}</text>` : "");
+    }).join("");
+
+    const pathOf = (values) => values.map((value, index) => `${index === 0 ? "M" : "L"}${xOf(energy[index]).toFixed(1)},${yOf(value).toFixed(1)}`).join(" ");
+    const areaOf = (values, base) => `${pathOf(values)} L${xOf(energy[energy.length - 1]).toFixed(1)},${yOf(base).toFixed(1)} L${xOf(energy[0]).toFixed(1)},${yOf(base).toFixed(1)} Z`;
+
+    let seriesMarkup = "";
+    if (stacked) {
+      const stack = energy.map(() => 0);
+      series.forEach((item) => {
+        const top = stack.map((base, index) => base + (item.values[index] || 0));
+        seriesMarkup += `<path d="${areaOf(top, 0)}" fill="${item.color}" opacity="0.30"/>`;
+        seriesMarkup += `<path d="${pathOf(top)}" fill="none" stroke="${item.color}" stroke-width="1.6"/>`;
+        top.forEach((value, index) => { stack[index] = value; });
+      });
+    } else {
+      series.forEach((item) => {
+        if (item.area) seriesMarkup += `<path d="${areaOf(item.values, item.base || 0)}" fill="${item.color}" opacity="${item.opacity || 0.16}"/>`;
+        seriesMarkup += `<path d="${pathOf(item.values)}" fill="none" stroke="${item.color}" stroke-width="${item.width || 2}" ${item.dash ? `stroke-dasharray="${item.dash}"` : ""}/>`;
+      });
+    }
+
+    const zeroLine = yMin < 0 && yMax > 0 ? `<line class="dos-zero" x1="${margin.left}" y1="${yOf(0).toFixed(1)}" x2="${width - margin.right}" y2="${yOf(0).toFixed(1)}"/>` : "";
+
+    const markerMarkup = markers.map((marker) => {
+      const x = xOf(marker.value);
+      const anchor = marker.anchor || "middle";
+      const labelY = marker.labelY ? marker.labelY : margin.top - 8;
+      return `<line class="dos-marker" x1="${x.toFixed(1)}" y1="${margin.top}" x2="${x.toFixed(1)}" y2="${height - margin.bottom}" stroke="${marker.color}" stroke-dasharray="5 4"/>`
+        + `<text class="dos-marker-text" x="${(x + (marker.offset || 0)).toFixed(1)}" y="${labelY}" text-anchor="${anchor}" fill="${marker.color}">${esc(marker.label)}</text>`;
+    }).join("");
+
+    const axisMarkup = `<line class="dos-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"/>`
+      + `<line class="dos-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"/>`
+      + gridX.map((value) => `<text class="dos-tick" x="${xOf(value).toFixed(1)}" y="${height - margin.bottom + 20}" text-anchor="middle">${value}</text>`).join("")
+      + gridY.map((value) => `<text class="dos-tick" x="${margin.left - 10}" y="${(yOf(value) + 4).toFixed(1)}" text-anchor="end">${fixed(value, 2)}</text>`).join("")
+      + `<text class="dos-axis-title" x="${margin.left + innerWidth / 2}" y="${height - 8}" text-anchor="middle">${esc(axisX)}</text>`
+      + `<text class="dos-axis-title" x="16" y="${margin.top + innerHeight / 2}" text-anchor="middle" transform="rotate(-90 16 ${margin.top + innerHeight / 2})">${esc(axisY)}</text>`;
+
+    const legendMarkup = `<g class="dos-legend" transform="translate(${width - margin.right - 8}, ${margin.top + 6})">`
+      + series.slice().reverse().map((item, index) => {
+        const y = index * 17;
+        return `<rect x="-14" y="${y}" width="11" height="9" rx="2" fill="${item.color}"/><text x="-20" y="${(y + 8).toFixed(0)}" text-anchor="end">${esc(item.name)}</text>`;
+      }).join("")
+      + `</g>`;
+
+    return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" role="img" aria-label="态密度谱图">
+      <rect x="0" y="0" width="${width}" height="${height}" fill="#fbfcfe"/>
+      ${gridMarkup}${bandMarkup}${zeroLine}${seriesMarkup}${markerMarkup}${axisMarkup}${legendMarkup}
+    </svg>`;
+  }
+
+  /* ---------- 页面渲染 ---------- */
+  function dosDownloadButton(kind, label, primary) {
+    return `<button class="${primary ? "btn-primary" : "twod-detail-link-btn"}" type="button" data-opto-dos-download="${kind}">${esc(label)}</button>`;
+  }
+
+  function renderOptoDosPageContent(material) {
+    const model = buildDosModel(material);
+    const m = model.meta;
+    const name = model.material.chineseName || model.material.name || model.material.fullName || "有机光电材料";
+    const code = model.material.materialNumber || model.material.code || model.material.id || "";
+
+    const tdosChart = dosChartSvg({
+      energy: model.energy,
+      series: [{ name: "总态密度 TDOS", color: "#165dff", values: model.tdos, area: true, opacity: 0.18 }],
+      axisY: "总态密度 (states/eV)",
+      yMax: Math.max.apply(null, model.tdos) * 1.18,
+      bands: [{ from: m.homo, to: m.lumo, label: `禁带 E_g = ${fixed(m.gap)} eV` }],
+      markers: [
+        { value: m.homo, color: "#e25353", label: `HOMO ${fixed(m.homo)} eV`, anchor: "end", offset: -6, labelY: 34 },
+        { value: m.lumo, color: "#1c9b73", label: `LUMO ${fixed(m.lumo)} eV`, anchor: "start", offset: 6, labelY: 34 },
+        { value: m.fermi, color: "#86909c", label: "E_F", anchor: "middle", labelY: 52 }
+      ]
+    });
+
+    const pdosChart = dosChartSvg({
+      energy: model.energy,
+      series: model.channels.map((channel) => ({ name: channel.name, color: channel.color, values: channel.values })),
+      axisY: "分波态密度 (states/eV)",
+      stacked: true
+    });
+
+    const chartCard = (title, chart, caption, kind) => `<section class="twod-detail-chart-card opto-dos-chart-card">
+      <div class="opto-dos-chart-head"><h5>${esc(title)}</h5>${dosDownloadButton(kind, "下载谱图数据", false)}</div>
+      <div class="line-chart">${chart}</div>
+      <div class="chart-caption">${esc(caption)}</div>
+    </section>`;
+
+    return `
+      <div class="twod-detail-page-head">
+        <div>
+          <h4>${esc(name)}态密度信息</h4>
+          <p>展示该有机光电材料的电子结构信息与多种电子态密度（DOS）总谱图，数据均为演示用模拟计算结果。</p>
+        </div>
+        <div class="twod-detail-page-action">
+          ${dosDownloadButton("all", "数据下载", true)}
+        </div>
+      </div>
+      <section class="twod-detail-section-card opto-dos-summary-card">
+        <h5>电子结构概览</h5>
+        <div class="twod-detail-property-grid">
+          <article class="twod-detail-property-item"><span>带隙 E_g</span><strong>${fixed(m.gap)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>HOMO 能级</span><strong>${fixed(m.homo)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>LUMO 能级</span><strong>${fixed(m.lumo)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>费米能级 E_F</span><strong>${fixed(m.fermi)} eV</strong></article>
+          <article class="twod-detail-property-item"><span>自旋态</span><strong>${esc(m.spinState)}</strong></article>
+          <article class="twod-detail-property-item"><span>价电子总数</span><strong>${m.valenceTotal} e</strong></article>
+        </div>
+      </section>
+      <div class="opto-dos-chart-grid">
+        ${chartCard("总态密度 TDOS（DOS 总谱图）", tdosChart, `横轴为相对真空能级的电子能量，纵轴为总态密度；HOMO 与 LUMO 之间 ${fixed(m.gap)} eV 区间为禁带，态密度为零。`, "tdos")}
+        ${chartCard("分波态密度 PDOS（轨道投影）", pdosChart, "按元素与角动量通道分解的投影态密度，堆叠显示各轨道对总态密度的贡献。", "pdos")}
+      </div>`;
+  }
+
+  /* ---------- 数据下载 ---------- */
+  function buildDosCsv(model, kind) {
+    const m = model.meta;
+    const material = model.material;
+    const name = material.chineseName || material.name || material.fullName || "有机光电材料";
+    const code = material.materialNumber || material.code || material.id || "";
+    const header = [
+      `# 有机光电材料电子态密度（DOS）数据`,
+      `# 材料名称: ${name}`,
+      `# 材料编号: ${code}`,
+      `# 分子式: ${material.formula || "--"}`,
+      `# HOMO: ${fixed(m.homo)} eV`,
+      `# LUMO: ${fixed(m.lumo)} eV`,
+      `# 带隙 Eg: ${fixed(m.gap)} eV`,
+      `# 费米能级 EF: ${fixed(m.fermi)} eV`,
+      `# 计算条件: ${m.software} / ${m.functional} / ${m.basisSet}`,
+      `# 展宽: ${m.smearing}`,
+      `# 数据类型: 模拟演示数据`,
+      `# 导出时间: ${new Date().toLocaleString("zh-CN")}`
+    ];
+    const columns = [];
+    columns.push({ title: "Energy(eV)", values: model.energy.map((value) => fixed(value, 2)) });
+    if (kind === "all" || kind === "tdos") columns.push({ title: "TDOS", values: model.tdos.map((value) => fixed(value, 4)) });
+    if (kind === "all" || kind === "pdos") model.channels.forEach((channel) => columns.push({ title: `PDOS_${channel.name.replace("-", "_")}`, values: channel.values.map((value) => fixed(value, 4)) }));
+    if (kind === "all" || kind === "spin") {
+      columns.push({ title: "DOS_spin_up", values: model.spinUp.map((value) => fixed(value, 4)) });
+      columns.push({ title: "DOS_spin_down", values: model.spinDown.map((value) => fixed(value, 4)) });
+    }
+    if (kind === "all" || kind === "idos") columns.push({ title: "IDOS(e)", values: model.idos.map((value) => fixed(value, 4)) });
+
+    const lines = header.slice();
+    lines.push(columns.map((column) => column.title).join(","));
+    for (let index = 0; index < model.energy.length; index += 1) {
+      lines.push(columns.map((column) => column.values[index]).join(","));
+    }
+    return lines.join("\r\n");
+  }
+
+  function downloadDosData(material, kind) {
+    const model = buildDosModel(material);
+    const materialName = model.material.chineseName || model.material.name || "有机光电材料";
+    const code = model.material.materialNumber || model.material.code || model.material.id || "opto";
+    const labels = { all: "态密度数据集", tdos: "总态密度数据", pdos: "分波态密度数据", spin: "自旋态密度数据", idos: "积分态密度数据" };
+    const content = "\ufeff" + buildDosCsv(model, kind);
+    const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${code}_dos_${kind}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 600);
+    if (typeof showToast === "function") showToast("下载数据", `${materialName} 的${labels[kind] || "态密度数据"}已开始下载。`);
+  }
+
+  /* ---------- 样式 ---------- */
+  if (!document.getElementById("optoDosModuleStyle")) {
+    const style = document.createElement("style");
+    style.id = "optoDosModuleStyle";
+    style.textContent = `
+      .opto-dos-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 16px; }
+      .opto-dos-chart-card .opto-dos-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .opto-dos-chart-card .opto-dos-chart-head h5 { margin: 0; }
+      .opto-dos-chart-card .line-chart { padding: 6px 4px; }
+      .opto-dos-info-grid .twod-detail-property-item span { min-width: 132px; }
+      .opto-dos-composition { display: grid; gap: 10px; }
+      .opto-dos-composition-row { display: grid; grid-template-columns: 92px 1fr 62px; align-items: center; gap: 12px; font-size: 13px; }
+      .opto-dos-composition-name { display: inline-flex; align-items: center; gap: 6px; color: #4e5969; }
+      .opto-dos-composition-name i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+      .opto-dos-composition-bar { height: 8px; border-radius: 4px; background: #f0f2f5; overflow: hidden; }
+      .opto-dos-composition-bar b { display: block; height: 100%; border-radius: 4px; }
+      .opto-dos-composition-value { text-align: right; color: #1d2129; font-weight: 600; }
+      .dos-grid { stroke: #e9edf3; stroke-width: 1; }
+      .dos-axis { stroke: #b9c2cf; stroke-width: 1.2; }
+      .dos-zero { stroke: #c9d1dc; stroke-width: 1.2; }
+      .dos-tick { font-size: 11px; fill: #86909c; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-axis-title { font-size: 12px; fill: #4e5969; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-marker { stroke-width: 1.4; opacity: .9; }
+      .dos-marker-text { font-size: 11px; font-weight: 600; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-band-label { font-size: 11px; fill: #a2660a; font-family: Arial, "Microsoft YaHei", sans-serif; }
+      .dos-legend text { font-size: 11px; fill: #4e5969; font-family: Arial, "Microsoft YaHei", sans-serif; }
+
+      .new-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 6px;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: #ff4d4f;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 14px;
+        vertical-align: middle;
+      }
+      .twod-tree-node .new-badge { pointer-events: none; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  document.body.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-opto-dos-download]");
+    if (!button) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const source = (typeof optoMaterials !== "undefined" && Array.isArray(optoMaterials))
+      ? (optoMaterials.find((item) => item.id === state?.selectedMaterialId) || optoMaterials[0])
+      : null;
+    downloadDosData(source, button.dataset.optoDosDownload || "all");
+  }, true);
+
+  window.renderOptoDosPageContent = renderOptoDosPageContent;
+  window.buildOptoDosModel = buildDosModel;
+  window.downloadOptoDosData = downloadDosData;
+})();
+
+</script>
+  <script>
+
 (() => {
   if (typeof state === "undefined" || typeof optoMaterials === "undefined") return;
 
@@ -110793,7 +111255,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     document.getElementById("materialModalSubtitle").textContent = `${material.materialNumber} · ${material.englishName}`;
     sectionNav.hidden = false;
     sectionNav.innerHTML = [
-      ["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]
+      ["basic", "详情信息"], ["spectra", "表征图谱"], ["dos", "态密度信息"], ["params", "特征参数"], ["external", "外部数据关联"]
     ].map(([key, label]) => `<button class="twod-detail-nav-btn${activePage === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button>`).join("");
 
     let container = modalBody.querySelector("#optoCustomDetail");
@@ -110828,6 +111290,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         <h5 class="opto-section-title">物性数据</h5><div class="opto-parameter-grid">${parameterMarkup("相对密度", material.relativeDensity)}${parameterMarkup("熔点", material.meltingPoint)}${parameterMarkup("沸点", material.boilingPoint)}${parameterMarkup("闪点", material.flashPoint)}</div>
         <h5 class="opto-section-title">计算数据</h5><div class="opto-parameter-grid">${parameterMarkup("激发能", material.excitedEnergy)}${parameterMarkup("放射能", material.emissionEnergy)}${parameterMarkup("跃迁偶极矩", material.transitionDipole)}${parameterMarkup("HOMO能级", `${shown(material.homo)} eV`)}${parameterMarkup("LUMO能级", `${shown(material.lumo)} eV`)}${parameterMarkup("溶剂化自由能", material.solvationFreeEnergy)}${parameterMarkup("斯托克斯位移", material.stokesShift)}${parameterMarkup("简正模式", material.normalModes)}</div>
       </section>
+      <section class="opto-detail-page${activePage === "dos" ? " active" : ""}" data-opto-detail-page="dos">${typeof window.renderOptoDosPageContent === "function" ? window.renderOptoDosPageContent(material) : ""}</section>
       <section class="opto-detail-page${activePage === "external" ? " active" : ""}" data-opto-detail-page="external">
         <div class="opto-detail-page-head"><div><h4>外部数据关联</h4><p>汇总论文检索系统与外部化学数据库的关联记录。</p></div></div>
         <div class="opto-detail-card opto-external-table-wrap"><table class="opto-external-table"><colgroup><col style="width:12%"><col style="width:16%"><col style="width:19%"><col style="width:25%"><col style="width:20%"><col style="width:8%"></colgroup><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${externalRows.map((row) => `<tr><td>${esc(row.type)}</td><td>${esc(row.platform)}</td><td>${esc(row.id)}</td><td class="opto-external-url">${esc(row.url)}</td><td>${esc(row.note)}</td><td><button class="opto-link-button" type="button" data-opto-external-url="${esc(row.url)}">打开链接</button></td></tr>`).join("")}</tbody></table></div>
@@ -110876,7 +111339,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       if (isOpto) {
         const id = token.slice(5);
         const material = optoMaterials.find((item) => item.id === id) || optoMaterials[0];
-        const targetMap = { spectra: "spectra", params: "params", external: "external" };
+        const targetMap = { spectra: "spectra", params: "params", dos: "dos", external: "external" };
         window.setTimeout(() => renderOptoCustomDetail(material, targetMap[targetView] || "basic"), 0);
       } else if (modal) {
         modal.classList.remove("opto-requested-modal");
@@ -111046,7 +111509,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       state.selectedMaterialId = material.id;
       state.selectedMaterialSection = "basic";
       if (typeof openModal === "function") openModal("materialModal");
-      const targetMap = { spectra: "spectra", params: "params", external: "external" };
+      const targetMap = { spectra: "spectra", params: "params", dos: "dos", external: "external" };
       const render = () => {
         const helperScript = document.getElementById("opto-requested-detail-20260902-script");
         const modal = document.getElementById("materialModal");
@@ -111105,11 +111568,15 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     </section>`;
   }
 
+  function dosPage(material) {
+    return `<section class="opto-detail-page active" data-opto-detail-page="dos">${typeof window.renderOptoDosPageContent === "function" ? window.renderOptoDosPageContent(material) : ""}</section>`;
+  }
+
   function externalPage(material) {
     return `<section class="opto-detail-page active" data-opto-detail-page="external">
       <div class="opto-detail-page-head"><div><h4>外部数据关联</h4><p>汇总论文检索系统与外部化学数据库的关联记录。</p></div></div>
       <div class="opto-detail-card opto-external-table-wrap"><table class="opto-external-table"><colgroup><col style="width:12%"><col style="width:16%"><col style="width:19%"><col style="width:25%"><col style="width:20%"><col style="width:8%"></colgroup><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${externalRows(material).map((row) => `<tr><td>${esc(row.type)}</td><td>${esc(row.platform)}</td><td>${esc(row.id)}</td><td class="opto-external-url">${esc(row.url)}</td><td>${esc(row.note)}</td><td><button class="opto-link-button" type="button" data-opto-external-url="${esc(row.url)}">打开链接</button></td></tr>`).join("")}</tbody></table></div>
-    </section>`;
+    </section><section class="twod-detail-section-card"><h5>关联细节</h5><div class="twod-detail-property-grid"><article class="twod-detail-property-item"><span>关联对象</span><strong>论文检索系统、第三方化学/材料数据库</strong></article><article class="twod-detail-property-item"><span>关联方式</span><strong>以 CAS 号、分子编号、DOI 作为主键进行精确匹配</strong></article><article class="twod-detail-property-item"><span>关联粒度</span><strong>材料级（分子条目）→ 数据级（谱图、计算、文献）两级关联</strong></article><article class="twod-detail-property-item"><span>校验规则</span><strong>来源可回溯、标识编号唯一、跳转链接可达性定期巡检</strong></article><article class="twod-detail-property-item"><span>更新周期</span><strong>文献关联每日增量更新，数据库关联每周全量复核</strong></article><article class="twod-detail-property-item"><span>失败处理</span><strong>关联不上时保留材料条目本体，不阻断检索与下载</strong></article></div><p class="opto-spectrum-caption">关联细节说明：本页每条关联记录均记录来源平台、标识编号与来源备注，点击“打开链接”可跳转至原始出处；关联结果只做指向与索引，不复制第三方数据本体，第三方数据的权利与解释归原平台所有。</p></section><section class="twod-detail-section-card"><h5>接口交付</h5><div class="twod-detail-property-grid"><article class="twod-detail-property-item"><span>交付形式</span><strong>RESTful 接口 + 数据文件导出（JSON / CSV）双通道</strong></article><article class="twod-detail-property-item"><span>接口清单</span><strong>材料检索、详情查询、外部关联查询、图谱与文件下载四类接口</strong></article><article class="twod-detail-property-item"><span>调用方式</span><strong>HTTPS + Token 鉴权，GET 查询 / POST 提交，统一 JSON 返回体</strong></article><article class="twod-detail-property-item"><span>返回字段</span><strong>材料编号、分子编号、CAS 号、关联类型、外部平台、标识编号、跳转链接、来源备注</strong></article><article class="twod-detail-property-item"><span>更新频率</span><strong>接口随数据入库实时生效，字段变更提前一个版本公告</strong></article><article class="twod-detail-property-item"><span>交付物</span><strong>接口说明文档、字段字典、示例请求与返回样例、联调测试用例</strong></article></div><p class="opto-spectrum-caption">接口交付说明：外部数据关联以标准接口对外交付，接入方按材料编号或 CAS 号批量查询即可获得本页同款关联结果；接口不返回第三方受限数据本身，仅返回网页地址与索引信息，第三方数据库的用户权限需接入方自行申请。</p></section>`;
   }
 
   function renderRequestedOptoDetailPage(material) {
@@ -111123,10 +111590,10 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     page.dataset.source = "opto";
     if (title) title.textContent = `${material.chineseName} 材料详情`;
     if (subtitle) subtitle.textContent = `材料编号 ${material.materialNumber} · 分子编号 ${material.moleculeNumber} · CAS号 ${material.casNumber}`;
-    const section = ["basic", "spectra", "params", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
+    const section = ["basic", "spectra", "params", "dos", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
     state.selectedTwodDetailSection = section;
-    tree.innerHTML = [["basic", "详情信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
-    const renderers = { basic: basicPage, spectra: spectraPage, params: paramsPage, external: externalPage };
+    tree.innerHTML = [["basic", "详情信息"], ["spectra", "表征图谱"], ["dos", "态密度信息"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+    const renderers = { basic: basicPage, spectra: spectraPage, params: paramsPage, dos: dosPage, external: externalPage };
     content.innerHTML = `<div class="opto-custom-detail">${renderers[section](material)}</div>`;
   }
 
@@ -111219,11 +111686,11 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     const content = document.getElementById("twodDetailPageContent");
     if (!page || !tree || !content || !material) return;
     page.dataset.source = "opto";
-    const section = ["basic", "spectra", "params", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
+    const section = ["basic", "spectra", "params", "dos", "external"].includes(state.selectedTwodDetailSection) ? state.selectedTwodDetailSection : "basic";
     state.selectedTwodDetailSection = section;
     if (title) title.textContent = `${material.chineseName || material.name} 材料详情`;
     if (subtitle) subtitle.textContent = `材料编号 ${material.materialNumber || material.code || material.id} · 分子编号 ${material.moleculeNumber || material.code || material.id} · CAS号 ${display(material.casNumber)}`;
-    tree.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+    tree.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["dos", "态密度信息"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${section === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
 
     if (section === "basic") {
       content.innerHTML = `<div class="twod-detail-page-head"><div><h4>基础信息</h4><p>展示材料基础身份信息与右侧 3D 分子结构图。</p></div></div><div class="twod-basic-card-grid">${systemBasicTable(material)}${systemStructureCard(material)}</div>`;
@@ -111231,6 +111698,8 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       content.innerHTML = `${systemMetaSection(material)}${typeof renderOptoSpectraPageContent === "function" ? renderOptoSpectraPageContent(material) : ""}`;
     } else if (section === "params") {
       content.innerHTML = typeof renderOptoParamsPageContent === "function" ? renderOptoParamsPageContent(material) : "";
+    } else if (section === "dos") {
+      content.innerHTML = typeof window.renderOptoDosPageContent === "function" ? window.renderOptoDosPageContent(material) : (typeof renderOptoDosPageContent === "function" ? renderOptoDosPageContent(material) : "");
     } else {
       content.innerHTML = typeof renderOptoExternalPageContent === "function" ? renderOptoExternalPageContent(material) : "";
     }
@@ -111260,7 +111729,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       state.selectedMaterialSource = "opto";
       state.selectedMaterialId = material.id;
       state.twodDetailReturnPage = state.page === "twod-detail" ? "opto" : (state.page || "opto");
-      state.selectedTwodDetailSection = ({ spectra: "spectra", params: "params", properties: "params", external: "external" })[targetView] || "basic";
+      state.selectedTwodDetailSection = ({ spectra: "spectra", params: "params", properties: "params", dos: "dos", visualization: "dos", external: "external" })[targetView] || "basic";
       document.getElementById("materialModal")?.classList.remove("show");
       if (typeof switchPage === "function") switchPage("twod-detail");
       window.setTimeout(() => renderSystemOptoDetailPage(material), 60);
@@ -111284,7 +111753,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
     if (!wrap || state.selectedMaterialSource !== "opto") return oldTree(material);
     wrap.dataset.systemOptoTree = "true";
     const active = state.selectedTwodDetailSection === "structure" ? "basic" : state.selectedTwodDetailSection;
-    wrap.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${active === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
+    wrap.innerHTML = [["basic", "基础信息"], ["spectra", "表征图谱"], ["dos", "态密度信息"], ["params", "特征参数"], ["external", "外部数据关联"]].map(([key, label]) => `<div class="twod-tree-item"><button class="twod-tree-node${active === key ? " active" : ""}" type="button" data-opto-detail-nav="${key}">${label}</button></div>`).join("");
   };
 })();
 
@@ -111331,7 +111800,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       ["文献论文", "图书馆论文检索系统", "DOI:10.1039/D3TA01245A", "https://doi.org/10.1039/D3TA01245A", "电导率、玻璃化转变温度原始文献"],
       ["外部化学数据库", "PubChem", `CID:${String(material.moleculeNumber || "17789").replace(/\D/g, "") || "17789"}`, `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(material.casNumber || material.formula || "")}`, "高分子单体结构拓展信息"]
     ];
-    return `<div class="twod-detail-page-head"><div><h4>${esc(material.chineseName || material.name)}外部数据关联</h4><p>查看与该有机光电材料关联的文献信息与外部数据资源。</p></div></div><section class="twod-detail-section-card"><h5>关联文献与数据库</h5><div class="table-wrap"><table class="twod-result-table"><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${esc(row[0])}</td><td>${esc(row[1])}</td><td>${esc(row[2])}</td><td><span style="color:#2451c6;word-break:break-all;">${esc(row[3])}</span></td><td>${esc(row[4])}</td><td><button class="twod-detail-link-btn" type="button" data-opto-external-url="${esc(row[3])}">打开链接</button></td></tr>`).join("")}</tbody></table></div></section>`;
+    return `<div class="twod-detail-page-head"><div><h4>${esc(material.chineseName || material.name)}外部数据关联</h4><p>查看与该有机光电材料关联的文献信息与外部数据资源。</p></div></div><section class="twod-detail-section-card"><h5>关联文献与数据库</h5><div class="table-wrap"><table class="twod-result-table"><thead><tr><th>关联类型</th><th>外部平台名称</th><th>标识编号</th><th>跳转链接</th><th>来源备注</th><th>操作</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${esc(row[0])}</td><td>${esc(row[1])}</td><td>${esc(row[2])}</td><td><span style="color:#2451c6;word-break:break-all;">${esc(row[3])}</span></td><td>${esc(row[4])}</td><td><button class="twod-detail-link-btn" type="button" data-opto-external-url="${esc(row[3])}">打开链接</button></td></tr>`).join("")}</tbody></table></div></section><section class="twod-detail-section-card"><h5>关联细节</h5><div class="twod-detail-property-grid"><article class="twod-detail-property-item"><span>关联对象</span><strong>论文检索系统、第三方化学/材料数据库</strong></article><article class="twod-detail-property-item"><span>关联方式</span><strong>以 CAS 号、分子编号、DOI 作为主键进行精确匹配</strong></article><article class="twod-detail-property-item"><span>关联粒度</span><strong>材料级（分子条目）→ 数据级（谱图、计算、文献）两级关联</strong></article><article class="twod-detail-property-item"><span>校验规则</span><strong>来源可回溯、标识编号唯一、跳转链接可达性定期巡检</strong></article><article class="twod-detail-property-item"><span>更新周期</span><strong>文献关联每日增量更新，数据库关联每周全量复核</strong></article><article class="twod-detail-property-item"><span>失败处理</span><strong>关联不上时保留材料条目本体，不阻断检索与下载</strong></article></div><p class="opto-spectrum-caption">关联细节说明：本页每条关联记录均记录来源平台、标识编号与来源备注，点击“打开链接”可跳转至原始出处；关联结果只做指向与索引，不复制第三方数据本体，第三方数据的权利与解释归原平台所有。</p></section><section class="twod-detail-section-card"><h5>接口交付</h5><div class="twod-detail-property-grid"><article class="twod-detail-property-item"><span>交付形式</span><strong>RESTful 接口 + 数据文件导出（JSON / CSV）双通道</strong></article><article class="twod-detail-property-item"><span>接口清单</span><strong>材料检索、详情查询、外部关联查询、图谱与文件下载四类接口</strong></article><article class="twod-detail-property-item"><span>调用方式</span><strong>HTTPS + Token 鉴权，GET 查询 / POST 提交，统一 JSON 返回体</strong></article><article class="twod-detail-property-item"><span>返回字段</span><strong>材料编号、分子编号、CAS 号、关联类型、外部平台、标识编号、跳转链接、来源备注</strong></article><article class="twod-detail-property-item"><span>更新频率</span><strong>接口随数据入库实时生效，字段变更提前一个版本公告</strong></article><article class="twod-detail-property-item"><span>交付物</span><strong>接口说明文档、字段字典、示例请求与返回样例、联调测试用例</strong></article></div><p class="opto-spectrum-caption">接口交付说明：外部数据关联以标准接口对外交付，接入方按材料编号或 CAS 号批量查询即可获得本页同款关联结果；接口不返回第三方受限数据本身，仅返回网页地址与索引信息，第三方数据库的用户权限需接入方自行申请。</p></section>`;
   };
   window.renderOptoExternalPageContent = renderOptoExternalPageContent;
   document.body.addEventListener("click", (event) => {
@@ -111526,7 +111995,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   const guideDocs = [{name:'Materials Studio 建模操作文档',size:'2.4 MB'},{name:'VESTA 晶体结构可视化指南',size:'1.8 MB'},{name:'VASP CO₂还原计算指南',size:'3.6 MB'},{name:'催化反应路径数据填写规范',size:'860 KB'}];
   const downloadBlob = (name, content) => { const blob = new Blob([content],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500); };
   window.showCatalystGuideDocs = () => { const modal=document.getElementById('catalystGuideDocsModal') || document.createElement('div'); modal.id='catalystGuideDocsModal'; modal.className='modal-backdrop'; modal.innerHTML=`<div class="modal modal-lg"><div class="modal-header"><div><h3>材料信息计算文档</h3><p>选择需要的操作文档下载。</p></div><button class="modal-close" data-catalyst-close-docs>×</button></div><div class="modal-body"><div class="catalyst-doc-modal-list">${guideDocs.map((doc)=>`<div class="catalyst-doc-row"><strong>${safe(doc.name)}</strong><span>${safe(doc.size)}</span><button class="btn-link" type="button" data-catalyst-doc-download="${safe(doc.name)}">下载</button></div>`).join('')}</div></div></div>`; if(!modal.parentElement) document.body.appendChild(modal); modal.hidden=false; };
-  window.renderCatalystExternalInfoPage = function renderCatalystExternalInfoPageRequest(material) { return `<div class="twod-detail-page-head"><div><h4>催化材料数据共享</h4><p>关联外部数据，并通过统一入口导入新的催化材料数据。</p></div><button class="btn-primary" type="button" data-catalyst-open-upload data-catalyst-share-upload onclick="return MarvisRouter.go(&#39;page-data-submit&#39;)">催化材料数据导入</button></div><div class="twod-detail-tabs"><button class="twod-detail-tab active" type="button">外部信息关联</button><button class="twod-detail-tab" type="button" data-catalyst-guide-tab>用户引导</button></div><div class="catalyst-feature-card" style="margin-top:16px"><h5>关联数据库</h5><div class="catalyst-feature-list"><div class="catalyst-feature-item"><span>Materials Project</span><strong>对比材料结构与基础性质信息</strong></div><div class="catalyst-feature-item"><span>Catalysis-Hub</span><strong>查询催化吸附与反应路径数据</strong></div><div class="catalyst-feature-item"><span>OQMD</span><strong>对比结构稳定性与材料组成</strong></div></div></div>`; };
+  window.renderCatalystExternalInfoPage = function renderCatalystExternalInfoPageRequest(material) { return `<div class="twod-detail-page-head"><div><h4>催化材料数据共享</h4><p>关联外部数据，并通过统一入口导入新的催化材料数据。</p></div><button class="btn-primary" type="button" data-catalyst-open-upload data-catalyst-share-upload onclick="return MarvisRouter.go(&#39;page-data-submit&#39;)">催化材料数据导入</button></div><div class="twod-detail-tabs"><button class="twod-detail-tab active" type="button">外部信息关联</button><button class="twod-detail-tab" type="button" data-catalyst-guide-tab>用户引导</button></div><div class="catalyst-external-layout" style="margin-top:16px"><div class="catalyst-external-section"><h5>外部信息关联 · 第三方数据库关联</h5><p class="catalyst-external-note">为特定催化材料提供指向其他第三方开源或商用数据库的链接（仅提供网页地址，不提供第三方数据库用户权限），便于用户查询第三方数据库中的催化材料结构与性质信息，支持跨库横向对比并形成整体认识。</p><div class="catalyst-external-list"><article class="catalyst-external-item"><strong>Materials Project</strong><p>对比材料结构与基础性质信息。</p><div class="catalyst-external-link-row"><a href="https://materialsproject.org/" target="_blank" rel="noreferrer noopener">https://materialsproject.org/</a><span>建议按化学式或材料名称检索</span></div></article><article class="catalyst-external-item"><strong>Catalysis-Hub</strong><p>查询催化吸附、反应路径与相关计算数据。</p><div class="catalyst-external-link-row"><a href="https://www.catalysis-hub.org/" target="_blank" rel="noreferrer noopener">https://www.catalysis-hub.org/</a><span>建议按反应路线与吸附物种检索</span></div></article><article class="catalyst-external-item"><strong>OQMD</strong><p>对比结构稳定性与材料组成相关数据。</p><div class="catalyst-external-link-row"><a href="https://oqmd.org/" target="_blank" rel="noreferrer noopener">https://oqmd.org/</a><span>建议按元素组成检索</span></div></article></div></div><div class="catalyst-external-section"><h5>论文数据关联</h5><p class="catalyst-external-note">与图书馆论文搜索系统高效连接，可提供来自论文的研究数据及原始数据论文或推荐阅读文献链接；同时支持用户关注该催化材料并留下邮箱等联系方式，用于推送后续新发表的相关论文与数据。</p><div class="catalyst-external-list"><article class="catalyst-external-item"><strong>中国知网</strong><p>查看该催化材料的论文、综述和实验报道。</p><div class="catalyst-external-link-row"><a href="https://kns.cnki.net/kns8s/defaultresult/index?kw=" target="_blank" rel="noreferrer noopener">https://kns.cnki.net/kns8s/defaultresult/index</a><span>检索关键词：材料名称 + 反应路线</span></div></article><article class="catalyst-external-item"><strong>万方数据</strong><p>检索相关论文、专利与学位论文信息。</p><div class="catalyst-external-link-row"><a href="https://s.wanfangdata.com.cn/paper?q=" target="_blank" rel="noreferrer noopener">https://s.wanfangdata.com.cn/paper</a><span>检索关键词：材料名称 + 表面</span></div></article><article class="catalyst-external-item"><strong>Google Scholar</strong><p>查看英文论文、引用与交叉验证数据。</p><div class="catalyst-external-link-row"><a href="https://scholar.google.com/scholar?q=" target="_blank" rel="noreferrer noopener">https://scholar.google.com/scholar</a><span>检索关键词：材料名称 + 化学式</span></div></article></div><h5 style="margin:14px 0 8px;">示例数据</h5><div class="catalyst-external-list"><article class="catalyst-external-item"><strong>示例一 · 单原子催化剂活性位点实验研究</strong><p>来源期刊：Journal of Catalysis（2025）· 数据类型：原始实验数据 + 论文全文 · 关联编号：DOI:10.1016/j.jcat.2025.01.018</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1016/j.jcat.2025.01.018" target="_blank" rel="noreferrer noopener">https://doi.org/10.1016/j.jcat.2025.01.018</a><span>推荐阅读 · 含活性位点表征原始数据</span></div></article><article class="catalyst-external-item"><strong>示例二 · CO₂ 还原反应路径理论计算</strong><p>来源期刊：ACS Catalysis（2025）· 数据类型：计算输入/输出文件 + 论文全文 · 关联编号：DOI:10.1021/acscatal.5c01234</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1021/acscatal.5c01234" target="_blank" rel="noreferrer noopener">https://doi.org/10.1021/acscatal.5c01234</a><span>推荐阅读 · 含反应能垒与吸附能数据</span></div></article><article class="catalyst-external-item"><strong>示例三 · 合金催化剂 d 带中心综述</strong><p>来源期刊：Chemical Reviews（2024）· 数据类型：综述文献 + 汇总数据集 · 关联编号：DOI:10.1021/acs.chemrev.4c00567</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1021/acs.chemrev.4c00567" target="_blank" rel="noreferrer noopener">https://doi.org/10.1021/acs.chemrev.4c00567</a><span>推荐阅读 · 便于横向对比不同体系</span></div></article></div><div class="catalyst-external-item" style="margin-top:10px;"><strong>关注该催化材料</strong><p>留下邮箱等联系方式后，系统将推送后续新发表的相关论文与数据。</p><div class="catalyst-external-link-row"><input class="page-input" type="text" placeholder="请输入邮箱，用于接收新论文与数据推送" style="flex:1;"><button class="btn-primary" type="button" onclick="return false;">关注并接收推送</button></div></div></div></div>`; };
   document.addEventListener('click', (event) => {
     const feature = event.target.closest('[data-catalyst-feature-tab]'); if(feature){ state.catalystFeatureTab=feature.dataset.catalystFeatureTab; const material=typeof findCatalystMaterial==='function'?findCatalystMaterial(state.selectedCatalystId):null; if(material && typeof renderCatalystDetailPage==='function') renderCatalystDetailPage(material); }
     const poscar=event.target.closest('[data-catalyst-poscar-download]'); if(poscar && typeof triggerCatalystDetailDownload==='function') triggerCatalystDetailDownload();
@@ -111556,7 +112025,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   window.renderCatalystExternalInfoPage = function renderCatalystExternalInfoPageRequestV2(material){
     const active = state.catalystShareTab || 'external';
     if(active === 'guide') return `<div class="twod-detail-page-head"><div><h4>用户引导</h4><p>从结构建模到计算结果导入，按步骤完成催化材料数据准备。</p></div></div><div class="twod-detail-tabs"><button class="twod-detail-tab" type="button" onclick="return switchCatalystShareTab('external')">外部信息关联</button><button class="twod-detail-tab active" type="button">用户引导</button></div>${docsMarkup()}`;
-    return `<div class="twod-detail-page-head"><div><h4>催化材料数据共享</h4><p>关联外部数据，并通过统一入口导入新的催化材料数据。</p></div><button class="btn-primary" type="button" data-catalyst-open-upload data-catalyst-share-upload onclick="return MarvisRouter.go(&#39;page-data-submit&#39;)">催化材料数据导入</button></div><div class="twod-detail-tabs"><button class="twod-detail-tab active" type="button">外部信息关联</button><button class="twod-detail-tab" type="button" onclick="return switchCatalystShareTab('guide')">用户引导</button></div><div class="catalyst-feature-card" style="margin-top:16px"><h5>关联数据库</h5><div class="catalyst-feature-list"><div class="catalyst-feature-item"><span>Materials Project</span><strong>对比材料结构与基础性质信息</strong></div><div class="catalyst-feature-item"><span>Catalysis-Hub</span><strong>查询催化吸附与反应路径数据</strong></div><div class="catalyst-feature-item"><span>OQMD</span><strong>对比结构稳定性与材料组成</strong></div></div></div>`;
+    return `<div class="twod-detail-page-head"><div><h4>催化材料数据共享</h4><p>关联外部数据，并通过统一入口导入新的催化材料数据。</p></div><button class="btn-primary" type="button" data-catalyst-open-upload data-catalyst-share-upload onclick="return MarvisRouter.go(&#39;page-data-submit&#39;)">催化材料数据导入</button></div><div class="twod-detail-tabs"><button class="twod-detail-tab active" type="button">外部信息关联</button><button class="twod-detail-tab" type="button" onclick="return switchCatalystShareTab('guide')">用户引导</button></div><div class="catalyst-external-layout" style="margin-top:16px"><div class="catalyst-external-section"><h5>外部信息关联 · 第三方数据库关联</h5><p class="catalyst-external-note">为特定催化材料提供指向其他第三方开源或商用数据库的链接（仅提供网页地址，不提供第三方数据库用户权限），便于用户查询第三方数据库中的催化材料结构与性质信息，支持跨库横向对比并形成整体认识。</p><div class="catalyst-external-list"><article class="catalyst-external-item"><strong>Materials Project</strong><p>对比材料结构与基础性质信息。</p><div class="catalyst-external-link-row"><a href="https://materialsproject.org/" target="_blank" rel="noreferrer noopener">https://materialsproject.org/</a><span>建议按化学式或材料名称检索</span></div></article><article class="catalyst-external-item"><strong>Catalysis-Hub</strong><p>查询催化吸附、反应路径与相关计算数据。</p><div class="catalyst-external-link-row"><a href="https://www.catalysis-hub.org/" target="_blank" rel="noreferrer noopener">https://www.catalysis-hub.org/</a><span>建议按反应路线与吸附物种检索</span></div></article><article class="catalyst-external-item"><strong>OQMD</strong><p>对比结构稳定性与材料组成相关数据。</p><div class="catalyst-external-link-row"><a href="https://oqmd.org/" target="_blank" rel="noreferrer noopener">https://oqmd.org/</a><span>建议按元素组成检索</span></div></article></div></div><div class="catalyst-external-section"><h5>论文数据关联</h5><p class="catalyst-external-note">与图书馆论文搜索系统高效连接，可提供来自论文的研究数据及原始数据论文或推荐阅读文献链接；同时支持用户关注该催化材料并留下邮箱等联系方式，用于推送后续新发表的相关论文与数据。</p><div class="catalyst-external-list"><article class="catalyst-external-item"><strong>中国知网</strong><p>查看该催化材料的论文、综述和实验报道。</p><div class="catalyst-external-link-row"><a href="https://kns.cnki.net/kns8s/defaultresult/index?kw=" target="_blank" rel="noreferrer noopener">https://kns.cnki.net/kns8s/defaultresult/index</a><span>检索关键词：材料名称 + 反应路线</span></div></article><article class="catalyst-external-item"><strong>万方数据</strong><p>检索相关论文、专利与学位论文信息。</p><div class="catalyst-external-link-row"><a href="https://s.wanfangdata.com.cn/paper?q=" target="_blank" rel="noreferrer noopener">https://s.wanfangdata.com.cn/paper</a><span>检索关键词：材料名称 + 表面</span></div></article><article class="catalyst-external-item"><strong>Google Scholar</strong><p>查看英文论文、引用与交叉验证数据。</p><div class="catalyst-external-link-row"><a href="https://scholar.google.com/scholar?q=" target="_blank" rel="noreferrer noopener">https://scholar.google.com/scholar</a><span>检索关键词：材料名称 + 化学式</span></div></article></div><h5 style="margin:14px 0 8px;">示例数据</h5><div class="catalyst-external-list"><article class="catalyst-external-item"><strong>示例一 · 单原子催化剂活性位点实验研究</strong><p>来源期刊：Journal of Catalysis（2025）· 数据类型：原始实验数据 + 论文全文 · 关联编号：DOI:10.1016/j.jcat.2025.01.018</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1016/j.jcat.2025.01.018" target="_blank" rel="noreferrer noopener">https://doi.org/10.1016/j.jcat.2025.01.018</a><span>推荐阅读 · 含活性位点表征原始数据</span></div></article><article class="catalyst-external-item"><strong>示例二 · CO₂ 还原反应路径理论计算</strong><p>来源期刊：ACS Catalysis（2025）· 数据类型：计算输入/输出文件 + 论文全文 · 关联编号：DOI:10.1021/acscatal.5c01234</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1021/acscatal.5c01234" target="_blank" rel="noreferrer noopener">https://doi.org/10.1021/acscatal.5c01234</a><span>推荐阅读 · 含反应能垒与吸附能数据</span></div></article><article class="catalyst-external-item"><strong>示例三 · 合金催化剂 d 带中心综述</strong><p>来源期刊：Chemical Reviews（2024）· 数据类型：综述文献 + 汇总数据集 · 关联编号：DOI:10.1021/acs.chemrev.4c00567</p><div class="catalyst-external-link-row"><a href="https://doi.org/10.1021/acs.chemrev.4c00567" target="_blank" rel="noreferrer noopener">https://doi.org/10.1021/acs.chemrev.4c00567</a><span>推荐阅读 · 便于横向对比不同体系</span></div></article></div><div class="catalyst-external-item" style="margin-top:10px;"><strong>关注该催化材料</strong><p>留下邮箱等联系方式后，系统将推送后续新发表的相关论文与数据。</p><div class="catalyst-external-link-row"><input class="page-input" type="text" placeholder="请输入邮箱，用于接收新论文与数据推送" style="flex:1;"><button class="btn-primary" type="button" onclick="return false;">关注并接收推送</button></div></div></div></div>`;
   };
   const download = (name, content) => { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),600); };
   document.addEventListener('click',(e)=>{
@@ -111959,7 +112428,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
             { value: "absorption", label: "X射线吸收谱图" }
           ]
         },
-        { key: "elements", kind: "text", title: "元素组成", label: "元素组成", placeholder: "如: Li, La, Zr, O" },
+        { key: "elements", kind: "text", title: "元素组成", label: "元素组成", placeholder: "请输入一个或多个元素进行检索，多个元素按照要求输入，例如“Mo-S”" },
         { key: "reference", kind: "text", title: "参考文献", label: "参考文献", placeholder: "作者、期刊或DOI" }
       ]
     }
@@ -114672,9 +115141,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           var structure = resolveStructure(mat);
           var label = TAB_LABEL[TAB_KEY[structure]];
           link.dataset.mlffTopicStructure = structure;
-          link.title = "查看详情 · 该材料归属「" + label + "」";
-          if (!/查看详情/.test(link.textContent)) {
-            link.textContent = "查看详情";
+          link.title = "查询详情 · 该材料归属「" + label + "」";
+          if (!/查询详情/.test(link.textContent)) {
+            link.textContent = "查询详情";
           }
         });
       } catch (e) { /* noop */ }
@@ -116529,7 +116998,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         '<td>' + ESC(item.polarizabilityText) + '</td>' +
         '<td>' + ESC(item.dispersionText) + '</td>' +
         '<td><div class="twod-record-inline-actions">' +
-          '<button class="twod-action-view" type="button" data-open-material="mlff:' + ESC(item.id) + '" data-material-view="basic">查看详情</button>' +
+          '<button class="twod-action-view" type="button" data-open-material="mlff:' + ESC(item.id) + '" data-material-view="basic">查询详情</button>' +
           '<button class="twod-record-link" type="button" data-open-material="mlff:' + ESC(item.id) + '" data-material-view="prediction">发起预测</button>' +
           '<button class="twod-record-link" type="button" data-mlff-field-update="' + ESC(item.id) + '">场数据更新</button>' +
         '</div></td>' +
@@ -116565,7 +117034,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
             Array.prototype.forEach.call(box.children, function (b) {
               if (b.dataset.mlffFieldUpdate != null) b.textContent = "场数据更新";
               else if (b.dataset.materialView === "prediction") b.textContent = "发起预测";
-              else if (b.classList.contains("twod-action-view")) b.textContent = "查看详情";
+              else if (b.classList.contains("twod-action-view")) b.textContent = "查询详情";
             });
           });
           var hint = page.querySelector(".twod-result-hint");
@@ -122232,6 +122701,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       dataType: "结构化",
       collectObject: "表",
       updateFreq: "每周",
+      extractCount: "",
       updateMode: "手动",
       dbConn: newDbConn(),
       error: ""
@@ -122722,6 +123192,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           + "</select>"
           + '<span class="rw-field-tip">按所选周期自动检查数据源更新并生成更新批次。</span></div>'
         : "")
+      + '<div class="rw-field"><label>抽取数量</label><input type="text" data-rw-f="extractCount" value="' + esc(c.extractCount || "") + '" placeholder="请输入抽取数量，如 1000"><span class="rw-field-tip">填写本次需要从数据源抽取的数据条数，留空表示按数据源全量抽取。</span></div>'
       + "</div>";
   }
 
@@ -122984,6 +123455,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "<div><b>入库名称</b>" + esc(c.name || "-") + "</div>"
       + "<div><b>数据来源</b>" + esc(c.sourceType) + "</div>"
       + "<div><b>更新频率</b>" + esc(c.updateMode === "自动" ? c.updateFreq : "—") + "</div>"
+      + "<div><b>抽取数量</b>" + esc(c.extractCount ? c.extractCount + " 条" : "—") + "</div>"
       + "<div><b>执行方式</b>" + esc(c.updateMode) + "</div>"
       + "<div><b>批次数量</b>" + r.batches.length + " 个" + (multi ? "（按频率自动提取，分批次留档）" : "（手动触发）") + "</div>"
       + "<div><b>记录总数</b>" + r.total + " 条</div>"
@@ -123444,6 +123916,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       else if (f === "dataType") c.dataType = el.value;
       else if (f === "collectObject") c.collectObject = el.value;
       else if (f === "updateFreq") c.updateFreq = el.value;
+      else if (f === "extractCount") c.extractCount = el.value;
       else if (f === "updateMode") { if (el.type !== "radio" || el.checked) c.updateMode = el.value; }
       else if (f === "dbConn") { var dc = dbConnOf(c); dc[el.getAttribute("data-key")] = el.value; }
       else if (f === "method") {
@@ -123563,6 +124036,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       dbName: String(c.name).trim(),
       integrationReport: report,
       updateFreq: c.updateFreq,
+      extractCount: c.extractCount || "",
       updateMode: c.updateMode,
       version: "V1.0",
       rawFiles: isTable ? "JSON / CSV" : "PNG / JPG",
@@ -123665,6 +124139,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + auditKvRow("数据采集对象", t.collectObject || "表")
       + auditKvRow("数据整合报告", t.integrationReport || "表字段规则校验通过 · 格式统一完成")
       + auditKvRow("更新频率", t.updateMode === "自动" ? (t.updateFreq || "每周") : "—")
+      + auditKvRow("抽取数量", t.extractCount ? t.extractCount + " 条" : "—")
       + auditKvRow("更新执行方式", t.updateMode || "手动")
       + auditKvRow("创建时间", t.createdAt)
       + "</div>"
