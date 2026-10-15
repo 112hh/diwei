@@ -114208,8 +114208,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           )).join("") +
         "</div>" +
 
-        /* —— 规则库版本 / 生效时间 / 变更历史 —— */
-        lstdRenderVersionBar(pageId) +
+        /* 2026-10-15：圈红删除——规则库版本条（V2.0/生效日期/发布方/变更历史/查看上游标准体系）整行移除 */
 
         /* —— 当前类别标准规则卡片 —— */
         '<div class="lstd-card">' +
@@ -114218,10 +114217,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
               "<h3>" + esc(activeCategory.label) + "</h3>" +
               '<button class="lstd-formspec-link" type="button" data-lstd-formspec>▤ 数据表单与规格要求</button>' +
             "</div>" +
-            '<div class="lstd-actions">' +
-              '<button class="btn-primary" type="button" data-lstd-rule-add>+ 新增</button>' +
-              '<button class="btn-primary" type="button" data-lstd-scan>非标准数据检测</button>' +
-            "</div>" +
+            /* 2026-10-15：圈红删除——「+ 新增」「非标准数据检测」按钮整组移除 */
           "</div>" +
           '<div class="lstd-intro">' + esc(activeCategory.intro) + "</div>" +
           lstdRenderRulesTable(pageId, activeCategory) +
@@ -122500,11 +122496,21 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     return renderCollectTab();
   }
 
+  /* 2026-10-15：五类材料页各有一份 [data-rw-root="page"]，DOM 查询必须限定在当前 PAGE_ID 页面内；
+     原先全用 document.querySelector，永远命中文档里排在前面的「二维材料」页，
+     导致其余四个材料点「数据统计 / 权限管理 / 流程管理」看起来毫无反应。 */
+  function rwRootEl() {
+    var page = document.getElementById("page-" + (PAGE_ID || "lowdim-ingest-twod"));
+    var root = page ? page.querySelector('[data-rw-root="page"]') : null;
+    return root || document.querySelector('[data-rw-root="page"]');
+  }
+
   function rerenderBody() {
-    var host = document.querySelector('[data-rw-root="page"] .rw-body');
+    var root = rwRootEl();
+    var host = root ? root.querySelector(".rw-body") : null;
     if (!host) { renderRwPage(); return; }
     host.innerHTML = renderRwBody();
-    var tabs = document.querySelectorAll('[data-rw-root="page"] .rw-tab');
+    var tabs = root.querySelectorAll(".rw-tab");
     for (var i = 0; i < tabs.length; i++) {
       tabs[i].classList.toggle("is-active", tabs[i].getAttribute("data-rw-tab") === getS().tab);
     }
@@ -124981,8 +124987,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       }).join("")
       + "</div>"
 
-      + '<div class="rw-section-title" style="margin-top:16px">③ 权限授予链路</div>'
-      + chainHtml(["系统管理员（内置最高权限）", "授予数据库维护员读取 / 修改权限", "授予高级用户密集读取权限", "普通用户默认正常频次读取", "到期 / 任务完成后回收"])
       /* 2026-10-10：按需求删除权限管理下方的「提交数据录入权限申请」按钮 */
       + "</div>";
   }
@@ -125010,7 +125014,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-card-head"><div><h3>② 定期备份</h3>'
       + "<p>为尽量减少硬件故障和人员误操作给数据库带来的伤害，应当定期对数据库进行备份工作。</p></div></div>"
       + tableHtml(LOOP_BACKUP)
-      + '<div style="margin-top:12px">' + chainHtml(["定时触发备份", "全量 / 增量快照", "完整性校验", "异地留存", "恢复演练"]) + "</div>"
+      /* 2026-10-15：圈红删除——数据备份配置下方的备份流程链路不再展示 */
       + "</div>"
       + "</div>";
   }
@@ -128229,7 +128233,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           s2.tab = "entry";
           entryState().view = "todo";
           renderRwPage();
-          var t = document.querySelector('[data-rw-root="page"] .rw-tab[data-rw-tab="entry"]');
+          var rwRootNow = (typeof rwRootEl === "function") ? rwRootEl() : null;
+          var t = rwRootNow
+            ? rwRootNow.querySelector('.rw-tab[data-rw-tab="entry"]')
+            : document.querySelector('[data-rw-root="page"] .rw-tab[data-rw-tab="entry"]');
           if (t && t.scrollIntoView) t.scrollIntoView({ block: "center" });
           toast("已切换到「资源录入」，完成审核入库后即可回来加工", "ok");
         })();
