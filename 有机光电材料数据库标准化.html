@@ -114217,7 +114217,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
               "<h3>" + esc(activeCategory.label) + "</h3>" +
               '<button class="lstd-formspec-link" type="button" data-lstd-formspec>▤ 数据表单与规格要求</button>' +
             "</div>" +
-            /* 2026-10-15：圈红删除——「+ 新增」「非标准数据检测」按钮整组移除 */
+                        '<div class="lstd-actions">' +
+              '<button class="btn-primary" type="button" data-lstd-rule-add>+ 新增</button>' +
+              '<button class="btn-primary" type="button" data-lstd-scan>非标准数据检测</button>' +
+            '</div>' +
           "</div>" +
           '<div class="lstd-intro">' + esc(activeCategory.intro) + "</div>" +
           lstdRenderRulesTable(pageId, activeCategory) +
@@ -114249,7 +114252,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       const field = (label, id, value, placeholder) =>
         '<label><span>' + label + '</span><input id="' + id + '" type="text" value="' + esc(value || "") + '" placeholder="' + esc(placeholder || "") + '"></label>';
       const docs = stdDocList(stdKey(pageId));
-      const docOptions = '<option value="">— 不关联 —</option>' + docs.map(function (d) {
+      const docOptions = '<option value="">不关联</option>' + docs.map(function (d) {
         return '<option value="' + esc(d.id) + '"' + ((record && record.docId === d.id) ? " selected" : "") + '>' + esc(d.standardNo + " " + d.standardName) + "</option>";
       }).join("");
       body.innerHTML = '<div class="lstd-rule-form">' +
