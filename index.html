@@ -49785,7 +49785,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         "mlff-gnn": "覆盖 SchNet、DimeNet、MACE 等图神经网络力场与子图消息传递分子内势能模型，支撑数据驱动的势能面构建。"
       };
       const count = (subcategory.algorithms || []).length;
-      return `${descMap[subcategoryKey] || subcategory.title} 该分类下共 ${count} 个算法，查看详情可在左侧切换同分类算法。`;
+      return `${descMap[subcategoryKey] || subcategory.title} 该分类下共 ${count} 个算法，点击「在线使用」可在左侧切换同分类算法。`;
     }
 
     function renderAlgorithmOverviewPage() {
@@ -49829,7 +49829,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 <div class="algorithm-list-actions">
                   <button class="btn-primary" type="button" data-algo-action="${algorithm.status === "maintenance" ? "maintenance" : "code"}" data-algo-id="${algorithm.id}">代码包下载</button>
                   <button class="btn" type="button" data-algo-action="manual" data-algo-id="${algorithm.id}">使用手册下载</button>
-                  <button class="btn" type="button" data-algo-action="doc" data-algo-id="${algorithm.id}">查看详情</button>
+                  <button class="btn" type="button" data-algo-action="doc" data-algo-id="${algorithm.id}">在线使用</button>
                 </div>
               </div>
             `).join("") || `<div class="module-list-empty">暂无算法数据</div>`}
@@ -66704,7 +66704,7 @@ function renderMlffTopicSampleTable(data) {
                   <div class="algorithm-list-actions">
                     <button class="btn-primary" type="button" data-tool-action="code" data-tool-id="${row.id}">代码包下载</button>
                     <button class="btn" type="button" data-tool-action="guide" data-tool-id="${row.id}">使用手册下载</button>
-                    <button class="btn" type="button" data-tool-action="detail" data-tool-id="${row.id}">查看详情</button>
+                    <button class="btn" type="button" data-tool-action="detail" data-tool-id="${row.id}">在线使用</button>
                   </div>
                 </div>
               `;
@@ -122727,14 +122727,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       "#page-" + PAGE_ID + " .rw-flow-desc { display:block; font-size:12px; color:#7d8ca3; line-height:1.5; }",
       "#page-" + PAGE_ID + " .rw-flow-arrow { flex:0 0 30px; display:grid; place-items:center; color:#b6c3d6; font-size:18px; }",
       /* 2026-10-13：数据加工来源标记 —— 圆圈加斜杠，hover 提示「该来源为数据加工，不会执行真实调用」 */
-      "#page-" + PAGE_ID + " .rw-mock-src { position:relative; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; margin-left:6px; border-radius:50%; background:#eef1f6; border:1px solid #d5dee8; cursor:help; vertical-align:middle; flex:0 0 auto; }",
-      "#page-" + PAGE_ID + " .rw-mock-src:hover, #page-" + PAGE_ID + " .rw-mock-src:focus { background:#fff7e8; border-color:#ffe0ac; outline:none; }",
-      "#page-" + PAGE_ID + " .rw-mock-ico { position:relative; display:block; width:9px; height:9px; border:1.5px solid #7c8b9c; border-radius:50%; }",
-      "#page-" + PAGE_ID + " .rw-mock-ico::after { content:\"\"; position:absolute; left:50%; top:50%; width:13px; height:1.5px; background:#7c8b9c; border-radius:1px; transform:translate(-50%,-50%) rotate(-45deg); }",
-      "#page-" + PAGE_ID + " .rw-mock-src:hover .rw-mock-ico, #page-" + PAGE_ID + " .rw-mock-src:focus .rw-mock-ico { border-color:#b8720f; }",
-      "#page-" + PAGE_ID + " .rw-mock-src:hover .rw-mock-ico::after, #page-" + PAGE_ID + " .rw-mock-src:focus .rw-mock-ico::after { background:#b8720f; }",
-      "#page-" + PAGE_ID + " .rw-mock-src > i.rw-mock-tip { position:absolute; left:50%; bottom:150%; transform:translateX(-50%); z-index:30; display:none; width:max-content; max-width:240px; margin:0; padding:6px 9px; border-radius:6px; background:#22364f; color:#fff; font-size:12px; font-style:normal; font-weight:400; line-height:1.5; box-shadow:0 4px 12px rgba(15,23,42,.18); }",
-      "#page-" + PAGE_ID + " .rw-mock-src:hover > i.rw-mock-tip, #page-" + PAGE_ID + " .rw-mock-src:focus > i.rw-mock-tip { display:block; }",
 
       /* 简易流程链（状态流转 / 审核流程） */
       "#page-" + PAGE_ID + " .rw-chain { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:14px; border-radius:10px; background:#f8fafd; border:1px solid #e6ecf5; }",
@@ -125298,11 +125290,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
   function auditOps(r) {
     var out = [];
-    /* 2026-10-08：一次审批制——待审核 / 自动校验未通过的记录只提供「审核」与「退回」 */
+    /* 2026-10-08：一次审批制——待审核 / 自动校验未通过的记录提供「审核」与「详情」；2026-10-21：移除「自动校验」「退回」按钮 */
     if (["待审核", "自动校验未通过"].indexOf(r.status) >= 0) {
       out.push('<button class="rw-op rw-op--primary" type="button" data-rw-act="entry-audit-open" data-id="' + esc(r.id) + '">审核</button>');
-      out.push('<button class="rw-op" type="button" data-rw-act="audit-auto" data-id="' + esc(r.id) + '">自动校验</button>');
-      out.push('<button class="rw-op rw-op--danger" type="button" data-rw-act="audit-back" data-id="' + esc(r.id) + '" data-stage="审核">退回</button>');
     }
     out.push('<button class="rw-op" type="button" data-rw-act="audit-detail" data-id="' + esc(r.id) + '">详情</button>');
     return out.join("");
@@ -126506,10 +126496,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     if (!PROC_MOCK_ONLY) return null;
     return { ok: true, mock: true, api: PROC_MOCK_API[step] || "proc/run", at: nowText() };
   }
-  /* 来源旁的「空实现」标记：圆圈加斜杠图标 + hover / focus 提示 */
-  function procMockBadge() {
-    return '<span class="rw-mock-src" tabindex="0" role="img" aria-label="该来源为数据加工，不会执行真实调用">' + '<em class="rw-mock-ico" aria-hidden="true"></em><i class="rw-mock-tip">该来源为数据加工，不会执行真实调用</i></span>';
-  }
 
   /* 系统内清单：分析预测模块「数据应用算法」的算法 + 「数据工具开发」的工具 */
   var PROC_SYS_ALGOS = {
@@ -126947,7 +126933,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     if (j.step === 1) return "填写完成后点击「下一步」";
     if (j.step === 2) return "勾选需要参与加工的采集数据后即可进入下一步";
     if (j.step === 4) return "选择加工模型 / 算法后本步骤自动完成（空实现 / mock），即可进入下一步";
-    if (j.step === 5) return "选择 1 个数据集类型并执行「生产数据产品」后再进入下一步";
+    if (j.step === 5) return "选择 1 个数据产品级别并执行「生产数据产品」后再进入下一步";
     if (j.step === 6) return "填写下方质量评价表后点击「完成加工」";
     return '<span style="color:#b8720f">请先执行本步骤操作后再进入下一步</span>';
   }
@@ -127234,6 +127220,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     };
     if (d) {
       d.fields.forEach(function (f) { out.push({ field: f, type: "业务字段", value: sample(f), from: d.title + " · 核心字段" }); });
+    } else if (keys.length) {
+      /* 2026-10-20：步骤 5 改为「数据产品级别」下拉后，产出标识为 L0—L4，
+         此时没有对应的数据集核心字段，改按级别本身呈现，避免字段列表为空。 */
+      var lv0 = procLevelOf(keys[0]);
+      out.push({ field: "数据产品级别", type: "业务字段", value: lv0 ? lv0.key : keys[0], from: "产品生产 · 数据产品级别" });
     }
     out.push({ field: "材料唯一标识", type: "元数据字段", value: r0.id || "-", from: "采集数据主键" });
     out.push({ field: "化学式", type: "元数据字段", value: r0.formula || "-", from: "采集数据 · 结构字段" });
@@ -127524,11 +127515,124 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     return '<div class="rw-section-title">选择加工模型 / 算法</div>'
       + '<div class="rw-card-note">先选择模型来源：系统内的数据加工模型 / 算法（下拉列出分析预测模块中的算法与工具），或基础加工模型 / 算法；再从下拉中选择具体的加工模型 / 算法。选择后本步骤自动完成（数据加工为空实现 / mock，不会执行真实调用）。</div>'
       + '<div class="rw-form" style="margin-top:10px">'
-      + '<div class="rw-field"><label>模型来源<i>*</i>' + procMockBadge() + "</label>" + srcSel + "</div>"
+      + '<div class="rw-field"><label>模型来源<i>*</i></label>' + srcSel + "</div>"
       + '<div class="rw-field"><label>加工模型 / 算法<i>*</i></label>' + modelSel + "</div></div>"
       + '<div class="rw-field-tip" style="margin-top:8px">' + esc(procModelDesc(m.key)) + "</div>"
       + result + nextTip
       + (j.done[4] ? procDoneCard(j, 4) : "");
+  }
+
+
+  /* ==========================================================================
+     2026-10-20：数据产品级别（L0—L4）
+     原步骤 5「数据集类型」下拉改为「数据产品级别」下拉，选项固定为 L0 / L1 / L2 / L3 / L4；
+     字段右侧增加问号说明图标，点击弹出浮层，等级说明文案逐字保留、按等级分行排版。
+     下拉仍挂在 data-rw-pf="productDs" 上，回填与提交链路保持不变。
+     ========================================================================== */
+  var PRODUCT_LEVELS = [
+    { key: "L0", desc: "TEM/SEM 原始图像帧、XRD 衍射原始谱、拉曼原始谱、AFM 形貌原始数据、第一性原理 OUTCAR/VASP 输出、MD 轨迹 dump 文件" },
+    { key: "L1", desc: "统一格式的晶体结构库（CIF/JSON + 完整元数据）、二维材料带隙/迁移率标准化数据集、扣除设备基线的拉曼谱库" },
+    { key: "L2", desc: "材料描述符/指纹集合（fingerprint）、热力学与动力学稳定性标注、缺陷类型标注数据集、构效关系特征表" },
+    { key: "L3", desc: "带隙预测模型与筛选评分、形成能预测结果、“结构—性能”构效知识图谱、材料可合成性评估报告" },
+    { key: "L4", desc: "材料逆向设计 API、晶体结构生成模型、机器学习势函数（MLIP）服务、器件选型决策系统、闭环自主实验平台（机器人合成 + AI 决策）" }
+  ];
+
+  function procLevelOf(key) {
+    var k = String(key || "").trim().toUpperCase();
+    return PRODUCT_LEVELS.filter(function (x) { return x.key === k; })[0] || null;
+  }
+
+  /* 数据产品标识展示：L0—L4 按「级别 + 级数据产品」取名，其余回退到数据集名称 */
+  function procProductLabel(key) {
+    var l = procLevelOf(key);
+    if (l) return l.key + " 级数据产品";
+    var d = procDatasetOf(key);
+    return d ? d.title : String(key || "-");
+  }
+
+  function procLevelHintHtml() {
+    return '<div class="rw-lv-tip"><div class="rw-lv-tip-hd">数据产品等级说明</div>'
+      + PRODUCT_LEVELS.map(function (l) {
+        return '<div class="rw-lv-row"><span class="rw-lv-key">' + esc(l.key) + "：</span>"
+          + '<span class="rw-lv-desc">' + esc(l.desc) + "</span></div>";
+      }).join("")
+      + "</div>";
+  }
+
+  function procLevelHint(icon) {
+    var old = document.getElementById("rwProcLevelPop");
+    var same = !!(old && old.__for === icon);
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    if (same) return;
+    ensureLevelStyle();
+    var pop = document.createElement("div");
+    pop.id = "rwProcLevelPop";
+    pop.className = "rw-lv-pop";
+    pop.setAttribute("role", "tooltip");
+    pop.__for = icon;
+    pop.innerHTML = procLevelHintHtml();
+    document.body.appendChild(pop);
+    var r = icon.getBoundingClientRect();
+    var pw = pop.offsetWidth || 520;
+    var ph = pop.offsetHeight || 240;
+    var left = r.right + 8;
+    var top = r.top - 8;
+    if (left + pw > window.innerWidth - 12) left = Math.max(12, r.left - pw - 8);
+    if (top + ph > window.innerHeight - 12) top = Math.max(12, window.innerHeight - ph - 12);
+    if (top < 12) top = 12;
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+    function cleanup() {
+      document.removeEventListener("click", onDoc, true);
+      window.removeEventListener("scroll", drop, true);
+      window.removeEventListener("resize", drop);
+    }
+    function drop() {
+      if (pop.parentNode) pop.parentNode.removeChild(pop);
+      cleanup();
+    }
+    function onDoc(ev) {
+      var t = ev.target;
+      if (t && t.closest && (t.closest("#rwProcLevelPop") || t.closest(".rw-lv-help"))) return;
+      drop();
+    }
+    setTimeout(function () { document.addEventListener("click", onDoc, true); }, 0);
+    window.addEventListener("scroll", drop, true);
+    window.addEventListener("resize", drop);
+  }
+
+  /* 新增 UI 的样式用「全局选择器」注入：加工向导弹窗挂在 body 下，
+     既有 ensureStyle() 里的选择器带 #page-<PAGE_ID> 前缀，在弹窗内不生效。 */
+  function ensureLevelStyle() {
+    if (document.getElementById("rwProcLevelStyle")) return;
+    var st = document.createElement("style");
+    st.id = "rwProcLevelStyle";
+    st.textContent = [
+      ".rw-lv-help { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;",
+      "  width:20px; height:20px; margin-left:8px; padding:0; border:1px solid #c7d3e6; border-radius:50%;",
+      "  background:#fff; color:#7d8ca3; font-size:13px; font-weight:700; line-height:1; cursor:pointer; }",
+      ".rw-lv-help:hover { border-color:#1f63ff; background:#eef3ff; color:#1f63ff; }",
+      ".rw-lv-pop { position:fixed; z-index:12000; width:520px; max-width:calc(100vw - 24px);",
+      "  padding:14px 16px; background:#fff; border:1px solid #dbe4f0; border-radius:10px;",
+      "  box-shadow:0 12px 32px rgba(15,42,86,.18); color:#22395c; font-size:13px; line-height:20px;",
+      "  text-align:left; max-height:70vh; overflow-y:auto; }",
+      ".rw-lv-tip-hd { margin:0 0 10px; font-size:14px; font-weight:600; color:#165DFF; }",
+      ".rw-lv-row { display:flex; gap:8px; padding:7px 0; border-top:1px dashed #e6ecf5; }",
+      ".rw-lv-row:first-of-type { border-top:0; }",
+      ".rw-lv-key { flex:0 0 30px; font-weight:600; color:#22395c; }",
+      ".rw-lv-desc { flex:1 1 auto; color:#4a5b76; }",
+      ".rw-qstd-hd { margin:0 0 4px; font-size:16px; font-weight:700; color:#1f2d3d; }",
+      ".rw-qstd-sub { margin:0 0 4px; font-size:13px; color:#7d8ca3; }",
+      ".rw-qstd-basis { margin:0 0 14px; font-size:12px; color:#94a5bd; line-height:1.7; }",
+      ".rw-qstd-sec { margin:0 0 18px; }",
+      ".rw-qstd-sec h4 { margin:0 0 8px; font-size:14px; font-weight:600; color:#165DFF; }",
+      ".rw-qstd-sec h5 { margin:0 0 6px; font-size:13px; font-weight:600; color:#22364f; }",
+      ".rw-qstd-p { margin:0 0 8px; font-size:13px; line-height:1.75; color:#4a5b76; }",
+      ".rw-qstd-li { font-size:12.5px; line-height:1.7; color:#5c6b83; }",
+      ".rw-qstd-ol { margin:8px 0 0; padding-left:20px; }",
+      ".rw-qstd-ol li { margin-bottom:8px; font-size:13px; line-height:1.75; color:#4a5b76; }"
+    ].join("\n");
+    document.head.appendChild(st);
   }
 
   /* 步骤 5 产品生产
@@ -127546,45 +127650,286 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var picked = pr.datasets || [];
     var ds = procDatasets();
     var dbName = procDbName();
-    var dsCards = ds.length
-      ? '<select data-rw-pf="productDs" style="min-height:36px;border:1px solid #d5dee8;border-radius:8px;padding:0 10px">'
-        + '<option value="">请选择数据集类型</option>'
-        + ds.map(function (d) {
-          return '<option value="' + esc(d.key) + '"' + (picked.indexOf(d.key) >= 0 ? " selected" : "") + ">" + esc(d.title) + "</option>";
-        }).join("") + "</select>"
-      : '<div class="rw-empty" style="padding:22px 0">当前材料未配置数据集</div>';
+    ensureLevelStyle();
+    var lvlSel = '<select data-rw-pf="productDs" style="min-height:36px;border:1px solid #d5dee8;border-radius:8px;padding:0 10px">'
+      + '<option value="">请选择数据产品级别</option>'
+      + PRODUCT_LEVELS.map(function (l) {
+        return '<option value="' + esc(l.key) + '"' + (picked.indexOf(l.key) >= 0 ? " selected" : "") + ">" + esc(l.key) + "</option>";
+      }).join("") + "</select>"
+      + '<button class="rw-lv-help" type="button" data-rw-act="proc-level-hint" title="查看数据产品等级说明" aria-label="查看数据产品等级说明">?</button>';
 
+    /* 本次产出条数：已执行筛选取筛选结果条数，否则回退到参与加工的记录数，避免出现 0 条的误读 */
+    var outN = (j.filter.executed && (j.filter.rows || []).length) ? j.filter.rows.length : (j.sourceIds || []).length;
     var result = pr.executed
-      ? '<div class="rw-result" style="margin-top:16px"><div class="rw-result-title">✓ 数据产品已生成（按数据集划分）</div>'
-      + '<div class="rw-kv"><div><b>产出数据集</b>' + esc((pr.datasets || []).length) + " 个</div>"
+      ? '<div class="rw-result" style="margin-top:16px"><div class="rw-result-title">✓ 数据产品已生成（按数据产品级别归档）</div>'
+      + '<div class="rw-kv"><div><b>数据产品级别</b>' + esc((pr.datasets || [])[0] || "-") + "</div>"
       + "<div><b>版本标记</b>" + esc(j.version) + "</div></div>"
-      + '<div style="margin-top:14px"><div class="rw-section-title">本次产出的数据集（' + (pr.datasets || []).length + " 个）"
-      + '</div><div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>数据集</th><th>核心字段</th><th>输出格式</th><th>本次产出</th><th>入库位置</th></tr></thead><tbody>'
+      + '<div style="margin-top:14px"><div class="rw-section-title">本次产出的数据产品</div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>数据产品级别</th><th>级别说明</th><th>本次产出</th><th>入库位置</th></tr></thead><tbody>'
       + (pr.datasets || []).map(function (k2) {
-        var d = procDatasetOf(k2);
-        if (!d) return "";
-        /* 本次产出条数：已执行筛选取筛选结果条数，否则回退到参与加工的记录数，避免出现 0 条的误读 */
-        var outN = (j.filter.executed && (j.filter.rows || []).length) ? j.filter.rows.length : (j.sourceIds || []).length;
-        return "<tr><td><b>" + esc(d.title) + "</b></td><td>" + esc(d.fields.join("、")) + "</td><td>" + esc(d.format) + "</td>"
-          + "<td>" + esc(outN) + " 条</td><td>" + esc(dbName) + " · " + esc(d.title) + "</td></tr>";
+        var l2 = procLevelOf(k2);
+        return "<tr><td><b>" + esc(k2) + "</b></td><td>" + esc(l2 ? l2.desc : "-") + "</td>"
+          + "<td>" + esc(outN) + " 条</td><td>" + esc(dbName) + " · " + esc(k2) + " 级数据产品</td></tr>";
       }).join("")
       + "</tbody></table></div></div>"
-      + '<div class="rw-field-tip">元数据字段 data_version 已更新为 ' + esc(j.version) + "；各数据集按上述入库位置归档，字段与数据库保持一致。</div></div>"
+      + '<div class="rw-field-tip">元数据字段 data_version 已更新为 ' + esc(j.version) + "；数据产品按上述级别与入库位置归档。</div></div>"
       : "";
 
-    var cur0 = picked.length ? procDatasetOf(picked[0]) : null;
-    return '<div class="rw-section-title">选择数据集类型（下拉单选，与' + esc(dbName) + '数据集一致）</div>'
-      + '<div class="rw-field-tip" style="margin-bottom:10px">本次产出只能归入 <b>1</b> 个数据集类型；已选 <b class="rw-ds-count">' + picked.length + "</b> / " + ds.length
-      + " 个数据集，重新选择会自动替换上一个。</div>"
-      + '<div class="rw-form"><div class="rw-field"><label>数据集类型<i>*</i></label>' + dsCards + "</div></div>"
+    var cur0 = picked.length ? procLevelOf(picked[0]) : null;
+    return '<div class="rw-section-title">选择数据产品级别</div>'
+      + '<div class="rw-field-tip" style="margin-bottom:10px">本次产出只能归入 <b>1</b> 个数据产品级别；'
+      + (cur0 ? "当前已选 <b>" + esc(cur0.key) + "</b>，重新选择会自动替换。" : "L0 → L4 表示数据加工程度与可直接使用的程度逐级提升。") + "</div>"
+      + '<div class="rw-form"><div class="rw-field"><label>数据产品级别<i>*</i></label>'
+      + '<span style="display:inline-flex;align-items:center">' + lvlSel + "</span></div></div>"
       + (cur0
-        ? '<div class="rw-card-note" style="margin-top:8px">入库位置：' + esc(dbName) + " · " + esc(cur0.title)
-          + "　核心字段：" + esc((cur0.fields || []).join("、"))
-          + "　输出格式：" + esc(cur0.format || "-") + "</div>"
+        ? '<div class="rw-card-note" style="margin-top:8px">入库位置：' + esc(dbName) + " · " + esc(cur0.key) + " 级数据产品"
+          + "　级别说明：" + esc(cur0.desc) + "</div>"
         : "")
       + '<div style="margin-top:14px"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-run-5">生产数据产品</button></div>'
       + result
       + (j.done[5] ? procDoneCard(j, 5) : "");
+  }
+
+
+  /* ==========================================================================
+     2026-10-20：《二维材料数据质量评价标准》V1.0（文档原样落地）
+     QUAL_STD_TABLES —— 第一部分 表 1 / 表 2 / 表 3 评分标准（四档用 \n 分行）
+     QUAL_RPT_GROUPS —— 第二部分 表 4 / 表 5 / 表 6 评价结果（示例值）
+     --------------------------------------------------------------------------
+     说明：JS 源码里的 "\\n" 是换行转义，渲染时按四档拆行，文案逐字取自文档。
+     ========================================================================== */
+  var QUAL_STD_TABLES = {
+    t1: {
+      title: "表 1  基础数据（数据来源）质量评价指标与评分标准",
+      rows: [
+        ["1", "来源权威性与合法性", "数据来源的权威程度、来源合法性与授权清晰度",
+          "优秀（90—100）：来源于权威机构、公开权威数据库或受控实验/规范计算，来源合法且授权清晰\n良好（80—89）：来源较权威，基本合规可追溯\n合格（60—79）：来源一般，合规性需补强\n不合格（<60）：来源不明或不合规"],
+        ["2", "采集与制备方法规范性", "二维材料制备、表征、计算方法的公认规范程度",
+          "优秀（90—100）：采用标准或公认方法，操作条件完整记录且可复现\n良好（80—89）：方法规范，个别条件记录不全\n合格（60—79）：方法基本可用，规范性不足\n不合格（<60）：方法不规范、不可复现"],
+        ["3", "样品信息完整性", "实际/虚拟样品名称、规格、制备或计算条件等信息完整程度",
+          "优秀（90—100）：样品名称、规格、制备/计算条件等齐全且一致\n良好（80—89）：基本信息齐全，个别细节缺失\n合格（60—79）：部分样品信息缺失\n不合格（<60）：样品信息大量缺失"],
+        ["4", "元数据完整性", "方法、条件、仪器/软件、参数等元数据的完整程度",
+          "优秀（90—100）：元数据齐全且与数据关联清晰\n良好（80—89）：元数据较全，个别缺失\n合格（60—79）：关键元数据部分缺失\n不合格（<60）：元数据缺失严重"],
+        ["5", "原始数据真实性", "数据是否未经处理的原始记录及真实可核程度",
+          "优秀（90—100）：为未经处理的原始数据，真实可核\n良好（80—89）：基本为原始数据，个别有轻度处理\n合格（60—79）：部分为处理后的数据且说明不清\n不合格（<60）：无法核实数据真实性"],
+        ["6", "数据可追溯性", "是否具备唯一资源标识（DOI/CSTR，按 GB/T 32843）及来源可查程度",
+          "优秀（90—100）：数据具备唯一持久标识且来源可查\n良好（80—89）：具备标识但检索不完全\n合格（60—79）：标识不完整或仅部分可溯\n不合格（<60）：无可追溯标识"],
+        ["7", "格式规范性", "数据是否符合 CIF、POSCAR 等标准格式",
+          "优秀（90—100）：完全符合标准格式，可互操作\n良好（80—89）：基本符合，个别字段不规范\n合格（60—79）：格式不规范但可读取\n不合格（<60）：格式错误不可用"]
+      ]
+    },
+    t2: {
+      title: "表 2  数据加工模型与算法质量评价指标与评分标准",
+      rows: [
+        ["1", "算法/模型正确性", "模型与算法的理论/物理依据及方法适用性",
+          "优秀（90—100）：理论依据正确，方法适用，结果物理合理\n良好（80—89）：方法正确，个别适用性存疑\n合格（60—79）：方法基本正确，需进一步核验\n不合格（<60）：方法错误或明显不适用"],
+        ["2", "参数设置合理性", "截断能、k 点网格、收敛判据等关键参数合理性",
+          "优秀（90—100）：关键参数经收敛性测试确定且合理\n良好（80—89）：参数合理，收敛性测试不充分\n合格（60—79）：参数基本可用，存在收敛风险\n不合格（<60）：参数设置不合理"],
+        ["3", "计算/处理可复现性", "相同输入条件下结果可复现程度",
+          "优秀（90—100）：相同条件下结果可稳定复现\n良好（80—89）：基本可复现，个别波动\n合格（60—79）：可复现性有限\n不合格（<60）：结果无法复现"],
+        ["4", "校验与验证", "结果与实验值或权威参考数据的一致性",
+          "优秀（90—100）：与实验/权威值吻合良好，误差在合理范围\n良好（80—89）：基本吻合，误差可接受\n合格（60—79）：部分偏差较大\n不合格（<60）：与参考值明显不符"],
+        ["5", "误差与收敛控制", "能量收敛、力收敛及误差评估充分性",
+          "优秀（90—100）：收敛判据严格，误差评估完整\n良好（80—89）：收敛良好，误差评估较全\n合格（60—79）：收敛与误差控制一般\n不合格（<60）：无收敛控制或误差不明"],
+        ["6", "软件与版本记录", "所用软件名称、版本、输入文件记录完整程度",
+          "优秀（90—100）：软件、版本、输入文件完整记录\n良好（80—89）：记录较全，个别缺失\n合格（60—79）：记录不全\n不合格（<60）：无软件版本记录"],
+        ["7", "加工过程可追溯性", "从基础数据到产物的加工链可追溯程度",
+          "优秀（90—100）：加工链完整、输入输出关联清晰\n良好（80—89）：基本可追溯\n合格（60—79）：部分环节不可追溯\n不合格（<60）：加工过程不可追溯"]
+      ]
+    },
+    t3: {
+      title: "表 3  数据产品质量评价指标与评分标准",
+      rows: [
+        ["1", "规范性", "数据符合数据标准、数据模型、业务规则、元数据或权威参考数据的程度",
+          "优秀（90—100）：完全符合相关标准与规则，命名、单位、格式统一\n良好（80—89）：基本符合，个别不规范\n合格（60—79）：部分符合\n不合格（<60）：不符合数据标准"],
+        ["2", "完整性", "按照数据规则要求，数据元素被赋予数值的程度",
+          "优秀（90—100）：字段缺失率低于 1%\n良好（80—89）：缺失率 1%—5%\n合格（60—79）：缺失率 5%—20%\n不合格（<60）：缺失率高于 20%"],
+        ["3", "准确性", "数据准确表示其所描述的真实实体真实值的程度",
+          "优秀（90—100）：与实测/权威值偏差在合理容差内\n良好（80—89）：偏差较小可接受\n合格（60—79）：偏差较大\n不合格（<60）：数据明显失真"],
+        ["4", "一致性", "数据与其他特定上下文中使用的数据无矛盾的程度",
+          "优秀（90—100）：跨来源、跨库、跨字段完全一致\n良好（80—89）：基本一致，个别冲突已标注\n合格（60—79）：存在部分矛盾\n不合格（<60）：存在明显冲突"],
+        ["5", "时效性", "数据在时间变化中的正确程度（版本、更新、有效期）",
+          "优秀（90—100）：版本清晰、及时更新、注明数据时间\n良好（80—89）：更新及时性较好\n合格（60—79）：版本与时效管理一般\n不合格（<60）：数据过时且无版本说明"],
+        ["6", "可访问性", "数据能被访问、检索与获取的程度",
+          "优秀（90—100）：可稳定访问、检索、下载，接口友好\n良好（80—89）：基本可访问\n合格（60—79）：访问受限或检索不便\n不合格（<60）：数据不可访问"]
+      ]
+    }
+  };
+
+  var QUAL_RPT_GROUPS = [
+    {
+      no: "3", title: "基础数据（数据来源）质量评价结果",
+      table: "表 4  基础数据质量评价结果（示例值）",
+      rows: [
+        ["1", "来源权威性与合法性", "95", "优秀", "权威公开数据库+受控实验，授权清晰（示例）"],
+        ["2", "采集与制备方法规范性", "90", "优秀", "CVD 制备与表征方法规范可复现（示例）"],
+        ["3", "样品信息完整性", "88", "良好", "样品信息基本齐全，个别条件缺失（示例）"],
+        ["4", "元数据完整性", "85", "良好", "元数据较全，部分仪器参数缺失（示例）"],
+        ["5", "原始数据真实性", "90", "优秀", "以未经处理的原始图谱为准（示例）"],
+        ["6", "数据可追溯性", "92", "优秀", "多数条目具备 DOI/CSTR 标识（示例）"],
+        ["7", "格式规范性", "95", "优秀", "符合标准结构文件格式（示例）"]
+      ],
+      avg: ["90.7", "优秀"]
+    },
+    {
+      no: "4", title: "数据加工模型与算法质量评价结果",
+      table: "表 5  数据加工模型与算法质量评价结果（示例值）",
+      rows: [
+        ["1", "算法/模型正确性", "92", "优秀", "PBE 泛函适用，结果物理合理（示例）"],
+        ["2", "参数设置合理性", "88", "良好", "600 eV 截断能经收敛测试（示例）"],
+        ["3", "计算/处理可复现性", "90", "优秀", "相同输入结果稳定复现（示例）"],
+        ["4", "校验与验证", "85", "良好", "晶格常数与文献值偏差约 1%（示例）"],
+        ["5", "误差与收敛控制", "82", "良好", "能量/力收敛达标，误差评估较全（示例）"],
+        ["6", "软件与版本记录", "90", "优秀", "VASP 6.3.2 与输入文件完整记录（示例）"],
+        ["7", "加工过程可追溯性", "88", "良好", "加工链完整可追溯（示例）"]
+      ],
+      avg: ["87.9", "良好"]
+    },
+    {
+      no: "5", title: "数据产品质量评价结果",
+      table: "表 6  数据产品质量评价结果（示例值）",
+      rows: [
+        ["1", "规范性", "90", "优秀", "单位、格式、命名统一（示例）"],
+        ["2", "完整性", "88", "良好", "字段缺失率约 2%（示例）"],
+        ["3", "准确性", "92", "优秀", "带隙等物性与实测偏差在容差内（示例）"],
+        ["4", "一致性", "90", "优秀", "跨库、跨字段一致（示例）"],
+        ["5", "时效性", "85", "良好", "版本清晰，更新及时（示例）"],
+        ["6", "可访问性", "95", "优秀", "可稳定检索与下载（示例）"]
+      ],
+      avg: ["90.0", "优秀"]
+    }
+  ];
+
+  var QUAL_RPT_CONCL = "综合得分 = 基础数据 90.7 × 40% + 加工模型与算法 87.9 × 30% + 数据产品 90.0 × 30% = 89.7（示例值）。"
+    + "按《二维材料数据质量评价标准》V1.0 等级判定规则，本示例评价对象综合得分为 89.7 分，等级为良好（80—89 分）。"
+    + "各方面均达到合格及以上，其中基础数据与数据产品质量为优秀，数据加工模型与算法质量为良好，无单项不合格项。";
+
+  var QUAL_RPT_ADVICE = [
+    "一是元数据完整性（85 分）与样品信息完整性（88 分）仍有提升空间，建议补齐缺失的仪器参数与样品制备细节，并纳入统一的元数据模板。",
+    "二是校验与验证（85 分）、误差与收敛控制（82 分）处于良好档中低位，建议增加与实验值、权威数据库的交叉验证，并对关键物性补充收敛性测试记录。",
+    "三是数据产品时效性（85 分）方面，建议建立数据版本与更新机制，明确数据有效期，保障数据的可追溯与持续可用。"
+  ];
+
+  var QUAL_RPT_NOTE = "本报告中的所有评分、得分、等级与结论均为【示例值】，用于展示质量报告的模板结构与填写方式。"
+    + "正式使用时应以真实数据逐项评分，并替换全部示例内容；报告编号、评价人员、评价日期等亦应填写真实信息。";
+
+  /* 四档评分标准按换行拆行渲染，保持文档文案原样 */
+  function qualStdCells(text) {
+    return String(text || "").split("\n").map(function (s) {
+      return '<div class="rw-qstd-li">' + esc(s) + "</div>";
+    }).join("");
+  }
+
+  function qualStdTableHtml(tbl) {
+    return '<div class="rw-section-title" style="margin:0 0 6px;font-size:13px">' + esc(tbl.title) + "</div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr>'
+      + '<th style="width:52px">序号</th><th style="width:170px">评价指标</th><th style="width:250px">指标说明</th><th>评分标准</th>'
+      + "</tr></thead><tbody>"
+      + tbl.rows.map(function (r) {
+        return "<tr><td>" + esc(r[0]) + "</td><td><b>" + esc(r[1]) + "</b></td><td>" + esc(r[2]) + "</td>"
+          + "<td>" + qualStdCells(r[3]) + "</td></tr>";
+      }).join("")
+      + "</tbody></table></div>";
+  }
+
+  function qualRptGroupHtml(g) {
+    return '<div class="rw-section-title" style="margin:0 0 6px;font-size:13px">' + esc(g.table) + "</div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr>'
+      + '<th style="width:52px">序号</th><th style="width:190px">评价指标</th><th style="width:70px">得分</th><th style="width:80px">等级</th><th>主要依据</th>'
+      + "</tr></thead><tbody>"
+      + g.rows.map(function (r) {
+        return "<tr><td>" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td><td>" + esc(r[3]) + "</td><td>" + esc(r[4]) + "</td></tr>";
+      }).join("")
+      + '<tr><td></td><td><b>方面得分（平均）</b></td><td><b>' + esc(g.avg[0]) + "</b></td><td><b>" + esc(g.avg[1]) + "</b></td><td></td></tr>"
+      + "</tbody></table></div>";
+  }
+
+  /* 2026-10-20：「质量评价标准」按钮 —— 展示《二维材料数据质量评价标准》V1.0 文档内容 */
+  function procQualityStandard() {
+    closeMask("rwProcQstdMask");
+    var mask = document.createElement("div");
+    mask.className = "rw-mask";
+    mask.id = "rwProcQstdMask";
+    mask.setAttribute("data-rw-root", "procQstd");
+    mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true" style="width:min(1000px,100%)">'
+      + '<div class="rw-modal-head"><div><h3>二维材料数据质量评价标准</h3>'
+      + "<p>依据 GB/T 36344—2018《信息技术 数据质量评价指标》　T/CSTM 00120—2019《材料基因工程数据通则》</p></div>"
+      + '<div class="rw-modal-head-side"><span class="rw-tag rw-tag--open">V1.0</span>'
+      + '<button class="rw-modal-close" type="button" data-rw-act="proc-qstd-close">×</button></div></div>'
+      + '<div class="rw-modal-body"><div style="padding:4px 2px 6px">'
+      + '<div class="rw-qstd-basis" style="margin:0 0 12px">第一部分  二维材料数据质量评价标准　｜　版本：V1.0　　日期：2026年10月20日</div>'
+      + QUAL_STD_SECTIONS_HTML()
+      + "</div></div>"
+      + '<div class="rw-modal-foot"><button class="rw-btn" type="button" data-rw-act="proc-qstd-close">关闭</button></div>'
+      + "</div>";
+    mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwProcQstdMask"); });
+    document.body.appendChild(mask);
+  }
+
+  /* 第一部分正文：1 总则 / 2 术语和定义 / 3 评价框架 / 4—6 三张评分标准表 / 7 综合评价 */
+  function QUAL_STD_SECTIONS_HTML() {
+    var h = "";
+    h += '<div class="rw-qstd-sec"><h4>1  总则</h4>'
+      + '<h5>1.1  目的与依据</h5>'
+      + '<p class="rw-qstd-p">本标准的目的是建立二维材料数据在全生命周期加工过程中的质量评价准则，对基础数据（数据来源）、数据加工模型与算法、数据产品三个对象进行可量化的质量评价，为二维材料数据库建设、数据产品产出和质量持续改进提供统一依据。</p>'
+      + '<p class="rw-qstd-p">本标准主要依据 GB/T 36344—2018《信息技术 数据质量评价指标》规定的数据质量评价指标框架，结合 T/CSTM 00120—2019《材料基因工程数据通则》对样品信息、源数据（未经处理的数据）与衍生数据（经分析处理得到的数据）的分类方法，并参考 FAIR 数据原则（可发现、可获取、可互操作、可再利用）制定。</p>'
+      + '<h5>1.2  适用范围</h5>'
+      + '<p class="rw-qstd-p">本标准适用于二维材料（如石墨烯、过渡金属硫族化合物、二维绝缘体及异质结等）科研与工程数据的产生、加工、产品化的全流程质量评价，包括：数据来源与采集、数据加工模型与算法、数据产品产出三个环节，以及贯穿上述环节的质量监控与改进。</p>'
+      + '<h5>1.3  评价原则</h5>'
+      + '<p class="rw-qstd-p">质量评价遵循以下原则：一是全过程原则，质量评价贯穿于整个数据资源加工过程，覆盖数据产生、加工、产品化的每一阶段；二是可量化原则，每个评价指标均给出可量化的评分标准（百分制）；三是分级原则，按得分将数据质量划分为优秀、良好、合格、不合格四个等级；四是可追溯原则，评价结论应能追溯到具体的指标、数据和依据。</p>'
+      + "</div>";
+
+    h += '<div class="rw-qstd-sec"><h4>2  术语和定义</h4>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><tbody>'
+      + [["2.1  二维材料数据", "指与二维材料（在至少一个空间维度上尺度极薄、具有二维特性的材料）相关的成分、结构、工艺、表征、计算及其派生物性等数据，包括实验测量数据和计算模拟数据。"],
+         ["2.2  基础数据（数据来源）", "指作为数据加工输入的一手数据资源，即未经加工或仅经最基本采集的原始数据及其样品信息与元数据。在二维材料场景中，包括实验源数据（如 XRD 原始图谱、STM/AFM 原始图像）与计算源数据（如 DFT 计算的原始输出），以及与之关联的样品信息与元数据。"],
+         ["2.3  数据加工模型与算法", "指对基础数据进行清洗、标准化、解析、统计、建模、计算等处理所采用的模型、算法、软件及其参数配置。"],
+         ["2.4  数据产品", "指以规范化基础数据为输入，经数据加工模型与算法处理后产出的、可供直接使用的数据成果，如结构-性能数据产品、能带/DOS 数据集、HOMO-LUMO 能级库、压电张量库、声子谱库、机器学习预测模型及知识图谱等。"],
+         ["2.5  数据质量", "指数据在规范性、完整性、准确性、一致性、时效性、可访问性等方面满足既定要求与使用目的的程度。"]]
+        .map(function (t) {
+          return '<tr><td style="width:190px"><b>' + esc(t[0]) + "</b></td><td>" + esc(t[1]) + "</td></tr>";
+        }).join("")
+      + "</tbody></table></div></div>";
+
+    h += '<div class="rw-qstd-sec"><h4>3  评价框架与总体要求</h4>'
+      + '<h5>3.1  评价对象</h5>'
+      + '<p class="rw-qstd-p">质量评价对象包括三个方面：基础数据（数据来源）质量、数据加工模型与算法质量、数据产品质量。三个方面分别评价，再按权重综合。</p>'
+      + '<h5>3.2  评价指标</h5>'
+      + '<p class="rw-qstd-p">评价指标以 GB/T 36344—2018 规定的六项数据质量指标为总框架，即规范性、完整性、准确性、一致性、时效性、可访问性；并根据二维材料数据特点补充材料专用指标，分别落实到三个方面。</p>'
+      + '<h5>3.3  评价方法与计分</h5>'
+      + '<p class="rw-qstd-p">采用百分制评分。每个评价指标按A级：优秀（90—100 分）、B级：良好（80—89 分）、C级：合格（60—79 分）、D级：不合格（60 分以下）四个档次给出评分标准，由评价人员对照标准评分。方面的得分为该方面各项指标得分的算术平均值；综合得分为三个方面得分按权重加权求和。</p>'
+      + '<h5>3.4  评价等级</h5>'
+      + '<p class="rw-qstd-p">按综合得分划分等级：综合得分不低于 90 分为A级：优秀，80—89 分为B级：良好，60—79 分为C级：合格，60 分以下为D级：不合格。</p>'
+      + "</div>";
+
+    h += '<div class="rw-qstd-sec"><h4>4  基础数据（数据来源）质量评价</h4>'
+      + '<h5>4.1  指标设置</h5>'
+      + '<p class="rw-qstd-p">基础数据（数据来源）质量评价设置七个指标，涵盖来源、方法、信息完备性与可追溯性等方面。各指标及评分标准见表 1。</p>'
+      + qualStdTableHtml(QUAL_STD_TABLES.t1)
+      + "</div>";
+
+    h += '<div class="rw-qstd-sec"><h4>5  数据加工模型与算法质量评价</h4>'
+      + '<h5>5.1  指标设置</h5>'
+      + '<p class="rw-qstd-p">数据加工模型与算法质量评价设置七个指标，覆盖正确性、可复现性与过程可追溯性。各指标及评分标准见表 2。</p>'
+      + qualStdTableHtml(QUAL_STD_TABLES.t2)
+      + "</div>";
+
+    h += '<div class="rw-qstd-sec"><h4>6  数据产品质量评价</h4>'
+      + '<h5>6.1  指标设置</h5>'
+      + '<p class="rw-qstd-p">数据产品质量评价直接对齐 GB/T 36344—2018 的六项数据质量指标，即规范性、完整性、准确性、一致性、时效性、可访问性。各指标及评分标准见表 3。</p>'
+      + qualStdTableHtml(QUAL_STD_TABLES.t3)
+      + "</div>";
+
+    h += '<div class="rw-qstd-sec"><h4>7  综合评价</h4>'
+      + '<h5>7.1  权重分配</h5>'
+      + '<p class="rw-qstd-p">三个方面在综合评价中的权重按数据价值链条分配：基础数据（数据来源）质量权重为 40%，数据加工模型与算法质量权重为 30%，数据产品质量权重为 30%。如实际场景对某一方面有特殊侧重，可经评审确认后调整权重并在报告中说明。</p>'
+      + '<h5>7.2  综合得分计算</h5>'
+      + '<p class="rw-qstd-p">综合得分 = 基础数据方面得分 × 40% + 加工模型与算法方面得分 × 30% + 数据产品方面得分 × 30%。各分项得分与综合得分均保留一位小数。</p>'
+      + '<h5>7.3  等级判定</h5>'
+      + '<p class="rw-qstd-p">综合得分不低于 90 分为优秀；80—89 分为良好；60—79 分为合格；60 分以下为不合格。任一方面得分低于 60 分时，即使综合得分达到合格及以上，也应注明该方面不合格并给出限期整改要求。</p>'
+      + "</div>";
+
+    return h;
   }
 
   /* 步骤 6 质量评价
@@ -127615,8 +127960,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
       + "<th>数据字段</th><th>字段类型</th><th>示例值 / 取值</th><th>字段来源</th>"
       + "</tr></thead><tbody>" + fieldRows + "</tbody></table></div>"
-      + '<div style="margin-top:16px"><div class="rw-section-title">质量评价表</div>'
-      + '<div class="rw-card-note">按三维度填写评价结果与评价建议；填写完成后点击底部「完成加工」提交。</div>'
+      + '<div style="margin-top:16px">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+      + '<div class="rw-section-title" style="margin:0">质量评价表</div>'
+      + '<button class="rw-btn rw-btn--blue rw-btn--sm" type="button" data-rw-act="proc-qstd" style="margin-left:auto">质量评价标准</button></div>'
+      + '<div class="rw-card-note">按三维度填写评价结果与评价建议；评价口径见《二维材料数据质量评价标准》V1.0，可点击右侧「质量评价标准」查看；填写完成后点击底部「完成加工」提交。</div>'
       + '<div class="rw-tbl-wrap" style="margin-top:10px"><table class="rw-tbl"><thead><tr>'
       + "<th>评价维度</th><th>评价结果</th><th>评价建议</th>"
       + "</tr></thead><tbody>" + qaRows + "</tbody></table></div></div>"
@@ -127775,46 +128123,92 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     toast("加工任务 " + j.id + " 已完成（版本 " + j.version + "）", "ok");
   }
 
+
+  /* 2026-10-20：加工报告 —— 内容结构 / 字段 / 文案对齐《二维材料数据质量评价标准》V1.0
+     第二部分「二维材料数据质量报告（示例）」：
+       1 报告基本信息    2 评价对象与范围
+       3 基础数据（数据来源）质量评价结果（表 4）
+       4 数据加工模型与算法质量评价结果（表 5）
+       5 数据产品质量评价结果（表 6）
+       6 综合评价结论    7 问题与改进建议    8 附注：示例数据说明
+     评分、得分、等级与结论均为【示例值】，与文档保持一致。 */
   function procReport(id) {
     var j = procJobs().filter(function (x) { return x.id === id; })[0];
     if (!j) return;
     closeMask("rwProcReportMask");
-    var steps = PROC_STEP_TITLES.map(function (t, i) {
-      return "<tr><td>步骤 " + (i + 1) + "：" + esc(t) + "</td><td>" + (j.done[i + 1] ? '<span class="rw-tag rw-tag--done">已完成</span>' : '<span class="rw-tag rw-tag--gray">未执行</span>') + "</td><td>" + esc(j.done[i + 1] || "—") + "</td></tr>";
-    }).join("");
+    var mo = procModelOf(j.model.key) || {};
+    var lvKey = (j.product.datasets || [])[0] || "";
+    var lv = procLevelOf(lvKey);
+    var srcN = j.filter.executed ? (j.filter.rows || []).length : (j.sourceIds || []).length;
+    var short = C().short || "材料";
+
+    var basic = [
+      ["报告编号", j.id + "（示例）"],
+      ["报告名称", (j.name || "加工任务") + "质量评价报告（示例）"],
+      ["评价对象", "基础数据、数据加工模型与算法、数据产品（各一处代表性对象）"],
+      ["评价依据", "《二维材料数据质量评价标准》V1.0；GB/T 36344—2018"],
+      ["评价日期", (j.done[6] || nowText()) + "（示例）"],
+      ["评价人员", "数据加工工程师（示例）"]
+    ];
+
+    var scope = [
+      ["基础数据", "来源于公开材料数据库与实验室制备的 " + srcN + " 组" + short + "结构表征数据，包含晶格常数、键长、XRD 图谱与 STM 图像，部分条目具有 DOI/CSTR 资源标识。"],
+      ["数据加工模型与算法", "使用第一性原理计算软件（示例：" + (mo.name || "—") + "）对结构进行优化与电子结构计算，输入为「" + (mo.input || "—") + "」，处理逻辑为「" + (mo.logic || "—") + "」，并以收敛判据进行校验。"],
+      ["数据产品", "产出" + short + "能带结构、态密度（DOS）、带隙与晶格常数等物性数据产品，数据产品级别为 " + (lvKey || "—") + " 级" + (lv ? "（" + lv.desc + "）" : "") + "，格式为标准化结构文件与数值表，用于" + short + "性能检索与建模。"]
+    ];
+
+    function kvTable(rows, w1, h1, h2) {
+      return '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr>'
+        + '<th style="width:' + w1 + 'px">' + esc(h1) + "</th><th>" + esc(h2) + "</th>"
+        + "</tr></thead><tbody>"
+        + rows.map(function (r) {
+          return "<tr><td><b>" + esc(r[0]) + "</b></td><td>" + esc(r[1]) + "</td></tr>";
+        }).join("")
+        + "</tbody></table></div>";
+    }
+
+    var body = '<div class="rw-qstd">'
+      + '<div class="rw-qstd-sec"><h4>1  报告基本信息</h4>' + kvTable(basic, 120, "项目", "内容") + "</div>"
+      + '<div class="rw-qstd-sec"><h4>2  评价对象与范围</h4>'
+      + '<p class="rw-qstd-p">本报告对以下代表性对象进行质量评价（均为示例描述）：</p>'
+      + kvTable(scope, 150, "评价对象", "范围说明") + "</div>";
+
+    QUAL_RPT_GROUPS.forEach(function (g, i) {
+      var sec = (i === 0 ? 3 : (i === 1 ? 4 : 5));
+      body += '<div class="rw-qstd-sec"><h4>' + sec + "  " + esc(g.title) + "</h4>"
+        + qualRptGroupHtml(g) + "</div>";
+    });
+
+    body += '<div class="rw-qstd-sec"><h4>6  综合评价结论</h4>'
+      + '<p class="rw-qstd-p">' + esc(QUAL_RPT_CONCL) + "</p>"
+      + '<div class="rw-kv" style="margin-top:8px">'
+      + "<div><b>综合得分</b>89.7（示例值）</div>"
+      + "<div><b>评价等级</b>良好（80—89 分）</div></div></div>"
+      + '<div class="rw-qstd-sec"><h4>7  问题与改进建议</h4>'
+      + '<p class="rw-qstd-p">结合评价结果，本示例提出以下改进建议（示例）：</p>'
+      + '<ol class="rw-qstd-ol">'
+      + QUAL_RPT_ADVICE.map(function (a) { return "<li>" + esc(a) + "</li>"; }).join("")
+      + "</ol></div>"
+      + '<div class="rw-qstd-sec"><h4>8  附注：示例数据说明</h4>'
+      + '<p class="rw-qstd-p">' + esc(QUAL_RPT_NOTE) + "</p></div>"
+      + "</div>";
+
     var mask = document.createElement("div");
     mask.className = "rw-mask";
     mask.id = "rwProcReportMask";
     mask.setAttribute("data-rw-root", "procReport");
-    mask.innerHTML = '<div class="rw-modal rw-modal--narrow" style="width:min(760px,100%)">'
-      + '<div class="rw-modal-head"><div><h3>' + esc(j.name || "加工任务") + "</h3><p>" + esc(j.id) + " · 加工报告</p></div>"
-      + '<div class="rw-modal-head-side"><span class="rw-tag rw-tag--open">' + esc(j.version) + '</span><button class="rw-modal-close" type="button" data-rw-act="proc-report-close">×</button></div></div>'
-      + '<div class="rw-modal-body">'
-      + '<div class="rw-kv"><div><b>目标用途</b>' + esc(j.spec.purpose || "-") + "</div><div><b>输出格式</b>" + esc(j.spec.format || "-") + "</div>"
-      + "<div><b>精度要求</b>" + esc(j.spec.precision || "-") + "</div><div><b>数据源</b>" + (j.sourceIds || []).length + " 条</div>"
-      + "<div><b>筛选结果</b>" + (j.filter.executed ? j.filter.rows.length + " 条 / " + j.filter.groups.length + " 组" : "未执行") + "</div>"
-      + "<div><b>加工模型</b>" + esc((procModelOf(j.model.key) || {}).name || "-") + "</div>"
-      + "<div><b>数据产品</b>" + esc((j.product.datasets || []).length ? (j.product.datasets || []).map(function (k4) {
-          var d4 = procDatasetOf(k4);
-          return d4 ? d4.title : k4;
-        }).join("、") : "-") + "</div>"
-      + "<div><b>当前版本</b>" + esc(j.version) + "</div></div>"
-      + '<div class="rw-section-title">执行进度</div>'
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>加工步骤</th><th>状态</th><th>完成时间</th></tr></thead><tbody>' + steps + "</tbody></table></div>"
-      + (j.quality.executed ? '<div class="rw-section-title" style="margin-top:14px">质量评价</div>'
-        + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>评价维度</th><th>实测值</th><th>判定</th><th>处理</th></tr></thead><tbody>'
-        + j.quality.items.map(function (it) {
-          var meta = PROC_QUALITY.filter(function (q) { return q.key === it.key; })[0] || {};
-          return "<tr><td>" + esc(meta.dim) + "</td><td>" + esc(it.measured) + "</td><td>" + (it.ok ? '<span class="rw-tag rw-tag--done">合格</span>' : '<span class="rw-tag rw-tag--fail">不合格</span>') + "</td><td>" + esc(it.handled || "—") + "</td></tr>";
-        }).join("") + "</tbody></table></div>" : "")
-      + "</div>"
+    mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true" style="width:min(1000px,100%)">'
+      + '<div class="rw-modal-head"><div><h3>' + esc(j.name || "加工任务") + "</h3>"
+      + "<p>" + esc(j.id) + " · 加工报告</p></div>"
+      + '<div class="rw-modal-head-side"><span class="rw-tag rw-tag--open">' + esc(j.version) + "</span>"
+      + '<button class="rw-modal-close" type="button" data-rw-act="proc-report-close">×</button></div></div>'
+      + '<div class="rw-modal-body"><div style="padding:4px 2px 6px">' + body + "</div></div>"
       + '<div class="rw-modal-foot"><button class="rw-btn" type="button" data-rw-act="proc-report-close">关闭</button>'
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-open" data-id="' + esc(j.id) + '">继续加工</button></div>'
       + "</div>";
     mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwProcReportMask"); });
     document.body.appendChild(mask);
   }
-
   /* ==========================================================================
      闭环补充层 —— 依据《低维材料主题库》清单 编号 6~22 补齐
      原则：
@@ -128899,6 +129293,15 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         return;
       case "proc-report-close":
         closeMask("rwProcReportMask");
+        return;
+      case "proc-qstd":
+        procQualityStandard();
+        return;
+      case "proc-qstd-close":
+        closeMask("rwProcQstdMask");
+        return;
+      case "proc-level-hint":
+        procLevelHint(node);
         return;
       case "proc-del":
         (function () {
