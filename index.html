@@ -32110,7 +32110,7 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
           <span class="chip">关键词检索</span>
           <span class="chip">催化性质数据浏览</span>
           <span class="chip">外部关联</span>
-          <span class="chip">批量下载</span>
+          <span class="chip">催化数据批量下载</span>
         </div>
 
         <div class="card pad">
@@ -33284,7 +33284,7 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
   <div class="overlay" id="twodDetailDownloadModal">
     <div class="modal modal-md">
       <div class="modal-header">
-        <h3 id="twodDetailDownloadTitle">确认下载</h3>
+        <h3 id="twodDetailDownloadTitle">二维材料数据共享</h3>
         <button class="modal-close" type="button" data-close-modal="twodDetailDownloadModal">×</button>
       </div>
       <div class="modal-body">
@@ -33953,7 +33953,7 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
   <div class="overlay" id="convertModal">
     <div class="modal modal-lg">
       <div class="modal-header">
-        <h3>文件转换</h3>
+        <h3>文件格式转换</h3>
         <button class="modal-close" type="button" data-close-modal="convertModal">×</button>
       </div>
       <div class="modal-body modal-scroll">
@@ -36330,7 +36330,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       catalyst: { group: "applications", portal: "applications", title: "催化材料应用", breadcrumbParent: "低维材料主题应用" },
       "catalyst-detail": { group: "applications", portal: "applications", navPage: "catalyst", title: "催化材料详情", breadcrumbParent: "催化材料应用" },
       "catalyst-site": { group: "applications", portal: "applications", navPage: "catalyst", title: "活性位点分析", breadcrumbParent: "催化材料应用" },
-      "catalyst-compare": { group: "applications", portal: "applications", navPage: "catalyst", title: "材料对比", breadcrumbParent: "催化材料应用" },
+      "catalyst-compare": { group: "applications", portal: "applications", navPage: "catalyst", title: "催化材料对比", breadcrumbParent: "催化材料应用" },
       "catalyst-build": { group: "applications", portal: "applications", navPage: "catalyst", title: "催化构建", breadcrumbParent: "催化材料应用" },
       "data-submit": { group: "workflow", portal: "workflow", title: "数据上传", breadcrumbParent: "数据管理" },
       "my-submissions": { group: "workflow", portal: "workflow", title: "我的提交", breadcrumbParent: "数据管理" },
@@ -42944,7 +42944,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       }
       twodDetailDownloadState.type = type;
       twodDetailDownloadState.label = label;
-      document.getElementById("twodDetailDownloadTitle").textContent = "确认下载";
+      document.getElementById("twodDetailDownloadTitle").textContent = "二维材料数据共享";
       document.getElementById("twodDetailDownloadName").textContent = label;
       document.getElementById("twodDetailDownloadText").textContent = `确认下载${material.name}的${label}吗？`;
       openModal("twodDetailDownloadModal");
@@ -47135,11 +47135,11 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       const shouldSelect = typeof forceChecked === "boolean" ? forceChecked : index === -1;
       const allowedIds = new Set(state.catalystCompareAllowedIds || []);
       if (shouldSelect && allowedIds.size && !allowedIds.has(materialId)) {
-        showNotify("warning", "材料对比", "暂无对比数据");
+        showNotify("warning", "催化材料对比", "暂无对比数据");
         return;
       }
       if (shouldSelect && index === -1 && selected.length >= 10) {
-        showNotify("warning", "材料对比", "对比材料数量已达上限");
+        showNotify("warning", "催化材料对比", "对比材料数量已达上限");
         return;
       }
       if (shouldSelect) {
@@ -52520,7 +52520,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         if (type === "visual-page") label = getTwodVisualProfile(material).currentLabel;
         twodDetailDownloadState.type = type;
         twodDetailDownloadState.label = label;
-        document.getElementById("twodDetailDownloadTitle").textContent = "确认下载";
+        document.getElementById("twodDetailDownloadTitle").textContent = "二维材料数据共享";
         document.getElementById("twodDetailDownloadName").textContent = label;
         document.getElementById("twodDetailDownloadText").textContent = `确认下载${material.name}的${label}吗？`;
         openModal("twodDetailDownloadModal");
@@ -52590,7 +52590,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const payload = buildTwodCurrentVisualDownloadPayload(material, visualKey);
         if (!payload) return;
         triggerTwodDetailDownload(payload.filename, payload.content, payload.mime);
-        showToast("下载图谱", `${material.name} 的 ${payload.label} 已开始下载。`);
+        showToast("二维材料数据共享", `${material.name} 的 ${payload.label} 已开始下载。`);
       }
 
       function openTwodVisualPreviewModal(material, visualKey) {
@@ -52774,7 +52774,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const material = getCurrentMaterial();
         const currentVisual = materialVisualTabs.find((item) => item.key === state.selectedMaterialVisual)?.label || "当前图谱";
         const scope = document.getElementById("materialVisualDownloadScope").value === "all" ? "全部图谱" : currentVisual;
-        if (material) showToast("下载图谱", `${material.name} 的${scope}已准备。`);
+        if (material) showToast("二维材料数据共享", `${material.name} 的${scope}已准备。`);
       });
 
       document.getElementById("recordDetailDownloadBtn")?.addEventListener("click", (event) => {
@@ -53581,7 +53581,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         <div class="twod-toolbar-count">共 <strong>${total}</strong> 条</div>
         <div class="twod-toolbar-actions">
           <details class="twod-toolbar-menu">
-            <summary>排序▾</summary>
+            <summary>特定性质排序▾</summary>
             <div class="twod-toolbar-panel">
               <button class="twod-toolbar-option${sortActive ? "" : " active"}" type="button" data-twod-result-sort="">默认排序</button>
               ${renderTwodToolbarOptions(TWOD_RESULT_SORT_GROUPS, sortActive, "data-twod-result-sort")}
@@ -54736,7 +54736,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         const material = getCurrentMaterial();
         const currentVisual = materialVisualTabs.find((item) => item.key === state.selectedMaterialVisual)?.label || "当前图谱";
         const scope = document.getElementById("materialVisualDownloadScope").value === "all" ? "全部图谱" : currentVisual;
-        if (material) showToast("下载图谱", `${material.name} 的${scope}已准备。`);
+        if (material) showToast("二维材料数据共享", `${material.name} 的${scope}已准备。`);
       });
 
       document.getElementById("recordDetailDownloadBtn")?.addEventListener("click", (event) => {
@@ -60391,7 +60391,7 @@ function renderMlffTopicSampleTable(data) {
 
     const CATALYST_WORKBENCH_TITLES = {
       site: "活性位点分析",
-      compare: "材料对比",
+      compare: "催化材料对比",
       build: "催化构建"
     };
 
@@ -62655,7 +62655,7 @@ function renderMlffTopicSampleTable(data) {
           <div class="table-head">
             <div class="catalyst-workbench-head">
               <div>
-                <h3>材料对比</h3>
+                <h3>催化材料对比</h3>
               </div>
               <div class="catalyst-compare-summary">
                 <span>当前已选材料</span>
@@ -62734,7 +62734,7 @@ function renderMlffTopicSampleTable(data) {
           <div class="table-head">
             <div class="catalyst-workbench-head">
               <div>
-                <h3>材料对比</h3>
+                <h3>催化材料对比</h3>
               </div>
               <div class="catalyst-compare-summary">
                 <span>平台可对比材料</span>
@@ -62886,7 +62886,7 @@ function renderMlffTopicSampleTable(data) {
           <div class="table-head">
             <div class="catalyst-workbench-head">
               <div>
-                <h3>材料对比</h3>
+                <h3>催化材料对比</h3>
               </div>
               <div class="catalyst-compare-summary">
                 <span>平台可对比材料</span>
@@ -63820,7 +63820,7 @@ function renderMlffTopicSampleTable(data) {
                 <p class="twod-result-hint">${getCatalystPlatformHint(resultList)}</p>
               </div>
               <div class="twod-result-actions">
-                ${!hasLowDimRealCaseDataset("catalyst") && state.catalystBatchSelection.length ? `<button class="btn" type="button" data-catalyst-batch-download>批量下载</button>` : ""}
+                ${!hasLowDimRealCaseDataset("catalyst") && state.catalystBatchSelection.length ? `<button class="btn" type="button" data-catalyst-batch-download>催化数据批量下载</button>` : ""}
                 <button class="btn-primary" type="button" data-catalyst-open-upload>数据上传</button>
               </div>
             </div>
@@ -66666,7 +66666,8 @@ function renderMlffTopicSampleTable(data) {
     function renderToolOverviewPage() {
       const mount = document.getElementById("toolPageMount");
       if (!mount) return;
-      const displayCategories = Object.keys(toolCategoryConfigs).filter((categoryName) => categoryName !== "机器学习模型接口");
+      /* 2026-10-22：新增「机器学习模型接口」Tab（传统机器学习 / 全连接神经网络 / 经典图神经网络三个接口） */
+      const displayCategories = Object.keys(toolCategoryConfigs);
       const activeCategory = displayCategories.includes(state.selectedToolCategory) ? state.selectedToolCategory : displayCategories[0];
       state.selectedToolCategory = activeCategory;
       const config = toolCategoryConfigs[activeCategory];
@@ -85653,15 +85654,15 @@ const MLFF_STRUCTURE_SOURCE = {
               <tbody>
                 <tr><th colspan="2">文件下载</th></tr>
                 <tr>
-                  <td class="is-row-head">参数力场文件下载</td>
+                  <td class="is-row-head">参数力场文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('package')">下载</button><span>包含分子结构PDB文件和力场XML文件</span></div></td>
                 </tr>
                 <tr>
-                  <td class="is-row-head">PDB结构文件下载</td>
+                  <td class="is-row-head">PDB 文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('pdb')">下载</button><span>包含原子种类和原子三维坐标</span></div></td>
                 </tr>
                 <tr>
-                  <td class="is-row-head">XML力场文件下载</td>
+                  <td class="is-row-head">XML 力场文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('xml')">下载</button><span>包含力场参数映射和结构节点信息</span></div></td>
                 </tr>
               </tbody>
@@ -85704,15 +85705,15 @@ const MLFF_STRUCTURE_SOURCE = {
               <tbody>
                 <tr><th colspan="2">文件下载</th></tr>
                 <tr>
-                  <td class="is-row-head">参数力场文件下载</td>
+                  <td class="is-row-head">参数力场文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('package')">下载</button><span>包含分子结构PDB文件和力场XML文件</span></div></td>
                 </tr>
                 <tr>
-                  <td class="is-row-head">PDB结构文件下载</td>
+                  <td class="is-row-head">PDB 文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('pdb')">下载</button><span>包含原子种类和原子三维坐标</span></div></td>
                 </tr>
                 <tr>
-                  <td class="is-row-head">XML力场文件下载</td>
+                  <td class="is-row-head">XML 力场文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('xml')">下载</button><span>包含力场参数映射和结构节点信息</span></div></td>
                 </tr>
               </tbody>
@@ -85755,15 +85756,15 @@ const MLFF_STRUCTURE_SOURCE = {
               <tbody>
                 <tr><th colspan="2">文件下载</th></tr>
                 <tr>
-                  <td class="is-row-head">参数力场文件下载</td>
+                  <td class="is-row-head">参数力场文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('package')">下载</button><span>包含分子结构PDB文件和力场XML文件</span></div></td>
                 </tr>
                 <tr>
-                  <td class="is-row-head">PDB结构文件下载</td>
+                  <td class="is-row-head">PDB 文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('pdb')">下载</button><span>包含原子种类和原子三维坐标</span></div></td>
                 </tr>
                 <tr>
-                  <td class="is-row-head">XML力场文件下载</td>
+                  <td class="is-row-head">XML 力场文件</td>
                   <td><div class="mlff-inline-actions"><button class="twod-detail-link-btn" type="button" onclick="return triggerMlffDownload('xml')">下载</button><span>包含力场参数映射和结构节点信息</span></div></td>
                 </tr>
               </tbody>
@@ -88857,7 +88858,7 @@ if (state.selectedTwodDetailSection === "molecule") {
         file: `${material.id}.vasp`
       }));
       if (!rows.length) {
-        showNotify("warning", "批量下载", "当前没有可下载的材料。");
+        showNotify("warning", "催化数据批量下载", "当前没有可下载的材料。");
         return false;
       }
       if (!window.confirm(`确认下载 ${rows.length} 个催化材料的批量代码包吗？`)) return false;
@@ -88872,7 +88873,7 @@ if (state.selectedTwodDetailSection === "molecule") {
         }))
       }, null, 2);
       triggerTwodDetailDownload(`catalyst_batch_${rows.length}.zip`, payload, "application/octet-stream");
-      showToast("批量下载", `已为 ${rows.length} 个催化材料生成批量下载包。`);
+      showToast("催化数据批量下载", `已为 ${rows.length} 个催化材料生成批量下载包。`);
       return false;
     }
 
@@ -88925,7 +88926,7 @@ if (state.selectedTwodDetailSection === "molecule") {
                   <p class="twod-result-hint">${getCatalystPlatformHint(resultList)}</p>
                 </div>
                 <div class="twod-result-actions">
-                  ${!hasLowDimRealCaseDataset("catalyst") && state.catalystBatchSelection.length ? `<button class="btn" type="button" data-catalyst-batch-download>批量下载</button>` : ""}
+                  ${!hasLowDimRealCaseDataset("catalyst") && state.catalystBatchSelection.length ? `<button class="btn" type="button" data-catalyst-batch-download>催化数据批量下载</button>` : ""}
                 </div>
               </div>
               <div class="table-wrap twod-result-table-wrap">
@@ -89309,7 +89310,7 @@ function renderCatalystDetailTreeOverride() {
             </table>
           </section>
           <section class="twod-detail-visual-card">
-            <h5>3D晶体结构</h5>
+            <h5>催化材料数据可视化</h5>
             <div class="catalyst-detail-stage"><div id="catalystVisualMainCanvas"></div></div>
             <div class="twod-structure-meta">
               <article class="twod-structure-meta-item"><span>数据来源</span><strong>${material.dataSource}</strong></article>
@@ -91938,7 +91939,7 @@ function escapeHtml(value) {
       if (type === "visual-page") label = getTwodVisualProfile(material).currentLabel;
       twodDetailDownloadState.type = type;
       twodDetailDownloadState.label = label;
-      document.getElementById("twodDetailDownloadTitle").textContent = "确认下载";
+      document.getElementById("twodDetailDownloadTitle").textContent = "二维材料数据共享";
       document.getElementById("twodDetailDownloadName").textContent = label;
       document.getElementById("twodDetailDownloadText").textContent = `确认下载${material.name}的${label}吗？`;
       openModal("twodDetailDownloadModal");
@@ -91999,7 +92000,7 @@ function escapeHtml(value) {
       if (!payload) return;
       if (visualKey) state.selectedMaterialVisual = visualKey;
       triggerTwodDetailDownload(payload.filename, payload.content, payload.mime);
-      showToast("下载图谱", `${material.name} 的 ${payload.label} 已开始下载。`);
+      showToast("二维材料数据共享", `${material.name} 的 ${payload.label} 已开始下载。`);
     }
 
     function openTwodVisualPreviewModal(material, visualKey) {
@@ -95095,7 +95096,7 @@ function escapeHtml(value) {
         if (typeof OPTO_MODE_CONFIG !== "undefined") {
           OPTO_MODE_CONFIG.code.placeholder = "请输入材料编号进行检索，如OP-001";
           OPTO_MODE_CONFIG.code.helper = "支持按材料编号进行准确或模糊检索。";
-          OPTO_MODE_CONFIG.combo.label = "条件组合筛选";
+          OPTO_MODE_CONFIG.combo.label = "条件组合检索";
           OPTO_MODE_CONFIG.combo.helper = "";
           OPTO_MODE_CONFIG.property.helper = "先选择性质类型，再勾选对应条件，系统按所选性质数据筛选列表。";
         }
@@ -96362,7 +96363,7 @@ function escapeHtml(value) {
 
       const materialConversionModules = {
         twod: {
-          title: "二维材料文件转换",
+          title: "二维材料文件格式转换",
           eyebrow: "二维材料数据应用",
           desc: "支持二维材料结构文件、计算结果和图谱源数据的格式统一化转换，转换结果可继续下载或作为更新记录维护。",
           materialLabel: "二维材料",
@@ -97176,7 +97177,7 @@ function escapeHtml(value) {
         return `
           <div class="module-tab-strip">
             <button class="module-tab-btn${active === "search" ? " active" : ""}" type="button" data-module-tab="${moduleKey}" data-module-target="search">数据检索</button>
-            <button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${moduleKey}" data-module-target="convert">文件转换</button>
+            <button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${moduleKey}" data-module-target="convert">${moduleKey === "twod" ? "文件格式转换" : "文件转换"}</button>
           </div>
         `;
       }
@@ -98937,10 +98938,10 @@ function renderElectrolyteCategoryTabs() {
                     <p class="twod-result-hint">${getCatalystPlatformHint(resultList)}</p>
                   </div>
                   <div class="twod-result-actions">
-                    <button class="btn" type="button" data-catalyst-workbench="site">活性位点分析</button>
-                    <button class="btn" type="button" data-catalyst-workbench="compare">材料对比</button>
+                    <button class="btn" type="button" data-catalyst-workbench="site">催化活性位点分析</button>
+                    <button class="btn" type="button" data-catalyst-workbench="compare">催化材料对比</button>
                     <button class="btn" type="button" data-catalyst-workbench="build">催化构建</button>
-                    ${!hasLowDimRealCaseDataset("catalyst") && state.catalystBatchSelection.length ? `<button class="btn" type="button" data-catalyst-batch-download>批量下载</button>` : ""}
+                    ${!hasLowDimRealCaseDataset("catalyst") && state.catalystBatchSelection.length ? `<button class="btn" type="button" data-catalyst-batch-download>催化数据批量下载</button>` : ""}
                   </div>
                 </div>
                 <div class="table-wrap twod-result-table-wrap">
@@ -103762,11 +103763,11 @@ function renderElectrolyteCategoryTabs() {
       const material = typeof getCurrentMaterial === "function" ? getCurrentMaterial() : null;
       const payload = buildAllTwodVisualChartsDownloadPayload(material);
       if (!payload) {
-        if (typeof showToast === "function") showToast("下载图表", "当前材料暂无可下载图表。");
+        if (typeof showToast === "function") showToast("二维材料数据共享", "当前材料暂无可下载图表。");
         return;
       }
       triggerTwodDetailDownload(payload.filename, payload.content, payload.mime);
-      if (typeof showToast === "function") showToast("下载图表", `${material?.name || "当前材料"} 的全部图表已开始下载。`);
+      if (typeof showToast === "function") showToast("二维材料数据共享", `${material?.name || "当前材料"} 的全部图表已开始下载。`);
     }, true);
 
     replaceTwodPropertySchemas();
@@ -105673,7 +105674,7 @@ function renderElectrolyteCategoryTabs() {
           <div class="cross-db-toolbar-actions">
             ${config.leadingActions ? `<div class="cross-db-toolbar-leading-actions">${config.leadingActions.map((item) => `<button class="btn-primary" type="button" ${item.attribute || ""}>${html(item.label)}</button>`).join("")}</div>` : ""}
             ${config.showSort !== false ? `<details class="cross-db-toolbar-menu">
-              <summary>排序▾</summary>
+              <summary>特定性质排序▾</summary>
               <div class="cross-db-toolbar-panel">${toolbarPanel(config.sorts || [])}</div>
             </details>` : ""}
             ${config.showFilter !== false ? `<details class="cross-db-toolbar-menu">
@@ -106250,8 +106251,8 @@ function renderElectrolyteCategoryTabs() {
           showFilter: false,
           columns: ["序号", "材料编号", "材料名称", "化学式", "分类标签", "材料成分", "中间产物", "材料描述", "表面参数", "数据来源", "活化能", "反应路径信息", "操作"],
           leadingActions: [
-            { label: "活性位点分析", attribute: 'data-catalyst-workbench="site"' },
-            { label: "材料对比", attribute: 'data-catalyst-workbench="compare"' },
+            { label: "催化活性位点分析", attribute: 'data-catalyst-workbench="site"' },
+            { label: "催化材料对比", attribute: 'data-catalyst-workbench="compare"' },
             { label: "催化构建", attribute: 'data-catalyst-workbench="build"' }
           ]
         }
@@ -106786,7 +106787,8 @@ function renderElectrolyteCategoryTabs() {
       const renderModuleTabs = (module, active) => `
         <div class="module-tab-strip">
           <button class="module-tab-btn${active === "search" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="search">数据检索</button>
-          ${["opto", "catalyst"].includes(module) ? "" : `<button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="convert">文件转换</button>`}
+          ${["opto", "catalyst"].includes(module) ? "" : `<button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="convert">${module === "twod" ? "文件格式转换" : "文件转换"}</button>`}
+          ${module === "mlff" ? `<button class="module-tab-btn${active === "share" ? " active" : ""}" type="button" data-module-tab="mlff" data-module-target="share">机器学习力场材料数据共享</button>` : ""}
         </div>
       `;
 
@@ -111398,7 +111400,7 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
       batchButton.className = siteButton.className || "btn";
       batchButton.type = "button";
       batchButton.dataset.catalystBatchDownload = "";
-      batchButton.textContent = "批量下载";
+      batchButton.textContent = "催化数据批量下载";
     }
     if (batchButton !== siteButton.previousElementSibling) {
       actionRow.insertBefore(batchButton, siteButton);
@@ -111442,13 +111444,13 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
         ? appState.catalystBatchSelection.map((id) => typeof findCatalystMaterial === "function" ? findCatalystMaterial(id) : null).filter(Boolean)
         : [];
       if (!selected.length) {
-        if (typeof showNotify === "function") showNotify("warning", "批量下载", "请先勾选需要下载的催化材料。");
+        if (typeof showNotify === "function") showNotify("warning", "催化数据批量下载", "请先勾选需要下载的催化材料。");
         return;
       }
       if (typeof triggerCatalystBatchDownload === "function") {
         triggerCatalystBatchDownload(selected);
       } else if (typeof showToast === "function") {
-        showToast("批量下载", `已选择 ${selected.length} 个催化材料。`);
+        showToast("催化数据批量下载", `已选择 ${selected.length} 个催化材料。`);
       }
     }, true);
   };
@@ -111953,7 +111955,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     return `<div class="twod-detail-page-head"><div><h4>${safe(material.name)} · 基础信息</h4><p>按数据集分类查看催化材料的元素、结构与体系特征。</p></div></div>
       <div class="catalyst-feature-bar"><div class="catalyst-feature-tabs" role="tablist"><button class="catalyst-feature-tab${active==='element'?' active':''}" type="button" data-catalyst-feature-tab="element">元素特征数据</button><button class="catalyst-feature-tab${active==='structure'?' active':''}" type="button" data-catalyst-feature-tab="structure">结构特征数据</button><button class="catalyst-feature-tab${active==='system'?' active':''}" type="button" data-catalyst-feature-tab="system">体系特征数据</button></div><div class="catalyst-dataset-tags catalyst-dataset-tags-inline">${tagHtml}</div></div>
       <div class="catalyst-feature-shell"><section class="catalyst-feature-card"><h5>${active==='element'?'元素特征数据':active==='structure'?'结构特征数据':'体系特征数据'}</h5><div class="catalyst-feature-list">${grid}</div>${active==='system' ? `<div style="margin-top:14px"><h5>反应路径信息</h5>${routeMarkup(material)}</div>` : ''}<div style="margin-top:14px"><button class="catalyst-poscar-download" type="button" data-catalyst-poscar-download="${safe(material.id)}">⇩ POSCAR下载</button></div></section>
-      <aside class="catalyst-feature-side"><section class="twod-detail-visual-card"><h5>3D晶体结构</h5><div class="catalyst-detail-stage">${realViewer || '<div id="catalystVisualMainCanvas"></div>'}</div><p class="chart-caption">保留 3D 结构查看、旋转与缩放能力。</p></section></aside></div>`;
+      <aside class="catalyst-feature-side"><section class="twod-detail-visual-card"><h5>催化材料数据可视化</h5><div class="catalyst-detail-stage">${realViewer || '<div id="catalystVisualMainCanvas"></div>'}</div><p class="chart-caption">保留 3D 结构查看、旋转与缩放能力。</p></section></aside></div>`;
   };
   if (typeof window.renderCatalystDetailBasicPage !== 'function' && oldBasic) window.renderCatalystDetailBasicPage = oldBasic;
 
@@ -116975,8 +116977,95 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   window.hasMlffAppliedSearchOverride = hasMlffAppliedSearchOverride;
 
   var baseRenderModule = typeof renderMlffModule === "function" ? renderMlffModule : null;
+
+  /* ==================================================================
+     2026-10-22（三.4）：机器学习力场材料数据共享
+     ------------------------------------------------------------------
+     统一标题：机器学习力场材料数据共享
+     功能分组 / 命名规范（集中在本配置层定义，避免散落多处改不到）：
+       (1) 力场参数文件 —— 参数力场文件（原「参数力场文件下载」）
+       (2) 结构文件     —— PDB 文件（原「PDB 文件下载 / PDB结构文件下载」）
+       (3) 力场定义文件 —— XML 力场文件
+       (4) 格式转换     —— 数据文件转换 / 拓扑文件转换 / 力场文件转换
+       (5) 数据更新     —— 场数据更新
+     所有按钮复用既有处理器（triggerMlffDownload / data-module-tab / data-mlff-field-update），
+     不新增任何接口调用，不改动原有交互、样式与权限校验。
+     ================================================================== */
+  var MLFF_SHARE_GROUPS = [
+    {
+      key: "package", title: "力场参数文件", desc: "成套力场参数，含分子结构 PDB 文件与力场 XML 文件",
+      items: [{ label: "参数力场文件", desc: "包含分子结构 PDB 文件和力场 XML 文件", action: "download", kind: "package", btn: "下载" }]
+    },
+    {
+      key: "structure", title: "结构文件", desc: "描述体系原子种类与三维坐标的结构文件",
+      items: [{ label: "PDB 文件", desc: "包含原子种类和原子三维坐标", action: "download", kind: "pdb", btn: "下载" }]
+    },
+    {
+      key: "define", title: "力场定义文件", desc: "力场参数映射与结构节点信息",
+      items: [{ label: "XML 力场文件", desc: "包含力场参数映射和结构节点信息", action: "download", kind: "xml", btn: "下载" }]
+    },
+    {
+      key: "convert", title: "格式转换", desc: "按转换对象发起格式转换，转换记录可在「文件转换」中查询与下载",
+      items: [
+        { label: "数据文件转换", desc: "结构文件与计算结果数据统一为目标格式", action: "convert" },
+        { label: "拓扑文件转换", desc: "常用拓扑文件格式互转，便于跨软件模拟", action: "convert" },
+        { label: "力场文件转换", desc: "力场参数转换为常用计算软件包格式", action: "convert" }
+      ]
+    },
+    {
+      key: "update", title: "数据更新", desc: "对现有数据进行补充存储，支持编辑与历史版本对比",
+      items: [{ label: "场数据更新", desc: "补充存储、编辑、撤销与历史记录对比", action: "update" }]
+    }
+  ];
+
+  function mlffShareActionButton(item) {
+    if (item.action === "download") {
+      return '<button class="btn-primary" type="button" onclick="return triggerMlffDownload(\'' + item.kind + '\')">' + item.btn + "</button>";
+    }
+    if (item.action === "convert") {
+      return '<button class="btn" type="button" data-module-tab="mlff" data-module-target="convert">前往转换</button>';
+    }
+    return '<button class="btn" type="button" data-mlff-field-update="">前往更新</button>';
+  }
+
+  function renderMlffShareBlock() {
+    /* 说明：本块刻意不使用 .twod-search-results / .twod-result-table 类，
+       避免被页面既有的「结果条归一化 / 单元格截断」增强逻辑改写。 */
+    var tabs = '<div class="module-tab-strip">'
+      + '<button class="module-tab-btn" type="button" data-module-tab="mlff" data-module-target="search">数据检索</button>'
+      + '<button class="module-tab-btn" type="button" data-module-tab="mlff" data-module-target="convert">文件转换</button>'
+      + '<button class="module-tab-btn active" type="button" data-module-tab="mlff" data-module-target="share">机器学习力场材料数据共享</button>'
+      + "</div>";
+    var groups = MLFF_SHARE_GROUPS.map(function (group, gi) {
+      var rows = group.items.map(function (item, ii) {
+        return '<div style="display:flex;align-items:center;gap:14px;padding:9px 0;'
+          + (ii === 0 ? "" : "border-top:1px dashed #eef2f8;") + '">'
+          + '<strong style="flex:0 0 148px;font-size:13px;color:#1f2d3d;font-weight:600">' + item.label + "</strong>"
+          + '<span style="flex:1 1 auto;font-size:12.5px;color:#6f8298;line-height:1.6">' + item.desc + "</span>"
+          + '<span style="flex:0 0 auto">' + mlffShareActionButton(item) + "</span></div>";
+      }).join("");
+      return '<section style="padding:14px 18px;'
+        + (gi < MLFF_SHARE_GROUPS.length - 1 ? "border-bottom:1px solid #eef2f8;" : "") + '">'
+        + '<h4 style="margin:0 0 6px;font-size:14px;color:#1f2d3d">' + group.title + "</h4>"
+        + '<p style="margin:0 0 4px;font-size:12.5px;color:#8a99ae">' + group.desc + "</p>"
+        + rows + "</section>";
+    }).join("");
+    return tabs
+      + '<div class="twod-platform-shell">'
+      + '<section class="card" style="padding:0;overflow:hidden">'
+      + '<div style="padding:16px 18px;border-bottom:1px solid #eef2f8">'
+      + '<h3 style="margin:0 0 4px;font-size:16px;color:#1f2d3d">机器学习力场材料数据共享</h3>'
+      + '<p style="margin:0;font-size:12.5px;color:#8a99ae">力场参数文件、结构文件、力场定义文件、格式转换与数据更新统一归入本页共享。</p>'
+      + "</div>" + groups + "</section></div>";
+  }
+
   if (baseRenderModule) {
     renderMlffModule = function () {
+      /* 2026-10-22：共享页签分支优先执行，避免被既有列表 DOM 后处理改写 */
+      if (state.mlffTab === "share" && !state.mlffFieldUpdateOpen) {
+        var shareHost = document.getElementById("page-mlff");
+        if (shareHost) { shareHost.innerHTML = renderMlffShareBlock(); return; }
+      }
       var r = baseRenderModule.apply(this, arguments);
       try {
         var page = document.getElementById("page-mlff");
@@ -122949,9 +123038,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
   /* ------------------------------------------------------------ 静态数据 */
   var RW_TABS = [
-    { key: "collect", label: "资源采集" },
-    { key: "entry", label: "资源录入" },
-    { key: "process", label: "资源加工" }
+    { key: "collect", label: "数据资源采集" },
+    { key: "entry", label: "数据资源录入" },
+    { key: "process", label: "数据资源加工" }
   ];
 
   var METHODS = {
@@ -123317,6 +123406,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-head-actions">'
       /* 清单编号 10「数据安全等级」只挂在二维材料名下，其余四类不出现该入口 */
       + (hasSecurity() ? '<button class="rw-btn" type="button" data-twod-security-guide>数据安全等级</button>' : "")
+      /* 2026-10-22：「数据资源对象」按钮自创建任务弹窗头部移出，统一放在「数据安全等级」旁边 */
+      + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="intro">数据资源对象</button>'
       + "</div></div>"
       + '<nav class="rw-tabs">' + tabs + "</nav>"
       + '<div class="rw-body">' + renderRwBody() + "</div>"
@@ -123609,7 +123700,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-modal-head">'
       + '<div><h3>创建采集任务</h3><p>数据获取 → 数据整合 → 数据更新 三步内容集中在同一页面填写；点击「执行采集」拉取数据，执行成功后才能「确认提交」。</p></div>'
       + '<div class="rw-modal-head-side">'
-      + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="intro">数据资源对象介绍</button>'
       + '<button class="rw-modal-close" type="button" data-rw-act="close-create" aria-label="关闭">×</button>'
       + "</div></div>"
       + '<div class="rw-modal-body">' + body + "</div>"
@@ -124575,28 +124665,22 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
   /* --------------------------------------------------- 数据资源对象介绍弹窗 */
+  /* 2026-10-22：数据资源对象弹窗正文（需求原文，逐字） */
+  var INTRO_TEXT = "二维材料数据库的数据资源包含二维材料的结构特征、电子结构、电学性质、磁学性质、热学性质、力学性质、光学性质以及缺陷性质八大对象。（1）结构特性：化学式、晶系和空间群、晶胞原子结构、晶格常数、原子坐标、键长键角、层间厚度；（2）电子结构：能带结构、态密度、电子有效质量；（3）电学性质：铁电性、压电性；（4）磁学性质：磁基态构型、磁转变温度；（5）热学性质：形成能、声子谱、声子态密度；（6）力学性质：弹性常数、杨氏模量、泊松比；（7）光学性质：介电函数、光吸收系数、反射率、折射率、消光系数；（8）缺陷性质：空位缺陷、反位缺陷，含缺陷构型与缺陷形成能。字符数据可通过软件可视化或绘图展示，其余以数字或图片形式存储展示。";
+
   function openIntro() {
     var old = document.getElementById("rwIntroMask");
     if (old && old.parentNode) old.parentNode.removeChild(old);
-    var objs = resourceObjects();
-    var list = objs.length
-      ? objs.map(function (o) {
-        return '<div class="rw-intro-item"><h5>' + esc(o.name) + "</h5><p>" + esc(o.fields) + "</p></div>";
-      }).join("")
-      : '<div class="rw-intro-item"><p>暂无资源对象定义</p></div>';
-
+    /* 2026-10-22：弹窗内容按需求原文逐字展示（八大资源对象），不再由配置拼装 */
     var mask = document.createElement("div");
     mask.className = "rw-mask";
     mask.id = "rwIntroMask";
     mask.setAttribute("data-rw-root", "intro");
     mask.innerHTML = '<div class="rw-modal">'
-      + '<div class="rw-modal-head"><div><h3>数据资源对象介绍</h3>'
-      + "<p>" + esc(C().introTitle) + "</p></div>"
+      + '<div class="rw-modal-head"><div><h3>数据资源对象</h3></div>'
       + '<div class="rw-modal-head-side"><button class="rw-modal-close" type="button" data-rw-act="close-intro" aria-label="关闭">×</button></div></div>'
       + '<div class="rw-modal-body">'
-      + '<div class="rw-banner"><span>▸</span><div>' + esc(C().introBanner) + "</div></div>"
-      + '<div class="rw-intro-list">' + list + "</div>"
-      + '<div class="rw-banner" style="margin-top:14px"><span>ⓘ</span><div>采集参数中的「性质范围」即针对上述资源对象的性质字段设置取值范围，用于过滤落在范围外的数据记录。</div></div>'
+      + '<p class="rw-intro-paragraph" style="margin:0;font-size:14px;line-height:1.9;color:#2c3e56;text-align:justify">' + esc(INTRO_TEXT) + "</p>"
       + "</div>"
       + '<div class="rw-modal-foot"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="close-intro">我知道了</button></div>'
       + "</div>";
