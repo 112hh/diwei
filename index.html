@@ -6971,8 +6971,9 @@
     }
 
     @media (max-width: 1199px) {
-      .app {
-        grid-template-columns: 1fr;
+      .app[id],
+      .app-shell[id] {
+        grid-template-columns: minmax(0, 1fr) !important;
         grid-template-areas:
           "topbar"
           "main";
@@ -126809,36 +126810,200 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   /* -------------------------------------------------------- 页签三：资源加工 */
   function renderProcessTab() {
     /* 2026-10-12：圈红删除——「加工任务」「加工规范说明」两个子页签不再展示，直接呈现加工任务工作台 */
+    ensureJobsStyle();
     return renderProcJobs();
+  }
+
+  /* --------------------------------------------------------
+     2026-10-22：加工报告列表排版重构
+     信息层级：报告名称（主）> 加工状态 > 更新时间 > 数据量 > 操作；
+     报告编号 / 版本 / 用途等次要信息降为副行弱化展示。
+     -------------------------------------------------------- */
+
+  /* 数字千分位 */
+  function fmtNum(n) {
+    var s = String(n == null || n === "" ? 0 : n);
+    var arr = s.split(".");
+    arr[0] = arr[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return arr.join(".");
+  }
+
+  /* 日期统一为 YYYY-MM-DD HH:mm（兼容带秒 / 斜杠等写法，无法识别时原样返回） */
+  function fmtDateTime(v) {
+    var s = String(v == null ? "" : v).trim();
+    if (!s) return "—";
+    var m = s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+    if (!m) return s;
+    var mm = ("0" + m[2]).slice(-2), dd = ("0" + m[3]).slice(-2);
+    return m[1] + "-" + mm + "-" + dd + (m[4] ? " " + ("0" + m[4]).slice(-2) + ":" + m[5] : "");
+  }
+
+  function procJobPct(j) { return Math.round(Object.keys(j.done || {}).length / 6 * 100); }
+
+  /* 更新时间 = 最近一次完成步骤的时间，回退到创建时间 */
+  function procJobUpdatedAt(j) {
+    var ts = Object.keys(j.done || {}).map(function (k) { return j.done[k]; }).filter(function (x) { return !!x; }).sort();
+    return ts.length ? ts[ts.length - 1] : j.createdAt;
+  }
+
+  function procJobStatus(j) {
+    var n = Object.keys(j.done || {}).length;
+    if (n >= 6) return { cls: "rw-tag--done", text: "已完成" };
+    if (n > 0) return { cls: "rw-tag--run", text: "进行中 · 步骤 " + (j.step || 1) + "/6" };
+    return { cls: "rw-tag--gray", text: "未开始" };
+  }
+
+  /* 列表样式一次性注入。选择器用「#page-X + 双类」压过既有 table.rw-tbl 规则 */
+  function ensureJobsStyle() {
+    if (document.getElementById("rwJobsListStyle")) return;
+    var P = "#page-" + PAGE_ID + " ";
+    var st = document.createElement("style");
+    st.id = "rwJobsListStyle";
+    st.textContent = [
+      P + ".rw-tbl-wrap.rw-jl-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e6ecf5; background:#fff; }",
+      P + "table.rw-tbl.rw-jl { width:100%; min-width:920px; table-layout:fixed; font-size:13px; }",
+      P + "table.rw-tbl.rw-jl th { padding:10px 14px; background:#f8fafc; font-size:12.5px; font-weight:600; color:#6b7d95;",
+      "  white-space:nowrap; text-align:left; }",
+      P + "table.rw-tbl.rw-jl td { padding:13px 14px; border-bottom:1px solid #f0f4fa; vertical-align:middle; line-height:1.5; }",
+      P + "table.rw-tbl.rw-jl tbody tr:last-child td { border-bottom:0; }",
+      P + "table.rw-tbl.rw-jl tbody tr:hover td { background:#fafcff; }",
+      P + "table.rw-tbl.rw-jl .rw-jl-title-c { width:36%; }",
+      P + "table.rw-tbl.rw-jl .rw-jl-status-c { width:19%; }",
+      P + "table.rw-tbl.rw-jl .rw-jl-num { width:12%; text-align:right; font-variant-numeric:tabular-nums; color:#54637c; }",
+      P + "table.rw-tbl.rw-jl .rw-jl-time { width:17%; text-align:right; font-variant-numeric:tabular-nums; color:#33475f; }",
+      P + "table.rw-tbl.rw-jl .rw-jl-ops-c { width:16%; }",
+      P + ".rw-jl-title { display:block; font-size:14.5px; font-weight:600; color:#1f2d3d; line-height:20px;",
+      "  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:default; }",
+      P + ".rw-jl-sub { display:block; margin-top:4px; font-size:12px; color:#8a99ae; line-height:18px;",
+      "  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }",
+      P + ".rw-jl-code { font-family:Consolas,Monaco,monospace; font-size:11.5px; color:#7d8ca3; }",
+      P + ".rw-jl-dot { display:inline-block; margin:0 6px; color:#c9d3e0; }",
+      P + ".rw-jl-bar { margin-top:7px; height:5px; border-radius:3px; background:#eef2f8; overflow:hidden; }",
+      P + ".rw-jl-bar > i { display:block; height:100%; border-radius:3px; background:#1f63ff; }",
+      P + ".rw-jl-bar.is-done > i { background:#0d9b70; }",
+      P + ".rw-jl-pct { margin-top:4px; font-size:11.5px; color:#94a5bd; line-height:16px; }",
+      P + ".rw-jl-ops { display:flex; align-items:center; justify-content:flex-end; gap:6px; }",
+      P + ".rw-jl-ops .rw-op { white-space:nowrap; }",
+      P + ".rw-jl-empty { padding:46px 20px 40px; text-align:center; }",
+      P + ".rw-jl-empty-ico { width:56px; height:56px; margin:0 auto 14px; border-radius:14px; background:#f4f7fb;",
+      "  border:1px dashed #d9e2ee; color:#9fb0c6; font-size:22px; line-height:54px; }",
+      P + ".rw-jl-empty-t { font-size:14.5px; font-weight:600; color:#33475f; margin-bottom:6px; }",
+      P + ".rw-jl-empty-d { font-size:12.5px; color:#8a99ae; margin:0 auto 16px; max-width:520px; line-height:1.75; }",
+      P + ".rw-jl-loading { display:flex; align-items:center; gap:8px; padding:10px 14px; margin-bottom:10px;",
+      "  border-radius:8px; background:#f4f8fd; color:#54637c; font-size:12.5px; }",
+      P + ".rw-jl-sk { height:12px; border-radius:6px; background:linear-gradient(90deg,#f1f4f9 25%,#e7ecf4 37%,#f1f4f9 63%);",
+      "  background-size:400% 100%; animation:rwjlsk 1.2s ease infinite; }",
+      "@keyframes rwjlsk { 0% { background-position:100% 50%; } 100% { background-position:0 50%; } }",
+      "/* 卡片模式：由 syncJobsCardMode() 按容器真实可用宽度切换，比视口媒体查询更准 */",
+      P + "table.rw-tbl.rw-jl.is-card, table.rw-tbl.rw-jl.is-card tbody { display:block; width:100%; min-width:0; table-layout:auto; }",
+      P + "table.rw-tbl.rw-jl.is-card thead { display:none; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody tr { display:block; width:100%; border:1px solid #e6ecf5; border-radius:10px;",
+      "  margin:0 0 10px; padding:8px 12px 10px; box-sizing:border-box; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td { display:block; width:100%; min-width:0; border:0; box-sizing:border-box;",
+      "  padding:4px 0 4px 92px; text-align:right; position:relative; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td[class] { width:auto; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td::before { content:attr(data-label); position:absolute; left:0; top:4px;",
+      "  width:80px; text-align:left; font-size:12px; color:#94a5bd; line-height:20px; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td .rw-jl-bar { width:auto; margin-top:5px; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td .rw-jl-pct { width:auto; margin-top:3px; white-space:nowrap;",
+      "  overflow:hidden; text-overflow:ellipsis; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td .rw-jl-ops { flex-wrap:wrap; justify-content:flex-end; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td.rw-jl-title-c { padding:2px 0 8px; text-align:left;",
+      "  margin-bottom:6px; border-bottom:1px dashed #eef2f8; }",
+      P + "table.rw-tbl.rw-jl.is-card tbody td.rw-jl-title-c::before { display:none; }"
+    ].join("\n");
+    document.head.appendChild(st);
+    window.addEventListener("resize", function () {
+      if (window.__rwJobsCardTimer) clearTimeout(window.__rwJobsCardTimer);
+      window.__rwJobsCardTimer = setTimeout(syncJobsCardMode, 120);
+    });
+  }
+
+  /* 按容器实际可用宽度在「表格 / 卡片」两种排版间切换，避免窄容器横向溢出 */
+  function syncJobsCardMode() {
+    var t = document.querySelector("#page-" + PAGE_ID + " table.rw-tbl.rw-jl");
+    if (!t) return;
+    var box = t.parentNode;
+    var w = box ? box.clientWidth : t.clientWidth;
+    if (!w || w < 940) t.classList.add("is-card");
+    else t.classList.remove("is-card");
+    /* 容器宽度变化（窗口缩放 / 侧栏折叠 / 内容重排）时自动重算 */
+    if (box && window.ResizeObserver && window.__rwJobsROBox !== box) {
+      if (window.__rwJobsRO) { try { window.__rwJobsRO.disconnect(); } catch (e) {} }
+      window.__rwJobsROBox = box;
+      window.__rwJobsRO = new ResizeObserver(function () { syncJobsCardMode(); });
+      window.__rwJobsRO.observe(box);
+    }
   }
 
   function renderProcJobs() {
     var p = procState();
     var e = entryState();
     var ready = e.records.filter(function (r) { return r.status === "已入库"; }).length;
-    var rows = p.jobs.length
-      ? p.jobs.map(function (j) {
-        var pct = Math.round(Object.keys(j.done).length / 6 * 100);
+    ensureJobsStyle();
+    setTimeout(syncJobsCardMode, 0);
+    setTimeout(syncJobsCardMode, 80);
+
+    var rows;
+    if (p.loading) {
+      /* 加载中：骨架屏 */
+      rows = [0, 1, 2, 3, 4].map(function () {
+        return '<tr><td colspan="5" style="padding:0;border-bottom:0"><div style="display:flex;align-items:center;gap:14px;padding:17px 14px">'
+          + '<div class="rw-jl-sk" style="flex:1 1 auto"></div>'
+          + '<div class="rw-jl-sk" style="flex:0 0 92px"></div>'
+          + '<div class="rw-jl-sk" style="flex:0 0 116px"></div>'
+          + '<div class="rw-jl-sk" style="flex:0 0 132px"></div>'
+          + "</div></td></tr>";
+      }).join("");
+    } else if (!p.jobs.length) {
+      /* 空数据：图标 + 说明 + 主操作 */
+      rows = '<tr><td colspan="5" style="padding:0;border-bottom:0"><div class="rw-jl-empty">'
+        + '<div class="rw-jl-empty-ico">＋</div>'
+        + '<div class="rw-jl-empty-t">暂无加工报告</div>'
+        + '<div class="rw-jl-empty-d">还没有加工任务。新建加工任务并按「数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价」六步执行完成后，即可生成质量评价报告。</div>'
+        + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-new">＋ 新建加工任务</button>'
+        + "</div></td></tr>";
+    } else {
+      rows = p.jobs.map(function (j) {
+        var pct = procJobPct(j);
+        var st = procJobStatus(j);
+        var stepN = Object.keys(j.done || {}).length;
+        var title = (j.name || "未命名加工任务") + "质量评价报告";
+        var subPlain = String(j.id) + " · " + (j.version || "—") + " · " + ((j.spec && j.spec.purpose) || "未填写目标用途");
+        var sub = '<span class="rw-jl-code">' + esc(j.id) + "</span>"
+          + '<span class="rw-jl-dot">·</span>' + esc(j.version || "—")
+          + '<span class="rw-jl-dot">·</span>' + esc((j.spec && j.spec.purpose) || "未填写目标用途");
         return "<tr>"
-          + '<td class="rw-id">' + esc(j.id) + "</td>"
-          + "<td><b>" + esc(j.name || "未命名加工任务") + "</b><div class=\"rw-field-tip\">" + esc(j.spec.purpose || "未填写目标用途") + "</div></td>"
-          + '<td><span class="rw-tag rw-tag--gray">' + esc(j.version) + "</span></td>"
-          + '<td>步骤 ' + j.step + '：' + esc(PROC_STEP_TITLES[j.step - 1]) + '<div class="rw-progress"><i style="width:' + pct + '%"></i></div></td>'
-          + "<td>" + (j.sourceIds || []).length + " 条</td>"
-          + "<td>" + esc(j.createdAt) + "</td>"
-          + '<td class="rw-nowrap">'
+          + '<td class="rw-jl-title-c" data-label="报告名称">'
+          + '<span class="rw-jl-title" title="' + esc(title) + '">' + esc(title) + "</span>"
+          + '<span class="rw-jl-sub" title="' + esc(subPlain) + '">' + sub + "</span></td>"
+          + '<td class="rw-jl-status-c" data-label="加工状态">'
+          + '<span class="rw-tag ' + st.cls + '">' + esc(st.text) + "</span>"
+          + '<div class="rw-jl-bar' + (pct >= 100 ? " is-done" : "") + '"><i style="width:' + pct + '%"></i></div>'
+          + '<div class="rw-jl-pct">' + pct + "% · " + stepN + "/6 步</div></td>"
+          + '<td class="rw-jl-num" data-label="数据量">' + fmtNum((j.sourceIds || []).length) + " 条</td>"
+          + '<td class="rw-jl-time" data-label="更新时间">' + esc(fmtDateTime(procJobUpdatedAt(j)))
+          + '<div class="rw-jl-pct">创建 ' + esc(fmtDateTime(j.createdAt)) + "</div></td>"
+          + '<td class="rw-jl-ops-c" data-label="操作"><div class="rw-jl-ops">'
+          + '<button class="rw-op rw-op--primary" type="button" data-rw-act="proc-report" data-id="' + esc(j.id) + '">查看报告</button>'
           + '<button class="rw-op" type="button" data-rw-act="proc-open" data-id="' + esc(j.id) + '">继续加工</button>'
-          + '<button class="rw-op" type="button" data-rw-act="proc-report" data-id="' + esc(j.id) + '">加工报告</button>'
           + '<button class="rw-op rw-op--danger" type="button" data-rw-act="proc-del" data-id="' + esc(j.id) + '">删除</button>'
-          + "</td></tr>";
-      }).join("")
-      : '<tr><td colspan="7"><div class="rw-empty" style="padding:26px 0">暂无加工任务，点击「新建加工任务」按六步流程开始加工</div></td></tr>';
+          + "</div></td></tr>";
+      }).join("");
+    }
 
     return '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>加工任务工作台</h3>'
-      + "<p>已入库数据 " + ready + " 条可参与加工；每个加工任务按「数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价」六步执行，版本随阶段推进 V0.0 → V1.0 → V2.0。</p></div>"
-      + '<div style="flex:0 0 auto"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-new">＋ 新建加工任务</button></div></div>'
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl rw-jobs-table"><thead><tr><th>任务ID</th><th>加工任务名称</th><th>版本</th><th>当前步骤</th><th>数据量</th><th>创建时间</th><th>操作</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
+      + '<div class="rw-card-head"><div><h3>加工报告列表</h3>'
+      + "<p>已入库数据 " + fmtNum(ready) + " 条可参与加工；共 " + fmtNum(p.jobs.length) + " 条加工报告。"
+      + "每个加工任务按「数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价」六步执行，版本随阶段推进 V0.0 → V1.0 → V2.0。</p></div>"
+      + '<div style="flex:0 0 auto;display:flex;gap:8px">'
+      + '<button class="rw-btn" type="button" data-rw-act="proc-refresh">↻ 刷新</button>'
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-new">＋ 新建加工任务</button></div></div>'
+      + (p.loading ? '<div class="rw-jl-loading"><span class="rw-jl-sk" style="width:14px;height:14px;border-radius:50%;flex:0 0 auto"></span>正在加载加工报告…</div>' : "")
+      + '<div class="rw-tbl-wrap rw-jl-wrap"><table class="rw-tbl rw-jl"><thead><tr>'
+      + '<th class="rw-jl-title-c">报告名称</th><th class="rw-jl-status-c">加工状态</th>'
+      + '<th class="rw-jl-num">数据量</th><th class="rw-jl-time">更新时间</th><th class="rw-jl-ops-c">操作</th>'
+      + "</tr></thead><tbody>" + rows + "</tbody></table></div>"
       + "</div>";
   }
 
@@ -129303,6 +129468,14 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         return;
       case "proc-new":
         newJob();
+        return;
+      case "proc-refresh":
+        (function () {
+          var pr = procState();
+          pr.loading = true;
+          renderRwPage();
+          setTimeout(function () { pr.loading = false; renderRwPage(); }, 320);
+        })();
         return;
       case "proc-open":
         procState().activeId = node.getAttribute("data-id") || "";
