@@ -31142,7 +31142,8 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
   }
 
 
- 与相邻 <script id="lowdim-aux-hint-20260920"> 即可。
+ 与相邻 
+<script id="lowdim-aux-hint-20260920"> 即可。
 -->
 <style id="lowdim-twod-aux-20260920">
   /* ── 附加功能按钮条（主流程之外的配套机制，点按钮看说明） ── */
@@ -31489,6 +31490,9 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
             <h2>二维材料数据应用</h2>
             <p>聚焦二维材料检索、预测分析与结果查看，支持多维属性检索。</p>
           </div>
+          <div class="page-head-actions">
+            <button class="upload-service-btn" type="button" data-upload-service-jump>上传服务</button>
+          </div>
         </div>
 
         <div id="twodAppRoot">
@@ -31828,6 +31832,9 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
           <div>
             <h2>电解质材料数据应用</h2>
             <p>面向有机电解液、固态有机和固态无机三类电解质，提供基础检索、性质检索和可视化详情查看。</p>
+          </div>
+          <div class="page-head-actions">
+            <button class="upload-service-btn" type="button" data-upload-service-jump>上传服务</button>
           </div>
         </div>
         <div id="electrolyteApp"></div>
@@ -34598,7 +34605,206 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
      ========================================================================== -->
 
 
-  <script>
+  <script id="wbp-unified-pager-20261026">
+/* 2026-10-26 全站统一分页组件：页码列表（省略号折叠）+ 上一页/下一页 + 总条数
+   + 每页条数 + 「往 N 页」跳转输入框（回车或点击跳转按钮，非法输入提示并自动纠正） */
+(function () {
+  var CSS = [
+    '.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}',
+    '.page-head-actions{display:flex;align-items:center;gap:10px}',
+    '.upload-service-btn{min-width:96px;height:34px;padding:0 16px;border:1px solid #1F63FF;border-radius:8px;background:#fff;color:#1F63FF;font-size:14px;font-weight:500;cursor:pointer}',
+    '.upload-service-btn:hover{background:#E8F3FF}',
+    '.wbp-jump-input{width:48px;min-width:48px;height:28px;box-sizing:border-box;border:1px solid #E5E6EB;border-radius:6px;text-align:center;font-weight:600;color:#4E5969;background:#fff;padding:0 4px;outline:none;font-size:13px}',
+    '.wbp-jump-input:focus{border-color:#1F63FF}',
+    '.wbp-jump-input.wbp-error{border-color:#f56c6c;box-shadow:0 0 0 2px rgba(245,108,108,.15)}',
+    '.wbp-jump-btn{height:28px;padding:0 10px;margin-left:8px}',
+    '.page-jump .wbp-jump-input{margin:0 2px}',
+    '.wbp-toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:#1F63FF;color:#fff;font-size:13px;line-height:20px;padding:8px 16px;border-radius:6px;box-shadow:0 6px 16px rgba(31,99,255,.28);z-index:99999;opacity:0;transition:opacity .18s;pointer-events:none;max-width:80vw}',
+    '.wbp-toast.show{opacity:1}',
+    '.wbp-toast.is-warn{background:#f56c6c;box-shadow:0 6px 16px rgba(245,108,108,.28)}'
+  ].join("\n");
+
+  function injectStyle() {
+    if (document.getElementById("wbpPagerStyle")) return;
+    var s = document.createElement("style");
+    s.id = "wbpPagerStyle";
+    s.textContent = CSS;
+    (document.head || document.documentElement).appendChild(s);
+  }
+
+  var toastEl = null;
+  function toast(msg, warn) {
+    injectStyle();
+    if (!toastEl) {
+      toastEl = document.createElement("div");
+      toastEl.className = "wbp-toast";
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = msg;
+    toastEl.className = "wbp-toast show" + (warn ? " is-warn" : "");
+    clearTimeout(toastEl._wbpT);
+    toastEl._wbpT = setTimeout(function () { toastEl.className = "wbp-toast" + (warn ? " is-warn" : ""); }, 2200);
+  }
+
+  function markError(input) {
+    if (!input) return;
+    input.classList.add("wbp-error");
+    setTimeout(function () { input.classList.remove("wbp-error"); }, 1200);
+  }
+
+  /* 省略号折叠的页码窗口 */
+  function pages(totalPages, current) {
+    var P = Math.max(1, totalPages);
+    var c = Math.min(Math.max(1, current), P);
+    if (P <= 7) {
+      var all = [];
+      for (var i = 1; i <= P; i++) all.push(i);
+      return all;
+    }
+    if (c <= 4) return [1, 2, 3, 4, 5, "...", P];
+    if (c >= P - 3) return [1, "...", P - 4, P - 3, P - 2, P - 1, P];
+    return [1, "...", c - 1, c, c + 1, "...", P];
+  }
+
+  /* 页码按钮组；numAttr 可为纯属性名，或形如 'data-x="k" data-y="' 的模板（结尾带 =） */
+  function buttons(totalPages, current, numAttr) {
+    var P = Math.max(1, totalPages);
+    var c = Math.min(Math.max(1, current), P);
+    var tmpl = numAttr || "data-wbp-page";
+    /* 兼容三种传参形式：以 =" 结尾的模板（引号已开）、纯属性名、以及多带一个 = 的属性名 */
+    var quoted = /="$/.test(tmpl);
+    var attrOpen = quoted ? tmpl : tmpl.replace(/=+$/, "") + '="';
+    function wrap(v) { return attrOpen + v + '"'; }
+    var out = [];
+    out.push('<button type="button" class="twod-pagination-btn" ' + wrap(Math.max(1, c - 1)) + (c <= 1 ? " disabled" : "") + ' aria-label="上一页">‹</button>');
+    pages(P, c).forEach(function (item) {
+      if (item === "...") { out.push('<span class="pagination-ellipsis">...</span>'); return; }
+      out.push('<button type="button" class="twod-pagination-btn' + (item === c ? " active" : "") + '" ' + wrap(item) + ">" + item + "</button>");
+    });
+    out.push('<button type="button" class="twod-pagination-btn" ' + wrap(Math.min(P, c + 1)) + (c >= P ? " disabled" : "") + ' aria-label="下一页">›</button>');
+    return out.join("");
+  }
+
+  function jumpBox(P, cur) {
+    P = Math.max(1, Number(P) || 1);
+    cur = Math.min(Math.max(1, Number(cur) || 1), P);
+    var dis = P <= 1 ? " disabled" : "";
+    return '<span class="page-jump" data-wbp-jump>往 <input type="text" inputmode="numeric" class="wbp-jump-input" data-wbp-max="' + P + '" value="' + cur + '" aria-label="输入页码后回车或点击跳转"' + dis + '> 页</span>'
+      + '<button type="button" class="twod-pagination-btn wbp-jump-btn" data-wbp-go' + dis + ">跳转</button>";
+  }
+
+  function footer(o) {
+    o = o || {};
+    if (!Number(o.total)) return "";
+    var P;
+    if (o.totalPages) P = Math.max(1, Number(o.totalPages) || 1);
+    else P = Math.max(1, Math.ceil(Number(o.total) / (o.pageSize || 10)));
+    var cur = Math.min(Math.max(1, o.currentPage || 1), P);
+    var html = '<div class="pagination-summary">共计 <strong>' + o.total + "</strong> " + (o.unit || "条") + "</div>";
+    html += '<div class="pagination pagination-toolbar" data-wbp-pages="' + P + '"' + (o.numAttr ? ' data-wbp-attr="' + o.numAttr + '"' : "") + ">";
+    html += '<div class="pager">' + buttons(P, cur, o.numAttr) + "</div>";
+    if (o.size !== false) {
+      var sizes = o.sizes || [5, 10, 20, 50];
+      html += '<select class="page-select"' + (o.sizeId ? ' id="' + o.sizeId + '"' : "") + (o.sizeAttrs || "") + ' aria-label="每页条数">'
+        + sizes.map(function (s) { return '<option value="' + s + '"' + (Number(o.pageSize) === s ? " selected" : "") + ">" + s + "条/页</option>"; }).join("")
+        + "</select>";
+    }
+    if (o.jump !== false) html += jumpBox(P, cur);
+    html += "</div>";
+    return html;
+  }
+
+  function jump(root, input) {
+    var P = Math.max(1, Number(root.getAttribute("data-wbp-pages")) || 1);
+    var attr = root.getAttribute("data-wbp-attr");
+    var raw = (input.value || "").trim();
+    var n = Number(raw);
+    if (!raw || !isFinite(n)) {
+      toast("请输入 1 - " + P + " 之间的页码", true);
+      markError(input);
+      return;
+    }
+    n = Math.round(n);
+    if (n < 1) { toast("页码不能小于 1，已自动跳转到第 1 页", true); n = 1; }
+    else if (n > P) { toast("页码不能大于 " + P + "，已自动跳转到第 " + P + " 页", true); n = P; }
+    input.value = n;
+    if (!attr) return;
+    var scope = root.parentElement || root;
+    var sample = root.querySelector("[" + attr + "]") || scope.querySelector("[" + attr + "]");
+    if (!sample) return;
+    var clone = sample.cloneNode(false);
+    clone.removeAttribute("disabled");
+    clone.setAttribute(attr, String(n));
+    (sample.parentNode || root).appendChild(clone);
+    clone.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+    if (clone.parentNode) clone.parentNode.removeChild(clone);
+  }
+
+  /* 全局事件委托：跳转输入框（回车 / 跳转按钮） */
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    var input = e.target && e.target.closest ? e.target.closest("[data-wbp-jump] input") : null;
+    if (!input) return;
+    var root = input.closest("[data-wbp-pages]");
+    if (!root) return;
+    e.preventDefault();
+    jump(root, input);
+  });
+  document.addEventListener("click", function (e) {
+    var go = e.target && e.target.closest ? e.target.closest("[data-wbp-go]") : null;
+    if (go) {
+      var root = go.closest("[data-wbp-pages]");
+      var input = root ? root.querySelector("input[data-wbp-max]") : null;
+      if (root && input) jump(root, input);
+      return;
+    }
+    var pb = e.target && e.target.closest ? e.target.closest("[data-convrec-page]") : null;
+    if (pb && !pb.disabled) {
+      var r2 = pb.closest("[data-convrec-module]");
+      if (!r2) return;
+      var mod = r2.getAttribute("data-convrec-module") || "twod";
+      var map = window.__wbpConvPage || (window.__wbpConvPage = {});
+      map[mod] = Number(pb.getAttribute("data-convrec-page")) || 1;
+      var reg = window.__wbpConvRenderers && window.__wbpConvRenderers[mod];
+      if (reg) { try { reg(); } catch (err) {} return; }
+      var section = pb.closest("section") || pb.closest(".card");
+      var btn2 = section && section.querySelector('[data-material-convert-search="' + mod + '"]');
+      if (btn2) btn2.click();
+      return;
+    }
+    var up = e.target && e.target.closest ? e.target.closest("[data-upload-service-jump]") : null;
+    if (up) {
+      if (window.MarvisRouter && typeof window.MarvisRouter.go === "function") window.MarvisRouter.go("data-submit");
+    }
+  });
+
+  /* 首屏即注入样式，避免上传服务按钮 / 跳页输入框在首次 toast 前呈现裸样式 */
+  function wbpEnsurePagerStyle() {
+    if (!document.head && !document.documentElement) return false;
+    injectStyle();
+    return true;
+  }
+  if (!wbpEnsurePagerStyle()) document.addEventListener("DOMContentLoaded", wbpEnsurePagerStyle);
+
+  window.WBPager = {
+    pages: pages,
+    buttons: buttons,
+    footer: footer,
+    jumpBox: jumpBox,
+    toast: toast,
+    jump: jump,
+    /* 转换记录等静态列表按 10 条/页切片 */
+    sliceRecords: function (records, key, size) {
+      var list = records || [];
+      var P = Math.max(1, Math.ceil(list.length / (size || 10)));
+      var map = window.__wbpConvPage || (window.__wbpConvPage = {});
+      var pg = Math.min(Math.max(1, Number(map[key]) || 1), P);
+      return list.slice((pg - 1) * (size || 10), pg * (size || 10));
+    }
+  };
+})();
+</script>
+<script>
 
     (function () {
       const params = new URLSearchParams(window.location.search);
@@ -44733,7 +44939,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         <div class="card table-card electrolyte-result-card">
           <div class="table-head"><div><h3>检索结果</h3><p class="section-subtitle" style="margin:10px 0 0;">基于当前检索条件返回对应电解质材料数据。</p></div></div>
           <div class="table-wrap"><table><thead><tr>${columns.map((column) => `<th>${column}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
-          <div class="result-footer"><span>显示 1 - ${list.length || 0} 条，共 ${list.length} 条结果</span><div class="pagination"><div class="pager"><button type="button">上一页</button><button type="button" class="active">1</button><button type="button">下一页</button></div></div></div>
+          <div class="result-footer"><div class="pagination-summary">共计 <strong>${list.length}</strong> 条</div><div class="pagination pagination-toolbar" data-wbp-pages="1" data-wbp-attr="data-wbp-static"><div class="pager"><button type="button" class="twod-pagination-btn" disabled aria-label="上一页">‹</button><button type="button" class="twod-pagination-btn active">1</button><button type="button" class="twod-pagination-btn" disabled aria-label="下一页">›</button></div>${window.WBPager ? window.WBPager.jumpBox(1, 1) : ""}</div></div>
         </div>
       `;
     }
@@ -45335,7 +45541,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         <div class="card table-card electrolyte-result-card">
           <div class="table-head"><div><h3>检索结果</h3><p class="section-subtitle" style="margin:10px 0 0;">基于当前检索条件返回对应电解质材料数据。</p></div></div>
           <div class="table-wrap"><table><thead><tr>${columns.map((column) => `<th>${column}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
-          <div class="result-footer"><span>显示 1 - ${list.length || 0} 条，共 ${list.length} 条结果</span><div class="pagination"><div class="pager"><button type="button">上一页</button><button type="button" class="active">1</button><button type="button">下一页</button></div></div></div>
+          <div class="result-footer"><div class="pagination-summary">共计 <strong>${list.length}</strong> 条</div><div class="pagination pagination-toolbar" data-wbp-pages="1" data-wbp-attr="data-wbp-static"><div class="pager"><button type="button" class="twod-pagination-btn" disabled aria-label="上一页">‹</button><button type="button" class="twod-pagination-btn active">1</button><button type="button" class="twod-pagination-btn" disabled aria-label="下一页">›</button></div>${window.WBPager ? window.WBPager.jumpBox(1, 1) : ""}</div></div>
         </div>
       `;
     }
@@ -51678,18 +51884,19 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function renderSharedPaginationFooter({ total, currentPage, totalPages, pageSize, pageSizeId, pageAttr, jumpModule }) {
+      /* 2026-10-26：统一分页——空数据不渲染；跳转输入框改为「往 N 页」（回车或点击跳转按钮），
+         非法输入统一提示并自动纠正；页码列表保持省略号折叠。 */
+      if (!Number(total)) return "";
       const current = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
+      const maxPage = Math.max(1, Number(totalPages) || 1);
       return `
         <div class="pagination-summary">共计 <strong>${total}</strong> 条</div>
-        <div class="pagination pagination-toolbar">
+        <div class="pagination pagination-toolbar" data-wbp-pages="${maxPage}" data-wbp-attr="${pageAttr}">
           <div class="pager">${renderSharedPaginationButtons(totalPages, current, pageAttr)}</div>
           <select class="page-select" id="${pageSizeId}" aria-label="每页条数">
             ${[5, 10, 20, 50].map((size) => `<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}条/页</option>`).join("")}
           </select>
-          <label class="page-jump">
-            <span>前往</span>
-            <input type="number" min="1" max="${Math.max(1, totalPages)}" value="${current}" data-pagination-input="${jumpModule}" aria-label="输入页码后回车">
-          </label>
+          ${window.WBPager ? window.WBPager.jumpBox(maxPage, current) : ""}
         </div>
       `;
     }
@@ -64882,8 +65089,14 @@ function renderMlffTopicSampleTable(data) {
 
     function applySharedPaginationJump(moduleKey, rawValue, maxValue) {
       const maxPage = Math.max(1, Number(maxValue) || 1);
-      const page = Math.min(maxPage, Math.max(1, Math.round(Number(rawValue))));
-      if (!Number.isFinite(page)) return;
+      const rawNum = Number(rawValue);
+      if (rawValue === "" || !Number.isFinite(rawNum)) {
+        if (window.WBPager) window.WBPager.toast("请输入 1 - " + maxPage + " 之间的页码", true);
+        return;
+      }
+      let page = Math.round(rawNum);
+      if (page < 1) { page = 1; if (window.WBPager) window.WBPager.toast("页码不能小于 1，已自动跳转到第 1 页", true); }
+      else if (page > maxPage) { page = maxPage; if (window.WBPager) window.WBPager.toast("页码不能大于 " + maxPage + "，已自动跳转到第 " + maxPage + " 页", true); }
 
       if (moduleKey === "algorithm-list") {
         state.algorithmListPage = page;
@@ -82044,16 +82257,33 @@ const MLFF_STRUCTURE_SOURCE = {
       for (let i = 1; i <= pages; i += 1) {
         buttons += `<button type="button" class="ldb-page-num${i === filters.page ? " active" : ""}" data-ldb-goto="${i}">${i}</button>`;
       }
+      const pagerHtml = window.WBPager ? window.WBPager.footer({
+        total: total,
+        currentPage: filters.page,
+        totalPages: pages,
+        pageSize: filters.pageSize,
+        numAttr: "data-ldb-goto",
+        sizeId: "ldbMaterialPageSize",
+        sizeAttrs: ' data-wbp-ldb-size="' + pageId + '"'
+      }) : "";
       return `
-          <div class="ldb-pagination">
-            <span class="ldb-page-info">共 ${total} 个材料数据集 · ${escapeLowDimHtml(config.datasetCountText)} · 第 ${filters.page} / ${pages} 页</span>
-            <div class="ldb-page-btns">
-              <button type="button" data-ldb-goto="${filters.page - 1}" ${filters.page <= 1 ? "disabled" : ""}>上一页</button>
-              ${buttons}
-              <button type="button" data-ldb-goto="${filters.page + 1}" ${filters.page >= pages ? "disabled" : ""}>下一页</button>
-            </div>
-          </div>`;
+          <div class="ldb-pagination result-footer twod-result-footer">${pagerHtml}</div>`;
     }
+
+    if (!window.__wbpLdbSizeBound) {
+      window.__wbpLdbSizeBound = true;
+      document.addEventListener("change", function (event) {
+        var el = event.target && event.target.closest ? event.target.closest("[data-wbp-ldb-size]") : null;
+        if (!el) return;
+        var pid = el.getAttribute("data-wbp-ldb-size");
+        var fs = getLowdimDbOverviewState(pid);
+        fs.pageSize = Number(el.value) || 10;
+        fs.page = 1;
+        if (typeof refreshLowdimDbList === "function") { try { refreshLowdimDbList(pid); } catch (e) {} }
+        if (typeof renderLowdimMaterialDbPage === "function") { try { renderLowdimMaterialDbPage(pid); } catch (e) {} }
+      });
+    }
+
 
     function renderLowdimMaterialDbDetail(pageId, materialId) {
       const config = getLowdimMaterialDbConfig(pageId);
@@ -82288,15 +82518,17 @@ const MLFF_STRUCTURE_SOURCE = {
       for (let i = 1; i <= pages; i += 1) {
         buttons += `<button type="button" class="ldb-page-num${i === filters.page ? " active" : ""}" data-ldb-goto="${i}">${i}</button>`;
       }
+      const pagerHtml = window.WBPager ? window.WBPager.footer({
+        total: total,
+        currentPage: filters.page,
+        totalPages: pages,
+        pageSize: filters.pageSize,
+        numAttr: "data-ldb-goto",
+        sizeId: "ldbDatasetPageSize",
+        sizeAttrs: ' data-wbp-ldb-size="' + pageId + '"'
+      }) : "";
       return `
-          <div class="ldb-pagination">
-            <span class="ldb-page-info">共 ${total} 个数据集 · 每页 ${filters.pageSize} 个 · 第 ${filters.page} / ${pages} 页</span>
-            <div class="ldb-page-btns">
-              <button type="button" data-ldb-goto="${filters.page - 1}" ${filters.page <= 1 ? "disabled" : ""}>上一页</button>
-              ${buttons}
-              <button type="button" data-ldb-goto="${filters.page + 1}" ${filters.page >= pages ? "disabled" : ""}>下一页</button>
-            </div>
-          </div>`;
+          <div class="ldb-pagination result-footer twod-result-footer">${pagerHtml}</div>`;
     }
 
     function refreshLowdimDbList(pageId) {
@@ -89893,19 +90125,19 @@ function escapeHtml(value) {
     }
 
     function renderSystemPaginationFooter(page, total, currentPage, totalPages, pageSize) {
+      /* 2026-10-26：统一分页——空数据不渲染；跳转输入框改为「往 N 页」（回车或点击跳转按钮）。 */
+      if (!Number(total)) return "";
       const current = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
+      const maxPage = Math.max(1, Number(totalPages) || 1);
       return `
         <div class="result-footer twod-result-footer">
           <div class="pagination-summary">共计 <strong>${total}</strong> 条</div>
-          <div class="pagination pagination-toolbar">
+          <div class="pagination pagination-toolbar" data-wbp-pages="${maxPage}" data-wbp-attr="data-system-page-num">
             <div class="pager">${renderSharedPaginationButtons(totalPages, current, "data-system-page-num").replaceAll("data-system-page-num=", `data-system-page="${page}" data-system-page-num=`)}</div>
             <select class="page-select" data-system-page-size="${page}" aria-label="每页条数">
               ${[5, 10, 20, 50].map((size) => `<option value="${size}" ${pageSize === size ? " selected" : ""}>${size}条/页</option>`).join("")}
             </select>
-            <label class="page-jump">
-              <span>前往</span>
-              <input type="number" min="1" max="${Math.max(1, totalPages)}" value="${current}" data-system-page-jump="${page}" aria-label="输入页码后回车">
-            </label>
+            ${window.WBPager ? window.WBPager.jumpBox(maxPage, current) : ""}
           </div>
         </div>
       `;
@@ -97397,17 +97629,8 @@ function escapeHtml(value) {
           </div>
         `;
         const recordFooter = isTwodConvert ? `
-          <div class="material-convert-record-footer">
-            <span>共计 ${records.length} 条</span>
-            <div class="material-convert-record-pager" aria-label="转换记录分页">
-              <button type="button" disabled aria-label="上一页">‹</button>
-              <button type="button" class="active">1</button>
-              <button type="button" ${records.length <= 10 ? "disabled" : ""}>2</button>
-              <button type="button" disabled aria-label="下一页">›</button>
-              <select class="material-convert-record-page-size" aria-label="每页条数">
-                <option>10条/页</option>
-              </select>
-            </div>
+          <div class="material-convert-record-footer" data-convrec-module="${moduleKey}">
+            ${window.WBPager ? window.WBPager.footer({ total: records.length, currentPage: (window.__wbpConvPage || {})[moduleKey] || 1, numAttr: "data-convrec-page", size: false, unit: "条" }) : ""}
           </div>
         ` : `
           <div class="result-footer twod-result-footer">
@@ -97485,7 +97708,7 @@ function escapeHtml(value) {
                     </tr>
                   </thead>
                   <tbody>
-                    ${records.length ? records.map((record) => `
+                    ${records.length ? window.WBPager.sliceRecords(records, moduleKey, 10).map((record) => `
                       <tr>
                         <td>${record.createdAt}</td>
                         <td>${record.materialName}</td>
@@ -97919,17 +98142,8 @@ function renderElectrolyteCategoryTabs() {
           </div>
         `;
         const recordFooter = isTwodConvert ? `
-          <div class="material-convert-record-footer">
-            <span>共计 ${records.length} 条</span>
-            <div class="material-convert-record-pager" aria-label="转换记录分页">
-              <button type="button" disabled aria-label="上一页">‹</button>
-              <button type="button" class="active">1</button>
-              <button type="button" ${records.length <= 10 ? "disabled" : ""}>2</button>
-              <button type="button" disabled aria-label="下一页">›</button>
-              <select class="material-convert-record-page-size" aria-label="每页条数">
-                <option>10条/页</option>
-              </select>
-            </div>
+          <div class="material-convert-record-footer" data-convrec-module="${moduleKey}">
+            ${window.WBPager ? window.WBPager.footer({ total: records.length, currentPage: (window.__wbpConvPage || {})[moduleKey] || 1, numAttr: "data-convrec-page", size: false, unit: "条" }) : ""}
           </div>
         ` : `
           <div class="result-footer twod-result-footer">
@@ -98041,7 +98255,7 @@ function renderElectrolyteCategoryTabs() {
                     </tr>
                   </thead>
                   <tbody>
-                    ${records.length ? records.map((record) => `
+                    ${records.length ? window.WBPager.sliceRecords(records, moduleKey, 10).map((record) => `
                       <tr>
                         <td>${record.createdAt}</td>
                         <td>${record.materialName}</td>
@@ -104096,19 +104310,11 @@ function renderElectrolyteCategoryTabs() {
                     <th>操作</th>
                   </tr>
                 </thead>
-                <tbody>${renderTwodConvertRecordRows(records, true)}</tbody>
+                <tbody>${renderTwodConvertRecordRows(window.WBPager ? window.WBPager.sliceRecords(records, moduleKey, 10) : records, true)}</tbody>
               </table>
             </div>
-            <div class="material-convert-record-footer">
-              <span>共计 ${records.length} 条转换记录</span>
-              <div class="material-convert-record-pager" aria-label="转换记录分页">
-                <button type="button" disabled aria-label="上一页">‹</button>
-                <button type="button" class="active">1</button>
-                <button type="button" disabled aria-label="下一页">›</button>
-                <select class="material-convert-record-page-size" aria-label="每页条数">
-                  <option>10 条/页</option>
-                </select>
-              </div>
+            <div class="material-convert-record-footer" data-convrec-module="${moduleKey}">
+              ${window.WBPager ? window.WBPager.footer({ total: records.length, currentPage: (window.__wbpConvPage || {})[moduleKey] || 1, numAttr: "data-convrec-page", size: false, unit: "条转换记录" }) : ""}
             </div>
           </section>
         </div>
@@ -106400,16 +106606,8 @@ function renderElectrolyteCategoryTabs() {
                   </tbody>
                 </table>
               </div>
-              <div class="material-convert-record-footer">
-                <span>共计 ${historyRecords.length} 条</span>
-                <div class="material-convert-record-pager" aria-label="转换记录分页">
-                  <button type="button" disabled aria-label="上一页">‹</button>
-                  <button type="button" class="active">1</button>
-                  <button type="button" disabled aria-label="下一页">›</button>
-                  <select class="material-convert-record-page-size" aria-label="每页条数">
-                    <option>10条/页</option>
-                  </select>
-                </div>
+              <div class="material-convert-record-footer" data-convrec-module="mlff-history">
+                ${window.WBPager ? window.WBPager.footer({ total: historyRecords.length, currentPage: (window.__wbpConvPage || {})["mlff-history"] || 1, numAttr: "data-convrec-page", size: false, unit: "条" }) : ""}
               </div>
             </section>
           </div>
@@ -109490,6 +109688,10 @@ ${values.join("\t")}`;
         end: ""
       };
 
+      /* 2026-10-26：预测任务列表改为真实分页（此前为静态示意） */
+      let predictionTaskPage = 1;
+      const predictionTaskPageSize = 10;
+
       const escapeTaskHtml = (value) => typeof escapeLowDimHtml === "function"
         ? escapeLowDimHtml(value == null ? "" : String(value))
         : String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -109609,6 +109811,9 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
           extraRow
         ] : rows;
         const displayRows = referenceRows;
+        const predTotalPages = Math.max(1, Math.ceil(displayRows.length / predictionTaskPageSize));
+        if (predictionTaskPage > predTotalPages) predictionTaskPage = predTotalPages;
+        const predPageRows = displayRows.slice((predictionTaskPage - 1) * predictionTaskPageSize, predictionTaskPage * predictionTaskPageSize);
         const statusIcon = (status) => status === "运行成功" ? "✓" : status === "运行失败" ? "×" : status === "已取消" ? "⊙" : "◷";
         const statusLabel = (status) => status === "运行成功" ? "已完成" : status === "运行失败" ? "失败" : status === "已取消" ? "已取消" : status === "排队中" ? "排队中" : "运行中";
         const statusClass = (status) => status === "运行成功" ? "success" : status === "运行失败" ? "danger" : status === "已取消" ? "muted" : status === "排队中" ? "queued" : "running";
@@ -109620,8 +109825,9 @@ ${failed ? "[ERROR] 输入参数校验未通过：缺少必要的收敛配置，
           <div class="prediction-task-hero"><div class="prediction-task-title-wrap"><div class="prediction-task-title-icon">✓</div><div><h2>预测任务管理</h2><p>管理所有材料预测任务，查看任务状态与计算结果</p></div></div><button class="prediction-create-btn" type="button" data-prediction-create><span>＋</span>新建预测任务</button></div>
           <section class="prediction-stat-grid" aria-label="任务统计"><article class="prediction-stat-card"><div><span class="prediction-stat-label">全部任务</span><strong>128</strong><em class="stat-up">↑ 较上周 +12%</em></div><div class="stat-icon blue">▤</div></article><article class="prediction-stat-card"><div><span class="prediction-stat-label">运行中</span><strong class="orange-text">7</strong><em class="stat-warn">◷ 3 个排队中</em></div><div class="stat-icon orange">▶</div></article><article class="prediction-stat-card"><div><span class="prediction-stat-label">已完成</span><strong class="green-text">112</strong><em class="stat-up">↑ 成功率 95.7%</em></div><div class="stat-icon green">✓</div></article><article class="prediction-stat-card"><div><span class="prediction-stat-label">失败/已取消</span><strong class="red-text">9</strong><em class="stat-down">↓ 失败率 4.3%</em></div><div class="stat-icon red">×</div></article></section>
           <section class="prediction-filter-card"><div class="prediction-filter-row"><label class="prediction-search-field"><span class="search-glyph">⌕</span><input type="text" value="${escapeTaskHtml(predictionTaskFilters.name)}" placeholder="搜索任务名称、材料名称..." data-prediction-filter="name"></label><label class="prediction-select-field"><select data-prediction-filter="status"><option>全部状态</option>${["排队中", "弛豫计算中", "性质计算中", "运行成功", "运行失败", "已取消"].map((item) => `<option${predictionTaskFilters.status === item ? " selected" : ""}>${item}</option>`).join("")}</select><span>⌄</span></label><label class="prediction-select-field"><select data-prediction-filter="source"><option>全部算法分类</option><option${predictionTaskFilters.source === "二维材料数据库" ? " selected" : ""}>二维材料数据库</option><option${predictionTaskFilters.source === "电解质材料数据库" ? " selected" : ""}>电解质材料数据库</option><option${predictionTaskFilters.source === "有机光电材料数据库" ? " selected" : ""}>有机光电材料数据库</option><option${predictionTaskFilters.source === "机器学习力场数据库" ? " selected" : ""}>机器学习力场数据库</option><option${predictionTaskFilters.source === "催化材料数据库" ? " selected" : ""}>催化材料数据库</option></select><span>⌄</span></label><label class="prediction-date-field"><input type="text" value="" placeholder="选择创建时间范围" onfocus="this.type='date'" onblur="if(!this.value)this.type='text'" data-prediction-filter="start"><span>▣</span></label><button class="prediction-query-btn" type="button" data-prediction-filter-submit>查询</button><button class="prediction-reset-btn" type="button" data-prediction-filter-reset>重置</button></div><div class="prediction-quick-filter"><span>快速筛选:</span><button class="quick-chip active" type="button" data-prediction-quick="全部">全部</button><button class="quick-chip" type="button" data-prediction-quick="运行中">运行中</button><button class="quick-chip" type="button" data-prediction-quick="已完成">已完成</button><button class="quick-chip" type="button" data-prediction-quick="排队中">排队中</button><button class="quick-chip" type="button" data-prediction-quick="失败">失败</button><button class="quick-chip" type="button" data-prediction-quick="我的任务">我的任务</button></div></section>
-          <section class="prediction-table-card"><div class="prediction-table-head"><div><h3>任务列表 <span>共 128 条</span></h3></div><div class="prediction-table-tools"><button type="button" aria-label="刷新任务列表">⟳</button><button type="button" aria-label="导出任务">⇩ 导出</button><button type="button" aria-label="列表设置">⚙</button></div></div><div class="prediction-table-wrap"><table class="prediction-task-table"><thead><tr><th><input type="checkbox" aria-label="选择全部任务"></th><th>任务名称</th><th>材料信息</th><th>算法名称</th><th>状态</th><th>创建人</th><th>创建时间</th><th>耗时</th><th>操作</th></tr></thead><tbody>${displayRows.length ? displayRows.map((task, index) => { const person = author(task, index); return `<tr><td><input type="checkbox" aria-label="选择 ${escapeTaskHtml(task.name)}"></td><td><div class="task-name-cell"><a href="#" onclick="return false">${escapeTaskHtml(task.name)}</a><small>${escapeTaskHtml(task.id.replace("PT-", "TASK-").replaceAll("-", ""))}</small></div></td><td><div class="material-cell"><strong>${materialName(task)}</strong><small>mp-${escapeTaskHtml(task.materialId.replace(/[^0-9]/g, "").slice(-7) || "1018134")}</small></div></td><td><div class="algorithm-cell">${escapeTaskHtml(algorithmName(task))}<small>v1.0 · 二维材料</small></div></td><td><span class="prediction-status ${statusClass(task.status)}"><i>${statusIcon(task.status)}</i>${statusLabel(task.status)}</span></td><td><div class="creator-cell"><b style="background:${person[1]}">${person[2]}</b><span>${person[0]}</span></div></td><td>${escapeTaskHtml(task.createdAt)}</td><td class="duration-cell">${task.status === "运行成功" ? "12分36秒" : task.status === "运行失败" ? "03分15秒" : task.status === "已取消" ? "01分20秒" : index === 0 ? "--" : "06分42秒"}</td><td><div class="prediction-actions"><button class="twod-action-view" type="button" data-prediction-task-result="${escapeTaskHtml(task.id)}"${task.status === "运行成功" ? "" : " disabled"}>查看结果</button>${task.status === "运行失败" ? `<button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}">重试</button>` : task.status === "已取消" ? `<button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}">重新提交</button>` : task.status === "运行成功" ? `<button class="twod-record-link" type="button" data-prediction-task-log="${escapeTaskHtml(task.id)}">下载</button>` : `<button class="twod-record-link" type="button" data-prediction-task-cancel="${escapeTaskHtml(task.id)}">终止</button>`}</div></td></tr>`; }).join("") : `<tr><td colspan="9" class="opto-table-empty">暂无符合条件的预测任务。</td></tr>`}</tbody></table></div><div class="prediction-table-footer"><span>共 128 条记录，第 1 / 22 页</span><div class="prediction-pagination"><button type="button">‹</button><button type="button" class="active">1</button><button type="button">2</button><button type="button">3</button><button type="button">4</button><button type="button">5</button><span>...</span><button type="button">22</button><button type="button">›</button><label>10条/页　⌄</label></div></div></section>
+          <section class="prediction-table-card"><div class="prediction-table-head"><div><h3>任务列表 <span>共 128 条</span></h3></div><div class="prediction-table-tools"><button type="button" aria-label="刷新任务列表">⟳</button><button type="button" aria-label="导出任务">⇩ 导出</button><button type="button" aria-label="列表设置">⚙</button></div></div><div class="prediction-table-wrap"><table class="prediction-task-table"><thead><tr><th><input type="checkbox" aria-label="选择全部任务"></th><th>任务名称</th><th>材料信息</th><th>算法名称</th><th>状态</th><th>创建人</th><th>创建时间</th><th>耗时</th><th>操作</th></tr></thead><tbody>${predPageRows.length ? predPageRows.map((task, index) => { const person = author(task, index); return `<tr><td><input type="checkbox" aria-label="选择 ${escapeTaskHtml(task.name)}"></td><td><div class="task-name-cell"><a href="#" onclick="return false">${escapeTaskHtml(task.name)}</a><small>${escapeTaskHtml(task.id.replace("PT-", "TASK-").replaceAll("-", ""))}</small></div></td><td><div class="material-cell"><strong>${materialName(task)}</strong><small>mp-${escapeTaskHtml(task.materialId.replace(/[^0-9]/g, "").slice(-7) || "1018134")}</small></div></td><td><div class="algorithm-cell">${escapeTaskHtml(algorithmName(task))}<small>v1.0 · 二维材料</small></div></td><td><span class="prediction-status ${statusClass(task.status)}"><i>${statusIcon(task.status)}</i>${statusLabel(task.status)}</span></td><td><div class="creator-cell"><b style="background:${person[1]}">${person[2]}</b><span>${person[0]}</span></div></td><td>${escapeTaskHtml(task.createdAt)}</td><td class="duration-cell">${task.status === "运行成功" ? "12分36秒" : task.status === "运行失败" ? "03分15秒" : task.status === "已取消" ? "01分20秒" : index === 0 ? "--" : "06分42秒"}</td><td><div class="prediction-actions"><button class="twod-action-view" type="button" data-prediction-task-result="${escapeTaskHtml(task.id)}"${task.status === "运行成功" ? "" : " disabled"}>查看结果</button>${task.status === "运行失败" ? `<button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}">重试</button>` : task.status === "已取消" ? `<button class="twod-record-link" type="button" data-prediction-task-retry="${escapeTaskHtml(task.id)}">重新提交</button>` : task.status === "运行成功" ? `<button class="twod-record-link" type="button" data-prediction-task-log="${escapeTaskHtml(task.id)}">下载</button>` : `<button class="twod-record-link" type="button" data-prediction-task-cancel="${escapeTaskHtml(task.id)}">终止</button>`}</div></td></tr>`; }).join("") : `<tr><td colspan="9" class="opto-table-empty">暂无符合条件的预测任务。</td></tr>`}</tbody></table></div><div class="prediction-table-footer"><div class="result-footer twod-result-footer" style="width:100%">${window.WBPager ? window.WBPager.footer({ total: displayRows.length, currentPage: predictionTaskPage, totalPages: predTotalPages, pageSize: predictionTaskPageSize, numAttr: "data-predtask-page", size: false }) : ""}</div></div></section>
         `;
+        page.querySelectorAll("[data-predtask-page]").forEach((button) => button.addEventListener("click", () => { predictionTaskPage = Number(button.dataset.predtaskPage) || 1; renderPredictionTaskManagementPage(); }));
         page.querySelectorAll("[data-prediction-quick]").forEach((button) => button.addEventListener("click", () => { const value = button.dataset.predictionQuick; if (value === "全部") Object.assign(predictionTaskFilters, { name: "", source: "全部", status: "全部", start: "", end: "" }); else if (value === "失败") predictionTaskFilters.status = "运行失败"; else if (value === "排队中") predictionTaskFilters.status = "排队中"; else if (value === "已完成") predictionTaskFilters.status = "运行成功"; else if (value === "运行中") predictionTaskFilters.status = "性质计算中"; renderPredictionTaskManagementPage(); }));
         page.querySelectorAll("[data-prediction-filter]").forEach((field) => field.addEventListener("change", () => { predictionTaskFilters[field.dataset.predictionFilter] = field.value === "全部状态" || field.value === "全部算法分类" ? "全部" : field.value; }));
       }
@@ -119590,29 +119796,38 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
   function renderPager(p, unit) {
-    var nums = pageNumbers(p).map(function (n) {
-      if (n === "...") return '<span class="t2d-page-gap">···</span>';
-      return '<button type="button" class="t2d-page-num' + (n === p.cur ? ' is-active' : '') + '"'
-        + ' data-t2d-page="' + p.listKey + '" data-t2d-page-to="' + n + '">' + n + '</button>';
-    }).join("");
+    /* 2026-10-26：对齐全站统一分页——页码省略号折叠 + 每页条数下拉 + 「往 N 页」跳转 */
+    var tmpl = 'data-t2d-page="' + p.listKey + '" data-t2d-page-to="';
+    var btns = (window.WBPager ? window.WBPager.buttons(p.pages, p.cur, tmpl)
+      : pageNumbers(p).map(function (n) {
+          if (n === "...") return '<span class="t2d-page-gap">···</span>';
+          return '<button type="button" class="t2d-page-num' + (n === p.cur ? ' is-active' : '') + '"'
+            + ' data-t2d-page="' + p.listKey + '" data-t2d-page-to="' + n + '">' + n + '</button>';
+        }).join(""));
 
-    var sizes = PER_OPTIONS.map(function (n) {
-      return '<button type="button" class="t2d-page-size' + (n === p.per ? ' is-active' : '') + '"'
-        + ' data-t2d-per="' + n + '">' + n + ' 条/页</button>';
-    }).join("");
+    var sizes = '<select class="page-select" data-t2d-per-select aria-label="每页条数">'
+      + PER_OPTIONS.map(function (n) {
+          return '<option value="' + n + '"' + (n === p.per ? ' selected' : '') + '>' + n + '条/页</option>';
+        }).join("") + '</select>';
 
     return '<div class="t2d-pager">'
-      + '<span class="t2d-page-tip">共 <b>' + fmt(p.total) + '</b> ' + unit
-      + '　第 <b>' + p.from + '-' + p.to + '</b> 条</span>'
-      + '<div class="t2d-page-ctl">'
-      + '<button type="button" class="t2d-page-btn" data-t2d-page="' + p.listKey + '" data-t2d-page-to="' + (p.cur - 1) + '"'
-      + (p.cur <= 1 ? ' disabled' : '') + '>上一页</button>'
-      + nums
-      + '<button type="button" class="t2d-page-btn" data-t2d-page="' + p.listKey + '" data-t2d-page-to="' + (p.cur + 1) + '"'
-      + (p.cur >= p.pages ? ' disabled' : '') + '>下一页</button>'
+      + '<span class="pagination-summary">共计 <strong>' + fmt(p.total) + '</strong> ' + unit + '</span>'
+      + '<div class="t2d-page-ctl" data-wbp-pages="' + Math.max(1, p.pages) + '" data-wbp-attr="data-t2d-page-to">'
+      + '<div class="pager">' + btns + '</div>'
+      + sizes
+      + (window.WBPager ? window.WBPager.jumpBox(Math.max(1, p.pages), p.cur) : '')
       + '</div>'
-      + '<div class="t2d-page-sizes">' + sizes + '</div>'
       + '</div>';
+  }
+
+  if (!window.__wbpT2dSizeBound) {
+    window.__wbpT2dSizeBound = true;
+    document.addEventListener("change", function (ev) {
+      var el = ev.target && ev.target.closest ? ev.target.closest("[data-t2d-per-select]") : null;
+      if (!el) return;
+      var pv = parseInt(el.value, 10);
+      if (isFinite(pv) && pv >= 1) { var st2 = getState(); st2.per = pv; st2.page = {}; renderPage(); }
+    });
   }
 
   /* ==========================================================================
@@ -122797,7 +123012,16 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       desc: "",
       dataType: "结构化",
       collectObject: "表",
-      updateFreq: "每周",
+      /* 2026-10-26：更新频率改为「请选择」默认值，未选择时隐藏时间配置；
+         频率对应的动态时间配置项见 renderCreateStep3 / resetCreateFreqCfg */
+      updateFreq: "",
+      freqTime: "09:00",
+      freqWeekday: "周一",
+      freqMonthDay: "1",
+      freqHalf: "上半年",
+      freqHalfMonth: "1",
+      freqHalfDay: "1",
+      freqQuarter: "第一季度（1-3 月）",
       extractCount: "",
       updateMode: "手动",
       dbConn: newDbConn(),
@@ -123264,10 +123488,76 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "</div>";
   }
 
-  /* ---------- 步骤 3：数据更新（2026-10-12 调整）
-     先选择更新执行方式：选「手动」不展示更新频率；选「自动」才展示更新频率。 */
+  /* ---------- 步骤 3：数据更新（2026-10-12 调整；2026-10-26 更新频率扩展）
+     先选择更新执行方式：选「手动」不展示更新频率；选「自动」才展示更新频率。
+     更新频率：每日 / 每周 / 每月 / 每半年 / 每季度；选中后动态展示对应时间配置：
+       每日 → 具体时刻（时分）；每周 → 星期几；每月 → 日期（1-31）；
+       每半年 → 上/下半年 + 月份 + 日期；每季度 → 季度（Q1 1-3 月 … Q4 10-12 月）。
+     未选择频率时隐藏配置项；切换频率时已填内容自动重置。 */
+  function resetCreateFreqCfg(c) {
+    c.freqTime = "09:00";
+    c.freqWeekday = "周一";
+    c.freqMonthDay = "1";
+    c.freqHalf = "上半年";
+    c.freqHalfMonth = "1";
+    c.freqHalfDay = "1";
+    c.freqQuarter = "第一季度（1-3 月）";
+  }
+
+  function freqCfgText(c) {
+    var f = c.updateFreq;
+    if (!f) return "未设置";
+    if (f === "每日") return "每日 · " + (c.freqTime || "09:00");
+    if (f === "每周") return "每周 · " + (c.freqWeekday || "周一");
+    if (f === "每月") return "每月 · " + (c.freqMonthDay || "1") + " 日";
+    if (f === "每半年") return "每半年 · " + (c.freqHalf || "上半年") + " · " + (c.freqHalfMonth || "1") + " 月 " + (c.freqHalfDay || "1") + " 日";
+    if (f === "每季度") return "每季度 · " + (c.freqQuarter || "第一季度（1-3 月）");
+    return f;
+  }
+
   function renderCreateStep3(c) {
     var isAuto = c.updateMode === "自动";
+    var freqs = ["每日", "每周", "每月", "每半年", "每季度"];
+    var freqSel = '<select data-rw-f="updateFreq">'
+      + '<option value=""' + (!c.updateFreq ? " selected" : "") + ">请选择更新频率</option>"
+      + freqs.map(function (o) { return '<option value="' + esc(o) + '"' + (c.updateFreq === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
+      + "</select>";
+    var cfg = "";
+    if (isAuto && c.updateFreq) {
+      var fHead = '<div class="rw-field"><label>时间配置<i>*</i></label>';
+      var fTip = '<span class="rw-field-tip">按所选周期与时间自动检查数据源更新并生成更新批次。</span></div>';
+      if (c.updateFreq === "每日") {
+        cfg = fHead + '<input type="time" data-rw-f="freqTime" value="' + esc(c.freqTime || "09:00") + '">' + fTip;
+      } else if (c.updateFreq === "每周") {
+        cfg = fHead + '<select data-rw-f="freqWeekday">'
+          + ["周一", "周二", "周三", "周四", "周五", "周六", "周日"].map(function (o) { return '<option value="' + esc(o) + '"' + ((c.freqWeekday || "周一") === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
+          + "</select>" + fTip;
+      } else if (c.updateFreq === "每月") {
+        var md = [];
+        for (var d = 1; d <= 31; d++) md.push(String(d));
+        cfg = fHead + '<select data-rw-f="freqMonthDay">'
+          + md.map(function (o) { return '<option value="' + o + '"' + (String(c.freqMonthDay || "1") === o ? " selected" : "") + ">" + o + " 日</option>"; }).join("")
+          + "</select>" + fTip;
+      } else if (c.updateFreq === "每半年") {
+        var months = c.freqHalf === "下半年" ? ["7", "8", "9", "10", "11", "12"] : ["1", "2", "3", "4", "5", "6"];
+        var hd = [];
+        for (var d2 = 1; d2 <= 31; d2++) hd.push(String(d2));
+        cfg = fHead
+          + '<select data-rw-f="freqHalf" style="margin-right:8px">'
+          + ["上半年", "下半年"].map(function (o) { return '<option value="' + esc(o) + '"' + ((c.freqHalf || "上半年") === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
+          + "</select>"
+          + '<select data-rw-f="freqHalfMonth" style="margin-right:8px">'
+          + months.map(function (o) { return '<option value="' + o + '"' + (String(c.freqHalfMonth || "1") === o ? " selected" : "") + ">" + o + " 月</option>"; }).join("")
+          + "</select>"
+          + '<select data-rw-f="freqHalfDay">'
+          + hd.map(function (o) { return '<option value="' + o + '"' + (String(c.freqHalfDay || "1") === o ? " selected" : "") + ">" + o + " 日</option>"; }).join("")
+          + "</select>" + fTip;
+      } else if (c.updateFreq === "每季度") {
+        cfg = fHead + '<select data-rw-f="freqQuarter">'
+          + ["第一季度（1-3 月）", "第二季度（4-6 月）", "第三季度（7-9 月）", "第四季度（10-12 月）"].map(function (o) { return '<option value="' + esc(o) + '"' + ((c.freqQuarter || "第一季度（1-3 月）") === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
+          + "</select>" + fTip;
+      }
+    }
     return '<div class="rw-section-title">第三步 · 数据更新</div>'
       + '<div class="rw-form" style="margin-top:4px">'
       + '<div class="rw-field"><label>更新执行方式<i>*</i></label>'
@@ -123283,10 +123573,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "</div></div>"
       + (isAuto
         ? '<div class="rw-field"><label>更新频率<i>*</i></label>'
-          + '<select data-rw-f="updateFreq">'
-          + ["每日", "每周", "每月", "每季度"].map(function (o) { return '<option value="' + esc(o) + '"' + (c.updateFreq === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("")
-          + "</select>"
-          + '<span class="rw-field-tip">按所选周期自动检查数据源更新并生成更新批次。</span></div>'
+          + freqSel
+          + '<span class="rw-field-tip">按所选周期定时检查数据源更新；未选择频率时不展示时间配置。</span></div>'
+          + cfg
         : "")
       + '<div class="rw-field"><label>抽取数量</label><input type="text" data-rw-f="extractCount" value="' + esc(c.extractCount || "") + '" placeholder="请输入抽取数量，如 1000"><span class="rw-field-tip">填写本次需要从数据源抽取的数据条数，留空表示按数据源全量抽取。</span></div>'
       + "</div>";
@@ -123453,10 +123742,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
   }
 
-  var FREQ_STEP_DAYS = { "每日": 1, "每周": 7, "每月": 30, "每季度": 90 };
+  var FREQ_STEP_DAYS = { "每日": 1, "每周": 7, "每月": 30, "每半年": 182, "每季度": 90 };
 
   function freqStepDays(freq) {
-    var m = { "每日": 1, "每周": 7, "每月": 30, "每季度": 90 };
+    var m = { "每日": 1, "每周": 7, "每月": 30, "每半年": 182, "每季度": 90 };
     return m[freq] || 7;
   }
 
@@ -123550,7 +123839,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-kv"><div><b>采集 ID</b>' + esc(c.id) + "</div>"
       + "<div><b>入库名称</b>" + esc(c.name || "-") + "</div>"
       + "<div><b>数据来源</b>" + esc(c.sourceType) + "</div>"
-      + "<div><b>更新频率</b>" + esc(c.updateMode === "自动" ? c.updateFreq : "—") + "</div>"
+      + "<div><b>更新频率</b>" + esc(c.updateMode === "自动" ? (c.updateFreq ? freqCfgText(c) : "未设置") : "—") + "</div>"
       + "<div><b>抽取数量</b>" + esc(c.extractCount ? c.extractCount + " 条" : "—") + "</div>"
       + "<div><b>执行方式</b>" + esc(c.updateMode) + "</div>"
       + "<div><b>批次数量</b>" + r.batches.length + " 个" + (multi ? "（按频率自动提取，分批次留档）" : "（手动触发）") + "</div>"
@@ -123558,7 +123847,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "<div><b>采集时间</b>" + esc(r.at) + "</div></div>"
       + r.batches.map(function (b) { return batchBlockHtml(b, multi); }).join("")
       + (multi
-        ? '<div class="rw-banner" style="margin-top:12px"><span>ⓘ</span><div>该任务按「' + esc(c.updateFreq) + '」自动提取，提交后在采集列表「查看详情」中可按批次分别查看各批次数据表。</div></div>'
+        ? '<div class="rw-banner" style="margin-top:12px"><span>ⓘ</span><div>该任务按「' + esc(freqCfgText(c)) + '」自动提取，提交后在采集列表「查看详情」中可按批次分别查看各批次数据表。</div></div>'
         : "")
       + "</div>";
   }
@@ -123571,6 +123860,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       c.error = "请填写入库名称后再执行采集";
       renderCreateModal();
       toast("请填写入库名称后再执行采集", "err");
+      return;
+    }
+    if (c.updateMode === "自动" && !c.updateFreq) {
+      c.error = "请先选择更新频率";
+      renderCreateModal();
+      toast("请先选择更新频率后再执行采集", "err");
       return;
     }
     c.error = "";
@@ -123647,7 +123942,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var multi = bs.length > 1;
     var head = '<div class="rw-banner" style="margin-top:12px"><span>ⓘ</span><div>'
       + (multi
-        ? "该任务按「" + esc(t.updateFreq || "-") + "」自动提取，共 " + bs.length + " 个批次，下方按批次分别展示各批次拉取的数据表。"
+        ? "该任务按「" + esc(t.updateFreqText || t.updateFreq || "-") + "」自动提取，共 " + bs.length + " 个批次，下方按批次分别展示各批次拉取的数据表。"
         : "该任务为" + esc(t.updateMode || "手动") + "触发采集，共 1 个批次。")
       + "</div></div>";
     return head + bs.map(function (b) { return batchBlockHtml(b, multi); }).join("");
@@ -124005,7 +124300,14 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       else if (f === "sourceType") c.sourceType = el.value;
       else if (f === "dataType") c.dataType = el.value;
       else if (f === "collectObject") c.collectObject = el.value;
-      else if (f === "updateFreq") c.updateFreq = el.value;
+      else if (f === "updateFreq") { if (c.updateFreq !== el.value) { c.updateFreq = el.value; resetCreateFreqCfg(c); } }
+      else if (f === "freqTime") c.freqTime = el.value;
+      else if (f === "freqWeekday") c.freqWeekday = el.value;
+      else if (f === "freqMonthDay") c.freqMonthDay = el.value;
+      else if (f === "freqQuarter") c.freqQuarter = el.value;
+      else if (f === "freqHalf") { if ((c.freqHalf || "上半年") !== el.value) { c.freqHalf = el.value; c.freqHalfMonth = el.value === "下半年" ? "7" : "1"; c.freqHalfDay = "1"; } }
+      else if (f === "freqHalfMonth") c.freqHalfMonth = el.value;
+      else if (f === "freqHalfDay") c.freqHalfDay = el.value;
       else if (f === "extractCount") c.extractCount = el.value;
       else if (f === "updateMode") { if (el.type !== "radio" || el.checked) c.updateMode = el.value; }
       else if (f === "dbConn") { var dc = dbConnOf(c); dc[el.getAttribute("data-key")] = el.value; }
@@ -124126,6 +124428,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       dbName: String(c.name).trim(),
       integrationReport: report,
       updateFreq: c.updateFreq,
+      updateFreqText: c.updateMode === "自动" ? freqCfgText(c) : "",
       extractCount: c.extractCount || "",
       updateMode: c.updateMode,
       version: "V1.0",
@@ -124228,7 +124531,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + auditKvRow("数据类型", t.dataType || "结构化")
       + auditKvRow("数据采集对象", t.collectObject || "表")
       + auditKvRow("数据整合报告", t.integrationReport || "表字段规则校验通过 · 格式统一完成")
-      + auditKvRow("更新频率", t.updateMode === "自动" ? (t.updateFreq || "每周") : "—")
+      + auditKvRow("更新频率", t.updateMode === "自动" ? (t.updateFreqText || t.updateFreq || "每周") : "—")
       + auditKvRow("抽取数量", t.extractCount ? t.extractCount + " 条" : "—")
       + auditKvRow("更新执行方式", t.updateMode || "手动")
       + auditKvRow("创建时间", t.createdAt)
@@ -129052,7 +129355,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       if (el.hasAttribute("data-rw-f")) {
         var f = el.getAttribute("data-rw-f");
         syncFromDom();
-        if (f === "method" || f === "materialType" || f === "dbAll" || f === "ds" || f === "calcOut" || f === "calcFiles" || f === "collectObject" || f === "obtainWay" || f === "updateMode") renderCreateModal();
+        if (f === "method" || f === "materialType" || f === "dbAll" || f === "ds" || f === "calcOut" || f === "calcFiles" || f === "collectObject" || f === "obtainWay" || f === "updateMode" || f === "updateFreq" || f === "freqHalf") renderCreateModal();
         return;
       }
       if (el.hasAttribute("data-rw-ef")) {
