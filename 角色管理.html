@@ -105109,8 +105109,7 @@ function renderElectrolyteCategoryTabs() {
       page.innerHTML = `
         <style>${getLowdimStandardBrowserStyles()}</style>
         <div class="lowdim-standard-browser-type-tabs" role="tablist" aria-label="标准类型">
-          <span class="lowdim-standard-browser-type-label">标准体系：</span>
-          ${browserTypes.map((type) => `<button type="button" class="${browserState.activeType === type ? "active" : ""}" data-standard-browser-type="${escapeBrowserHtml(type)}" role="tab" aria-selected="${browserState.activeType === type ? "true" : "false"}">${escapeBrowserHtml(type)}</button>`).join("")}
+          ${browserTypes.map((type) => `<button type="button" class="${browserState.activeType === type ? "active" : ""}" data-standard-browser-type="${escapeBrowserHtml(type)}" role="tab" aria-selected="${browserState.activeType === type ? "true" : "false"}">${escapeBrowserHtml(type.replace(/体系$/, ""))}</button>`).join("")}
         </div>
         <div class="lowdim-standard-browser-shell">
           <section class="lowdim-standard-browser-panel lowdim-standard-browser-filter-panel">
@@ -126113,7 +126112,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "<p>已入库数据 " + fmtNum(ready) + " 条可参与加工；共 " + fmtNum(p.jobs.length) + " 条加工报告。"
       + "每个加工任务按「数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价」六步执行，版本随阶段推进 V0.0 → V1.0 → V2.0。</p></div>"
       + '<div style="flex:0 0 auto;display:flex;gap:8px">'
-      + '<button class="rw-btn" type="button" data-rw-act="proc-refresh">↻ 刷新</button>'
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-new">＋ 新建加工任务</button></div></div>'
       + (p.loading ? '<div class="rw-jl-loading"><span class="rw-jl-sk" style="width:14px;height:14px;border-radius:50%;flex:0 0 auto"></span>正在加载加工报告…</div>' : "")
       + '<div class="rw-tbl-wrap rw-jl-wrap"><table class="rw-tbl rw-jl"><thead><tr>'

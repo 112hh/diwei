@@ -1419,15 +1419,16 @@
     .page-select,
     .page-jump button,
     .page-jump input {
-      min-width: 38px;
-      height: 32px;
-      border-radius: 10px;
-      border: 1px solid var(--line-strong);
+      /* 2026-10-23：对齐设计稿——与共享分页按钮同规格（28px 高、6px 圆角） */
+      min-width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid #E5E6EB;
       background: white;
-      color: #50627f;
-      font-weight: 700;
-      font-size: 12px;
-      line-height: 20px;
+      color: #4E5969;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 26px;
     }
 
     .pager button.active {
@@ -2070,21 +2071,24 @@
     }
 
     .algorithm-list-pagination .twod-pagination-btn {
-      min-width: 32px;
-      height: 32px;
+      /* 2026-10-23：对齐全站统一分页样式（原为无边框浅蓝激活的独立样式） */
+      min-width: 28px;
+      height: 28px;
       padding: 0 8px;
-      border: 0;
-      border-radius: 3px;
-      background: transparent;
-      color: #35445c;
-      font-size: 14px;
+      border: 1px solid #E5E6EB;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #4E5969;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
     }
 
     .algorithm-list-pagination .twod-pagination-btn.active {
-      background: #e9f2ff;
-      color: #1f63ff;
-      font-weight: 700;
+      background: #1F63FF;
+      border-color: #1F63FF;
+      color: #ffffff;
+      font-weight: 500;
     }
 
     .algorithm-list-pagination .twod-pagination-btn:disabled {
@@ -9765,21 +9769,22 @@
     }
 
     .twod-pagination-btn {
-      min-width: 40px;
-      height: 40px;
-      padding: 0 12px;
+      /* 2026-10-23：对齐设计稿——28px 方块、6px 圆角、激活态主题蓝底白字 */
+      min-width: 28px;
+      height: 28px;
+      padding: 0 8px;
       border: 1px solid #E5E6EB;
-      border-radius: 10px;
+      border-radius: 6px;
       background: #ffffff;
-      color: #1c2d4b;
-      font-size: 14px;
-      line-height: 22px;
-      font-weight: 700;
+      color: #4E5969;
+      font-size: 13px;
+      line-height: 26px;
+      font-weight: 500;
     }
 
     .twod-pagination-btn.active {
-      background: #2451c6;
-      border-color: #2451c6;
+      background: #1F63FF;
+      border-color: #1F63FF;
       color: #ffffff;
     }
 
@@ -36108,7 +36113,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       periodic: new Set(),
       twodBaseView: "table",
       twodPropertyView: "table",
-      twodPageSize: 5,
+      twodPageSize: 10,
       algorithmListPage: 1,
       algorithmListPageSize: 10,
       selectedPropertyCategory: "",
@@ -36128,7 +36133,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       twodDetailTreeSearch: "",
       electrolyteCategory: "organicLiquid",
       electrolyteTab: "base",
-      electrolytePageSize: 5,
+      electrolytePageSize: 10,
       electrolyteUploadStep: 1,
       electrolyteUploadProgress: 0,
       electrolyteUploadDraft: null,
@@ -36142,7 +36147,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
         dataDescription: ""
       },
       optoViewMode: "table",
-      optoPageSize: 5,
+      optoPageSize: 10,
       optoPage: 1,
       optoFilters: {
         name: "",
@@ -36157,7 +36162,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       mlffTab: "search",
       mlffGlossaryTab: "definition",
       mlffPage: 1,
-      mlffPageSize: 5,
+      mlffPageSize: 10,
       mlffSort: "default",
       selectedMlffId: "ML-001",
       mlffMethodFilter: "all",
@@ -36182,7 +36187,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       catalystTab: "base",
       catalystViewMode: "table",
       catalystPage: 1,
-      catalystPageSize: 5,
+      catalystPageSize: 10,
       catalystSort: "default",
       selectedCatalystId: "CAT-PT-111-001",
       selectedCatalystTool: "site",
@@ -36525,7 +36530,7 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       activePage: "sys-user",
       selectedIds: { "sys-user": new Set(), "sys-role": new Set(), "sys-menu": new Set(), "sys-dict": new Set(), "sys-algorithm": new Set(), "sys-api": new Set(), "sys-log": new Set() },
       pagination: {
-        "sys-menu": { page: 1, pageSize: 5 }
+        "sys-menu": { page: 1, pageSize: 10 }
       },
       search: {
         "sys-user": { username: "", roleName: "", status: "" },
@@ -46032,11 +46037,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
             <div class="opto-result-head">
               <h3>检索结果</h3>
               <div class="opto-result-tools">
-                <label class="opto-inline-field">每页显示:
-                  <select id="optoPageSize">
-                    ${[5, 10, 20, 50].map((size) => `<option value="${size}" ${state.optoPageSize === size ? "selected" : ""}>${size}条</option>`).join("")}
-                  </select>
-                </label>
+                <!-- 2026-10-23：每页条数选择器移至底部统一分页条（id=optoPageSize 保持不变，交互不变） -->
                 <div class="opto-view-toggle">
                   <button class="opto-view-btn${state.optoViewMode === "card" ? " active" : ""}" type="button" data-opto-view="card">卡片视图</button>
                   <button class="opto-view-btn${state.optoViewMode === "table" ? " active" : ""}" type="button" data-opto-view="table">表格视图</button>
@@ -46534,11 +46535,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <div class="mlff-result-head">
             <h3>检索结果</h3>
             <div class="mlff-result-tools">
-              <label class="mlff-inline-field">每页显示:
-                <select id="mlffPageSize">
-                  ${[5, 10, 20, 50].map((size) => `<option value="${size}" ${state.mlffPageSize === size ? "selected" : ""}>${size}条/页</option>`).join("")}
-                </select>
-              </label>
+              <!-- 2026-10-23：每页条数选择器移至底部统一分页条（id=mlffPageSize 保持不变，交互不变） -->
               <label class="mlff-inline-field">排序:
                 <select id="mlffSort">
                   <option value="default" ${state.mlffSort === "default" ? "selected" : ""}>默认排序</option>
@@ -47714,10 +47711,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
                 <button class="catalyst-view-btn${state.catalystViewMode === "card" ? " active" : ""}" type="button" data-catalyst-view="card">卡片视图</button>
               </div>
               <div class="action-row">
-                <select id="catalystPageSize">
-                  <option value="5"${state.catalystPageSize === 5 ? " selected" : ""}>5条/页</option>
-                  <option value="10"${state.catalystPageSize === 10 ? " selected" : ""}>10条/页</option>
-                </select>
+                <!-- 2026-10-23：每页条数选择器移至底部统一分页条（id=catalystPageSize 保持不变，交互不变） -->
                 <select id="catalystSort">
                   <option value="default"${state.catalystSort === "default" ? " selected" : ""}>默认排序</option>
                   <option value="activation-asc"${state.catalystSort === "activation-asc" ? " selected" : ""}>活化能升序</option>
@@ -51461,7 +51455,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       if (!state.twodSearchMode) state.twodSearchMode = "formula";
       if (!state.twodTab) state.twodTab = "search";
       if (!state.twodCurrentPage) state.twodCurrentPage = 1;
-      if (!state.twodPageSize) state.twodPageSize = 5;
+      if (!state.twodPageSize) state.twodPageSize = 10;
       if (typeof state.twodHasSearched !== "boolean") state.twodHasSearched = false;
       if (!state.twodReviewFilter) state.twodReviewFilter = "all";
       if (!state.twodReviewFocusId) state.twodReviewFocusId = "";
@@ -51713,7 +51707,11 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     }
 
     function renderSharedPaginationFooter({ total, currentPage, totalPages, pageSize, pageSizeId, pageAttr, jumpModule }) {
+      /* 2026-10-23：统一分页状态规则——空数据不渲染分页（列表区自行显示空态文案） */
+      if (!Number(total)) return "";
       const current = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
+      /* 2026-10-23：对齐设计稿——「共计 N 条」居左，页码居中（‹ 数字 ›，省略号折叠），
+         每页条数选择器居右（N条/页）；跳转输入框按设计稿移除，jumpModule 参数保留兼容既有调用。 */
       return `
         <div class="pagination-summary">共计 <strong>${total}</strong> 条</div>
         <div class="pagination pagination-toolbar">
@@ -51721,13 +51719,49 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
           <select class="page-select" id="${pageSizeId}" aria-label="每页条数">
             ${[5, 10, 20, 50].map((size) => `<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}条/页</option>`).join("")}
           </select>
-          <label class="page-jump">
-            <span>前往</span>
-            <input type="number" min="1" max="${Math.max(1, totalPages)}" value="${current}" data-pagination-input="${jumpModule}" aria-label="输入页码后回车">
-          </label>
         </div>
       `;
     }
+
+
+    /* 2026-10-23：全站分页与地址栏同步 —— 点击任何分页页码按钮（data-*-page / data-system-page-num）
+       后把页码写入地址栏（pg- 前缀查询参数）；页面加载后读取地址栏并自动还原对应页码。
+       file:// 等不支持的场景静默降级，不影响分页本身。 */
+    (function initSharedPaginationUrlSync() {
+      var PAGE_ATTR_RE = /^data-([a-z0-9-]+-page(?:-num)?)$/;
+      function writePageToUrl(attrName, value) {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          params.set("pg-" + attrName.replace(/^data-/, ""), value);
+          var qs = params.toString();
+          window.history.replaceState(null, "", window.location.pathname + (qs ? "?" + qs : "") + window.location.hash);
+        } catch (e) { /* file:// 降级：仅不分页参数写入地址栏 */ }
+      }
+      document.addEventListener("click", function (event) {
+        var el = event.target instanceof Element ? event.target.closest("[data-]") : null;
+        if (!el) return;
+        for (var i = 0; i < el.attributes.length; i++) {
+          var attr = el.attributes[i];
+          if (PAGE_ATTR_RE.test(attr.name) && /^\d+$/.test(attr.value)) { writePageToUrl(attr.name, attr.value); break; }
+        }
+      }, true);
+      function readPagesFromUrl(attempt) {
+        attempt = attempt || 0;
+        var clicked = 0;
+        try {
+          var params = new URLSearchParams(window.location.search);
+          params.forEach(function (value, key) {
+            if (!/^pg-[a-z0-9-]+-page(?:-num)?$/.test(key) || !/^\d+$/.test(value)) return;
+            var attrName = "data-" + key.replace(/^pg-/, "");
+            var btn = document.querySelector("[" + attrName + "=\"" + value + "\"]");
+            if (btn) { btn.click(); clicked++; }
+          });
+        } catch (e) { return; }
+        if (!clicked && attempt < 8) setTimeout(function () { readPagesFromUrl(attempt + 1); }, 600);
+      }
+      if (document.readyState === "complete") setTimeout(function () { readPagesFromUrl(); }, 800);
+      else window.addEventListener("load", function () { setTimeout(function () { readPagesFromUrl(); }, 800); });
+    })();
 
     function renderTwodPagination(totalPages) {
       const wrap = document.getElementById("twodBasePagination");
@@ -55085,7 +55119,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
         };
       }
       if (!state.electrolyteCurrentPage) state.electrolyteCurrentPage = 1;
-      if (!state.electrolytePageSize) state.electrolytePageSize = 5;
+      if (!state.electrolytePageSize) state.electrolytePageSize = 10;
       if (!state.electrolyteNameMatchMode) state.electrolyteNameMatchMode = "fuzzy";
       if (!state.electrolyteFormulaMatchMode) state.electrolyteFormulaMatchMode = "fuzzy";
       if (!state.electrolyteCodeMatchMode) state.electrolyteCodeMatchMode = "fuzzy";
@@ -56898,7 +56932,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
     function ensureOptoRuntimeState() {
       if (!state.optoSearchMode) state.optoSearchMode = "name";
       if (!state.optoCurrentPage) state.optoCurrentPage = 1;
-      if (!state.optoPageSize) state.optoPageSize = 5;
+      if (!state.optoPageSize) state.optoPageSize = 10;
       if (!state.optoSearchDraft) state.optoSearchDraft = createOptoSearchDrafts();
       if (!state.optoAppliedSearch) {
         state.optoAppliedSearch = {
@@ -58783,7 +58817,7 @@ const OPTO_PREDICTION_SPECTRA = deepFreezeLowDimRealCases({
       ensureMlffStyles();
       if (!state.mlffSearchMode) state.mlffSearchMode = "name";
       if (!state.mlffPage) state.mlffPage = 1;
-      if (!state.mlffPageSize) state.mlffPageSize = 5;
+      if (!state.mlffPageSize) state.mlffPageSize = 10;
       if (!state.mlffGlossaryTab) state.mlffGlossaryTab = "definition";
       if (!state.selectedMlffId) state.selectedMlffId = mlffMaterials[0]?.id || "";
       if (!state.mlffSearchDraft) {
@@ -65004,7 +65038,7 @@ function renderMlffTopicSampleTable(data) {
         if (systemPageSize) {
           const page = systemPageSize.dataset.systemPageSize;
           const pager = getSystemPaginationState(page);
-          pager.pageSize = Number(event.target.value) || 5;
+          pager.pageSize = Number(event.target.value) || 10;
           pager.page = 1;
           renderSystemPage(page);
           return;
@@ -71040,7 +71074,7 @@ print(resp.json())`;
       document.body.addEventListener("change", (event) => {
         if (event.target.id === "lowdimStandardPageSize") {
           const std = getLowdimStandardSystemState();
-          std.pageSize = Number(event.target.value) || 5;
+          std.pageSize = Number(event.target.value) || 10;
           std.currentPage = 1;
           renderLowdimStandardSystemPage();
           return;
@@ -89903,7 +89937,7 @@ function escapeHtml(value) {
 
     function getSystemPaginationState(page) {
       if (!systemState.pagination[page]) {
-        systemState.pagination[page] = { page: 1, pageSize: 5 };
+        systemState.pagination[page] = { page: 1, pageSize: 10 };
       }
       return systemState.pagination[page];
     }
@@ -89928,6 +89962,8 @@ function escapeHtml(value) {
     }
 
     function renderSystemPaginationFooter(page, total, currentPage, totalPages, pageSize) {
+      /* 2026-10-23：与全站统一——空数据不渲染分页；移除跳转输入框，样式对齐设计稿 */
+      if (!Number(total)) return "";
       const current = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
       return `
         <div class="result-footer twod-result-footer">
@@ -89937,10 +89973,6 @@ function escapeHtml(value) {
             <select class="page-select" data-system-page-size="${page}" aria-label="每页条数">
               ${[5, 10, 20, 50].map((size) => `<option value="${size}" ${pageSize === size ? " selected" : ""}>${size}条/页</option>`).join("")}
             </select>
-            <label class="page-jump">
-              <span>前往</span>
-              <input type="number" min="1" max="${Math.max(1, totalPages)}" value="${current}" data-system-page-jump="${page}" aria-label="输入页码后回车">
-            </label>
           </div>
         </div>
       `;
@@ -104980,22 +105012,16 @@ function renderElectrolyteCategoryTabs() {
     }
 
     function browserPagination(total, totalPages) {
-      const page = browserState.page;
-      const buttons = [];
-      const first = Math.max(1, Math.min(page - 2, totalPages - 4));
-      const last = Math.min(totalPages, first + 4);
-      for (let index = first; index <= last; index += 1) {
-        buttons.push(`<button type="button" class="${index === page ? "active" : ""}" data-standard-browser-page="${index}" aria-current="${index === page ? "page" : "false"}">${index}</button>`);
-      }
+      /* 2026-10-23：对齐全站统一分页——空数据不渲染；页码复用共享组件（省略号折叠）；
+         汇总文案统一为「共计 N 条」；「第 x / y 页」提示按设计稿移除。 */
+      if (!Number(total)) return "";
+      const page = Math.min(Math.max(1, browserState.page), Math.max(1, totalPages));
       return `
-        <div class="lowdim-standard-browser-pagination">
-          <span>共 ${total} 条标准</span>
-          <div class="lowdim-standard-browser-page-buttons">
-            <button type="button" ${page <= 1 ? "disabled" : ""} data-standard-browser-page="${page - 1}" aria-label="上一页">‹</button>
-            ${buttons.join("")}
-            <button type="button" ${page >= totalPages ? "disabled" : ""} data-standard-browser-page="${page + 1}" aria-label="下一页">›</button>
+        <div class="lowdim-standard-browser-pagination result-footer twod-result-footer">
+          <div class="pagination-summary">共计 <strong>${total}</strong> 条</div>
+          <div class="pagination pagination-toolbar">
+            <div class="pager">${renderSharedPaginationButtons(totalPages, page, "data-standard-browser-page")}</div>
           </div>
-          <span>第 ${page} / ${totalPages} 页</span>
         </div>
       `;
     }
@@ -105144,8 +105170,7 @@ function renderElectrolyteCategoryTabs() {
       page.innerHTML = `
         <style>${getLowdimStandardBrowserStyles()}</style>
         <div class="lowdim-standard-browser-type-tabs" role="tablist" aria-label="标准类型">
-          <span class="lowdim-standard-browser-type-label">标准体系：</span>
-          ${browserTypes.map((type) => `<button type="button" class="${browserState.activeType === type ? "active" : ""}" data-standard-browser-type="${escapeBrowserHtml(type)}" role="tab" aria-selected="${browserState.activeType === type ? "true" : "false"}">${escapeBrowserHtml(type)}</button>`).join("")}
+          ${browserTypes.map((type) => `<button type="button" class="${browserState.activeType === type ? "active" : ""}" data-standard-browser-type="${escapeBrowserHtml(type)}" role="tab" aria-selected="${browserState.activeType === type ? "true" : "false"}">${escapeBrowserHtml(type.replace(/体系$/, ""))}</button>`).join("")}
         </div>
         <div class="lowdim-standard-browser-shell">
           <section class="lowdim-standard-browser-panel lowdim-standard-browser-filter-panel">
@@ -105234,9 +105259,9 @@ function renderElectrolyteCategoryTabs() {
         #page-standard-twod .lowdim-standard-browser-empty{grid-column:1/-1;padding:46px 18px;text-align:center;color:#64748b;border:1px dashed #cfd8e6;border-radius:8px;background:#fbfdff;}
         #page-standard-twod .lowdim-standard-browser-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 2px 0;color:#64748b;font-size:13px;}
         #page-standard-twod .lowdim-standard-browser-page-buttons{display:flex;align-items:center;gap:6px;}
-        #page-standard-twod .lowdim-standard-browser-page-buttons button{width:34px;height:34px;border:1px solid #d4deeb;border-radius:5px;background:#fff;color:#334155;cursor:pointer;}
-        #page-standard-twod .lowdim-standard-browser-page-buttons button:hover:not(:disabled){border-color:#2451c6;color:#123c9c;background:#eaf2ff;}
-        #page-standard-twod .lowdim-standard-browser-page-buttons button.active{border-color:#123c9c;background:#123c9c;color:#fff;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons button{width:28px;height:28px;border:1px solid #E5E6EB;border-radius:6px;background:#fff;color:#4E5969;font-size:13px;cursor:pointer;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons button:hover:not(:disabled){border-color:#1F63FF;color:#1F63FF;background:#fff;}
+        #page-standard-twod .lowdim-standard-browser-page-buttons button.active{border-color:#1F63FF;background:#1F63FF;color:#fff;}
         #page-standard-twod .lowdim-standard-browser-page-buttons button:disabled{cursor:not-allowed;opacity:.45;}
         #page-standard-twod .lowdim-standard-browser-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
         #page-standard-twod .lowdim-standard-browser-section-title h3{margin:0;color:#0f2377;font-size:18px;line-height:26px;}
@@ -116982,7 +117007,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     /* 注意：调用方已按 state.mlffPageSize 切好当前页，此处不得再次切片 */
     var rows = (list && list.length) ? list : ORDERED;
     if (!(list && list.length)) return '<tr><td colspan="13" class="opto-table-empty">未检索到符合条件的机器学习力场数据，请调整检索条件后重试。</td></tr>';
-    var pageSize = Number(state.mlffPageSize) || 5;
+    var pageSize = Number(state.mlffPageSize) || 10;
     var start = (Math.max(1, state.mlffPage || 1) - 1) * pageSize;
     return rows.map(function (item, i) {
       var cls = item.mlffxClass || "molecule";
@@ -126148,7 +126173,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "<p>已入库数据 " + fmtNum(ready) + " 条可参与加工；共 " + fmtNum(p.jobs.length) + " 条加工报告。"
       + "每个加工任务按「数据策划 → 基础数据筛选 → 标准化预处理 → 数据加工 → 产品生产 → 质量评价」六步执行，版本随阶段推进 V0.0 → V1.0 → V2.0。</p></div>"
       + '<div style="flex:0 0 auto;display:flex;gap:8px">'
-      + '<button class="rw-btn" type="button" data-rw-act="proc-refresh">↻ 刷新</button>'
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="proc-new">＋ 新建加工任务</button></div></div>'
       + (p.loading ? '<div class="rw-jl-loading"><span class="rw-jl-sk" style="width:14px;height:14px;border-radius:50%;flex:0 0 auto"></span>正在加载加工报告…</div>' : "")
       + '<div class="rw-tbl-wrap rw-jl-wrap"><table class="rw-tbl rw-jl"><thead><tr>'
