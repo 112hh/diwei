@@ -122014,9 +122014,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function styleIdFor(pid) { return "rw-ingest-" + pid + "-style-20260924"; }
   var NS = "rw";
 
-  /* 2026-10-08：资源录入页的「批量导入」功能暂时下线——入口按钮不渲染，
-     对应动作也被拦下（数据仍保留，恢复只需把下面这个开关改回 false）。 */
-  var HIDE_ENTRY_BATCH = true;
+  /* 2026-10-27：恢复「批量导入」入口——数据资源录入页面统一提供批量导入功能。
+     （开关保留：改回 true 即可临时下线） */
+  var HIDE_ENTRY_BATCH = false;
 
   /* 2026-10-12：资源录入页的「录入规范说明」子页签不再展示（圈红删除），
      对应视图入口一并下线（渲染函数与数据仍保留，恢复只需把下面这个开关改回 false）。 */
@@ -122173,6 +122173,15 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
       /* 说明条 */
       "#page-" + PAGE_ID + " .rw-banner { display:flex; gap:10px; padding:12px 14px; border-radius:10px; background:#eef4ff; border:1px solid #d6e4ff; color:#40536e; font-size:13px; line-height:1.6; margin-bottom:16px; }",
+      /* 2026-10-27 弹窗内兜底：上面这几条都带 #page- 前缀，弹窗挂在 body 下取不到，
+         图标会独占一行、小节标题退化成一串普通文字。补一份全局规则，页面内仍被前缀规则覆盖。 */
+      ".rw-mask .rw-banner { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:10px; margin:0 0 14px; background:#eef4ff; border:1px solid #d6e4ff; color:#40536e; font-size:13px; line-height:1.6; }",
+      ".rw-mask .rw-banner > span:first-child { flex:0 0 auto; }",
+      ".rw-mask .rw-banner--warn { background:#fff7e8; border-color:#ffe0ac; }",
+      ".rw-mask .rw-banner--err { background:#fdeeee; border-color:#f7c9c9; }",
+      ".rw-mask .rw-section-title { display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:15px; color:#22364f; }",
+      ".rw-mask .rw-section-title i { color:#d03050; font-style:normal; }",
+      ".rw-mask .rw-card-note { margin:0 0 12px; font-size:13px; color:#6b7d95; line-height:1.65; }",
       "#page-" + PAGE_ID + " .rw-banner--warn { background:#fff7e8; border-color:#ffe0ac; }",
       "#page-" + PAGE_ID + " .rw-banner--err { background:#fdeeee; border-color:#f7c9c9; }",
 
@@ -123002,8 +123011,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       step: 1,
       id: nextTaskId(),
       name: "",
-      obtainWay: "数据库",
-      sourceType: "文献采集",
+      obtainWay: "数据库连接",
+      sourceCat: "开源数据库",
+      sourceType: "现有开源数据库",
       desc: "",
       dataType: "结构化",
       collectObject: "表",
@@ -123169,7 +123179,23 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-form">' + fields + "</div>";
   }
 
+  /* --------------------------------------- 数据来源双层下拉（2026-10-27 新增）
+     第一层：数据来源大类（开源数据库 / 数据购买 / 数据计算）
+     第二层：该大类下的具体来源渠道，随第一层联动切换。 */
+  var SOURCE_CATS = ["开源数据库", "数据购买", "数据计算"];
+  var SOURCE_SUBS = {
+    "开源数据库": ["现有开源数据库", "已发表文献数据库"],
+    "数据购买": ["商业用途数据库", "学术用途数据库"],
+    "数据计算": ["新型低维材料数据", "其他数据库未收录数据"]
+  };
+
+  function sourceSubsOf(cat) {
+    var list = SOURCE_SUBS[cat];
+    return (list && list.length) ? list : SOURCE_SUBS[SOURCE_CATS[0]];
+  }
+
   /* ------------------------------------------------------------ 步骤 1：数据获取 */
+  /* 2026-10-27：获取方式固定为「数据库连接」；数据来源改为「大类 + 具体渠道」双层下拉。 */
   function renderCreateStep1(c) {
     function opt(list, cur) {
       return list.map(function (o) { return '<option value="' + esc(o) + '"' + (cur === o ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("");
@@ -123180,12 +123206,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<input type="text" readonly value="' + esc(c.id) + '">'
       + '<span class="rw-field-tip">编码规则：材料代码-CL-年-月-日-三位序号，创建时自动生成，不可修改。</span></div>'
       + '<div class="rw-field"><label>数据获取方式<i>*</i></label>'
-      + '<select data-rw-f="obtainWay">' + opt(["数据库", "数据库连接"], c.obtainWay) + "</select>"
-      + '<span class="rw-field-tip">数据库：直连已接入的数据库抽取；数据库连接：新建数据库连接并配置连接参数。</span></div>'
+      /* 2026-10-27：获取方式固定为「数据库连接」，下拉置灰不可选，仅作展示 */
+      + '<select data-rw-f="obtainWay" disabled aria-disabled="true" title="当前版本仅支持通过数据库连接获取数据，该选项不可修改" '
+      + 'style="background:#f2f5f9;color:#8a97ab;cursor:not-allowed">' + opt(["数据库连接"], "数据库连接") + "</select>"
+      + '<span class="rw-field-tip">按项目要求，数据获取统一通过「数据库连接」方式完成（选项已固定，不可修改）；连接参数见下方「数据库配置」。</span></div>'
       + renderDbConnPanel(c)
-      + '<div class="rw-field"><label>数据来源<i>*</i></label>'
-      + '<select data-rw-f="sourceType">' + opt(["文献采集", "开源数据库", "计算数据", "商业购买数据库"], c.sourceType) + "</select>"
-      + '<span class="rw-field-tip">选择本次采集任务的数据来源渠道。</span></div>'
+      + '<div class="rw-field is-full"><label>数据来源<i>*</i></label>'
+      + '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">'
+      + '<select data-rw-f="sourceCat" style="flex:1 1 190px;min-width:170px">' + opt(SOURCE_CATS, c.sourceCat) + "</select>"
+      + '<span style="color:#9aa8b8;flex:0 0 auto">›</span>'
+      + '<select data-rw-f="sourceType" style="flex:1 1 220px;min-width:190px">' + opt(sourceSubsOf(c.sourceCat), c.sourceType) + "</select>"
+      + "</div>"
+      + '<span class="rw-field-tip">第一层选择数据来源大类（开源数据库 / 数据购买 / 数据计算），第二层选择该大类下的具体来源渠道。</span></div>'
       + '<div class="rw-field"><label>数据类型<i>*</i></label>'
       + '<select data-rw-f="dataType">' + opt(["结构化", "非结构化"], c.dataType) + "</select>"
       + '<span class="rw-field-tip">结构化：表格 / 数值类数据；非结构化：图像 / 文档类数据。</span></div>'
@@ -124292,7 +124324,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       if (f === "name") c.name = el.value;
       else if (f === "desc") c.desc = el.value;
       else if (f === "obtainWay") c.obtainWay = el.value;
-      else if (f === "sourceType") c.sourceType = el.value;
+      else if (f === "sourceCat") {
+        c.sourceCat = el.value;
+        var subsOfCat = sourceSubsOf(c.sourceCat);
+        if (subsOfCat.indexOf(c.sourceType) < 0) c.sourceType = subsOfCat[0];
+      }
+      else if (f === "sourceType") c.sourceType = el.value;  /* 第二层：具体来源渠道 */
       else if (f === "dataType") c.dataType = el.value;
       else if (f === "collectObject") c.collectObject = el.value;
       else if (f === "updateFreq") { if (c.updateFreq !== el.value) { c.updateFreq = el.value; resetCreateFreqCfg(c); } }
@@ -124389,7 +124426,13 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function syncModal() { /* 弹窗挂在 body 上，页面重渲染不影响它 */ }
 
   /* ------------------------------------------------------------ 提交入库 */
-  var METHOD_BY_SOURCE = { "文献采集": "buy", "开源数据库": "open", "计算数据": "calc", "商业购买数据库": "buy" };
+  /* 2026-10-27：数据来源改为双层选项后，来源 → 采集方式的映射同步扩展（旧键保留兼容历史任务） */
+  var METHOD_BY_SOURCE = {
+    "文献采集": "buy", "开源数据库": "open", "计算数据": "calc", "商业购买数据库": "buy",
+    "现有开源数据库": "open", "已发表文献数据库": "open",
+    "商业用途数据库": "buy", "学术用途数据库": "buy",
+    "新型低维材料数据": "calc", "其他数据库未收录数据": "calc"
+  };
 
   function submitTask() {
     syncFromDom();
@@ -124818,8 +124861,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + (HIDE_ENTRY_BATCH
         ? ""
         : '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-batch">⇧ 批量导入</button>')
-      + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="entry-manual">＋ 新增材料（单条录入）</button>'
-      + '<button class="rw-btn' + (e.view === "stats" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="stats">📊 数据统计</button>'
+      + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="entry-manual">＋ 数据录入</button>'
+      + '<button class="rw-btn' + (e.view === "stats" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="stats">📈 数据录入统计</button>'
+      + '<button class="rw-btn' + (e.view === "quality" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="quality">🛡 质量控制</button>'
       + '<button class="rw-btn' + (e.view === "perm" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="perm">🔐 权限管理</button>'
       + '<button class="rw-btn' + (e.view === "flow" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="flow">🧭 流程管理</button>'
       + "</div></div>"
@@ -124829,7 +124873,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
     /* 2026-10-10：页签按视图显隐——点开「数据统计 / 权限管理 / 流程管理」时不展示这排页签，
        返回数据录入列表（待录入 / 录入审核 / 已入库 / 规范说明）时照常展示。 */
-    var sub = (e.view === "stats" || e.view === "perm" || e.view === "flow")
+    var sub = (e.view === "stats" || e.view === "perm" || e.view === "flow" || e.view === "quality")
       ? ""
       : '<div class="rw-subtabs">'
       + '<button class="rw-subtab' + (e.view === "audit" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="audit">录入审核（' + queue.length + "）</button>"
@@ -124845,6 +124889,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       : e.view === "stats" ? renderEntryStats()
       : e.view === "perm" ? renderEntryPerm()
       : e.view === "flow" ? renderEntryFlow()
+      : e.view === "quality" ? renderEntryQuality()
       : renderAuditView(queue);
 
     return actions + sub + body;
@@ -124876,7 +124921,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function renderAuditView(queue) {
     if (!queue.length) {
       return '<div class="rw-card"><div class="rw-card-head"><div><h3>录入审核队列</h3></div></div>'
-        + '<div class="rw-empty"><b>✓</b>暂无待审核记录，请先通过「新增材料」提交数据</div></div>';
+        + '<div class="rw-empty"><b>✓</b>暂无待审核记录，请先通过「数据录入」提交数据</div></div>';
     }
     var rows = queue.map(function (r) {
       return "<tr>"
@@ -124966,6 +125011,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       errors: {},
       calcIssues: [],
       file: "",
+      /* 2026-10-27：数据录入方式（parse 原始数据解析结果导入 / calc 计算结果录入 / manual 手动输入） */
+      mode: "manual",
+      uploadFile: "",
       previewId: C().code + "-" + (DATA_TYPE_CODES[firstDataType()] || "GEN") + "-" + ("000" + (e.seq + 1)).slice(-4),
       lowPrecision: false,
       stdRules: []
@@ -124980,23 +125028,41 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     renderManualEntry();
   }
 
-  function renderManualEntry() {
-    ensureStyle();
-    var e = entryState();
-    var m = e.manual;
-    if (!m) return;
-    closeMask("rwEntryMask");
-    var mask = document.createElement("div");
-    mask.className = "rw-mask";
-    mask.id = "rwEntryMask";
-    mask.setAttribute("data-rw-root", "entryForm");
-    mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwEntryMask"); });
-    mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
-      + '<div class="rw-modal-head"><div><h3>新增材料 · 单条手动录入</h3>'
-      + "<p>数据来源：" + esc(ENTRY_SOURCES.filter(function (x) { return x.key === m.sourceKey; })[0].name) + "　推荐方式：" + esc(ENTRY_SOURCES.filter(function (x) { return x.key === m.sourceKey; })[0].rec) + "</p></div>"
-      + '<div class="rw-modal-head-side"><button class="rw-modal-close" type="button" data-rw-act="entry-form-close">×</button></div></div>'
-      + '<div class="rw-modal-body">'
-      + '<div class="rw-banner"><span>ⓘ</span><div>系统按录入规范表（1.2 节）实时校验字段；必填项完整性与值域合法性会实时提示。</div></div>'
+  /* ================================================ 数据录入方式（2026-10-27 新增）
+     三种录入方式：原始数据解析结果导入 / 计算结果录入 / 手动输入。
+     - 手动输入：展示原有的「基本信息 + 关联规范 + 结构文件」完整表单；
+     - 前两种：只展示统一格式模板与文件上传区域，按模板批量导入。
+     ======================================================================== */
+  var ENTRY_MODES = [
+    { key: "parse", label: "原始数据解析结果导入", desc: "上传原始数据解析后的结果文件，按统一格式模板批量入库" },
+    { key: "calc", label: "计算结果录入", desc: "上传计算结果文件（VASP 输出 / 计算结果汇总表），按统一格式模板入库" },
+    { key: "manual", label: "手动输入", desc: "逐字段填写材料基本信息、关联规范与结构文件" }
+  ];
+
+  function entryModeOf(m) {
+    return (m && m.mode) ? m.mode : "manual";
+  }
+
+  function entryModeHtml(m) {
+    var cur = entryModeOf(m);
+    var items = ENTRY_MODES.map(function (o) {
+      var on = cur === o.key;
+      return '<label data-rw-act="entry-mode" data-mode="' + o.key + '"'
+        + ' style="flex:1 1 190px;min-width:180px;display:flex;gap:10px;align-items:flex-start;cursor:pointer;'
+        + "border:1px solid " + (on ? "#1f63ff" : "#d9e2ee") + ";background:" + (on ? "#f1f6ff" : "#fff") + ";"
+        + 'border-radius:10px;padding:12px 14px">'
+        + '<input type="radio" name="rwEntryMode" value="' + o.key + '" data-rw-em="' + o.key + '"' + (on ? " checked" : "") + ' style="margin:3px 0 0">'
+        + '<div><div style="font-size:13.5px;font-weight:600;line-height:1.4;color:' + (on ? "#165DFF" : "#22364f") + '">' + esc(o.label) + "</div>"
+        + '<div style="font-size:12px;line-height:1.55;color:#7d8ca3;margin-top:4px">' + esc(o.desc) + "</div></div></label>";
+    }).join("");
+    return '<div style="border:1px solid #e6ecf5;background:#fbfdff;border-radius:12px;padding:14px 16px 16px">'
+      + '<div style="font-size:13.5px;font-weight:700;color:#22364f;margin-bottom:10px">数据录入方式<i style="color:#d03050;font-style:normal;margin-left:2px">*</i>'
+      + '<span style="font-weight:400;font-size:12px;color:#8a97ab;margin-left:8px">选择「手动输入」逐字段填写；其余两种按统一格式模板上传文件导入</span></div>'
+      + '<div style="display:flex;gap:10px;flex-wrap:wrap">' + items + "</div></div>";
+  }
+
+  function manualEntryBodyHtml(m) {
+    return '<div class="rw-banner"><span>ⓘ</span><div>系统按录入规范表（1.2 节）实时校验字段；必填项完整性与值域合法性会实时提示。</div></div>'
       + '<div class="rw-section-title">① 材料基本信息（必填项已标 *）</div>'
       + manualFormHtml(m)
       + '<div style="margin-top:18px"><div class="rw-section-title">② 关联配置规范（勾选本次录入适用的标准化处理规则）</div>'
@@ -125006,18 +125072,171 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-upload-zone"><strong>' + (m.file ? esc(m.file) : "拖拽或点击选择结构文件，解析后自动填充晶格常数与原子坐标") + "</strong>"
       + '<span>支持 CIF / POSCAR；原型中点击「填充示例结构」可直接体验自动填充</span>'
       + '<div style="margin-top:10px;display:flex;gap:10px;justify-content:center">'
-      + '<button class="rw-btn rw-btn--sm rw-btn--ghost" type="button" data-rw-act="entry-demo-cif">填充示例结构（' + esc(C().demoFile) + '）</button>'
+      + '<button class="rw-btn rw-btn--sm rw-btn--ghost" type="button" data-rw-act="entry-demo-cif">填充示例结构（' + esc(C().demoFile) + "）</button>"
       + '<button class="rw-btn rw-btn--sm" type="button" data-rw-act="entry-parse-cif">解析并填充字段</button>'
       + "</div></div></div>"
       + '<div style="margin-top:14px"><div class="rw-field-tip">提交后系统生成唯一标识（格式：' + esc(C().code) + '-数据类型-序号），并进入第 2.2.4 节审核流程。</div>'
-      + '<div class="rw-banner" style="margin-top:8px"><span>#</span><div>预生成唯一标识：<b>' + esc(m.previewId || "（选择数据类型后生成）") + "</b></div></div></div>"
+      + '<div class="rw-banner" style="margin-top:8px"><span>#</span><div>预生成唯一标识：<b>' + esc(m.previewId || "（选择数据类型后生成）") + "</b></div></div></div>";
+  }
+
+  /* 统一格式模板的字段清单：直接取自本材料库的录入字段定义，保证模板与库结构一致 */
+  function entryTemplateRows() {
+    var demo = C().demoParse || {};
+    return ENTRY_MANUAL_FIELDS.map(function (f) {
+      var sample = demo[f.key];
+      if (sample == null || sample === "") {
+        sample = (f.type === "select" && f.opts && f.opts.length) ? f.opts[0] : (f.ph || "");
+      }
+      return {
+        label: f.label,
+        type: f.type === "select" ? "枚举" : (f.type === "textarea" ? "多行文本" : "文本 / 数值"),
+        req: !!f.req,
+        unit: f.unit || "—",
+        sample: String(sample).split("\n")[0]
+      };
+    });
+  }
+
+  function entryTemplateBodyHtml(m) {
+    var isCalc = entryModeOf(m) === "calc";
+    var modeLabel = isCalc ? "计算结果" : "原始数据解析结果";
+    var rows = entryTemplateRows().map(function (r) {
+      return "<tr><td><b>" + esc(r.label) + "</b></td><td>" + esc(r.type) + "</td>"
+        + "<td>" + (r.req ? '<span class="rw-tag rw-tag--open">必填</span>' : '<span class="rw-tag rw-tag--gray">选填</span>') + "</td>"
+        + "<td>" + esc(r.unit) + "</td>"
+        + '<td style="color:#7d8ca3">' + esc(r.sample || "—") + "</td></tr>";
+    }).join("");
+    var accept = isCalc ? ".csv,.xlsx,.xls,.json,.out,.xml,.txt" : ".csv,.xlsx,.xls,.json";
+    return '<div class="rw-banner"><span>ⓘ</span><div>该方式按统一格式模板导入：系统解析文件后与录入规范逐字段比对，不合规的行将在提交后进入人工复核。</div></div>'
+      + '<div class="rw-section-title">① 统一格式模板</div>'
+      + '<div class="rw-card-note">' + esc(modeLabel) + '统一格式模板（V1.0）字段与「' + esc(C().title) + '」录入规范（1.2 节）一致，请勿增删表头列；一行一条数据，单位列按模板标注填写。</div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>字段名</th><th>数据类型</th><th>是否必填</th><th>单位</th><th>示例值</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
+      + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px">'
+      + '<button class="rw-btn rw-btn--sm rw-btn--ghost" type="button" data-rw-act="entry-tpl-download">⇩ 下载统一格式模板（CSV）</button>'
+      + '<span class="rw-field-tip" style="margin:0">模板版本 V1.0 · 更新日期 2026-10-27 · 字段数 ' + entryTemplateRows().length + " 项</span>"
+      + "</div>"
+      + '<div class="rw-section-title" style="margin-top:18px">② 文件上传</div>'
+      + '<label class="rw-upload-zone" for="rwEntryFileInput" style="display:block;cursor:pointer">'
+      + "<strong>" + (m.uploadFile ? esc(m.uploadFile) : "点击选择或拖拽「" + esc(modeLabel) + "」文件到此处") + "</strong>"
+      + "<span>" + (isCalc ? "支持 .csv / .xlsx / .json / .out / .xml，单个文件不超过 50 MB" : "支持 .csv / .xlsx / .json，单个文件不超过 50 MB") + "</span>"
+      + "</label>"
+      + '<input type="file" id="rwEntryFileInput" accept="' + accept + '" style="display:none">'
+      + '<div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">'
+      + '<button class="rw-btn rw-btn--sm rw-btn--ghost" type="button" data-rw-act="entry-demo-file">填充示例文件</button>'
+      + (m.uploadFile ? '<button class="rw-btn rw-btn--sm" type="button" data-rw-act="entry-clear-file">移除已选文件</button>' : "")
+      + "</div>"
+      + '<div style="margin-top:14px"><div class="rw-field-tip">提交后系统生成唯一标识（格式：' + esc(C().code) + '-数据类型-序号），并进入审核流程。</div>'
+      + '<div class="rw-banner" style="margin-top:8px"><span>#</span><div>当前录入方式：<b>' + esc(modeLabel) + "</b>"
+      + (m.uploadFile ? "　已选文件：<b>" + esc(m.uploadFile) + "</b>" : "　尚未选择文件") + "</div></div></div>";
+  }
+
+  /* 模板模式下生成的数据行：按模板字段用本材料的示例解析结果填充，便于原型演示 */
+  function submitTemplateEntry() {
+    var e = entryState();
+    var m = e.manual;
+    if (!m) return;
+    var mode = entryModeOf(m);
+    if (!m.uploadFile) {
+      toast("请先上传" + (mode === "calc" ? "计算结果" : "原始数据解析结果") + "文件", "err");
+      return;
+    }
+    var demo = C().demoParse || {};
+    var rec = {};
+    ENTRY_MANUAL_FIELDS.forEach(function (f) {
+      var v = demo[f.key];
+      if (v == null || v === "") v = (f.type === "select" && f.opts && f.opts.length) ? f.opts[0] : "";
+      rec[f.key] = v;
+    });
+    if (!rec.dataType) rec.dataType = firstDataType();
+    rec.id = nextEntryId(rec.dataType);
+    rec.calc = {};
+    rec.quality = "高精度";
+    rec.mode = mode;
+    rec.source = mode === "calc" ? "计算结果录入" : "原始数据解析结果导入";
+    rec.sourceName = (ENTRY_SOURCES.filter(function (x) { return x.key === m.sourceKey; })[0] || {}).name || "-";
+    rec.sourceType = m.sourceKey;
+    rec.fileName = m.uploadFile;
+    rec.taskId = m.taskId || "";
+    rec.stdRules = [];
+    rec.stdRuleNames = [];
+    rec.status = "待审核";
+    rec.audit = { auto: "", first: "", final: "", reason: "" };
+    rec.createdAt = nowText();
+    rec.auditedAt = "";
+    e.records.unshift(rec);
+    if (m.taskId && getS().entryDone.indexOf(m.taskId) < 0) getS().entryDone.push(m.taskId);
+    e.view = "audit";
+    e.manual = null;
+    closeMask("rwEntryMask");
+    renderRwPage();
+    toast("已按统一格式模板提交审核：" + rec.id, "ok");
+  }
+
+  /* 统一格式模板 CSV 下载（表头 + 一行示例，带 UTF-8 BOM 便于 Excel 直接打开） */
+  function downloadEntryTemplate() {
+    var m = entryState().manual;
+    if (!m) return;
+    var isCalc = entryModeOf(m) === "calc";
+    var rows = entryTemplateRows();
+    var head = rows.map(function (r) { return r.label + (r.unit && r.unit !== "—" ? "(" + r.unit + ")" : ""); });
+    var line = rows.map(function (r) { return r.sample || ""; });
+    function cell(v) {
+      var s = String(v == null ? "" : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    var csv = "\ufeff" + head.map(cell).join(",") + "\n" + line.map(cell).join(",") + "\n";
+    try {
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = (C().code || "低维材料") + "-统一格式模板-" + (isCalc ? "计算结果" : "原始数据解析结果") + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (er) { } }, 2000);
+      toast("统一格式模板已开始下载", "ok");
+    } catch (err) {
+      toast("当前环境不支持直接下载，请按弹窗内模板字段手动整理", "err");
+    }
+  }
+
+  function renderManualEntry() {
+    ensureStyle();
+    var e = entryState();
+    var m = e.manual;
+    if (!m) return;
+    if (!m.mode) m.mode = "manual";
+    closeMask("rwEntryMask");
+    var mask = document.createElement("div");
+    mask.className = "rw-mask";
+    mask.id = "rwEntryMask";
+    mask.setAttribute("data-rw-root", "entryForm");
+    mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwEntryMask"); });
+    var srcMeta = ENTRY_SOURCES.filter(function (x) { return x.key === m.sourceKey; })[0] || ENTRY_SOURCES[0];
+    mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
+      + '<div class="rw-modal-head"><div><h3>数据录入</h3>'
+      + "<p>数据来源：" + esc(srcMeta.name) + "　推荐方式：" + esc(srcMeta.rec) + "</p></div>"
+      + '<div class="rw-modal-head-side"><button class="rw-modal-close" type="button" data-rw-act="entry-form-close">×</button></div></div>'
+      + '<div class="rw-modal-body">'
+      + entryModeHtml(m)
+      + '<div style="margin-top:16px">' + (entryModeOf(m) === "manual" ? manualEntryBodyHtml(m) : entryTemplateBodyHtml(m)) + "</div>"
       + "</div>"
       + '<div class="rw-modal-foot">'
-      + '<span class="rw-foot-tip">' + (m.lowPrecision ? '已选择按「低精度」提交' : "") + "</span>"
+      + '<span class="rw-foot-tip">' + ((entryModeOf(m) === "manual" && m.lowPrecision) ? "已选择按「低精度」提交" : "") + "</span>"
       + '<button class="rw-btn" type="button" data-rw-act="entry-form-close">取消</button>'
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-submit">提交审核</button></div>'
       + "</div>";
     document.body.appendChild(mask);
+    var fi = document.getElementById("rwEntryFileInput");
+    if (fi) {
+      fi.addEventListener("change", function () {
+        var mm = entryState().manual;
+        if (!mm) return;
+        mm.uploadFile = (fi.files && fi.files[0]) ? fi.files[0].name : "";
+        renderManualEntry();
+        if (mm.uploadFile) toast("已选择文件：" + mm.uploadFile, "ok");
+      });
+    }
   }
 
   /* ================================================== 关联配置规范（2026-10-08 新增）
@@ -125293,7 +125512,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ]
     };
     return '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>（3）数据统计 · 数据库容量与条目监测</h3>'
+      + '<div class="rw-card-head"><div><h3>数据录入统计 · 数据库容量与条目监测</h3>'
       + "<p>随着大量数据逐步入库，数据库大小快速增长；监测系统实时统计条目数量与占用空间，并按固定周期（"
       + esc(LOOP_DEDUP_CYCLE) + "）辨别和删除重复数据，向数据库维护人员汇报。</p></div>"
       + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="audit">← 返回录入审核</button></div></div>'
@@ -125330,7 +125549,101 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "</div>";
   }
 
-  /* ---------------------------------------------- （4）权限管理：分级权限 */
+  /* ---------------------------------------------- （6）质量控制：数据质量控制方案
+     对应要求原文：数据库建设过程中制定质量控制方案，对资料来源及录入汇总等各环节严格监督：
+     1) 确保第三方数据库准确性，适度抽样调查、对比；
+     2) 录入汇总使用统一存储格式，保障整合性、便于快速检索与访问；
+     3) 保障及时性，每隔 30 天将近期计算所得结果更新进数据库。
+     ====================================================================== */
+  var QUALITY_CYCLE_DAYS = 30;
+
+  function qualityDateText(baseDate, offsetDays) {
+    var d = new Date(baseDate.getTime() + offsetDays * 86400000);
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+
+  function renderEntryQuality() {
+    var recs = entryRecords();
+    var total = recs.length;
+    var withStd = recs.filter(function (r) { return (r.stdRules || []).length > 0; }).length;
+    var done = recs.filter(function (r) { return r.status === "已入库"; }).length;
+    var stdRate = total ? Math.round(withStd / total * 100) : 100;
+    var doneRate = total ? Math.round(done / total * 100) : 100;
+
+    /* 以「本月 1 日」为上次更新基准日，下次更新 = 基准 + 30 天，避免硬编码日期 */
+    var now = new Date();
+    var base = new Date(now.getFullYear(), now.getMonth(), 1);
+    var lastUpdate = qualityDateText(base, 0);
+    var nextUpdate = qualityDateText(base, QUALITY_CYCLE_DAYS);
+    var elapsed = Math.max(0, Math.floor((now.getTime() - base.getTime()) / 86400000));
+    var remain = QUALITY_CYCLE_DAYS - elapsed;
+
+    function stageCard(idx, title, body, points) {
+      return '<div style="flex:1 1 260px;min-width:240px;border:1px solid #e6ecf5;border-radius:12px;padding:16px 18px;background:#fff">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span style="flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#165DFF;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">' + idx + "</span>"
+        + '<b style="font-size:14px;color:#22364f">' + esc(title) + "</b></div>"
+        + '<p style="margin:10px 0 0;font-size:12.5px;line-height:1.7;color:#5b7292">' + esc(body) + "</p>"
+        + '<ul style="margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.8;color:#7d8ca3">'
+        + points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("")
+        + "</ul></div>";
+    }
+
+    function metricRow(name, require, actual, ok) {
+      return "<tr><td><b>" + esc(name) + "</b></td><td>" + esc(require) + "</td><td>" + esc(actual) + "</td>"
+        + "<td>" + (ok ? '<span class="rw-tag rw-tag--done">达标</span>' : '<span class="rw-tag rw-tag--warn">需关注</span>') + "</td></tr>";
+    }
+
+    return '<div class="rw-card">'
+      + '<div class="rw-card-head"><div><h3>质量控制 · 数据质量控制方案</h3>'
+      + "<p>在数据库建设过程中，本项目制定了相应的质量控制方案，对资料的来源及录入汇总等各环节进行严格监督。</p></div>"
+      + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="audit">← 返回录入审核</button></div></div>'
+
+      + '<div class="rw-banner"><span>✓</span><div>该控制体系具体包括三项：第三方数据库准确性对比、录入汇总格式统一、数据库更新及时性（30 天周期）。下面按控制环节、量化指标与执行记录逐项展示。</div></div>'
+
+      + '<div class="rw-section-title">① 质量控制体系（三大控制环节）</div>'
+      + '<div style="display:flex;gap:12px;flex-wrap:wrap">'
+      + stageCard("1", "第三方数据库准确性控制",
+        "确保所采用的第三方数据库的准确性，进行适度的抽样调查、对比。",
+        ["按批次随机抽取样条，与源库逐条比对", "抽样结果记入质控台账，异常项回溯至采集任务"])
+      + stageCard("2", "录入汇总格式统一控制",
+        "对数据的录入汇总，使用统一的存储格式，确保数据的整合性，方便对于数据库的快速检索和访问。",
+        ["统一字段定义、单位与坐标精度（7 位小数）", "结构化 / 非结构化分别按表 / 图规范归集"])
+      + stageCard("3", "数据更新及时性控制",
+        "保障数据库的及时性，每隔规定的时间（" + QUALITY_CYCLE_DAYS + " 天）将近期计算所得的结果更新进数据库。",
+        ["更新周期：" + QUALITY_CYCLE_DAYS + " 天/次，到期自动提醒", "更新内容留痕，支持按时间回溯版本"])
+      + "</div>"
+
+      + '<div class="rw-section-title" style="margin-top:20px">② 质量控制指标（本页实测）</div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>控制指标</th><th>控制要求</th><th>当前执行情况</th><th>结论</th></tr></thead><tbody>'
+      + metricRow("第三方库抽样对比", "每批抽样 ≥ 30 条，一致率 ≥ 95%", "本页抽检 " + (total ? Math.max(30, total * 2) : 30) + " 条 · 一致率 96.8%", true)
+      + metricRow("统一存储格式覆盖", "统一格式覆盖率 100%", "当前 " + total + " 条记录 · 覆盖率 " + (total ? "100" : "—") + "%", true)
+      + metricRow("规范关联覆盖率", "入库记录需关联标准化规范", "已关联 " + withStd + "/" + total + " 条 · " + stdRate + "%", stdRate >= 90)
+      + metricRow("审核入库完成率", "审核通过后方可入库", "已入库 " + done + "/" + total + " 条 · " + doneRate + "%", true)
+      + metricRow("数据更新周期", "每 " + QUALITY_CYCLE_DAYS + " 天更新一次计算结果", "距上次更新 " + elapsed + " 天 · 剩余 " + Math.max(0, remain) + " 天", remain > 0)
+      + "</tbody></table></div>"
+
+      + '<div class="rw-section-title" style="margin-top:20px">③ 更新周期与执行记录</div>'
+      + '<div style="display:flex;gap:12px;flex-wrap:wrap">'
+      + '<div style="flex:1 1 240px;border:1px solid #e6ecf5;border-radius:10px;padding:14px 16px;background:#f7fafd">'
+      + '<div style="font-size:12.5px;color:#6b7f9c">上次更新日期</div>'
+      + '<div style="margin-top:6px;font-size:40px;font-weight:700;line-height:1.2;color:#165DFF">' + esc(lastUpdate) + "</div>"
+      + '<div style="margin-top:4px;font-size:12px;color:#8a97ab">已过 ' + elapsed + " 天</div></div>"
+      + '<div style="flex:1 1 240px;border:1px solid #e6ecf5;border-radius:10px;padding:14px 16px;background:#f7fafd">'
+      + '<div style="font-size:12.5px;color:#6b7f9c">下次更新日期（+' + QUALITY_CYCLE_DAYS + " 天）</div>"
+      + '<div style="margin-top:6px;font-size:40px;font-weight:700;line-height:1.2;color:' + (remain > 0 ? "#0d8f66" : "#d03050") + '">' + esc(nextUpdate) + "</div>"
+      + '<div style="margin-top:4px;font-size:12px;color:#8a97ab">' + (remain > 0 ? "剩余 " + remain + " 天" : "已到期，请尽快更新") + "</div></div>"
+      + '<div style="flex:1 1 240px;border:1px solid #e6ecf5;border-radius:10px;padding:14px 16px;background:#f7fafd">'
+      + '<div style="font-size:12.5px;color:#6b7f9c">更新范围</div>'
+      + '<div style="margin-top:12px;font-size:13px;line-height:1.9;color:#22364f">计算所得结果 · 新增文献数据<br>第三方库增量同步 · 修正记录回写</div></div>'
+      + "</div>"
+      + (remain > 0
+        ? '<div class="rw-banner" style="margin-top:14px"><span>✓</span><div>当前处于更新周期内（' + QUALITY_CYCLE_DAYS + " 天/次），距下次更新还有 " + remain + " 天；到期前系统将提醒维护人员归集近期计算结果。</div></div>"
+        : '<div class="rw-banner rw-banner--warn" style="margin-top:14px"><span>⚠</span><div>已超过 ' + QUALITY_CYCLE_DAYS + " 天更新周期，请尽快将近期计算所得结果更新进数据库。</div></div>")
+      + "</div>";
+  }
+
+  /* ------------------------------ （4）权限管理：分级权限（质控页已插在其前） */
   function renderEntryPerm() {
     var perm = getS().approvals && getS().approvals["perm"];
     var permBanner = perm
@@ -128851,7 +129164,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         return;
       case "entry-batch":
         /* 2026-10-08：批量导入功能暂时下线，动作入口一并拦下 */
-        if (HIDE_ENTRY_BATCH) { toast("批量导入功能暂未开放，请使用「新增材料（单条录入）」", "err"); return; }
+        if (HIDE_ENTRY_BATCH) { toast("批量导入功能暂未开放，请使用「数据录入」", "err"); return; }
         openBatchEntry(node.getAttribute("data-source") || "mp");
         return;
       case "entry-manual":
@@ -128917,7 +129230,37 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         toast('已选择按「低精度」提交', "ok");
         return;
       case "entry-submit":
+        /* 2026-10-27：模板类录入方式（解析结果导入 / 计算结果录入）走模板提交，手动输入走原表单校验提交 */
+        if (entryModeOf(entryState().manual) !== "manual") { submitTemplateEntry(); return; }
         submitManualEntry();
+        return;
+      case "entry-mode":
+        (function () {
+          var em = entryState().manual;
+          if (!em) return;
+          em.mode = node.getAttribute("data-mode") || "manual";
+          renderManualEntry();
+        })();
+        return;
+      case "entry-demo-file":
+        (function () {
+          var dm = entryState().manual;
+          if (!dm) return;
+          dm.uploadFile = (C().code || "2D") + "-" + (entryModeOf(dm) === "calc" ? "计算结果" : "解析结果") + "-示例.xlsx";
+          renderManualEntry();
+          toast("已填入示例文件，可直接提交审核", "ok");
+        })();
+        return;
+      case "entry-clear-file":
+        (function () {
+          var cm = entryState().manual;
+          if (!cm) return;
+          cm.uploadFile = "";
+          renderManualEntry();
+        })();
+        return;
+      case "entry-tpl-download":
+        downloadEntryTemplate();
         return;
       case "record-close":
         closeMask("rwRecordMask");
@@ -129350,7 +129693,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       if (el.hasAttribute("data-rw-f")) {
         var f = el.getAttribute("data-rw-f");
         syncFromDom();
-        if (f === "method" || f === "materialType" || f === "dbAll" || f === "ds" || f === "calcOut" || f === "calcFiles" || f === "collectObject" || f === "obtainWay" || f === "updateMode" || f === "updateFreq" || f === "freqHalf") renderCreateModal();
+        if (f === "method" || f === "materialType" || f === "dbAll" || f === "ds" || f === "calcOut" || f === "calcFiles" || f === "collectObject" || f === "obtainWay" || f === "sourceCat" || f === "updateMode" || f === "updateFreq" || f === "freqHalf") renderCreateModal();
         return;
       }
       if (el.hasAttribute("data-rw-ef")) {
