@@ -31481,9 +31481,6 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
             <h2>二维材料数据应用</h2>
             <p>聚焦二维材料检索、预测分析与结果查看，支持多维属性检索。</p>
           </div>
-          <div class="page-head-actions">
-            <button class="upload-service-btn" type="button" data-upload-service-jump>上传服务</button>
-          </div>
         </div>
 
         <div id="twodAppRoot">
@@ -31823,9 +31820,6 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
           <div>
             <h2>电解质材料数据应用</h2>
             <p>面向有机电解液、固态有机和固态无机三类电解质，提供基础检索、性质检索和可视化详情查看。</p>
-          </div>
-          <div class="page-head-actions">
-            <button class="upload-service-btn" type="button" data-upload-service-jump>上传服务</button>
           </div>
         </div>
         <div id="electrolyteApp"></div>
@@ -34776,6 +34770,47 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
     return true;
   }
   if (!wbpEnsurePagerStyle()) document.addEventListener("DOMContentLoaded", wbpEnsurePagerStyle);
+
+  /* 2026-10-27：「上传服务」按钮改挂到模块页签条右侧。
+     原因：twod / electrolyte 两页的 .page-head 被既有脚本 / 既有 CSS 隐藏
+     （twod 为 renderTwodModuleUnified() 中 twodPageHead.style.display = "none"），
+     静态放在 .page-head 内用户根本看不到。 */
+  var UPLOAD_STRIPS = [
+    "#page-twod .module-tab-strip",
+    "#page-electrolyte .module-tab-strip"
+  ];
+
+  function wbpMountUploadButtons() {
+    for (var ui = 0; ui < UPLOAD_STRIPS.length; ui++) {
+      var strip = document.querySelector(UPLOAD_STRIPS[ui]);
+      if (!strip || strip.querySelector("[data-upload-service-jump]")) continue;
+      var wrap = document.createElement("div");
+      wrap.className = "wbp-tab-actions";
+      /* 内联样式：父级 .module-tab-strip 为 flex，靠 margin-left:auto 顶到最右；
+         内联优先级最高，避免被项目后续的 !important 规则覆盖 */
+      wrap.setAttribute("style", "margin-left:auto;display:flex;align-items:center;padding-left:8px;");
+      wrap.innerHTML = '<button class="upload-service-btn" type="button" data-upload-service-jump>上传服务</button>';
+      strip.appendChild(wrap);
+    }
+  }
+
+  function wbpInitUploadMount() {
+    wbpMountUploadButtons();
+    if (window.MutationObserver) {
+      var moTimer = null;
+      var mo = new MutationObserver(function () {
+        clearTimeout(moTimer);
+        moTimer = setTimeout(wbpMountUploadButtons, 120); /* tabStrip 常被 outerHTML 重建 */
+      });
+      ["twodAppRoot", "electrolyteApp"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) mo.observe(el, { childList: true, subtree: true });
+      });
+    }
+    [600, 1500, 3000, 5000].forEach(function (ms) { setTimeout(wbpMountUploadButtons, ms); });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wbpInitUploadMount);
+  else wbpInitUploadMount();
 
   window.WBPager = {
     pages: pages,
