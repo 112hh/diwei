@@ -121912,7 +121912,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + esc(t.label) + '</button>';
     }).join("");
 
-    var intro = SUBCFG && SUBCFG.intro ? SUBCFG.intro : "";
     var body = tab.key === "category" ? renderSubCategory(ds, kd, tab) : renderSubTable(ds, kd, tab, s);
 
     return '<div class="t2d-crumb"><span>低维材料主题库</span><span>／</span><span>低维材料数据库</span><span>／</span>'
@@ -121920,8 +121919,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="t2d-title-row"><h2>' + esc(ds.label) + '</h2>'
       + '<span class="t2d-badge">' + esc(kd.group) + '</span>'
       + '<span class="t2d-badge is-plain">子数据集</span></div>'
-      + '<p class="t2d-subintro"><b>分类说明：</b>' + esc(intro) + '　本页为「' + esc(kd.label) + '」，'
-      + '共 ' + fmt(ds.rows) + ' 条记录（示例），覆盖 ' + esc(ds.coverage) + '。</p>'
       + '<div class="t2d-tabs">' + tabsHtml + '</div>'
       + body;
   }
