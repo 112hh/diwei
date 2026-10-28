@@ -124857,9 +124857,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function styleIdFor(pid) { return "rw-ingest-" + pid + "-style-20260924"; }
   var NS = "rw";
 
-  /* 2026-10-27：恢复「批量导入」入口——数据资源录入页面统一提供批量导入功能。
-     （开关保留：改回 true 即可临时下线） */
-  var HIDE_ENTRY_BATCH = false;
+  /* 2026-10-28：删除「批量导入」按钮——数据资源录入页面不再提供批量导入入口。
+     （开关保留：改回 false 即可恢复按钮与动作） */
+  var HIDE_ENTRY_BATCH = true;
 
   /* 2026-10-12：资源录入页的「录入规范说明」子页签不再展示（圈红删除），
      对应视图入口一并下线（渲染函数与数据仍保留，恢复只需把下面这个开关改回 false）。 */
