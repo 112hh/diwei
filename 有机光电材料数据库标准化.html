@@ -124861,6 +124861,11 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
      （开关保留：改回 false 即可恢复按钮与动作） */
   var HIDE_ENTRY_BATCH = true;
 
+  /* 2026-10-28：删除「2）数据录入审核」说明卡片（标题 + 说明文字 + a/b/c 三张要点卡片）。
+     需求原文第 2）条的说明性内容不再在录入页展示；渲染函数 ENTRY_AUDIT_POINTS /
+     renderEntryAuditDesc 仍保留，改回 false 即可恢复。 */
+  var HIDE_ENTRY_AUDIT_DESC = true;
+
   /* 2026-10-12：资源录入页的「录入规范说明」子页签不再展示（圈红删除），
      对应视图入口一并下线（渲染函数与数据仍保留，恢复只需把下面这个开关改回 false）。 */
   var HIDE_ENTRY_SPEC = true;
@@ -127766,7 +127771,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     if (!queue.length) {
       return '<div class="rw-card"><div class="rw-card-head"><div><h3>数据录入审核队列</h3></div></div>'
         + '<div class="rw-empty"><b>✓</b>暂无待审核记录，请先通过「数据录入」提交数据</div></div>'
-        + renderEntryAuditDesc();
+        + (HIDE_ENTRY_AUDIT_DESC ? "" : renderEntryAuditDesc());
     }
     var rows = queue.map(function (r) {
       return "<tr>"
@@ -127787,7 +127792,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-tbl-wrap"><table class="rw-tbl rw-audit-table"><thead><tr><th>材料唯一标识</th><th>标识 / 数据类型</th>' + listThs()
       + "<th>审核状态</th><th>提交时间</th><th>操作</th></tr></thead><tbody>" + rows + "</tbody></table></div>"
       + "</div>"
-      + renderEntryAuditDesc();
+      + (HIDE_ENTRY_AUDIT_DESC ? "" : renderEntryAuditDesc());
   }
 
   /* 列表里的「材料相关列」随材料变化，列定义来自 C().listCols */
