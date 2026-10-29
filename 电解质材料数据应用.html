@@ -127539,17 +127539,76 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
   /* 单条手动录入表单字段（基于 1.2 节字段定义） */
   var ENTRY_MANUAL_FIELDS = [
-    { key: "formula", label: "化学式", req: true, ph: "如 MoS2", rule: "formula", msg: "化学式格式不正确，示例：MoS2" },
-    { key: "crystal", label: "晶系", req: true, ph: "如 Hexagonal", rule: "text" },
-    { key: "spaceGroup", label: "空间群", req: true, ph: "如 P6₃/mmc", rule: "text" },
-    { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["结构特征", "电子结构", "电学性质", "磁学性质", "热学性质", "力学性质", "光学性质", "缺陷性质"], rule: "text" },
-    { key: "la", label: "晶格常数 a", req: true, unit: "Å", rule: "pos", msg: "晶格常数必须为正数" },
-    { key: "lb", label: "晶格常数 b", req: true, unit: "Å", rule: "pos", msg: "晶格常数必须为正数" },
-    { key: "lc", label: "晶格常数 c", req: true, unit: "Å", rule: "pos", msg: "晶格常数必须为正数" },
-    { key: "coords", label: "原子坐标（分数坐标）", req: true, type: "textarea", ph: "Mo 0.000 0.000 0.250\nS 0.333 0.667 0.620", rule: "coord", msg: "分数坐标应在 0-1 范围内" },
-    { key: "bandGap", label: "带隙", req: true, unit: "eV", rule: "gap", msg: "带隙值超出合理范围（0-10 eV）" },
-    { key: "formationEnergy", label: "形成能", req: false, unit: "eV/atom", rule: "fe", msg: "形成能应≤0，请确认是否为稳定结构" },
-    { key: "thickness", label: "层间厚度", req: false, unit: "Å", rule: "pos", msg: "层间厚度必须为正数" }
+    { key: "materialNo", label: "材料编号", req: false, ph: "如 2D-CuCrP2S6-001", rule: "text", group: "基础信息" },
+    { key: "materialName", label: "材料名称", req: true, ph: "如 CuCrP2S6", rule: "text", group: "基础信息" },
+    { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["结构特征", "电子结构", "电学性质", "磁学性质", "热学性质", "力学性质", "光学性质", "缺陷性质"], rule: "text", group: "基础信息" },
+    { key: "formula", label: "化学式", req: true, ph: "如 MoS2", rule: "formula", msg: "化学式格式不正确，示例：MoS2", group: "结构特征" },
+    { key: "elements", label: "元素组成", req: false, ph: "如 Cu, Cr, P, S", rule: "text", group: "结构特征" },
+    { key: "structImage", label: "原子结构图", req: false, type: "file", ph: "上传结构文件或结构图（CIF / PNG）", rule: "text", accept: ".cif,.png,.jpg,.jpeg", group: "结构特征" },
+    { key: "crystal", label: "晶系 / 对称性", req: true, ph: "如 Hexagonal", rule: "text", group: "结构特征" },
+    { key: "spaceGroup", label: "空间群 / 点群", req: true, ph: "如 P6₃/mmc", rule: "text", group: "结构特征" },
+    { key: "la", label: "晶格常数 a", req: true, unit: "Å", rule: "pos", msg: "晶格常数必须为正数", group: "结构特征" },
+    { key: "lb", label: "晶格常数 b", req: true, unit: "Å", rule: "pos", msg: "晶格常数必须为正数", group: "结构特征" },
+    { key: "lc", label: "晶格常数 c", req: true, unit: "Å", rule: "pos", msg: "晶格常数必须为正数", group: "结构特征" },
+    { key: "alpha", label: "晶格夹角 α", req: false, unit: "°", rule: "range", min: 0, max: 180, msg: "晶格夹角超出合理范围（0 ~ 180°）", group: "结构特征" },
+    { key: "beta", label: "晶格夹角 β", req: false, unit: "°", rule: "range", min: 0, max: 180, msg: "晶格夹角超出合理范围（0 ~ 180°）", group: "结构特征" },
+    { key: "gamma", label: "晶格夹角 γ", req: false, unit: "°", rule: "range", min: 0, max: 180, msg: "晶格夹角超出合理范围（0 ~ 180°）", group: "结构特征" },
+    { key: "thickness", label: "层厚", req: false, unit: "nm", rule: "pos", msg: "层厚必须为正数", group: "结构特征" },
+    { key: "layerSpacing", label: "层间距", req: false, unit: "Å", rule: "pos", msg: "层间距必须为正数", group: "结构特征" },
+    { key: "coords", label: "原子坐标（分数坐标）", req: true, type: "textarea", ph: "Mo 0.000 0.000 0.250\nS 0.333 0.667 0.620", rule: "coord", msg: "分数坐标应在 0-1 范围内", group: "结构特征" },
+    { key: "bondLength", label: "键长", req: false, unit: "Å", rule: "pos", msg: "键长必须为正数", group: "结构特征" },
+    { key: "bondAngle", label: "键角", req: false, unit: "°", rule: "range", min: 0, max: 180, msg: "键角超出合理范围（0 ~ 180°）", group: "结构特征" },
+    { key: "cellVolume", label: "晶胞体积", req: false, unit: "Å³", rule: "pos", msg: "晶胞体积必须为正数", group: "结构特征" },
+    { key: "density", label: "密度", req: false, unit: "g/cm³", rule: "pos", msg: "密度必须为正数", group: "结构特征" },
+    { key: "bandType", label: "能带结构类型", req: false, type: "select", opts: ["金属", "半导体", "绝缘体"], rule: "text", group: "电子结构" },
+    { key: "bandGap", label: "带隙", req: true, unit: "eV", rule: "gap", msg: "带隙值超出合理范围（0-10 eV）", group: "电子结构" },
+    { key: "dosEnergy", label: "态密度能量", req: false, ph: "如 [-6,-5,-4,...,6]（eV）", rule: "text", group: "电子结构" },
+    { key: "dosValue", label: "态密度值", req: false, ph: "如 [0.2,0.5,1.0,...]（states/eV）", rule: "text", group: "电子结构" },
+    { key: "effectiveMass", label: "有效质量", req: false, unit: "m₀", rule: "num", msg: "请输入数值型有效质量", group: "电子结构" },
+    { key: "bandImage", label: "能带图 / 能带结构图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "电子结构" },
+    { key: "dosImage", label: "态密度图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "电子结构" },
+    { key: "ferroelectric", label: "是否铁电 / 铁电性质", req: false, type: "select", opts: ["是", "否"], rule: "text", group: "电学性质" },
+    { key: "polarization", label: "铁电极化", req: false, unit: "μC/cm²", rule: "num", msg: "请输入数值型铁电极化", group: "电学性质" },
+    { key: "piezoTensor", label: "压电张量矩阵 eij", req: false, type: "textarea", ph: "如 e11≈40 pC/m；d33≈-200 pC/N", rule: "text", group: "电学性质" },
+    { key: "piezoCoef", label: "压电系数", req: false, unit: "pC/N", rule: "num", msg: "请输入数值型压电系数", group: "电学性质" },
+    { key: "conductivity", label: "电导率", req: false, unit: "S/m", rule: "pos", msg: "电导率必须为正数", group: "电学性质" },
+    { key: "magneticOrder", label: "磁序类型 / 磁基态构型", req: false, type: "select", opts: ["铁磁", "反铁磁", "亚铁磁", "弱铁磁", "非磁性"], rule: "text", group: "磁学性质" },
+    { key: "magneticMoment", label: "磁矩", req: false, unit: "μB", rule: "num", msg: "请输入数值型磁矩", group: "磁学性质" },
+    { key: "curieTemp", label: "居里温度 / 磁转变温度", req: false, unit: "K", rule: "num", msg: "请输入数值型温度（K）", group: "磁学性质" },
+    { key: "magGroundImage", label: "磁基态构型图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "磁学性质" },
+    { key: "formationEnergy", label: "形成能", req: false, unit: "eV/atom", rule: "fe", msg: "形成能应≤0，请确认是否为稳定结构", group: "热学性质" },
+    { key: "phononImaginary", label: "声子谱虚频判定", req: false, type: "select", opts: ["无虚频", "有虚频"], rule: "text", group: "热学性质" },
+    { key: "phononDos", label: "声子态密度", req: false, ph: "如：提供 png 图片 / 声子态密度元素贡献", rule: "text", group: "热学性质" },
+    { key: "phononBranch", label: "声学支 / 光学支", req: false, type: "textarea", ph: "如 3 声学支 + 57 光学支", rule: "text", group: "热学性质" },
+    { key: "phononImage", label: "声子谱图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "热学性质" },
+    { key: "phononDosImage", label: "声子态密度图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "热学性质" },
+    { key: "thermalConductivity", label: "热导率", req: false, unit: "W/(m·K)", rule: "pos", msg: "热导率必须为正数", group: "热学性质" },
+    { key: "c11", label: "弹性常数 C11", req: false, unit: "GPa", rule: "num", msg: "请输入数值型弹性常数", group: "力学性质" },
+    { key: "c12", label: "弹性常数 C12", req: false, unit: "GPa", rule: "num", msg: "请输入数值型弹性常数", group: "力学性质" },
+    { key: "c13", label: "弹性常数 C13", req: false, unit: "GPa", rule: "num", msg: "请输入数值型弹性常数", group: "力学性质" },
+    { key: "c33", label: "弹性常数 C33", req: false, unit: "GPa", rule: "num", msg: "请输入数值型弹性常数", group: "力学性质" },
+    { key: "c44", label: "弹性常数 C44", req: false, unit: "GPa", rule: "num", msg: "请输入数值型弹性常数", group: "力学性质" },
+    { key: "youngsModulus", label: "杨氏模量", req: false, unit: "GPa", rule: "pos", msg: "杨氏模量必须为正数", group: "力学性质" },
+    { key: "poissonRatio", label: "泊松比", req: false, rule: "range", min: -1, max: 0.5, msg: "泊松比超出合理范围（-1 ~ 0.5）", group: "力学性质" },
+    { key: "dielectricConst", label: "介电常数", req: false, rule: "pos", msg: "介电常数必须为正数", group: "光学性质" },
+    { key: "dielectricReal", label: "介电常数实部", req: false, ph: "如 [8.5,9.2,10.1,...,8.8]", rule: "text", group: "光学性质" },
+    { key: "dielectricImag", label: "介电常数虚部", req: false, ph: "如 [0.5,0.8,1.2,...,0.8]", rule: "text", group: "光学性质" },
+    { key: "dielectricImage", label: "介电函数图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "光学性质" },
+    { key: "absorptionCoef", label: "光吸收系数", req: false, unit: "cm⁻¹", rule: "pos", msg: "光吸收系数必须为正数", group: "光学性质" },
+    { key: "absorptionRange", label: "吸收系数（范围）", req: false, ph: "如 [0,500,2000,...,30000]", rule: "text", group: "光学性质" },
+    { key: "reflectivity", label: "反射率", req: false, unit: "%", rule: "range", min: 0, max: 100, msg: "反射率超出合理范围（0 ~ 100%）", group: "光学性质" },
+    { key: "reflectivityRange", label: "反射率（范围）", req: false, ph: "如 [0,2,4,8,...,10]", rule: "text", group: "光学性质" },
+    { key: "reflectivityImage", label: "反射率图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "光学性质" },
+    { key: "refractiveIndex", label: "折射率", req: false, rule: "pos", msg: "折射率必须为正数", group: "光学性质" },
+    { key: "refractiveImage", label: "折射率图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "光学性质" },
+    { key: "extinctionCoef", label: "消光系数", req: false, rule: "pos", msg: "消光系数必须为正数", group: "光学性质" },
+    { key: "extinctionImage", label: "消光系数图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "光学性质" },
+    { key: "defectType", label: "缺陷类型", req: false, type: "select", opts: ["空位缺陷", "反位缺陷", "间隙缺陷", "其他"], rule: "text", group: "缺陷性质" },
+    { key: "vacancyFormationEnergy", label: "空位缺陷形成能", req: false, unit: "eV", rule: "pos", msg: "空位缺陷形成能必须为正数", group: "缺陷性质" },
+    { key: "antisiteFormationEnergy", label: "反位缺陷形成能", req: false, unit: "eV", rule: "pos", msg: "反位缺陷形成能必须为正数", group: "缺陷性质" },
+    { key: "antisiteDefect", label: "反位缺陷", req: false, type: "textarea", ph: "如 Cu_Cr（双受主）与 Cr_Cu（双施主）", rule: "text", group: "缺陷性质" },
+    { key: "defectFormationImage", label: "缺陷形成能图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "缺陷性质" },
+    { key: "defectStructImage", label: "缺陷结构图", req: false, type: "file", ph: "上传 png 图片", rule: "text", accept: ".png,.jpg,.jpeg", group: "缺陷性质" }
   ];
 
   /* 计算参数与标准阈值（1.4 节） */
@@ -127991,7 +128050,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       }
       return {
         label: f.label,
-        type: f.type === "select" ? "枚举" : (f.type === "textarea" ? "多行文本" : "文本 / 数值"),
+        type: f.type === "select" ? "枚举" : (f.type === "textarea" ? "多行文本" : (f.type === "file" ? "文件（上传）" : "文本 / 数值")),
         req: !!f.req,
         unit: f.unit || "—",
         sample: String(sample).split("\n")[0]
@@ -128219,26 +128278,43 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     });
   }
 
+  /* 2026-10-29：字段按《低维材料-需求字段与映射字段整理表》的大类（group）分组展示 */
   function manualFormHtml(m) {
-    return '<div class="rw-form">' + ENTRY_MANUAL_FIELDS.map(function (f) {
-      var err = m.errors[f.key];
-      var val = m.form[f.key];
-      var ctl;
-      if (f.type === "select") {
-        ctl = '<select data-rw-ef="' + f.key + '">' + f.opts.map(function (o) {
-          return '<option' + (val === o ? " selected" : "") + ">" + esc(o) + "</option>";
-        }).join("") + "</select>";
-      } else if (f.type === "textarea") {
-        ctl = '<textarea data-rw-ef="' + f.key + '" placeholder="' + esc(f.ph || "") + '">' + esc(val) + "</textarea>";
-      } else {
-        ctl = '<input type="text" data-rw-ef="' + f.key + '" placeholder="' + esc(f.ph || "") + '" value="' + esc(val) + '">';
-      }
-      return '<div class="rw-field' + (f.type === "textarea" ? " is-full" : "") + (err ? " is-error" : "") + '">'
-        + "<label>" + esc(f.label) + (f.req ? "<i>*</i>" : "") + (f.unit ? "（" + esc(f.unit) + "）" : "") + "</label>"
-        + ctl
-        + (err ? '<span class="rw-field-err">' + esc(err) + "</span>" : (f.rule === "coord" ? '<span class="rw-field-tip">每行一个原子：元素 + 三个分数坐标（0~1）</span>' : ""))
-        + "</div>";
-    }).join("") + "</div>";
+    var order = [];
+    var byGroup = {};
+    ENTRY_MANUAL_FIELDS.forEach(function (f) {
+      var g = f.group || "材料基本信息";
+      if (!byGroup[g]) { byGroup[g] = []; order.push(g); }
+      byGroup[g].push(f);
+    });
+    return order.map(function (g) {
+      return '<div class="rw-section-title" style="margin-top:14px">' + esc(g) + "</div>"
+        + '<div class="rw-form">' + byGroup[g].map(function (f) { return manualFieldHtml(m, f); }).join("") + "</div>";
+    }).join("");
+  }
+
+  function manualFieldHtml(m, f) {
+    var err = m.errors[f.key];
+    var val = m.form[f.key];
+    var ctl;
+    if (f.type === "select") {
+      ctl = '<select data-rw-ef="' + f.key + '">' + f.opts.map(function (o) {
+        return '<option' + (val === o ? " selected" : "") + ">" + esc(o) + "</option>";
+      }).join("") + "</select>";
+    } else if (f.type === "textarea") {
+      ctl = '<textarea data-rw-ef="' + f.key + '" placeholder="' + esc(f.ph || "") + '">' + esc(val) + "</textarea>";
+    } else if (f.type === "file") {
+      /* 2026-10-29：图谱 / 结构类字段支持上传文件，原型只记录文件名 */
+      ctl = '<input type="file" data-rw-ef="' + f.key + '"' + (f.accept ? ' accept="' + f.accept + '"' : "") + ' style="font-size:12.5px">'
+        + '<span class="rw-field-tip">' + esc(val ? "已选择：" + val : (f.ph || "未选择文件")) + "</span>";
+    } else {
+      ctl = '<input type="text" data-rw-ef="' + f.key + '" placeholder="' + esc(f.ph || "") + '" value="' + esc(val) + '">';
+    }
+    return '<div class="rw-field' + (f.type === "textarea" ? " is-full" : "") + (err ? " is-error" : "") + '">'
+      + "<label>" + esc(f.label) + (f.req ? "<i>*</i>" : "") + (f.unit ? "（" + esc(f.unit) + "）" : "") + "</label>"
+      + ctl
+      + (err ? '<span class="rw-field-err">' + esc(err) + "</span>" : (f.rule === "coord" ? '<span class="rw-field-tip">每行一个原子：元素 + 三个分数坐标（0~1）</span>' : ""))
+      + "</div>";
   }
 
   function calcParamHtml(m) {
@@ -132876,7 +132952,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         var m = entryState().manual;
         if (!m) return;
         var k = el.getAttribute("data-rw-ef");
-        m.form[k] = el.value;
+        m.form[k] = (el.type === "file" && el.files && el.files[0]) ? el.files[0].name : el.value;
+        if (el.type === "file") {
+          var fh = el.closest ? el.closest(".rw-field") : null;
+          var ftip = fh ? fh.querySelector(".rw-field-tip") : null;
+          if (ftip) ftip.textContent = m.form[k] ? ("已选择：" + m.form[k]) : "未选择文件";
+        }
         if (k === "dataType") {
           m.previewId = C().code + "-" + (DATA_TYPE_CODES[el.value] || "GEN") + "-" + ("000" + (entryState().seq + 1)).slice(-4);
           renderManualEntry();
@@ -133168,7 +133249,42 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     entryRules: null,
     manualDefaults: { form: { dataType: "结构特征" }, calc: { software: "VASP", functional: "PBE", encut: "450", kpoints: "18", force: "0.01", vacuum: "16" } },
     demoFile: "MoS2.cif",
-    demoParse: { formula: "MoS2", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", la: "3.16", lb: "3.16", lc: "12.30", coords: "Mo 0.000 0.000 0.250\nS 0.333 0.667 0.620", bandGap: "1.68", formationEnergy: "-1.24", thickness: "6.15" },
+    demoParse: { formula: "MoS2", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", la: "3.16", lb: "3.16", lc: "12.30", coords: "Mo 0.000 0.000 0.250\nS 0.333 0.667 0.620", bandGap: "1.68", formationEnergy: "-1.24", thickness: "0.641",      materialNo: "2D-CuCrP2S6-001",
+      materialName: "CuCrP2S6",
+      elements: "Cu, Cr, P, S",
+      alpha: "90",
+      beta: "106.974",
+      gamma: "90",
+      layerSpacing: "6.391",
+      bondLength: "2.47",
+      bondAngle: "90",
+      cellVolume: "773.89",
+      density: "3.174",
+      bandType: "半导体",
+      effectiveMass: "2.1",
+      ferroelectric: "是",
+      polarization: "16.05",
+      piezoCoef: "200",
+      conductivity: "1e-6",
+      magneticOrder: "反铁磁",
+      magneticMoment: "3.03",
+      curieTemp: "31",
+      phononImaginary: "无虚频",
+      thermalConductivity: "2",
+      c11: "108",
+      c12: "27",
+      c13: "-5",
+      c33: "30",
+      c44: "7.5",
+      youngsModulus: "101",
+      poissonRatio: "0.25",
+      dielectricConst: "9.08",
+      absorptionCoef: "400000",
+      reflectivity: "32.8",
+      refractiveIndex: "3.65",
+      extinctionCoef: "0.365",
+      defectType: "空位缺陷",
+      vacancyFormationEnergy: "0.95" },
     procFlow: null,
     procStepTitles: null,
     procS1: null, procS2: null, procS3: null, procS4: null, procS5: null, procS6: null, procVersion: null,
@@ -133312,17 +133428,35 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     ],
     dataTypeCodes: { "基础信息对象": "BAS", "物理性质对象": "PHY", "表征图谱对象": "SPC", "计算数据对象": "CAL" },
     entryManualFields: [
-      { key: "formula", label: "分子式", req: true, ph: "如 C22H30N2O2S2", rule: "formula", msg: "分子式格式不正确，示例：C22H30N2O2S2" },
-      { key: "mw", label: "分子量", req: true, unit: "g/mol", rule: "pos", msg: "分子量必须为正数" },
-      { key: "name", label: "中英文名称", req: true, ph: "如 DPP-DTT / 吡咯并吡咯二酮", rule: "text" },
-      { key: "code", label: "分子编号 / CAS", req: true, ph: "如 1446789-12-4", rule: "text" },
-      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["基础信息对象", "物理性质对象", "表征图谱对象", "计算数据对象"], rule: "text" },
-      { key: "meltingPoint", label: "熔点", req: true, unit: "℃", rule: "range", min: -200, max: 500, msg: "熔点超出合理范围（-200 ~ 500 ℃）" },
-      { key: "flashPoint", label: "闪点", req: false, unit: "℃", rule: "range", min: -200, max: 500, msg: "闪点超出合理范围（-200 ~ 500 ℃）" },
-      { key: "bandGap", label: "HOMO-LUMO 能隙", req: true, unit: "eV", rule: "gap", msg: "HOMO-LUMO 能隙超出合理范围（0-10 eV）" },
-      { key: "excitation", label: "激发能", req: false, unit: "eV", rule: "gap", msg: "激发能超出合理范围（0-10 eV）" },
-      { key: "solvation", label: "溶剂化自由能", req: false, unit: "kcal/mol", rule: "fe", msg: "溶剂化自由能应 ≤ 0，请确认溶剂模型" },
-      { key: "dipole", label: "跃迁偶极矩", req: false, unit: "Debye", rule: "pos", msg: "跃迁偶极矩必须为正数" }
+      { key: "materialNo", label: "材料编号", req: false, ph: "如 OP-023", rule: "text", group: "基础数据字段" },
+      { key: "shortName", label: "材料简称 / 名称", req: true, ph: "如 Rubrene", rule: "text", group: "基础数据字段" },
+      { key: "name", label: "完整名称 / 中文名称", req: true, ph: "如 5,6,11,12-四苯基并四苯", rule: "text", group: "基础数据字段" },
+      { key: "nameEn", label: "英文名称", req: false, ph: "如 Rubrene", rule: "text", group: "基础数据字段" },
+      { key: "code", label: "分子编号 / CAS", req: true, ph: "如 1446789-12-4", rule: "text", group: "基础数据字段" },
+      { key: "formula", label: "分子式", req: true, ph: "如 C22H30N2O2S2", rule: "formula", msg: "分子式格式不正确，示例：C22H30N2O2S2", group: "基础数据字段" },
+      { key: "mw", label: "分子量", req: true, unit: "g/mol", rule: "pos", msg: "分子量必须为正数", group: "基础数据字段" },
+      { key: "struct3d", label: "三维结构 / 图", req: false, type: "file", ph: "上传结构文件或三维结构图", rule: "text", accept: ".pdb,.mol,.cif,.png,.jpg,.jpeg", group: "基础数据字段" },
+      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["基础信息对象", "物理性质对象", "表征图谱对象", "计算数据对象"], rule: "text", group: "基础数据字段" },
+      { key: "density", label: "相对密度 / 密度", req: false, unit: "g/cm³", rule: "pos", msg: "密度必须为正数", group: "物性数据字段" },
+      { key: "meltingPoint", label: "熔点", req: true, unit: "℃", rule: "range", min: -200, max: 500, msg: "熔点超出合理范围（-200 ~ 500 ℃）", group: "物性数据字段" },
+      { key: "boilingPoint", label: "沸点", req: false, unit: "℃", rule: "range", min: -200, max: 500, msg: "沸点超出合理范围（-200 ~ 500 ℃）", group: "物性数据字段" },
+      { key: "flashPoint", label: "闪点", req: false, unit: "℃", rule: "range", min: -200, max: 500, msg: "闪点超出合理范围（-200 ~ 500 ℃）", group: "物性数据字段" },
+      { key: "irSpectrum", label: "红外光谱", req: false, type: "file", ph: "上传谱线 CSV / 图谱 png", rule: "text", accept: ".csv,.png,.jpg,.jpeg", group: "表征图谱数据" },
+      { key: "ramanSpectrum", label: "拉曼光谱", req: false, type: "file", ph: "上传谱线 CSV / 图谱 png", rule: "text", accept: ".csv,.png,.jpg,.jpeg", group: "表征图谱数据" },
+      { key: "nmrSpectrum", label: "核磁共振光谱（NMR）", req: false, type: "file", ph: "上传 1H / 13C 谱 CSV 或谱图", rule: "text", accept: ".csv,.png,.jpg,.jpeg", group: "表征图谱数据" },
+      { key: "groundState", label: "基态结构", req: false, type: "file", ph: "上传基态结构文件（PDB）", rule: "text", accept: ".pdb,.mol,.xyz", group: "计算数据字段" },
+      { key: "excitedState", label: "激发态结构", req: false, type: "file", ph: "上传激发态结构文件（PDB）", rule: "text", accept: ".pdb,.mol,.xyz", group: "计算数据字段" },
+      { key: "excitation", label: "激发能", req: false, unit: "eV", rule: "gap", msg: "激发能超出合理范围（0-10 eV）", group: "计算数据字段" },
+      { key: "emissionEnergy", label: "发射能", req: false, unit: "eV", rule: "gap", msg: "发射能超出合理范围（0-10 eV）", group: "计算数据字段" },
+      { key: "dipole", label: "跃迁偶极矩", req: false, unit: "Debye", rule: "pos", msg: "跃迁偶极矩必须为正数", group: "计算数据字段" },
+      { key: "homoLevel", label: "HOMO 能级", req: false, unit: "eV", rule: "num", msg: "请输入数值型能级（eV）", group: "计算数据字段" },
+      { key: "lumoLevel", label: "LUMO 能级", req: false, unit: "eV", rule: "num", msg: "请输入数值型能级（eV）", group: "计算数据字段" },
+      { key: "bandGap", label: "HOMO-LUMO 能隙", req: true, unit: "eV", rule: "gap", msg: "HOMO-LUMO 能隙超出合理范围（0-10 eV）", group: "计算数据字段" },
+      { key: "solvation", label: "溶剂化自由能", req: false, unit: "kcal/mol", rule: "fe", msg: "溶剂化自由能应 ≤ 0，请确认溶剂模型", group: "计算数据字段" },
+      { key: "stokesShift", label: "斯托克斯位移", req: false, ph: "如 25–35 nm（≈ 800–1100 cm⁻¹）", rule: "text", group: "计算数据字段" },
+      { key: "normalModes", label: "简正模式", req: false, type: "file", ph: "上传简正模式 CSV / Gaussian 文件", rule: "text", accept: ".csv,.txt,.gjf", group: "计算数据字段" },
+      { key: "dos", label: "态密度 / 电子态密度总谱图（DOS）", req: false, type: "file", ph: "上传 DOS 数值 CSV 或谱图", rule: "text", accept: ".csv,.png,.jpg,.jpeg", group: "计算数据字段" },
+      { key: "externalLink", label: "外部数据关联", req: false, ph: "如 PubChem CID / 来源数据集链接", rule: "text", group: "计算数据字段" }
     ],
     entryCalcParams: [
       { key: "software", label: "计算软件", type: "select", opts: ["Gaussian16", "ORCA", "Turbomole", "PSI4"], std: "—", neutral: true },
@@ -133353,14 +133487,28 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ["HOMO-LUMO 能隙", "≥ 0 且 ≤ 10", "“HOMO-LUMO 能隙超出合理范围（0-10 eV）”"],
       ["溶剂化自由能", "≤ 0（稳定溶剂化）", "“溶剂化自由能应 ≤ 0，请确认溶剂模型”"],
       ["分子量", "> 0", "“分子量必须为正数”"],
-      ["熔点 / 闪点", "-200 ~ 500 ℃", "“熔点超出合理范围（-200 ~ 500 ℃）”"]
+      ["熔点 / 闪点", "-200 ~ 500 ℃", "“熔点超出合理范围（-200 ~ 500 ℃）”"],
+      ["沸点 / 闪点", "-200 ~ 500 ℃", "“沸点超出合理范围（-200 ~ 500 ℃）”"],
+      ["HOMO / LUMO 能级", "数值型（eV）", "“请输入数值型能级（eV）”"],
+      ["三维结构 / 图谱文件", "PDB / MOL / CSV / PNG", "“请上传对应格式的文件”"],
     ],
     manualDefaults: {
       form: { dataType: "计算数据对象" },
       calc: { software: "Gaussian16", method: "B3LYP", basis: "def2-TZVP", solvent: "PCM", scf: "1e-6", dispersion: "GD3(BJ)" }
     },
     demoFile: "DPP-DTT.mol",
-    demoParse: { formula: "C22H30N2O2S2", mw: "418.62", name: "DPP-DTT", code: "1446789-12-4", meltingPoint: "286", flashPoint: "312", bandGap: "2.14", excitation: "2.14", solvation: "-8.60", dipole: "3.42" },
+    demoParse: { formula: "C22H30N2O2S2", mw: "418.62", name: "DPP-DTT", code: "1446789-12-4", meltingPoint: "286", flashPoint: "312", bandGap: "2.14", excitation: "2.14", solvation: "-8.60", dipole: "3.42",      materialNo: "OP-023",
+      shortName: "Rubrene",
+      name: "5,6,11,12-四苯基并四苯",
+      nameEn: "Rubrene",
+      density: "1.269",
+      homoLevel: "-5.36",
+      lumoLevel: "-3.15",
+      bandGap: "2.21",
+      stokesShift: "约 25–35 nm（≈ 800–1100 cm⁻¹）",
+      excitation: "2.36",
+      emissionEnergy: "2.23",
+      externalLink: "PubChem CID（来源数据集关联）" },
     procFlow: [
       { n: "数据策划", d: "明确数据产品目标用途、格式与精度要求" },
       { n: "基础数据筛选", d: "按“分子量 < 500 + 有光电性能”筛选" },
@@ -133559,17 +133707,61 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     ],
     dataTypeCodes: { "基础信息": "BAS", "物性数据": "PHY", "表征图谱": "SPC", "计算数据": "CAL" },
     entryManualFields: [
-      { key: "formula", label: "化学式 / 分子式", req: true, ph: "如 Li6PS5Cl", rule: "formula", msg: "化学式格式不正确，示例：Li6PS5Cl" },
-      { key: "type", label: "电解质类型", req: true, type: "select", opts: ["有机电解液", "固态有机电解质", "固态无机电解质"], rule: "text" },
-      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["基础信息", "物性数据", "表征图谱", "计算数据"], rule: "text" },
-      { key: "name", label: "材料名称", req: true, ph: "如 锂镧锆氧（LLZO）", rule: "text" },
-      { key: "crystal", label: "晶体结构 / 空间群", req: false, ph: "如 F-43m", rule: "text" },
-      { key: "meltingPoint", label: "熔点", req: false, unit: "℃", rule: "range", min: -200, max: 1600, msg: "熔点超出合理范围（-200 ~ 1600 ℃）" },
-      { key: "flashPoint", label: "燃点", req: false, unit: "℃", rule: "range", min: -50, max: 800, msg: "燃点超出合理范围（-50 ~ 800 ℃）" },
-      { key: "conductivity", label: "离子电导率", req: true, unit: "S/cm", ph: "如 3.2e-3", rule: "range", min: 0, max: 0.01, msg: "离子电导率超出合理范围（0 ~ 10⁻² S/cm）" },
-      { key: "window", label: "电化学窗口", req: false, unit: "V", rule: "pos", msg: "电化学窗口必须为正数" },
-      { key: "bandGap", label: "带隙", req: false, unit: "eV", rule: "gap", msg: "带隙值超出合理范围（0-10 eV）" },
-      { key: "solvation", label: "溶剂化自由能", req: false, unit: "kcal/mol", rule: "fe", msg: "溶剂化自由能应 ≤ 0，请确认溶剂模型" }
+      { key: "category", label: "类别 / 大类", req: false, type: "select", opts: ["有机电解液", "固态有机电解质", "固态无机电解质"], rule: "text", group: "基础数据字段" },
+      { key: "materialNo", label: "材料编号", req: false, ph: "如 EL-001", rule: "text", group: "基础数据字段" },
+      { key: "name", label: "中文名称", req: true, ph: "如 碳酸乙烯酯", rule: "text", group: "基础数据字段" },
+      { key: "nameEn", label: "英文名称", req: false, ph: "如 EC", rule: "text", group: "基础数据字段" },
+      { key: "formula", label: "分子式 / 化学式", req: true, ph: "如 Li6PS5Cl", rule: "formula", msg: "化学式格式不正确，示例：Li6PS5Cl", group: "基础数据字段" },
+      { key: "casNo", label: "分子编号 / CAS 号", req: false, ph: "如 96-49-1", rule: "text", group: "基础数据字段" },
+      { key: "structureType", label: "结构种类细分", req: false, ph: "如 环状有机电解液数据集", rule: "text", group: "基础数据字段" },
+      { key: "typeTag", label: "类型标签 / 细分类型", req: false, ph: "如 有机溶剂 / 锂盐", rule: "text", group: "基础数据字段" },
+      { key: "mw", label: "分子量", req: false, unit: "g/mol", rule: "pos", msg: "分子量必须为正数", group: "基础数据字段" },
+      { key: "struct3d", label: "三维结构 / 图", req: false, type: "file", ph: "上传结构文件或三维结构图", rule: "text", accept: ".cif,.pdb,.png,.jpg,.jpeg", group: "基础数据字段" },
+      { key: "type", label: "电解质类型", req: true, type: "select", opts: ["有机电解液", "固态有机电解质", "固态无机电解质"], rule: "text", group: "基础数据字段" },
+      { key: "safetyLevel", label: "安全等级", req: false, type: "select", opts: ["低风险", "中等风险", "高风险"], rule: "text", group: "基础数据字段" },
+      { key: "appearance", label: "外观", req: false, ph: "如 无色液体", rule: "text", group: "基础数据字段" },
+      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["基础信息", "物性数据", "表征图谱", "计算数据"], rule: "text", group: "基础数据字段" },
+      { key: "color", label: "性状-外观颜色", req: false, ph: "如 无色", rule: "text", group: "物性数据字段" },
+      { key: "shape", label: "性状-形状", req: false, ph: "如 液体 / 粉末", rule: "text", group: "物性数据字段" },
+      { key: "taste", label: "性状-味觉", req: false, rule: "text", group: "物性数据字段" },
+      { key: "odor", label: "性状-嗅觉", req: false, ph: "如 无味 / 微有醚味", rule: "text", group: "物性数据字段" },
+      { key: "meltingPoint", label: "熔点", req: false, unit: "℃", rule: "range", min: -200, max: 1600, msg: "熔点超出合理范围（-200 ~ 1600 ℃）", group: "物性数据字段" },
+      { key: "boilingPoint", label: "沸点", req: false, unit: "℃", rule: "range", min: -200, max: 1600, msg: "沸点超出合理范围（-200 ~ 1600 ℃）", group: "物性数据字段" },
+      { key: "density", label: "相对密度 / 密度", req: false, unit: "g/cm³", rule: "pos", msg: "密度必须为正数", group: "物性数据字段" },
+      { key: "flashPoint", label: "闪点", req: false, unit: "℃", rule: "range", min: -200, max: 500, msg: "闪点超出合理范围（-200 ~ 500 ℃）", group: "物性数据字段" },
+      { key: "ignitionPoint", label: "燃点", req: false, unit: "℃", rule: "range", min: -50, max: 800, msg: "燃点超出合理范围（-50 ~ 800 ℃）", group: "物性数据字段" },
+      { key: "solubility", label: "溶解性（水溶性）", req: false, ph: "如 易溶 / 微溶（《中国药典》术语）", rule: "text", group: "物性数据字段" },
+      { key: "refractiveIndex", label: "折射率", req: false, rule: "pos", msg: "折射率必须为正数", group: "物性数据字段" },
+      { key: "viscosity", label: "黏度", req: false, unit: "mPa·s", rule: "pos", msg: "黏度必须为正数", group: "物性数据字段" },
+      { key: "dielectricConst", label: "介电常数", req: false, rule: "pos", msg: "介电常数必须为正数", group: "物性数据字段" },
+      { key: "specificHeat", label: "比热容", req: false, unit: "J/(g·K)", rule: "pos", msg: "比热容必须为正数", group: "物性数据字段" },
+      { key: "thermalConductivity", label: "热导率", req: false, unit: "W/(m·K)", rule: "pos", msg: "热导率必须为正数", group: "物性数据字段" },
+      { key: "conductivityK", label: "电导率（加钾盐）", req: false, unit: "S/cm", rule: "pos", msg: "电导率必须为正数", group: "物性数据字段" },
+      { key: "conductivity", label: "离子电导率", req: true, unit: "S/cm", ph: "如 3.2e-3", rule: "range", min: 0, max: 0.01, msg: "离子电导率超出合理范围（0 ~ 10⁻² S/cm）", group: "物性数据字段" },
+      { key: "conductivityPure", label: "纯溶剂本征电导率", req: false, unit: "S/cm", rule: "pos", msg: "电导率必须为正数", group: "物性数据字段" },
+      { key: "toxicology", label: "毒理学数据", req: false, type: "textarea", ph: "如 口服 LD50 / 皮肤刺激性结论", rule: "text", group: "安全信息数据字段" },
+      { key: "oralLd50", label: "口服 LD50", req: false, unit: "mg/kg", ph: "如 >5000", rule: "text", group: "安全信息数据字段" },
+      { key: "skinLd50", label: "皮肤 LD50", req: false, unit: "mg/kg", ph: "如 >2000", rule: "text", group: "安全信息数据字段" },
+      { key: "ecoToxicity", label: "生态毒性", req: false, type: "textarea", ph: "如 鱼类 / 藻类毒性结论", rule: "text", group: "安全信息数据字段" },
+      { key: "fishToxicity", label: "鱼类生态毒性", req: false, unit: "mg/L", ph: "如 >100", rule: "text", group: "安全信息数据字段" },
+      { key: "algaeToxicity", label: "藻类生态毒性", req: false, unit: "mg/L", ph: "如 >100", rule: "text", group: "安全信息数据字段" },
+      { key: "safetyLabel", label: "安全标识", req: false, ph: "如 GHS07 / 易燃", rule: "text", group: "安全信息数据字段" },
+      { key: "homoLevel", label: "HOMO 能级", req: false, unit: "eV", rule: "num", msg: "请输入数值型能级（eV）", group: "计算数据字段" },
+      { key: "lumoLevel", label: "LUMO 能级", req: false, unit: "eV", rule: "num", msg: "请输入数值型能级（eV）", group: "计算数据字段" },
+      { key: "chargeDistribution", label: "电荷分布", req: false, ph: "如 形式电荷 / 逐原子电荷", rule: "text", group: "计算数据字段" },
+      { key: "dipole", label: "偶极矩", req: false, unit: "D", rule: "num", msg: "请输入数值型偶极矩", group: "计算数据字段" },
+      { key: "solvation", label: "溶剂化自由能", req: false, unit: "kJ/mol", rule: "fe", msg: "溶剂化自由能应 ≤ 0，请确认溶剂模型", group: "计算数据字段" },
+      { key: "adsorptionEnergy", label: "吸附能", req: false, unit: "eV", rule: "num", msg: "请输入数值型吸附能", group: "计算数据字段" },
+      { key: "formationEnthalpy", label: "生成焓 / 生成热", req: false, unit: "kJ/mol", rule: "num", msg: "请输入数值型生成焓", group: "计算数据字段" },
+      { key: "bindingEnergy", label: "结合能", req: false, unit: "eV", rule: "num", msg: "请输入数值型结合能", group: "计算数据字段" },
+      { key: "gibbsFreeEnergy", label: "生成吉布斯自由能", req: false, unit: "kJ/mol", rule: "num", msg: "请输入数值型自由能", group: "计算数据字段" },
+      { key: "window", label: "电化学窗口", req: false, unit: "V", rule: "pos", msg: "电化学窗口必须为正数", group: "计算数据字段" },
+      { key: "bandGap", label: "带隙", req: false, unit: "eV", rule: "gap", msg: "带隙值超出合理范围（0-10 eV）", group: "计算数据字段" },
+      { key: "keywords", label: "关键词", req: false, ph: "如 高介电常数,成膜添加剂", rule: "text", group: "计算数据字段" },
+      { key: "similarMolecules", label: "相似分子推荐", req: false, type: "textarea", ph: "如 相似分子编号与关注性质变化趋势", rule: "text", group: "计算数据字段" },
+      { key: "irSpectrum", label: "红外光谱", req: false, type: "file", ph: "上传谱线 CSV / 图谱 png", rule: "text", accept: ".csv,.png,.jpg,.jpeg", group: "图谱信息字段" },
+      { key: "ramanSpectrum", label: "拉曼光谱", req: false, type: "file", ph: "上传谱线 CSV / 图谱 png", rule: "text", accept: ".csv,.png,.jpg,.jpeg", group: "图谱信息字段" },
+      { key: "nmrSpectrum", label: "核磁共振光谱", req: false, type: "file", ph: "上传 1H / 13C 谱 CSV 或谱图", rule: "text", accept: ".csv,.png,.jpg,.jpeg", group: "图谱信息字段" }
     ],
     entryCalcParams: [
       { key: "software", label: "计算软件", type: "select", opts: ["VASP", "Gaussian16", "CP2K", "LAMMPS"], std: "—", neutral: true },
@@ -133600,14 +133792,46 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ["离子电导率", "0 ~ 10⁻² S/cm", "“离子电导率超出合理范围（0 ~ 10⁻² S/cm）”"],
       ["溶剂化自由能", "≤ 0（稳定溶剂化）", "“溶剂化自由能应 ≤ 0，请确认溶剂模型”"],
       ["带隙", "≥ 0 且 ≤ 10", "“带隙值超出合理范围（0-10 eV）”"],
-      ["熔点 / 燃点", "熔点 -200 ~ 1600 ℃；燃点 -50 ~ 800 ℃", "“熔点超出合理范围（-200 ~ 1600 ℃）”"]
+      ["熔点 / 燃点", "熔点 -200 ~ 1600 ℃；燃点 -50 ~ 800 ℃", "“熔点超出合理范围（-200 ~ 1600 ℃）”"],
+      ["沸点", "-200 ~ 1600 ℃", "“沸点超出合理范围（-200 ~ 1600 ℃）”"],
+      ["HOMO / LUMO 能级", "数值型（eV）", "“请输入数值型能级（eV）”"],
+      ["口服 / 皮肤 LD50", "数值或阈值表达（如 >5000 mg/kg）", "“请按数值或阈值格式填写”"],
+      ["毒理学 / 生态毒性", "文本描述（含测试物种与阈值）", "“请填写毒性数据描述”"],
     ],
     manualDefaults: {
       form: { dataType: "物性数据", type: "固态无机电解质" },
       calc: { software: "VASP", functional: "PBE", encut: "520", kpoints: "24", force: "0.01", energy: "1e-6" }
     },
     demoFile: "LLZO.cif",
-    demoParse: { formula: "Li7La3Zr2O12", type: "固态无机电解质", crystal: "Ia-3d", name: "锂镧锆氧（LLZO）", conductivity: "8.5e-4", window: "4.2", bandGap: "4.86", meltingPoint: "1230", flashPoint: "", solvation: "" },
+    demoParse: { formula: "Li7La3Zr2O12", type: "固态无机电解质", crystal: "Ia-3d", name: "锂镧锆氧（LLZO）", conductivity: "8.5e-4", window: "4.2", bandGap: "4.86", meltingPoint: "1230", flashPoint: "", solvation: "",      category: "有机电解液",
+      materialNo: "EL-001",
+      name: "碳酸乙烯酯",
+      nameEn: "EC",
+      casNo: "96-49-1",
+      structureType: "环状有机电解液数据集",
+      typeTag: "有机溶剂",
+      safetyLevel: "低风险",
+      appearance: "无色液体",
+      mw: "88.06",
+      meltingPoint: "36.4",
+      boilingPoint: "248",
+      density: "1.321",
+      flashPoint: "145",
+      refractiveIndex: "1.415",
+      viscosity: "1.9",
+      dielectricConst: "89.8",
+      specificHeat: "1.92",
+      thermalConductivity: "0.28",
+      conductivityK: "0.01",
+      conductivity: "0.0095",
+      homoLevel: "-8.72",
+      lumoLevel: "0.61",
+      dipole: "4.9",
+      solvation: "-48",
+      formationEnthalpy: "-671",
+      bindingEnergy: "-0.85",
+      gibbsFreeEnergy: "-622",
+      keywords: "高介电常数,成膜添加剂" },
     procFlow: [
       { n: "数据策划", d: "明确应用需求，如“动力电池电解液”" },
       { n: "基础数据筛选", d: "按“燃点 > 150 ℃ + 离子电导率 > 10⁻³ S/m”筛选" },
@@ -133804,17 +134028,47 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     ],
     dataTypeCodes: { "有机小分子力场对象": "SM", "高分子力场对象": "PL", "蛋白质力场对象": "PT" },
     entryManualFields: [
-      { key: "formula", label: "分子式", req: true, ph: "如 H2O", rule: "formula", msg: "分子式格式不正确，示例：H2O" },
-      { key: "systemType", label: "分子体系类型", req: true, type: "select", opts: ["有机小分子体系", "高分子片段体系", "蛋白质体系"], rule: "text" },
-      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["有机小分子力场对象", "高分子力场对象", "蛋白质力场对象"], rule: "text" },
-      { key: "name", label: "体系名称", req: true, ph: "如 甘氨酸二肽", rule: "text" },
-      { key: "conformers", label: "构象数", req: true, unit: "个", rule: "pos", msg: "构象数必须为正数" },
-      { key: "temperature", label: "采样温度", req: true, unit: "K", rule: "range", min: 0, max: 1000, msg: "采样温度超出合理范围（0 ~ 1000 K）" },
-      { key: "energy", label: "单分子能量", req: true, unit: "Hartree", ph: "如 -76.321154", rule: "num", msg: "请输入数值型能量" },
-      { key: "force", label: "原子受力", req: false, unit: "eV/Å", rule: "num", msg: "请输入数值型受力" },
-      { key: "dimerEnergy", label: "双分子相互作用能", req: false, unit: "kJ/mol", rule: "num", msg: "请输入数值型相互作用能" },
-      { key: "rmsd", label: "RMSD", req: false, unit: "Å", rule: "pos", msg: "RMSD 必须为正数" },
-      { key: "dipole", label: "偶极矩", req: false, unit: "Debye", rule: "pos", msg: "偶极矩必须为正数" }
+      { key: "materialNo", label: "材料编号", req: false, ph: "如 ML-001", rule: "text", group: "基础数据字段" },
+      { key: "name", label: "中文名称", req: true, ph: "如 甘氨酸二肽", rule: "text", group: "基础数据字段" },
+      { key: "nameEn", label: "英文名称", req: false, ph: "如 Water", rule: "text", group: "基础数据字段" },
+      { key: "formula", label: "分子式 / 化学式", req: true, ph: "如 H2O", rule: "formula", msg: "分子式格式不正确，示例：H2O", group: "基础数据字段" },
+      { key: "systemType", label: "分子体系类型", req: true, type: "select", opts: ["有机小分子体系", "高分子片段体系", "蛋白质体系"], rule: "text", group: "基础数据字段" },
+      { key: "scaleType", label: "体系规模类型", req: false, type: "select", opts: ["单分子数据集", "双分子数据集", "多分子团簇数据集"], rule: "text", group: "基础数据字段" },
+      { key: "substanceType", label: "分子体系物质类型", req: false, ph: "如 醚类有机小分子数据集", rule: "text", group: "基础数据字段" },
+      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["有机小分子力场对象", "高分子力场对象", "蛋白质力场对象"], rule: "text", group: "基础数据字段" },
+      { key: "atomCount", label: "原子数量", req: false, unit: "个", ph: "如 10", rule: "pos", msg: "原子数量必须为正整数", group: "基础数据字段" },
+      { key: "pubchemId", label: "PubChem 编号", req: false, ph: "如 962", rule: "text", group: "基础数据字段" },
+      { key: "atomicCharge", label: "原子电荷", req: false, unit: "e", ph: "如 -0.834 / 0.417", rule: "num", msg: "请输入数值型电荷", group: "组分性质字段" },
+      { key: "dipole", label: "偶极矩", req: false, unit: "D", rule: "pos", msg: "偶极矩必须为正数", group: "组分性质字段" },
+      { key: "quadrupole", label: "四极矩", req: false, ph: "如 Qxx / Qyy / Qzz（无迹）", rule: "text", group: "组分性质字段" },
+      { key: "multipole", label: "多极矩", req: false, ph: "如 无（仅偶极矩 + 四极矩）", rule: "text", group: "组分性质字段" },
+      { key: "polarizability", label: "极化率", req: false, ph: "如 α(0)", rule: "text", group: "组分性质字段" },
+      { key: "dispersionCoef", label: "色散系数", req: false, ph: "如 C6 / C8", rule: "text", group: "组分性质字段" },
+      { key: "energy", label: "单分子能量", req: true, unit: "Hartree", ph: "如 -76.321154", rule: "num", msg: "请输入数值型能量", group: "结构特征字段" },
+      { key: "monomerStructure", label: "单分子结构", req: false, type: "file", ph: "上传单分子结构文件", rule: "text", accept: ".pdb,.xyz,.mol", group: "结构特征字段" },
+      { key: "dimerBondLength", label: "双分子结构-键长", req: false, unit: "Å", rule: "pos", msg: "键长必须为正数", group: "结构特征字段" },
+      { key: "dimerBondAngle", label: "双分子结构-键角", req: false, unit: "°", rule: "range", min: 0, max: 180, msg: "键角超出合理范围（0 ~ 180°）", group: "结构特征字段" },
+      { key: "dimerDihedral", label: "双分子结构-二面角", req: false, unit: "°", rule: "range", min: -180, max: 180, msg: "二面角超出合理范围（-180 ~ 180°）", group: "结构特征字段" },
+      { key: "dimerEnergy", label: "双分子相互作用能", req: false, unit: "kJ/mol", rule: "num", msg: "请输入数值型相互作用能", group: "结构特征字段" },
+      { key: "force", label: "原子受力", req: false, unit: "eV/Å", rule: "num", msg: "请输入数值型受力", group: "结构特征字段" },
+      { key: "clusterStructure", label: "多分子团簇结构", req: false, ph: "如 组成 + 构象 PDB", rule: "text", group: "结构特征字段" },
+      { key: "clusterInteractionEnergy", label: "多分子相互作用能", req: false, unit: "kJ/mol", rule: "num", msg: "请输入数值型相互作用能", group: "结构特征字段" },
+      { key: "clusterForce", label: "多分子-原子受力", req: false, unit: "eV/Å", rule: "num", msg: "请输入数值型受力", group: "结构特征字段" },
+      { key: "clusterCoords", label: "团簇坐标", req: false, type: "textarea", ph: "H 0.000 0.000 0.000; O 0.758 0.000 0.000", rule: "text", group: "结构特征字段" },
+      { key: "topologyFile", label: "拓扑文件", req: false, type: "file", ph: "上传拓扑文件", rule: "text", accept: ".xyz,.pdb,.top,.xml", group: "结构特征字段" },
+      { key: "rmsd", label: "RMSD", req: false, unit: "Å", rule: "pos", msg: "RMSD 必须为正数", group: "结构特征字段" },
+      { key: "conformers", label: "构象数", req: true, unit: "个", rule: "pos", msg: "构象数必须为正数", group: "力场参数字段" },
+      { key: "temperature", label: "采样温度", req: true, unit: "K", rule: "range", min: 0, max: 1000, msg: "采样温度超出合理范围（0 ~ 1000 K）", group: "力场参数字段" },
+      { key: "energyKcal", label: "能量", req: false, unit: "kcal/mol", rule: "num", msg: "请输入数值型能量", group: "力场参数字段" },
+      { key: "forceFieldType", label: "力场类型", req: false, type: "select", opts: ["GFN-FF", "TIP3P", "OPLS-AA", "其他"], rule: "text", group: "力场参数字段" },
+      { key: "calcMethod", label: "计算方法", req: false, type: "select", opts: ["GFN-FF NVT MD 采样 + GFN2-xTB 单点", "DFT/B3LYP", "CCSD(T)", "MP2", "其他"], rule: "text", group: "力场参数字段" },
+      { key: "paramName", label: "参数名称", req: false, ph: "如 电荷 / 键角参数", rule: "text", group: "力场参数字段" },
+      { key: "paramType", label: "参数类型", req: false, ph: "如 原子电荷 / 键角", rule: "text", group: "力场参数字段" },
+      { key: "paramMethod", label: "参数方法", req: false, ph: "如 RESP 电荷模型 / 实验值", rule: "text", group: "力场参数字段" },
+      { key: "paramValue", label: "参数值", req: false, ph: "如 -0.834 / 0.417 e", rule: "text", group: "力场参数字段" },
+      { key: "systemScale", label: "体系规模", req: false, type: "select", opts: ["小体系", "中体系", "大体系"], rule: "text", group: "力场参数字段" },
+      { key: "systemKind", label: "体系类型", req: false, type: "select", opts: ["单体", "二聚体", "团簇"], rule: "text", group: "力场参数字段" },
+      { key: "downloadUrl", label: "下载链接", req: false, ph: "如 本地文件路径 / 公开仓库链接", rule: "text", group: "力场参数字段" }
     ],
     entryCalcParams: [
       { key: "software", label: "采样软件", type: "select", opts: ["Gromacs", "Amber", "LAMMPS", "MaterialsStudio"], std: "—", neutral: true },
@@ -133845,14 +134099,37 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ["构象数", "> 0，且训练用体系建议 ≥ 1000", "“构象数必须为正数”"],
       ["采样温度", "0 ~ 1000 K", "“采样温度超出合理范围（0 ~ 1000 K）”"],
       ["能量 / 受力", "数值型（支持科学计数法）", "“请输入数值型能量”"],
-      ["RMSD / 偶极矩", "> 0", "“RMSD 必须为正数”"]
+      ["RMSD / 偶极矩", "> 0", "“RMSD 必须为正数”"],
+      ["原子数量 / 构象数", "> 0，训练用体系构象数建议 ≥ 1000", "“构象数必须为正数”"],
+      ["团簇坐标", "元素 + x/y/z（Å）", "“请按「元素 x y z」格式填写”"],
+      ["拓扑文件 / 单分子结构", "XYZ / PDB", "“请上传对应格式的文件”"],
     ],
     manualDefaults: {
       form: { dataType: "有机小分子力场对象", systemType: "有机小分子体系" },
       calc: { software: "Gromacs", ensemble: "NVT", temp: "300", method: "CCSD(T)", basis: "def2-QZVP", conformers: "1200" }
     },
     demoFile: "H2O_traj.pdb",
-    demoParse: { formula: "H2O", systemType: "有机小分子体系", name: "水分子（H2O）", conformers: "1200", temperature: "300", energy: "-76.321154", force: "0.042", dimerEnergy: "-6.82", rmsd: "0.42", dipole: "1.85" },
+    demoParse: { formula: "H2O", systemType: "有机小分子体系", name: "水分子（H2O）", conformers: "1200", temperature: "300", energy: "-76.321154", force: "0.042", dimerEnergy: "-6.82", rmsd: "0.42", dipole: "1.85",      materialNo: "ML-001",
+      name: "水分子",
+      nameEn: "Water",
+      scaleType: "单分子数据集",
+      substanceType: "醚类有机小分子数据集",
+      atomCount: "10",
+      pubchemId: "962",
+      atomicCharge: "-0.834",
+      dipole: "1.85",
+      energyKcal: "-74.1",
+      forceFieldType: "TIP3P",
+      calcMethod: "DFT/B3LYP",
+      paramName: "电荷",
+      paramType: "原子电荷",
+      paramMethod: "RESP电荷模型",
+      paramValue: "-0.834 / 0.417 e",
+      systemScale: "小体系",
+      systemKind: "单体",
+      topologyFile: "H2O.xyz",
+      clusterCoords: "H 0.000 0.000 0.000; O 0.758 0.000 0.000; H -0.240 0.720 0.000",
+      downloadUrl: "https://github.com/openmm/openmm-forcefields" },
     procFlow: [
       { n: "数据策划", d: "明确力场应用场景，如“药物分子对接力场”" },
       { n: "基础数据筛选", d: "按“小分子 + CCSD(T) 计算 + 构象数 ≥ 1000”筛选" },
@@ -134042,16 +134319,56 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     ],
     dataTypeCodes: { "催化表面分子吸附数据": "ADS", "催化表面反应路径数据": "PTH" },
     entryManualFields: [
-      { key: "formula", label: "催化体系标识", req: true, ph: "如 Cu(211)-CO2RR", rule: "text" },
-      { key: "facet", label: "催化表面晶面", req: true, type: "select", opts: ["Cu(100)", "Cu(110)", "Cu(111)", "Cu(210)", "Cu(211)", "Cu(411)"], rule: "text" },
-      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["催化表面分子吸附数据", "催化表面反应路径数据"], rule: "text" },
-      { key: "dopant", label: "掺杂原子参数", req: false, ph: "如 Ag / 单原子 Pt", rule: "text" },
-      { key: "adsorbate", label: "吸附分子种类", req: true, type: "select", opts: ["CO2", "CO", "H", "OH", "OCHO", "COOH", "CH4"], rule: "text" },
-      { key: "site", label: "分子吸附位置", req: false, ph: "如 Step-bridge / Hollow", rule: "text" },
-      { key: "adsorptionEnergy", label: "分子吸附能量", req: true, unit: "eV", ph: "如 -0.86", rule: "num", msg: "请输入数值型吸附能" },
-      { key: "reactionEnergy", label: "反应能", req: false, unit: "eV", rule: "num", msg: "请输入数值型反应能" },
-      { key: "activationEnergy", label: "活化能", req: false, unit: "eV", rule: "pos", msg: "活化能必须为正数" },
-      { key: "coordination", label: "活性位点配位数", req: false, rule: "pos", msg: "配位数必须为正数" }
+      { key: "materialNo", label: "材料编号", req: false, ph: "如 CAT-PT-111-001", rule: "text", group: "基础数据字段" },
+      { key: "materialName", label: "材料名称", req: true, ph: "如 Pt(111)", rule: "text", group: "基础数据字段" },
+      { key: "materialDesc", label: "材料描述", req: false, ph: "如 铂单晶(111)面", rule: "text", group: "基础数据字段" },
+      { key: "categoryTag", label: "分类标签", req: false, ph: "如 单原子催化剂数据集、二元合金数据集、晶界数据集", rule: "text", group: "基础数据字段" },
+      { key: "chemicalFormula", label: "化学式", req: true, ph: "如 PtNi", rule: "formula", msg: "化学式格式不正确，示例：PtNi", group: "基础数据字段" },
+      { key: "composition", label: "材料成分 / 元素组成", req: false, ph: "如 Pt, Ni", rule: "text", group: "基础数据字段" },
+      { key: "formula", label: "催化体系标识", req: true, ph: "如 Cu(211)-CO2RR", rule: "text", group: "基础数据字段" },
+      { key: "catalystCategory", label: "催化剂种类 / 类别", req: false, type: "select", opts: ["金属单晶", "合金催化剂", "单原子催化剂", "金属氧化物", "其他"], rule: "text", group: "基础数据字段" },
+      { key: "reactionType", label: "反应类型", req: false, type: "select", opts: ["ORR", "OER", "HER", "CO2RR", "NRR", "其他"], rule: "text", group: "基础数据字段" },
+      { key: "surfaceParam", label: "表面参数", req: false, ph: "如 表面原子层数 / 超胞尺寸", rule: "text", group: "基础数据字段" },
+      { key: "dataType", label: "数据类型", req: true, type: "select", opts: ["催化表面分子吸附数据", "催化表面反应路径数据"], rule: "text", group: "基础数据字段" },
+      { key: "period", label: "周期数", req: false, rule: "range", min: 1, max: 7, msg: "周期数超出合理范围（1 ~ 7）", group: "元素特征数据字段" },
+      { key: "groupNo", label: "族数", req: false, rule: "range", min: 1, max: 18, msg: "族数超出合理范围（1 ~ 18）", group: "元素特征数据字段" },
+      { key: "elementCharge", label: "元素电荷", req: false, unit: "e", rule: "num", msg: "请输入数值型电荷", group: "元素特征数据字段" },
+      { key: "atomicMass", label: "相对原子质量", req: false, rule: "pos", msg: "相对原子质量必须为正数", group: "元素特征数据字段" },
+      { key: "atomicRadius", label: "原子半径", req: false, unit: "Å", rule: "pos", msg: "原子半径必须为正数", group: "元素特征数据字段" },
+      { key: "valenceElectrons", label: "价电子数量", req: false, rule: "pos", msg: "价电子数量必须为正数", group: "元素特征数据字段" },
+      { key: "pdElectrons", label: "p 轨道或 d 轨道电子数", req: false, rule: "pos", msg: "轨道电子数必须为正数", group: "元素特征数据字段" },
+      { key: "ionizationEnergy", label: "第一电离能", req: false, unit: "eV", rule: "pos", msg: "第一电离能必须为正数", group: "元素特征数据字段" },
+      { key: "electronAffinity", label: "电子亲和势", req: false, unit: "eV", rule: "num", msg: "请输入数值型电子亲和势", group: "元素特征数据字段" },
+      { key: "electronegativity", label: "电负性", req: false, rule: "pos", msg: "电负性必须为正数", group: "元素特征数据字段" },
+      { key: "dBandCenter", label: "d 带中心", req: false, unit: "eV", rule: "num", msg: "请输入数值型 d 带中心", group: "元素特征数据字段" },
+      { key: "morphologyImage", label: "形貌结构图", req: false, type: "file", ph: "上传形貌结构图（png / cif）", rule: "text", accept: ".png,.jpg,.jpeg,.cif", group: "结构特征数据字段" },
+      { key: "atomCoords", label: "原子位置坐标", req: false, type: "textarea", ph: "Pt 0.000 0.000 0.000", rule: "text", group: "结构特征数据字段" },
+      { key: "facet", label: "催化表面晶面", req: true, type: "select", opts: ["Cu(100)", "Cu(110)", "Cu(111)", "Cu(210)", "Cu(211)", "Cu(411)"], rule: "text", group: "结构特征数据字段" },
+      { key: "spaceGroup", label: "空间群", req: false, ph: "如 Fm-3m", rule: "text", group: "结构特征数据字段" },
+      { key: "pointGroup", label: "所属点群", req: false, ph: "如 Oh", rule: "text", group: "结构特征数据字段" },
+      { key: "site", label: "分子吸附位置", req: false, ph: "如 Step-bridge / Hollow", rule: "text", group: "结构特征数据字段" },
+      { key: "coordination", label: "活性位点配位数", req: false, rule: "pos", msg: "配位数必须为正数", group: "结构特征数据字段" },
+      { key: "symmetryFunction", label: "对称性函数", req: false, type: "textarea", ph: "如 对称性函数描述符取值", rule: "text", group: "结构特征数据字段" },
+      { key: "otherStructuralDesc", label: "其他结构特征描述符", req: false, type: "textarea", rule: "text", group: "结构特征数据字段" },
+      { key: "fermiPosition", label: "体系特征-费米面位置", req: false, ph: "如 相对带边位置", rule: "text", group: "体系特征数据字段" },
+      { key: "fermiLevel", label: "费米能级", req: false, unit: "eV", rule: "num", msg: "请输入数值型费米能级", group: "体系特征数据字段" },
+      { key: "dopingFormationEnergy", label: "体系特征-掺杂形成能", req: false, unit: "eV", rule: "num", msg: "请输入数值型形成能", group: "体系特征数据字段" },
+      { key: "systemMagneticMoment", label: "体系特征-体系磁矩", req: false, unit: "μB", rule: "num", msg: "请输入数值型磁矩", group: "体系特征数据字段" },
+      { key: "adsorbate", label: "吸附分子种类", req: true, type: "select", opts: ["CO2", "CO", "H", "OH", "OCHO", "COOH", "CH4"], rule: "text", group: "体系特征数据字段" },
+      { key: "dopant", label: "掺杂原子参数", req: false, ph: "如 Ag / 单原子 Pt", rule: "text", group: "体系特征数据字段" },
+      { key: "reactants", label: "反应物", req: false, ph: "如 CO₂ + H⁺ + e⁻", rule: "text", group: "体系特征数据字段" },
+      { key: "intermediates", label: "催化反应-中间产物", req: false, ph: "如 *O, *OH, *OOH", rule: "text", group: "体系特征数据字段" },
+      { key: "products", label: "生成物", req: false, ph: "如 CO + H₂O", rule: "text", group: "体系特征数据字段" },
+      { key: "overallReaction", label: "完整反应方程（总包）", req: false, type: "textarea", ph: "如 CO₂ + 2H⁺ + 2e⁻ → CO + H₂O", rule: "text", group: "体系特征数据字段" },
+      { key: "reactionPath", label: "反应路径信息 / 基元步骤", req: false, type: "textarea", ph: "如 (1) CO₂(g) + * → *CO₂；(2) *CO₂ + H⁺ + e⁻ → *COOH", rule: "text", group: "体系特征数据字段" },
+      { key: "adsorptionEnergy", label: "分子吸附能量", req: true, unit: "eV", ph: "如 -0.86", rule: "num", msg: "请输入数值型吸附能", group: "体系特征数据字段" },
+      { key: "reactionEnergy", label: "反应能", req: false, unit: "eV", rule: "num", msg: "请输入数值型反应能", group: "体系特征数据字段" },
+      { key: "activationEnergy", label: "活化能", req: false, unit: "eV", rule: "pos", msg: "活化能必须为正数", group: "体系特征数据字段" },
+      { key: "selectivity", label: "选择性", req: false, unit: "%", rule: "range", min: 0, max: 100, msg: "选择性超出合理范围（0 ~ 100%）", group: "体系特征数据字段" },
+      { key: "tof", label: "TOF / 转换频率", req: false, unit: "s⁻¹", rule: "pos", msg: "TOF 必须为正数", group: "体系特征数据字段" },
+      { key: "activeSite", label: "活性位点", req: false, type: "select", opts: ["顶位", "桥位", "穴位", "台阶位", "其他"], rule: "text", group: "体系特征数据字段" },
+      { key: "performanceLevel", label: "性能等级", req: false, type: "select", opts: ["high-activity", "medium-activity", "low-activity"], rule: "text", group: "体系特征数据字段" },
+      { key: "externalLink", label: "外部信息关联", req: false, ph: "如 文献 DOI / 外部数据集链接", rule: "text", group: "体系特征数据字段" }
     ],
     entryCalcParams: [
       { key: "software", label: "计算软件", type: "select", opts: ["VASP", "Quantum ESPRESSO", "CP2K", "GPAW"], std: "—", neutral: true },
@@ -134082,14 +134399,36 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       ["分子吸附能量", "数值型（稳定吸附通常为负值）", "“请输入数值型吸附能”"],
       ["活化能", "> 0", "“活化能必须为正数”"],
       ["活性位点配位数", "> 0", "“配位数必须为正数”"],
-      ["表面晶面 / 吸附分子", "从标准字典中选择", "“请选择标准字典中的取值”"]
+      ["表面晶面 / 吸附分子", "从标准字典中选择", "“请选择标准字典中的取值”"],
+      ["化学式", "正则：[A-Z][a-z]?\d*（可重复）", "“化学式格式不正确，示例：PtNi”"],
+      ["选择性", "0 ~ 100 %", "“选择性超出合理范围（0 ~ 100%）”"],
+      ["TOF / 转换频率", "> 0（s⁻¹）", "“TOF 必须为正数”"],
+      ["周期数 / 族数", "周期 1 ~ 7；族 1 ~ 18", "“周期数超出合理范围（1 ~ 7）”"],
     ],
     manualDefaults: {
       form: { dataType: "催化表面分子吸附数据", facet: "Cu(211)", adsorbate: "CO2" },
       calc: { software: "VASP", functional: "PBE", cutoff: "450", kpoints: "14", force: "0.02", vacuum: "14" }
     },
     demoFile: "Cu211_CO2.cif",
-    demoParse: { formula: "Cu(211)-CO2RR", facet: "Cu(211)", dopant: "—（纯 Cu）", adsorbate: "CO2", site: "Step-bridge", adsorptionEnergy: "-0.86", reactionEnergy: "-0.42", activationEnergy: "0.78", coordination: "7" },
+    demoParse: { formula: "Cu(211)-CO2RR", facet: "Cu(211)", dopant: "—（纯 Cu）", adsorbate: "CO2", site: "Step-bridge", adsorptionEnergy: "-0.86", reactionEnergy: "-0.42", activationEnergy: "0.78", coordination: "7",      materialNo: "CAT-PT-111-001",
+      materialName: "Pt(111)",
+      materialDesc: "铂单晶(111)面",
+      categoryTag: "单原子催化剂数据集、二元合金数据集、晶界数据集",
+      chemicalFormula: "Pt",
+      composition: "Pt",
+      catalystCategory: "金属单晶",
+      reactionType: "ORR",
+      dBandCenter: "-2.45",
+      coordination: "7",
+      intermediates: "*O, *OH, *OOH",
+      reactants: "O₂ + H⁺ + e⁻",
+      products: "H₂O",
+      overallReaction: "O₂ + 4H⁺ + 4e⁻ → 2H₂O",
+      reactionPath: "(1) O₂(g) + * → *O₂；(2) *O₂ + H⁺ + e⁻ → *OOH；(3) *OOH + H⁺ + e⁻ → *O + H₂O",
+      selectivity: "85",
+      tof: "12.5",
+      activeSite: "顶位",
+      performanceLevel: "high-activity" },
     procFlow: [
       { n: "数据策划", d: "明确应用需求，如“CO2 还原催化剂筛选”" },
       { n: "基础数据筛选", d: "按“Cu 基表面 + 有吸附能 / 活化能数据”筛选" },
