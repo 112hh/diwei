@@ -80257,21 +80257,6 @@ const MLFF_STRUCTURE_SOURCE = {
             color: #111827;
             font-size: 18px;
           }
-          #page-lowdim-standardization-twod .twod-std-status {
-            display: inline-flex;
-            align-items: center;
-            min-height: 28px;
-            padding: 3px 10px;
-            border-radius: 999px;
-            background: #ecfdf5;
-            color: #047857;
-            font-size: 13px;
-            font-weight: 800;
-          }
-          #page-lowdim-standardization-twod .twod-std-status.dirty {
-            background: #fff7ed;
-            color: #c2410c;
-          }
           #page-lowdim-standardization-twod .twod-std-actions {
             display: flex;
             gap: 8px;
@@ -80312,21 +80297,6 @@ const MLFF_STRUCTURE_SOURCE = {
           #page-lowdim-standardization-twod .twod-std-row-actions {
             display: flex;
             gap: 8px;
-          }
-          #page-lowdim-standardization-twod .twod-std-detect {
-            margin-top: 18px;
-          }
-          #page-lowdim-standardization-twod .twod-std-progress {
-            height: 8px;
-            border-radius: 999px;
-            background: #e2e8f0;
-            overflow: hidden;
-          }
-          #page-lowdim-standardization-twod .twod-std-progress span {
-            display: block;
-            height: 100%;
-            background: #1f63ff;
-            transition: width 180ms ease;
           }
           .twod-standardization-rule-modal .twod-std-form-grid {
             display: grid;
@@ -80395,60 +80365,6 @@ const MLFF_STRUCTURE_SOURCE = {
       `;
     }
 
-    function renderTwodNonstandardPanel() {
-      const std = getTwodStandardizationState();
-      const scan = std.scan;
-      const selected = new Set(std.selected || []);
-      const pendingCount = (scan.results || []).filter((item) => item.status !== "已标准化").length;
-      return `
-        <div class="twod-std-card twod-std-detect">
-          <div class="twod-std-card-head">
-            <div>
-              <h3>非标数据检测</h3>
-              <span>自动扫描并列出不符合当前标准的数据</span>
-            </div>
-            <div class="twod-std-actions">
-              <button class="btn" type="button" data-twod-std-scan ${scan.running ? "disabled" : ""}>非标数据检测</button>
-              <button class="btn-primary" type="button" data-twod-std-batch ${selected.size ? "" : "disabled"}>批量标准化</button>
-            </div>
-          </div>
-          <div style="padding:16px 18px;">
-            <div class="twod-std-progress" aria-label="扫描进度"><span style="width:${scan.progress || 0}%;"></span></div>
-            <p style="margin:10px 0 0;color:#64748b;font-size:13px;">${scan.running ? `正在扫描数据库：${scan.progress}%` : (scan.complete ? `扫描完成，发现 ${pendingCount} 条待处理非标数据。` : "点击检测后扫描当前数据库中的非标数据。")}</p>
-          </div>
-          ${scan.results?.length ? `
-            <div class="twod-std-table-wrap">
-              <table class="twod-std-table">
-                <thead>
-                  <tr>
-                    <th style="width:56px;">选择</th>
-                    <th>材料</th>
-                    <th>字段</th>
-                    <th>当前值</th>
-                    <th>标准值</th>
-                    <th>问题说明</th>
-                    <th style="width:110px;">状态</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${scan.results.map((item) => `
-                    <tr>
-                      <td><input type="checkbox" data-twod-std-nonstandard-check="${item.id}" ${selected.has(item.id) ? "checked" : ""} ${item.status === "已标准化" ? "disabled" : ""}></td>
-                      <td>${renderTwodStdCell(item.material)}</td>
-                      <td>${renderTwodStdCell(item.field)}</td>
-                      <td>${renderTwodStdCell(item.current)}</td>
-                      <td>${renderTwodStdCell(item.target)}</td>
-                      <td>${renderTwodStdCell(item.reason)}</td>
-                      <td>${renderTwodStdCell(item.status)}</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          ` : ""}
-        </div>
-      `;
-    }
 
     function renderTwodStandardizationPage(pageId) {
       const page = document.getElementById(`page-${pageId}`);
@@ -80464,7 +80380,7 @@ const MLFF_STRUCTURE_SOURCE = {
           <div class="lowdim-workflow-head">
             <div>
               <h2>二维材料数据库标准化</h2>
-              <p>围绕计算方法、数据格式、表格、图片和单位规则进行统一配置，并对存量非标数据执行检测和批量标准化。</p>
+              <p>围绕计算方法、数据格式、表格、图片和单位规则进行统一配置，并对存量数据执行批量标准化。</p>
             </div>
           </div>
           ${affected ? `
@@ -80485,14 +80401,12 @@ const MLFF_STRUCTURE_SOURCE = {
                     <span>当前类别标准规则列表</span>
                   </div>
                   <div class="twod-std-actions">
-                    <span class="twod-std-status ${dirty ? "dirty" : ""}">${dirty ? "未保存" : "已保存"}</span>
                     <button class="btn" type="button" data-twod-std-rule-add>新增</button>
                     <button class="btn-primary" type="button" data-twod-std-save-standard ${dirty ? "" : "disabled"}>保存标准</button>
                   </div>
                 </div>
                 ${renderTwodStandardizationRules(active.key)}
               </div>
-              ${renderTwodNonstandardPanel()}
             </section>
           </div>
         </div>
@@ -80571,39 +80485,6 @@ const MLFF_STRUCTURE_SOURCE = {
       std.affectedCount = 128;
       renderTwodStandardizationPage("lowdim-standardization-twod");
       showToast("标准保存", "标准已保存，存量数据影响已计算。");
-    }
-
-    function runTwodStandardizationScan() {
-      const std = getTwodStandardizationState();
-      if (std.scan.running) return;
-      std.scan = { running: true, progress: 0, complete: false, results: [] };
-      std.selected = [];
-      renderTwodStandardizationPage("lowdim-standardization-twod");
-      clearInterval(runTwodStandardizationScan.timer);
-      runTwodStandardizationScan.timer = setInterval(() => {
-        const current = getTwodStandardizationState();
-        current.scan.progress = Math.min(100, current.scan.progress + 20);
-        if (current.scan.progress >= 100) {
-          clearInterval(runTwodStandardizationScan.timer);
-          current.scan.running = false;
-          current.scan.complete = true;
-          current.scan.results = TWOD_STANDARDIZATION_NONSTANDARD_DEFAULTS.map((item) => Object.assign({}, item));
-        }
-        renderTwodStandardizationPage("lowdim-standardization-twod");
-      }, 220);
-    }
-
-    function batchTwodStandardization() {
-      const std = getTwodStandardizationState();
-      const selected = new Set(std.selected || []);
-      if (!selected.size) {
-        showToast("批量标准化", "请先勾选非标数据。");
-        return;
-      }
-      std.scan.results = (std.scan.results || []).map((item) => selected.has(item.id) ? Object.assign({}, item, { current: item.target, status: "已标准化" }) : item);
-      std.selected = [];
-      renderTwodStandardizationPage("lowdim-standardization-twod");
-      showToast("批量标准化", `${selected.size} 条非标数据已完成标准化。`);
     }
 
     function restandardizeTwodAffectedData() {
@@ -83956,14 +83837,6 @@ const MLFF_STRUCTURE_SOURCE = {
         }
         if (event.target.closest("[data-twod-std-save-standard]")) {
           saveTwodStandardizationStandard();
-          return;
-        }
-        if (event.target.closest("[data-twod-std-scan]")) {
-          runTwodStandardizationScan();
-          return;
-        }
-        if (event.target.closest("[data-twod-std-batch]")) {
-          batchTwodStandardization();
           return;
         }
         if (event.target.closest("[data-twod-std-restandardize]")) {
@@ -114033,7 +113906,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         dirty: {},
         selected: [],
         scan: { running: false, progress: 0, complete: false, results: [] },
-        affectedCount: 0
+        affectedCount: 0,
+        pageNum: 1,
+        pageSize: 5
       };
     }
     return state.lowdimStd[pageId];
@@ -114082,7 +113957,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     "__SCOPE__ .lstd-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }",
     "__SCOPE__ .lstd-intro { padding:0 20px 15px; color:#6b7a90; font-size:12.5px; line-height:20px; }",
     /* —— 规则表格 —— */
-    "__SCOPE__ .lstd-table-wrap { overflow:auto; border-radius:0 0 10px 10px; }",
+    "__SCOPE__ .lstd-table-wrap { overflow:auto; }",
     "__SCOPE__ .lstd-table { width:100%; min-width:1020px; border-collapse:collapse; table-layout:fixed; }",
     "__SCOPE__ .lstd-table col.c-item { width:140px; }",
     "__SCOPE__ .lstd-table col.c-field { width:120px; }",
@@ -114121,17 +113996,21 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     "__SCOPE__ .lstd-row-actions button { min-height:0; padding:0; border:0; background:transparent; color:#1f63ff; font:inherit; font-size:12.5px; cursor:pointer; white-space:nowrap; }",
     "__SCOPE__ .lstd-row-actions button:hover { text-decoration:underline; }",
     "__SCOPE__ .lstd-row-actions button.danger { color:#e05656; }",
-    /* —— 卡片底部：状态 + 取消/保存 —— */
-    "__SCOPE__ .lstd-card-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:13px 20px; border-top:1px solid #e8eef6; }",
-    "__SCOPE__ .lstd-foot-actions { display:flex; gap:10px; }",
-    "__SCOPE__ .lstd-status { display:inline-flex; align-items:center; min-height:28px; padding:3px 12px; border-radius:999px; background:#e5f7ef; color:#0d9b70; font-size:12px; font-weight:700; }",
-    "__SCOPE__ .lstd-status.dirty { background:#fef3e2; color:#d97706; }",
+    /* —— 表格底部分页 —— */
+    "__SCOPE__ .lstd-table-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 16px; border-top:1px solid #e8eef6; border-radius:0 0 10px 10px; }",
+    "__SCOPE__ .lstd-total { color:#64748b; font-size:12.5px; }",
+    "__SCOPE__ .lstd-total strong { color:#101f3c; font-weight:800; }",
+    "__SCOPE__ .lstd-pager { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }",
+    "__SCOPE__ .lstd-page-btn { min-width:30px; height:30px; padding:0 8px; border:1px solid #dbe3ee; border-radius:6px; background:#fff; color:#334155; font:inherit; font-size:12.5px; font-weight:600; line-height:28px; text-align:center; cursor:pointer; transition:border-color .15s ease, color .15s ease, background .15s ease; }",
+    "__SCOPE__ .lstd-page-btn:hover:not(:disabled):not(.active) { border-color:#1f63ff; color:#1f63ff; }",
+    "__SCOPE__ .lstd-page-btn.active { border-color:#1f63ff; background:#1f63ff; color:#fff; font-weight:700; }",
+    "__SCOPE__ .lstd-page-btn:disabled { color:#c2cbd8; background:#f8fafc; cursor:not-allowed; }",
+    "__SCOPE__ .lstd-page-dots { padding:0 2px; color:#94a3b8; font-size:12.5px; }",
+    "__SCOPE__ .lstd-page-size { height:30px; padding:0 6px; border:1px solid #dbe3ee; border-radius:6px; background:#fff; color:#334155; font:inherit; font-size:12px; cursor:pointer; }",
+    "__SCOPE__ .lstd-page-size:focus { outline:none; border-color:#1f63ff; box-shadow:0 0 0 2px rgba(31,99,255,.12); }",
     /* —— 影响存量数据横幅 —— */
     "__SCOPE__ .lstd-affected { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:16px; padding:13px 18px; border:1px solid #f5d9a8; border-radius:10px; background:#fffaf0; }",
     "__SCOPE__ .lstd-affected span { color:#92400e; font-weight:700; font-size:12.5px; }",
-    /* —— 进度条（保留给弹窗用） —— */
-    "__SCOPE__ .lstd-progress { height:10px; border-radius:999px; background:#e6ebf3; overflow:hidden; }",
-    "__SCOPE__ .lstd-progress span { display:block; height:100%; background:#1f63ff; transition:width .2s ease; }",
     "@media (max-width: 900px) { __SCOPE__ .lstd-flow::before { display:none; } __SCOPE__ .lstd-tabs { gap:18px; } }"
   ].join("\n          ");
 
@@ -114143,7 +114022,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   /* ===================== 全局弹窗样式（弹窗挂在 body 下，不能用页面作用域） ===================== */
   const LSTD_GLOBAL_CSS = [
     /* !important：渲染期注入的 .modal { width:520px } 会同特异性后到先得，必须压过它 */
-    ".overlay .modal.lstd-detect-modal { width:min(100%,900px) !important; }",
     ".overlay .modal.lstd-formspec-modal { width:min(100%,620px) !important; }",
     ".overlay .modal.lstd-save-modal { width:min(100%,440px) !important; }",
     ".overlay .modal.twod-standardization-rule-modal { width:min(100%,500px) !important; }",
@@ -114162,21 +114040,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     ".lstd-rule-form input, .lstd-rule-form textarea { width:100%; box-sizing:border-box; padding:9px 12px; border:1px solid #d3dbe7; border-radius:6px; background:#fff; color:#1e293b; font:inherit; font-size:13px; }",
     ".lstd-rule-form input:focus, .lstd-rule-form textarea:focus { outline:none; border-color:#1f63ff; box-shadow:0 0 0 2px rgba(31,99,255,.12); }",
     ".lstd-rule-form textarea { resize:vertical; min-height:88px; }",
-    /* 非标数据检测弹窗 */
-    ".lstd-progress-row { display:flex; align-items:center; gap:12px; }",
-    ".lstd-progress-row .lstd-progress { flex:1; height:10px; border-radius:999px; background:#e6ebf3; overflow:hidden; }",
-    ".lstd-progress-row .lstd-progress span { display:block; height:100%; background:#1f63ff; transition:width .2s ease; }",
-    ".lstd-progress-row.done .lstd-progress span { background:#16a34a; }",
-    ".lstd-progress-num { min-width:42px; text-align:right; color:#16a34a; font-size:13px; font-weight:700; }",
-    ".lstd-progress-row:not(.done) .lstd-progress-num { color:#1f63ff; }",
-    ".lstd-detect-tip { margin:12px 0 16px; color:#6b7a90; font-size:13px; }",
-    ".lstd-detect-table { width:100% !important; min-width:860px; border-collapse:collapse; table-layout:fixed; }",
-    ".lstd-detect-table th { height:40px; padding:0 12px; background:#f4f6fa; border-bottom:1px solid #e8eef6; color:#55657c; font-size:12px; font-weight:700; text-align:left; white-space:nowrap; }",
-    ".lstd-detect-table td { padding:11px 12px; border-bottom:1px solid #eef2f7; color:#334155; font-size:12.5px; word-break:break-word; vertical-align:top; }",
-    ".lstd-detect-table tr:last-child td { border-bottom:0; }",
-    ".lstd-pill { display:inline-flex; align-items:center; min-height:22px; padding:2px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap; }",
-    ".lstd-pill.warn { background:#fef3e2; color:#d97706; }",
-    ".lstd-pill.ok { background:#e5f7ef; color:#0d9b70; }",
     /* 标准化数据表单与规格要求弹窗 */
     ".lstd-formspec-list { display:grid; gap:12px; }",
     ".lstd-formspec-list div { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:8px; background:#f4f6fa; color:#3a4a5f; font-size:13px; line-height:21px; }",
@@ -114193,7 +114056,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     document.head.appendChild(style);
   }
 
-  /* ===================== 动态弹窗：非标数据检测 / 规格要求 / 标准保存 ===================== */
+  /* ===================== 动态弹窗：规格要求 / 标准保存 ===================== */
   function lstdOpenModalEl(id) {
     const el = document.getElementById(id);
     if (el) el.classList.add("show");
@@ -114205,20 +114068,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
   function ensureLstdModals() {
     lstdGlobalStyle();
-    if (document.getElementById("lstdDetectModal")) return;
+    if (document.getElementById("lstdFormSpecModal")) return;
     const wrap = document.createElement("div");
     wrap.innerHTML =
-      /* 非标数据检测 */
-      '<div class="overlay" id="lstdDetectModal">' +
-        '<div class="modal lstd-detect-modal">' +
-          '<div class="lstd-modal-head"><h3>非标数据检测 <em>（按本库标准化规则逐条比对，列出不符合标准值的数据）</em></h3>' +
-            '<button class="lstd-modal-close" type="button" data-close-modal="lstdDetectModal" aria-label="关闭非标数据检测">×</button></div>' +
-          '<div class="lstd-modal-body" id="lstdDetectModalBody"></div>' +
-          '<div class="lstd-modal-foot">' +
-            '<button class="btn-primary" type="button" data-lstd-batch>批量标准化</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
       /* 标准化数据表单与规格要求 */
       '<div class="overlay" id="lstdFormSpecModal">' +
         '<div class="modal lstd-formspec-modal">' +
@@ -114240,61 +114092,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         '</div>' +
       '</div>';
     document.body.appendChild(wrap);
-  }
-
-  function lstdStatusPill(status) {
-    const ok = status === "已标准化";
-    return '<span class="lstd-pill ' + (ok ? "ok" : "warn") + '">' + esc(status || "-") + "</span>";
-  }
-
-  function lstdRenderDetectBody(pageId) {
-    const st = stdState(pageId);
-    const scan = st.scan || { progress: 0 };
-    const selected = new Set(st.selected || []);
-    const pending = (scan.results || []).filter((item) => item.status !== "已标准化").length;
-    const tip = scan.running
-      ? "正在扫描数据库，请稍候…"
-      : (scan.complete ? "扫描完成，发现 " + pending + " 条待处理非标数据。" : "正在准备扫描…");
-    let html = '<div class="lstd-progress-row' + (scan.complete ? " done" : "") + '">' +
-      '<div class="lstd-progress"><span style="width:' + (scan.progress || 0) + '%;"></span></div>' +
-      '<span class="lstd-progress-num">' + (scan.progress || 0) + "%</span></div>" +
-      '<p class="lstd-detect-tip">' + esc(tip) + "</p>";
-    if ((scan.results || []).length) {
-      html += '<div style="overflow:auto;border:1px solid #e8eef6;border-radius:9px;">' +
-        '<table class="lstd-detect-table"><colgroup>' +
-        '<col style="width:46px;"><col style="width:122px;"><col style="width:118px;"><col style="width:112px;"><col style="width:112px;"><col><col style="width:88px;">' +
-        '</colgroup><thead><tr>' +
-        "<th>选择</th><th>材料</th><th>标准项</th><th>当前值</th><th>标准值</th><th>问题说明</th><th>状态</th>" +
-        "</tr></thead><tbody>" + scan.results.map((item) => (
-          '<tr><td><input type="checkbox" data-lstd-check="' + esc(item.id) + '"' + (selected.has(item.id) ? " checked" : "") + (item.status === "已标准化" ? " disabled" : "") + "></td>" +
-          "<td>" + stdCell(item.material) + "</td><td>" + stdCell(item.field) + "</td><td>" + stdCell(item.current) + "</td>" +
-          "<td>" + stdCell(item.target) + "</td><td>" + stdCell(item.reason, "wrap") + "</td><td>" + lstdStatusPill(item.status) + "</td></tr>"
-        )).join("") + "</tbody></table></div>";
-    }
-    return html;
-  }
-
-  function lstdSyncDetectModal(pageId) {
-    const modal = document.getElementById("lstdDetectModal");
-    if (!modal || !modal.classList.contains("show")) return;
-    if (modal.dataset.lstdPage !== pageId) return;
-    const body = document.getElementById("lstdDetectModalBody");
-    if (body) body.innerHTML = lstdRenderDetectBody(pageId);
-    const st = stdState(pageId);
-    const batchButton = modal.querySelector("[data-lstd-batch]");
-    if (batchButton) batchButton.disabled = !(st.selected || []).length;
-  }
-
-  function openLstdDetectModal(pageId) {
-    ensureLstdModals();
-    const modal = document.getElementById("lstdDetectModal");
-    if (!modal) return;
-    modal.dataset.lstdPage = pageId;
-    const body = document.getElementById("lstdDetectModalBody");
-    if (body) body.innerHTML = lstdRenderDetectBody(pageId);
-    lstdOpenModalEl("lstdDetectModal");
-    const st = stdState(pageId);
-    if (!st.scan || (!st.scan.running && !st.scan.complete)) runLstdScan(pageId);
   }
 
   function openLstdFormSpecModal(pageId) {
@@ -114415,33 +114212,93 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     modal.classList.add("show");
   }
 
+  /* —— 规则列表分页：默认每页 5 条，可切换 10 / 20 / 50 条 —— */
+  const LSTD_PAGE_SIZES = [5, 10, 20, 50];
+
+  function lstdFlatRules(category) {
+    const flat = [];
+    (category.sections || []).forEach((section) => {
+      (section.rules || []).forEach((rule) => {
+        flat.push({ rule: rule, section: section.title || "" });
+      });
+    });
+    return flat;
+  }
+
+  function lstdPagerNumbers(totalPages, current) {
+    if (totalPages <= 7) {
+      const all = [];
+      for (let i = 1; i <= totalPages; i++) all.push(i);
+      return all;
+    }
+    if (current <= 4) return [1, 2, 3, 4, 5, "...", totalPages];
+    if (current >= totalPages - 3) return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [1, "...", current - 1, current, current + 1, "...", totalPages];
+  }
+
+  function lstdPagerHtml(total, current, pageSize) {
+    if (!total) return "";
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const cur = Math.min(Math.max(1, Math.round(current) || 1), totalPages);
+    let html = '<div class="lstd-table-foot">' +
+      '<span class="lstd-total">共 <strong>' + total + "</strong> 条标准规则 · 第 " + cur + " / " + totalPages + " 页</span>" +
+      '<div class="lstd-pager">' +
+      '<button type="button" class="lstd-page-btn" data-lstd-page-num="' + Math.max(1, cur - 1) + '"' + (cur <= 1 ? " disabled" : "") + ' aria-label="上一页">‹</button>';
+    lstdPagerNumbers(totalPages, cur).forEach((item) => {
+      if (item === "...") {
+        html += '<span class="lstd-page-dots">…</span>';
+        return;
+      }
+      html += '<button type="button" class="lstd-page-btn' + (item === cur ? " active" : "") + '" data-lstd-page-num="' + item + '">' + item + "</button>";
+    });
+    html += '<button type="button" class="lstd-page-btn" data-lstd-page-num="' + Math.min(totalPages, cur + 1) + '"' + (cur >= totalPages ? " disabled" : "") + ' aria-label="下一页">›</button>' +
+      '<select class="lstd-page-size" data-lstd-page-size aria-label="每页条数">' +
+      LSTD_PAGE_SIZES.map((size) => '<option value="' + size + '"' + (size === pageSize ? " selected" : "") + ">" + size + " 条/页</option>").join("") +
+      "</select></div></div>";
+    return html;
+  }
+
   function lstdRenderRulesTable(pageId, activeCategory) {
     const st = stdState(pageId);
-    const rows = st.rules[activeCategory.key] || [];
-    const sections = (activeCategory.sections || []).map((section) => {
-      const sectionRules = section.rules || [];
-      const body = sectionRules.map((rule) => {
-        const record = rows.find((item) => item.id === rule.id) || rule;
-        const mod = lstdRuleModified(record.id);
-        return "<tr><td>" + stdCell(record.item, "strong") + "</td>" +
-          "<td>" + stdCell(record.field || record.item) + "</td>" +
-          '<td class="lstd-rule-value">' + stdCell(record.value, "wrap") + "</td>" +
-          "<td>" + stdCell(record.type) + "</td>" +
-          "<td>" + stdCell(record.basis, "wrap") + "</td>" +
-          '<td>' + esc(stdDocName(stdKey(pageId), record.docId)) + '</td>' +
-          '<td><div class="lstd-mod"><b>' + esc(mod.by) + "</b><span>" + esc(mod.at) + "</span></div></td>" +
-          '<td><div class="lstd-row-actions">' +
-            '<button type="button" data-lstd-rule-edit="' + esc(record.id) + '">编辑</button>' +
-            '<button type="button" class="danger" data-lstd-rule-delete="' + esc(record.id) + '">删除</button>' +
-          "</div></td></tr>";
-      }).join("");
-      const header = section.title ? '<tr class="lstd-section-row"><td colspan="8">' + esc(section.title) + "</td></tr>" : "";
-      return header + body;
+    const saved = st.rules[activeCategory.key] || [];
+    const flat = lstdFlatRules(activeCategory).map((entry) => ({
+      record: saved.find((item) => item.id === entry.rule.id) || entry.rule,
+      section: entry.section
+    }));
+    const total = flat.length;
+    const pageSize = LSTD_PAGE_SIZES.indexOf(Number(st.pageSize)) >= 0 ? Number(st.pageSize) : LSTD_PAGE_SIZES[0];
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const pageNum = Math.min(Math.max(1, Number(st.pageNum) || 1), totalPages);
+    st.pageSize = pageSize;
+    st.pageNum = pageNum;
+    const from = (pageNum - 1) * pageSize;
+    const pageRows = flat.slice(from, from + pageSize);
+    const body = pageRows.map((entry, index) => {
+      const record = entry.record;
+      const mod = lstdRuleModified(record.id);
+      /* 分组标题：页首必显，同组续排不重复 */
+      const showSection = index === 0 || (entry.section && entry.section !== pageRows[index - 1].section);
+      const sectionRow = showSection && entry.section
+        ? '<tr class="lstd-section-row"><td colspan="8">' + esc(entry.section) + "</td></tr>"
+        : "";
+      return sectionRow + "<tr><td>" + stdCell(record.item, "strong") + "</td>" +
+        "<td>" + stdCell(record.field || record.item) + "</td>" +
+        '<td class="lstd-rule-value">' + stdCell(record.value, "wrap") + "</td>" +
+        "<td>" + stdCell(record.type) + "</td>" +
+        "<td>" + stdCell(record.basis, "wrap") + "</td>" +
+        "<td>" + esc(stdDocName(stdKey(pageId), record.docId)) + "</td>" +
+        '<td><div class="lstd-mod"><b>' + esc(mod.by) + "</b><span>" + esc(mod.at) + "</span></div></td>" +
+        '<td><div class="lstd-row-actions">' +
+          '<button type="button" data-lstd-rule-edit="' + esc(record.id) + '">编辑</button>' +
+          '<button type="button" class="danger" data-lstd-rule-delete="' + esc(record.id) + '">删除</button>' +
+        "</div></td></tr>";
     }).join("");
+    const emptyRow = total ? "" : '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:26px 16px;">当前类别暂无标准规则</td></tr>';
     return '<div class="lstd-table-wrap"><table class="lstd-table">' +
       '<colgroup><col class="c-item"><col class="c-field"><col class="c-value"><col class="c-type"><col class="c-basis"><col class="c-doc"><col class="c-mod"><col class="c-op"></colgroup>' +
       "<thead><tr><th>标准项</th><th>数据字段</th><th>标准值</th><th>数据类型</th><th>依据 / 说明</th><th>关联体系文档</th><th>最近修改</th><th>操作</th></tr></thead>" +
-      "<tbody>" + sections + "</tbody></table></div>";
+      "<tbody>" + body + emptyRow + "</tbody></table></div>" +
+      lstdPagerHtml(total, pageNum, pageSize);
   }
 
   function cancelLstdStandard(pageId) {
@@ -114528,18 +114385,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
             "</div>" +
                         '<div class="lstd-actions">' +
               '<button class="btn-primary" type="button" data-lstd-rule-add>+ 新增</button>' +
-              '<button class="btn-primary" type="button" data-lstd-scan>非标准数据检测</button>' +
             '</div>' +
           "</div>" +
           '<div class="lstd-intro">' + esc(activeCategory.intro) + "</div>" +
           lstdRenderRulesTable(pageId, activeCategory) +
-          '<div class="lstd-card-foot">' +
-            '<span class="lstd-status' + (dirty ? " dirty" : "") + '">' + (dirty ? "未保存" : "已保存") + "</span>" +
-            '<div class="lstd-foot-actions">' +
-              '<button class="btn" type="button" data-lstd-cancel' + (dirty ? "" : " disabled") + ">取消</button>" +
-              '<button class="btn-primary" type="button" data-lstd-save-standard' + (dirty ? "" : " disabled") + ">保存</button>" +
-            "</div>" +
-          "</div>" +
         "</div>" +
 
       "</div>";
@@ -114606,9 +114455,13 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       rows.push(Object.assign({ id: categoryKey + "-" + Date.now() }, draft));
     }
     st.dirty[categoryKey] = true;
+    if (editing.mode !== "edit") {
+      /* 新增的规则排在末页，保存后直接定位过去 */
+      st.pageNum = Math.max(1, Math.ceil(rows.length / (Number(st.pageSize) || LSTD_PAGE_SIZES[0])));
+    }
     if (typeof closeModal === "function") closeModal("twodStandardizationRuleModal");
     renderLstdPage(pageId);
-    toast("标准规则", editing.mode === "edit" ? "规则已编辑，当前未保存。" : "规则已新增，当前未保存。");
+    toast("标准规则", editing.mode === "edit" ? "规则已编辑。" : "规则已新增。");
   }
 
   function deleteLstdRule(pageId, ruleId) {
@@ -114621,7 +114474,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     st.rules[categoryKey] = rows.filter((row) => row.id !== ruleId);
     st.dirty[categoryKey] = true;
     renderLstdPage(pageId);
-    toast("标准规则", "规则已删除，当前未保存。");
+    toast("标准规则", "规则已删除。");
   }
 
   function saveLstdStandard(pageId) {
@@ -114635,51 +114488,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     openLstdSaveModal(pageId);
   }
 
-  function runLstdScan(pageId) {
-    const st = stdState(pageId);
-    if (st.scan && st.scan.running) return;
-    const lib = stdLib(pageId);
-    st.scan = { running: true, progress: 0, complete: false, results: [] };
-    st.selected = [];
-    lstdSyncDetectModal(pageId);
-    renderLstdPage(pageId);
-    clearInterval(runLstdScan.timer);
-    runLstdScan.timer = setInterval(() => {
-      const current = stdState(pageId);
-      current.scan.progress = Math.min(100, current.scan.progress + 20);
-      if (current.scan.progress >= 100) {
-        clearInterval(runLstdScan.timer);
-        current.scan.running = false;
-        current.scan.complete = true;
-        current.scan.results = lib.nonstandard.map((item) => Object.assign({}, item));
-      }
-      if (typeof state !== "undefined" && state.page === pageId) renderLstdPage(pageId);
-      lstdSyncDetectModal(pageId);
-    }, 200);
-  }
-
-  function batchLstdStandardize(pageId) {
-    const st = stdState(pageId);
-    const selected = new Set(st.selected || []);
-    if (!selected.size) {
-      toast("批量标准化", "请先勾选非标数据。");
-      return;
-    }
-    st.scan.results = (st.scan.results || []).map((item) =>
-      selected.has(item.id) ? Object.assign({}, item, { current: item.target, status: "已标准化" }) : item);
-    st.selected = [];
-    renderLstdPage(pageId);
-    lstdSyncDetectModal(pageId);
-    toast("批量标准化", selected.size + " 条非标数据已按标准值完成标准化。");
-  }
-
   function restandardizeLstd(pageId) {
     const st = stdState(pageId);
     st.affectedCount = 0;
     st.scan.results = (st.scan.results || []).map((item) => Object.assign({}, item, { current: item.target, status: "已标准化" }));
     st.selected = [];
     renderLstdPage(pageId);
-    lstdSyncDetectModal(pageId);
     toast("批量重新标准化", "受影响的存量数据已按最新标准重新标准化。");
   }
 
@@ -114793,7 +114607,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     const preview = lib.categories.map((category) => category.label + "(" + stdCategoryRules(category).length + ")").join("、");
     return '<div class="lstd-ingest-inline">' +
       "<strong>标准化规则调用：" + totalRules + " 条规则 · " + lib.categories.length + " 个类别</strong>" +
-      "<p>本次加工将依据《" + esc(lib.standardizationName) + "》执行清洗、格式转换与单位归一，加工结果按标准值回写；标准化环节将逐条比对并生成非标清单。</p>" +
+      "<p>本次加工将依据《" + esc(lib.standardizationName) + "》执行清洗、格式转换与单位归一，加工结果按标准值回写；标准化环节按上述规则逐条校验。</p>" +
       "<em>类别：" + esc(preview) + "</em></div>";
   }
 
@@ -114854,7 +114668,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     const categoryButton = target.closest("[data-lstd-category]");
     if (categoryButton) {
       const pageId = lstdPageIdFrom(categoryButton);
-      stdState(pageId).activeCategory = categoryButton.dataset.lstdCategory;
+      const stdSt = stdState(pageId);
+      stdSt.activeCategory = categoryButton.dataset.lstdCategory;
+      stdSt.pageNum = 1;
+      renderLstdPage(pageId);
+      return;
+    }
+    const pageNumButton = target.closest("[data-lstd-page-num]");
+    if (pageNumButton) {
+      if (pageNumButton.disabled) return;
+      const pageId = lstdPageIdFrom(pageNumButton);
+      const st = stdState(pageId);
+      st.pageNum = Number(pageNumButton.dataset.lstdPageNum) || 1;
       renderLstdPage(pageId);
       return;
     }
@@ -114898,14 +114723,6 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       cancelLstdStandard(lstdPageIdFrom(target));
       return;
     }
-    if (target.closest("[data-lstd-scan]")) {
-      openLstdDetectModal(lstdPageIdFrom(target));
-      return;
-    }
-    if (target.closest("[data-lstd-batch]")) {
-      batchLstdStandardize(lstdPageIdFrom(target));
-      return;
-    }
     if (target.closest("[data-lstd-restandardize]")) {
       restandardizeLstd(lstdPageIdFrom(target));
       return;
@@ -114946,18 +114763,13 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }, false);
 
   document.addEventListener("change", function (event) {
-    const check = event.target && event.target.closest ? event.target.closest("[data-lstd-check]") : null;
-    if (!check) return;
-    const pageId = lstdPageIdFrom(check);
+    const sizeSelect = event.target && event.target.closest ? event.target.closest("[data-lstd-page-size]") : null;
+    if (!sizeSelect) return;
+    const pageId = lstdPageIdFrom(sizeSelect);
     const st = stdState(pageId);
-    const selected = new Set(st.selected || []);
-    if (check.checked) selected.add(check.dataset.lstdCheck);
-    else selected.delete(check.dataset.lstdCheck);
-    st.selected = Array.from(selected);
-    /* 只更新按钮可用态，避免整页重渲染导致勾选跳动 */
-    const root = check.closest("[data-lstd-page]");
-    const batchButton = root ? root.querySelector("[data-lstd-batch]") : null;
-    if (batchButton) batchButton.disabled = !st.selected.length;
+    st.pageSize = Number(sizeSelect.value) || LSTD_PAGE_SIZES[0];
+    st.pageNum = 1;
+    renderLstdPage(pageId);
   }, false);
 
   window.__LOWDIM_STD_LIBRARY_READY__ = true;
