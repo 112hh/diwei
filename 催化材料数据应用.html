@@ -27107,6 +27107,14 @@ tr:hover td {
   .catalyst-dataset-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
   .catalyst-dataset-tag{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:#e8f7f5;color:#087f78;font-size:12px;font-weight:700;border:1px solid #bde8e3}
   .catalyst-dataset-tag.active{background:#0c817b;color:#fff;border-color:#0c817b}
+  /* 2026-11-03 催化材料应用列表新增字段展示样式：元素组成(字符串数组→元素标签组)、催化性能(枚举→状态标签) */
+  .catalyst-element-chips{display:flex;flex-wrap:wrap;gap:4px;max-width:180px}
+  .catalyst-element-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:6px;background:#eef3ff;color:#2453d4;font-size:12px;font-weight:600;line-height:18px;border:1px solid #d5e2fb;white-space:nowrap}
+  .catalyst-element-chip.is-empty{background:#f7f9fc;color:#9aa9bd;border-color:#e2e9f2;font-weight:400}
+  .catalyst-performance-tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;line-height:18px;background:#f1f4f8;color:#73859b;white-space:nowrap}
+  .catalyst-performance-tag.is-hot{background:#fff0f0;color:#d63a3a}
+  .catalyst-performance-tag.is-good{background:#e7f8ec;color:#1b8c4a}
+  .catalyst-performance-tag.is-verified{background:#e6f2ff;color:#1a6fc4}
   .catalyst-route-preview{display:flex;flex-direction:column;gap:7px;padding:12px 14px;background:#f4f8fc;border:1px solid #dce8f4;border-radius:10px;color:#25435e;line-height:1.55;font-size:13px}
   .catalyst-feature-shell{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;margin-top:16px}
   .catalyst-feature-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -60692,6 +60700,7 @@ function renderMlffTopicSampleTable(data) {
       { key: "intermediate", label: "中间产物" },
       { key: "catalystCategory", label: "催化材料种类" },
       { key: "composition", label: "材料成分" },
+      { key: "elements", label: "元素组成" },
       { key: "surface", label: "表面参数" },
       { key: "site", label: "活性位点" },
       { key: "structureFeature", label: "结构特征" },
@@ -62418,6 +62427,33 @@ function renderMlffTopicSampleTable(data) {
       return Boolean(String(filters || "").trim());
     }
 
+    // =====================================================================
+    // 2026-11-03 催化材料应用列表新增字段（字段结构定义：数据类型 + 展示形式）
+    // 1) 催化材料种类  catalystCategory  : string（受控枚举：金属单晶/单原子催化剂/金属氧化物/
+    //                                      层状双金属氢氧化物/二维硫化物…）→ 纯文本展示
+    // 2) 催化性能      performanceLevel  : string（受控枚举：high-activity/high-selectivity，
+    //                                      兜底取 quality 实验标注）     → 彩色状态标签展示
+    // 3) 元素组成      elements          : string[]（元素符号数组，兜底由 composition/
+    //                                      formula 解析）                → 元素标签组(Chips)展示
+    // =====================================================================
+    function getCatalystPerformanceBadge(item) {
+      const level = String(item?.performanceLevel || item?.condition || "");
+      if (level.includes("high-activity")) return `<span class="catalyst-performance-tag is-hot">高活性</span>`;
+      if (level.includes("high-selectivity")) return `<span class="catalyst-performance-tag is-good">高选择性</span>`;
+      if (String(item?.quality || "").includes("实验")) return `<span class="catalyst-performance-tag is-verified">实验验证</span>`;
+      return `<span class="catalyst-performance-tag">常规</span>`;
+    }
+
+    function renderCatalystElementChips(item) {
+      const escape = typeof html === "function" ? html : (value) => String(value ?? "");
+      let elements = Array.isArray(item?.elements) ? item.elements.filter(Boolean) : [];
+      if (!elements.length) {
+        elements = String(item?.composition || item?.formula || "").split(/[,，、+\s]+/).filter(Boolean);
+      }
+      if (!elements.length) return `<span class="catalyst-element-chip is-empty">—</span>`;
+      return `<div class="catalyst-element-chips">${elements.map((element) => `<span class="catalyst-element-chip">${escape(element)}</span>`).join("")}</div>`;
+    }
+
     function buildCatalystRouteText(item) {
       const routeMap = {
         orr: "O2 -> *OOH -> *O -> *OH -> H2O",
@@ -62505,6 +62541,10 @@ function renderMlffTopicSampleTable(data) {
           }
           if (field === "performance") {
             return `${item.activationEnergy} ${item.selectivity} ${item.tof} ${item.performanceLevel}`.toLowerCase().includes(keyword);
+          }
+          // 2026-11-03：性质项=元素组成 时，复用元素组成检索的“同时包含”匹配规则，保证两处筛选逻辑一致
+          if (field === "elements") {
+            return includesAllCatalystElements(item, keyword);
           }
           return String(item[field] ?? "").toLowerCase().includes(keyword);
         });
@@ -106400,18 +106440,22 @@ function renderElectrolyteCategoryTabs() {
       };
 
       renderCatalystPlatformRows = function renderCatalystPlatformRowsUnified(list) {
-        if (!list.length) return `<tr><td colspan="13" class="opto-table-empty">未检索到符合条件的催化材料数据，请调整检索条件后重试。</td></tr>`;
+        if (!list.length) return `<tr><td colspan="16" class="opto-table-empty">未检索到符合条件的催化材料数据，请调整检索条件后重试。</td></tr>`;
         const start = ((state.catalystPage || 1) - 1) * (state.catalystPageSize || 5);
+        // 2026-11-03：新增 催化材料种类(文本) / 催化性能(状态标签) / 元素组成(元素标签组) 三列，与表头 16 列一一对应
         return list.map((item, index) => `
           <tr>
             ${cell(start + index + 1)}
             ${cell(item.id)}
             <td title="${html(valueText(item.name))}"><button class="twod-material-link" type="button" data-open-material="catalyst:${html(item.id)}" data-material-view="basic">${valueText(item.name)}</button></td>
             ${cell(item.formula)}
+            <td title="${html(Array.isArray(item.catalystDatasetTags || item.classificationTags) ? (item.catalystDatasetTags || item.classificationTags).join("、") : valueText(item.catalystDatasetTags || item.classificationTags))}">${html(Array.isArray(item.catalystDatasetTags || item.classificationTags) ? (item.catalystDatasetTags || item.classificationTags).join("、") : valueText(item.catalystDatasetTags || item.classificationTags))}</td>
             ${cell(item.catalystCategory)}
             ${cell(item.composition || (item.elements || []).join(", "))}
+            <td>${renderCatalystElementChips(item)}</td>
             ${cell(item.intermediate)}
             ${cell(item.structureFeature || item.systemFeature || item.atomicStructure || "/")}
+            <td>${getCatalystPerformanceBadge(item)}</td>
             ${cell(item.surface)}
             <td>${renderCatalystDatasetSource(item)}</td>
             ${cell(item.activationEnergy, { numeric: true, digits: 2, suffix: " eV" })}
@@ -106442,7 +106486,7 @@ function renderElectrolyteCategoryTabs() {
         catalyst: {
           showSort: false,
           showFilter: false,
-          columns: ["序号", "材料编号", "材料名称", "化学式", "分类标签", "材料成分", "中间产物", "材料描述", "表面参数", "数据来源", "活化能", "反应路径信息", "操作"],
+          columns: ["序号", "材料编号", "材料名称", "化学式", "分类标签", "催化材料种类", "材料成分", "元素组成", "中间产物", "材料描述", "催化性能", "表面参数", "数据来源", "活化能", "反应路径信息", "操作"],
           leadingActions: [
             { label: "催化活性位点分析", attribute: 'data-catalyst-workbench="site"' },
             { label: "催化材料对比", attribute: 'data-catalyst-workbench="compare"' },
@@ -106973,7 +107017,6 @@ function renderElectrolyteCategoryTabs() {
         <div class="module-tab-strip">
           <button class="module-tab-btn${active === "search" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="search">数据检索</button>
           ${["opto", "catalyst"].includes(module) ? "" : `<button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="convert">${module === "twod" ? "文件格式转换" : "文件转换"}</button>`}
-          ${module === "mlff" ? `<button class="module-tab-btn${active === "share" ? " active" : ""}" type="button" data-module-tab="mlff" data-module-target="share">机器学习力场材料数据共享</button>` : ""}
         </div>
       `;
 
@@ -107118,7 +107161,7 @@ function renderElectrolyteCategoryTabs() {
                 ${renderCrossDatabaseToolbar(total, resultToolbars.catalyst)}
                 <div class="table-wrap twod-result-table-wrap">
                   <table class="twod-result-table">
-                    <thead><tr><th>序号</th><th>材料编号</th><th>材料名称</th><th>化学式</th><th>分类标签</th><th>材料成分</th><th>中间产物</th><th>材料描述</th><th>表面参数</th><th>数据来源</th><th>活化能</th><th>反应路径信息</th><th>操作</th></tr></thead>
+                    <thead><tr><th>序号</th><th>材料编号</th><th>材料名称</th><th>化学式</th><th>分类标签</th><th>催化材料种类</th><th>材料成分</th><th>元素组成</th><th>中间产物</th><th>材料描述</th><th>催化性能</th><th>表面参数</th><th>数据来源</th><th>活化能</th><th>反应路径信息</th><th>操作</th></tr></thead>
                     <tbody>${renderCatalystPlatformRows(items)}</tbody>
                   </table>
                 </div>
@@ -112180,13 +112223,19 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   };
 
   window.renderCatalystPlatformRows = function renderCatalystPlatformRowsRequest(list) {
-    if (!list.length) return '<tr><td colspan="13" class="opto-table-empty">未检索到符合条件的催化材料数据，请调整检索条件后重试。</td></tr>';
+    if (!list.length) return '<tr><td colspan="16" class="opto-table-empty">未检索到符合条件的催化材料数据，请调整检索条件后重试。</td></tr>';
     const start = ((state.catalystPage || 1) - 1) * (state.catalystPageSize || 5);
+    // 2026-11-03：新增 催化材料种类(文本) / 催化性能(状态标签) / 元素组成(元素标签组) 三列，与表头 16 列一一对应
+    const categoryCell = (item) => `<td>${safe(item.catalystCategory)}</td>`;
+    const performanceCell = (item) => `<td>${typeof getCatalystPerformanceBadge === 'function' ? getCatalystPerformanceBadge(item) : safe(item.performanceLevel || '常规')}</td>`;
+    const elementsCell = (item) => `<td>${typeof renderCatalystElementChips === 'function' ? renderCatalystElementChips(item) : safe((item.elements || []).join(', '))}</td>`;
     return list.map((item,index) => `<tr>
       <td>${start + index + 1}</td><td>${safe(item.id)}</td>
       <td title="${safe(item.name)}"><button class="twod-material-link" type="button" data-open-material="catalyst:${safe(item.id)}" data-material-view="basic">${safe(item.name)}</button></td>
       <td>${safe(item.formula)}</td><td><div class="catalyst-dataset-tags">${datasetTags(item).map((tag) => `<span class="catalyst-dataset-tag">${safe(tag)}</span>`).join('')}</div></td>
-      <td>${safe(item.composition || (item.elements || []).join(', '))}</td><td>${safe(item.intermediate)}</td><td>${safe(item.structureFeature || item.systemFeature || item.atomicStructure || '/')}</td>
+      ${categoryCell(item)}
+      <td>${safe(item.composition || (item.elements || []).join(', '))}</td>${elementsCell(item)}<td>${safe(item.intermediate)}</td><td>${safe(item.structureFeature || item.systemFeature || item.atomicStructure || '/')}</td>
+      ${performanceCell(item)}
       <td>${safe(item.surface || item.surfaceParameter)}</td><td>${typeof renderCatalystDatasetSource === 'function' ? renderCatalystDatasetSource(item) : safe(item.dataSource)}</td>
       <td>${safe(item.activationEnergy ? `${Number(item.activationEnergy).toFixed(2)} eV` : '—')}</td><td>${routeMarkup(item)}</td>
       <td><div class="twod-record-inline-actions"><button class="twod-action-view" type="button" data-open-material="catalyst:${safe(item.id)}" data-material-view="basic">查询详情</button><button class="twod-record-link" type="button" data-open-material="catalyst:${safe(item.id)}" data-material-view="prediction">发起预测</button></div></td>
@@ -117166,94 +117215,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
   var baseRenderModule = typeof renderMlffModule === "function" ? renderMlffModule : null;
 
-  /* ==================================================================
-     2026-10-22（三.4）：机器学习力场材料数据共享
-     ------------------------------------------------------------------
-     统一标题：机器学习力场材料数据共享
-     功能分组 / 命名规范（集中在本配置层定义，避免散落多处改不到）：
-       (1) 力场参数文件 —— 参数力场文件（原「参数力场文件下载」）
-       (2) 结构文件     —— PDB 文件（原「PDB 文件下载 / PDB结构文件下载」）
-       (3) 力场定义文件 —— XML 力场文件
-       (4) 格式转换     —— 数据文件转换 / 拓扑文件转换 / 力场文件转换
-       (5) 数据更新     —— 场数据更新
-     所有按钮复用既有处理器（triggerMlffDownload / data-module-tab / data-mlff-field-update），
-     不新增任何接口调用，不改动原有交互、样式与权限校验。
-     ================================================================== */
-  var MLFF_SHARE_GROUPS = [
-    {
-      key: "package", title: "力场参数文件", desc: "成套力场参数，含分子结构 PDB 文件与力场 XML 文件",
-      items: [{ label: "参数力场文件", desc: "包含分子结构 PDB 文件和力场 XML 文件", action: "download", kind: "package", btn: "下载" }]
-    },
-    {
-      key: "structure", title: "结构文件", desc: "描述体系原子种类与三维坐标的结构文件",
-      items: [{ label: "PDB 文件", desc: "包含原子种类和原子三维坐标", action: "download", kind: "pdb", btn: "下载" }]
-    },
-    {
-      key: "define", title: "力场定义文件", desc: "力场参数映射与结构节点信息",
-      items: [{ label: "XML 力场文件", desc: "包含力场参数映射和结构节点信息", action: "download", kind: "xml", btn: "下载" }]
-    },
-    {
-      key: "convert", title: "格式转换", desc: "按转换对象发起格式转换，转换记录可在「文件转换」中查询与下载",
-      items: [
-        { label: "数据文件转换", desc: "结构文件与计算结果数据统一为目标格式", action: "convert" },
-        { label: "拓扑文件转换", desc: "常用拓扑文件格式互转，便于跨软件模拟", action: "convert" },
-        { label: "力场文件转换", desc: "力场参数转换为常用计算软件包格式", action: "convert" }
-      ]
-    },
-    {
-      key: "update", title: "数据更新", desc: "对现有数据进行补充存储，支持编辑与历史版本对比",
-      items: [{ label: "场数据更新", desc: "补充存储、编辑、撤销与历史记录对比", action: "update" }]
-    }
-  ];
-
-  function mlffShareActionButton(item) {
-    if (item.action === "download") {
-      return '<button class="btn-primary" type="button" onclick="return triggerMlffDownload(\'' + item.kind + '\')">' + item.btn + "</button>";
-    }
-    if (item.action === "convert") {
-      return '<button class="btn" type="button" data-module-tab="mlff" data-module-target="convert">前往转换</button>';
-    }
-    return '<button class="btn" type="button" data-mlff-field-update="">前往更新</button>';
-  }
-
-  function renderMlffShareBlock() {
-    /* 说明：本块刻意不使用 .twod-search-results / .twod-result-table 类，
-       避免被页面既有的「结果条归一化 / 单元格截断」增强逻辑改写。 */
-    var tabs = '<div class="module-tab-strip">'
-      + '<button class="module-tab-btn" type="button" data-module-tab="mlff" data-module-target="search">数据检索</button>'
-      + '<button class="module-tab-btn" type="button" data-module-tab="mlff" data-module-target="convert">文件转换</button>'
-      + '<button class="module-tab-btn active" type="button" data-module-tab="mlff" data-module-target="share">机器学习力场材料数据共享</button>'
-      + "</div>";
-    var groups = MLFF_SHARE_GROUPS.map(function (group, gi) {
-      var rows = group.items.map(function (item, ii) {
-        return '<div style="display:flex;align-items:center;gap:14px;padding:9px 0;'
-          + (ii === 0 ? "" : "border-top:1px dashed #eef2f8;") + '">'
-          + '<strong style="flex:0 0 148px;font-size:13px;color:#1f2d3d;font-weight:600">' + item.label + "</strong>"
-          + '<span style="flex:1 1 auto;font-size:12.5px;color:#6f8298;line-height:1.6">' + item.desc + "</span>"
-          + '<span style="flex:0 0 auto">' + mlffShareActionButton(item) + "</span></div>";
-      }).join("");
-      return '<section style="padding:14px 18px;'
-        + (gi < MLFF_SHARE_GROUPS.length - 1 ? "border-bottom:1px solid #eef2f8;" : "") + '">'
-        + '<h4 style="margin:0 0 6px;font-size:14px;color:#1f2d3d">' + group.title + "</h4>"
-        + '<p style="margin:0 0 4px;font-size:12.5px;color:#8a99ae">' + group.desc + "</p>"
-        + rows + "</section>";
-    }).join("");
-    return tabs
-      + '<div class="twod-platform-shell">'
-      + '<section class="card" style="padding:0;overflow:hidden">'
-      + '<div style="padding:16px 18px;border-bottom:1px solid #eef2f8">'
-      + '<h3 style="margin:0 0 4px;font-size:16px;color:#1f2d3d">机器学习力场材料数据共享</h3>'
-      + '<p style="margin:0;font-size:12.5px;color:#8a99ae">力场参数文件、结构文件、力场定义文件、格式转换与数据更新统一归入本页共享。</p>'
-      + "</div>" + groups + "</section></div>";
-  }
-
   if (baseRenderModule) {
     renderMlffModule = function () {
-      /* 2026-10-22：共享页签分支优先执行，避免被既有列表 DOM 后处理改写 */
-      if (state.mlffTab === "share" && !state.mlffFieldUpdateOpen) {
-        var shareHost = document.getElementById("page-mlff");
-        if (shareHost) { shareHost.innerHTML = renderMlffShareBlock(); return; }
-      }
       var r = baseRenderModule.apply(this, arguments);
       try {
         var page = document.getElementById("page-mlff");

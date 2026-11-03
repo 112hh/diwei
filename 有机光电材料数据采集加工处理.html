@@ -106904,7 +106904,6 @@ function renderElectrolyteCategoryTabs() {
         <div class="module-tab-strip">
           <button class="module-tab-btn${active === "search" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="search">数据检索</button>
           ${["opto", "catalyst"].includes(module) ? "" : `<button class="module-tab-btn${active === "convert" ? " active" : ""}" type="button" data-module-tab="${html(module)}" data-module-target="convert">${module === "twod" ? "文件格式转换" : "文件转换"}</button>`}
-          ${module === "mlff" ? `<button class="module-tab-btn${active === "share" ? " active" : ""}" type="button" data-module-tab="mlff" data-module-target="share">机器学习力场材料数据共享</button>` : ""}
         </div>
       `;
 
@@ -117137,94 +117136,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
   var baseRenderModule = typeof renderMlffModule === "function" ? renderMlffModule : null;
 
-  /* ==================================================================
-     2026-10-22（三.4）：机器学习力场材料数据共享
-     ------------------------------------------------------------------
-     统一标题：机器学习力场材料数据共享
-     功能分组 / 命名规范（集中在本配置层定义，避免散落多处改不到）：
-       (1) 力场参数文件 —— 参数力场文件（原「参数力场文件下载」）
-       (2) 结构文件     —— PDB 文件（原「PDB 文件下载 / PDB结构文件下载」）
-       (3) 力场定义文件 —— XML 力场文件
-       (4) 格式转换     —— 数据文件转换 / 拓扑文件转换 / 力场文件转换
-       (5) 数据更新     —— 场数据更新
-     所有按钮复用既有处理器（triggerMlffDownload / data-module-tab / data-mlff-field-update），
-     不新增任何接口调用，不改动原有交互、样式与权限校验。
-     ================================================================== */
-  var MLFF_SHARE_GROUPS = [
-    {
-      key: "package", title: "力场参数文件", desc: "成套力场参数，含分子结构 PDB 文件与力场 XML 文件",
-      items: [{ label: "参数力场文件", desc: "包含分子结构 PDB 文件和力场 XML 文件", action: "download", kind: "package", btn: "下载" }]
-    },
-    {
-      key: "structure", title: "结构文件", desc: "描述体系原子种类与三维坐标的结构文件",
-      items: [{ label: "PDB 文件", desc: "包含原子种类和原子三维坐标", action: "download", kind: "pdb", btn: "下载" }]
-    },
-    {
-      key: "define", title: "力场定义文件", desc: "力场参数映射与结构节点信息",
-      items: [{ label: "XML 力场文件", desc: "包含力场参数映射和结构节点信息", action: "download", kind: "xml", btn: "下载" }]
-    },
-    {
-      key: "convert", title: "格式转换", desc: "按转换对象发起格式转换，转换记录可在「文件转换」中查询与下载",
-      items: [
-        { label: "数据文件转换", desc: "结构文件与计算结果数据统一为目标格式", action: "convert" },
-        { label: "拓扑文件转换", desc: "常用拓扑文件格式互转，便于跨软件模拟", action: "convert" },
-        { label: "力场文件转换", desc: "力场参数转换为常用计算软件包格式", action: "convert" }
-      ]
-    },
-    {
-      key: "update", title: "数据更新", desc: "对现有数据进行补充存储，支持编辑与历史版本对比",
-      items: [{ label: "场数据更新", desc: "补充存储、编辑、撤销与历史记录对比", action: "update" }]
-    }
-  ];
-
-  function mlffShareActionButton(item) {
-    if (item.action === "download") {
-      return '<button class="btn-primary" type="button" onclick="return triggerMlffDownload(\'' + item.kind + '\')">' + item.btn + "</button>";
-    }
-    if (item.action === "convert") {
-      return '<button class="btn" type="button" data-module-tab="mlff" data-module-target="convert">前往转换</button>';
-    }
-    return '<button class="btn" type="button" data-mlff-field-update="">前往更新</button>';
-  }
-
-  function renderMlffShareBlock() {
-    /* 说明：本块刻意不使用 .twod-search-results / .twod-result-table 类，
-       避免被页面既有的「结果条归一化 / 单元格截断」增强逻辑改写。 */
-    var tabs = '<div class="module-tab-strip">'
-      + '<button class="module-tab-btn" type="button" data-module-tab="mlff" data-module-target="search">数据检索</button>'
-      + '<button class="module-tab-btn" type="button" data-module-tab="mlff" data-module-target="convert">文件转换</button>'
-      + '<button class="module-tab-btn active" type="button" data-module-tab="mlff" data-module-target="share">机器学习力场材料数据共享</button>'
-      + "</div>";
-    var groups = MLFF_SHARE_GROUPS.map(function (group, gi) {
-      var rows = group.items.map(function (item, ii) {
-        return '<div style="display:flex;align-items:center;gap:14px;padding:9px 0;'
-          + (ii === 0 ? "" : "border-top:1px dashed #eef2f8;") + '">'
-          + '<strong style="flex:0 0 148px;font-size:13px;color:#1f2d3d;font-weight:600">' + item.label + "</strong>"
-          + '<span style="flex:1 1 auto;font-size:12.5px;color:#6f8298;line-height:1.6">' + item.desc + "</span>"
-          + '<span style="flex:0 0 auto">' + mlffShareActionButton(item) + "</span></div>";
-      }).join("");
-      return '<section style="padding:14px 18px;'
-        + (gi < MLFF_SHARE_GROUPS.length - 1 ? "border-bottom:1px solid #eef2f8;" : "") + '">'
-        + '<h4 style="margin:0 0 6px;font-size:14px;color:#1f2d3d">' + group.title + "</h4>"
-        + '<p style="margin:0 0 4px;font-size:12.5px;color:#8a99ae">' + group.desc + "</p>"
-        + rows + "</section>";
-    }).join("");
-    return tabs
-      + '<div class="twod-platform-shell">'
-      + '<section class="card" style="padding:0;overflow:hidden">'
-      + '<div style="padding:16px 18px;border-bottom:1px solid #eef2f8">'
-      + '<h3 style="margin:0 0 4px;font-size:16px;color:#1f2d3d">机器学习力场材料数据共享</h3>'
-      + '<p style="margin:0;font-size:12.5px;color:#8a99ae">力场参数文件、结构文件、力场定义文件、格式转换与数据更新统一归入本页共享。</p>'
-      + "</div>" + groups + "</section></div>";
-  }
-
   if (baseRenderModule) {
     renderMlffModule = function () {
-      /* 2026-10-22：共享页签分支优先执行，避免被既有列表 DOM 后处理改写 */
-      if (state.mlffTab === "share" && !state.mlffFieldUpdateOpen) {
-        var shareHost = document.getElementById("page-mlff");
-        if (shareHost) { shareHost.innerHTML = renderMlffShareBlock(); return; }
-      }
       var r = baseRenderModule.apply(this, arguments);
       try {
         var page = document.getElementById("page-mlff");
