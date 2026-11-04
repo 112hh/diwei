@@ -36588,6 +36588,8 @@ if (typeof module !== "undefined" && module.exports) module.exports = (typeof gl
       "my-submissions": { group: "workflow", portal: "workflow", title: "我的提交", breadcrumbParent: "数据管理" },
       "submission-detail": { group: "workflow", portal: "workflow", navPage: "my-submissions", title: "提交详情", breadcrumbParent: "数据管理" },
       "twod-review": { group: "workflow", portal: "workflow", title: "入库审核", breadcrumbParent: "数据管理" },
+      "my-applications": { group: "workflow", portal: "workflow", title: "我的申请", breadcrumbParent: "数据管理" },
+      "identity-review": { group: "workflow", portal: "workflow", title: "身份申请审核", breadcrumbParent: "数据管理" },
       algorithms: { group: "analysis", portal: "algorithms", title: "数据应用算法", breadcrumbParent: "低维材料数据库分析预测" },
       "prediction-tasks": { group: "analysis", portal: "algorithms", title: "预测任务管理", breadcrumbParent: "低维材料数据库分析预测" },
       "algorithm-doc-detail": { group: "analysis", portal: "algorithms", navPage: "algorithms", title: "算法详情", breadcrumbParent: "数据应用算法" },
@@ -134474,5 +134476,1338 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     window.addEventListener("scroll", hideTip, true);
   })();
 </script>
+<script id="ldm-proid-script-20261104">
+/* ============================================================================
+   2026-11-04 新增：专业用户身份管理
+     · 列表页「专业用户身份申请」入口 + 信息图标悬浮提示
+     · 身份申请弹窗（用户ID/姓名/机构/理由/数据范围/使用期限）
+     · 数据管理 ▸ 我的申请（有效期、查看详情、续期）
+     · 数据管理 ▸ 身份申请审核（审批结果 + 审批原因）
+   实现方式：自包含模块（样式自注入 + DOM 自挂载），不改动既有业务逻辑，
+   仅依赖全局 MarvisRouter / switchPage 链路与既有 .page / .card / .field 视觉体系。
+   ========================================================================== */
+(function () {
+  "use strict";
+  if (window.__LDM_PROID_20261104__) return;
+  window.__LDM_PROID_20261104__ = true;
+
+  /* ---------- 0. 常量 ---------- */
+  var STORE_KEY = "ldm-proid-store-v1";
+  var STORE_VERSION = 3;
+  var ME = { userId: "researcher", email: "researcher@demo.cn", display: "管理员9527" };
+  var MAT_TYPES = ["二维材料", "有机光电材料", "电解质材料", "机器学习力场", "催化材料"];
+  var TIP_TEXT = "我方将通过设定审核机制来区分普通用户和专业用户。普通用户和专业用户均能够查阅和下载第1级别的数据，而仅专业用户则能够查阅和下载第2级别的数据。普通用户需要通过申请，并经数据库管理员审核通过后，才能转变为专业用户。专业用户的身份是有使用期限的，超过使用期限后将自动转变为普通用户。如果需要延续专业用户的身份，则需提交续期申请，并经过数据库管理员审核通过后，继续保有专业用户身份。用户身份区分和数据库管理员审核将为数据安全级别提供保障。";
+
+  /* ---------- 1. 通用工具 ---------- */
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function fmtDate(d) { return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+  function todayStr() { return fmtDate(new Date()); }
+  function nowStr() { var d = new Date(); return fmtDate(d) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()); }
+  function parseDate(s) {
+    if (!s) return null;
+    var p = String(s).split("-");
+    var y = Number(p[0]); var m = Number(p[1] || 1); var d = Number(p[2] || 1);
+    if (!y || !m) return null;
+    return new Date(y, m - 1, d);
+  }
+  function addDays(s, n) { var d = parseDate(s); if (!d) return ""; d.setDate(d.getDate() + n); return fmtDate(d); }
+  function addMonths(s, n) { var d = parseDate(s); if (!d) return ""; d.setDate(1); d.setMonth(d.getMonth() + n); return fmtDate(d); }
+  function endOfMonth(ym) {
+    if (!ym) return "";
+    var p = String(ym).split("-");
+    var d = new Date(Number(p[0]), Number(p[1]), 0);
+    return fmtDate(d);
+  }
+  function diffDays(from, to) {
+    var a = parseDate(from); var b = parseDate(to);
+    if (!a || !b) return 0;
+    a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0);
+    return Math.round((b - a) / 86400000);
+  }
+  function monthsBetween(from, to) {
+    var a = parseDate(from); var b = parseDate(to);
+    if (!a || !b) return 0;
+    return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()) + (b.getDate() >= a.getDate() ? 0 : 0);
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function byId(id) { return document.getElementById(id); }
+  function toast(title, body) {
+    if (typeof window.showToast === "function") { try { window.showToast(title, body); return; } catch (e) { } }
+    var el = byId("toast");
+    if (el) { el.classList.add("show"); setTimeout(function () { el.classList.remove("show"); }, 2400); }
+  }
+  function openOverlay(id) { var el = byId(id); if (el) el.classList.add("show"); }
+  function closeOverlay(id) { var el = byId(id); if (el) el.classList.remove("show"); }
+
+  /* ---------- 2. 数据层（localStorage + 内存兜底） ---------- */
+  function seedStore() {
+    var t = todayStr();
+    var expire = addDays(t, 5);                 /* 5 天后到期 → 触发到期前 7 天提醒演示 */
+    var renewAsk = endOfMonth(addMonths(t, 6));
+    var firstStart = addDays(t, -178);
+    var rejectStart = addMonths(t, -9);
+    var rejectEnd = addDays(rejectStart, 29);
+    var chenqiStart = addDays(t, 1);
+    var chenqiEnd = endOfMonth(addMonths(t, 7));
+    var sunqiEnd = addDays(t, 94);
+    return {
+      version: STORE_VERSION,
+      me: ME,
+      identities: {
+        researcher: { role: "专业用户", scopes: ["二维材料", "电解质材料"], expireAt: expire, since: addDays(t, -178) },
+        chenqi: { role: "普通用户", scopes: [], expireAt: "" },
+        sunqi: { role: "专业用户", scopes: ["二维材料", "机器学习力场"], expireAt: addDays(t, 3) },
+        wangwu: { role: "专业用户", scopes: ["催化材料"], expireAt: addMonths(t, 8) }
+      },
+      applications: [
+        {
+          id: "PA-2026-0031", type: "身份申请", userId: "researcher", name: "李思远",
+          org: "中国科学院物理研究所", reason: "开展二维材料电子结构高通量筛选与电解质界面计算，需要查阅并下载第2级半公开数据用于模型训练与结果复核。",
+          scopes: ["二维材料", "电解质材料"], termMode: "month",
+          startDate: firstStart, endDate: expire, termText: firstStart + " 至 " + expire + "（共 6 个月）",
+          status: "已通过", appliedAt: addDays(t, -180) + " 09:20", reviewer: "数据库管理员",
+          reviewedAt: addDays(t, -179) + " 15:40", reviewReason: "研究用途明确，材料范围与课题一致，同意开通第2级数据访问权限。"
+        },
+        {
+          id: "PA-2026-0042", type: "续期申请", userId: "researcher", name: "李思远",
+          org: "中国科学院物理研究所", reason: "二维材料缺陷性质数据加工任务尚未结题，需延续第2级数据访问权限。",
+          scopes: ["二维材料", "电解质材料"], termMode: "month",
+          startDate: addDays(expire, 1), endDate: renewAsk, termText: "续期至 " + renewAsk + "（延长 6 个月）",
+          status: "待审核", appliedAt: addDays(t, -1) + " 10:05", reviewer: "", reviewedAt: "", reviewReason: ""
+        },
+        {
+          id: "PA-2026-0026", type: "身份申请", userId: "researcher", name: "李思远",
+          org: "中国科学院物理研究所", reason: "想了解平台全部数据内容。",
+          scopes: ["二维材料", "有机光电材料", "电解质材料", "机器学习力场", "催化材料"], termMode: "day",
+          startDate: rejectStart, endDate: rejectEnd, termText: rejectStart + " 至 " + rejectEnd + "（共 30 天）",
+          status: "已驳回", appliedAt: addMonths(t, -10) + " 14:12", reviewer: "数据库管理员",
+          reviewedAt: addMonths(t, -10) + " 17:30", reviewReason: "申请理由未说明具体研究用途，且勾选范围过宽，请按急需材料类型重新提交。"
+        },
+        {
+          id: "PA-2026-0043", type: "身份申请", userId: "chenqi", name: "陈启",
+          org: "清华大学材料学院", reason: "开展二维铁电材料极化翻转的第一性原理计算，需访问第2级半公开的结构与电学性质数据。",
+          scopes: ["二维材料"], termMode: "month",
+          startDate: chenqiStart, endDate: chenqiEnd, termText: chenqiStart + " 至 " + chenqiEnd + "（共 7 个月）",
+          status: "待审核", appliedAt: addDays(t, -1) + " 16:40", reviewer: "", reviewedAt: "", reviewReason: ""
+        },
+        {
+          id: "PA-2026-0044", type: "续期申请", userId: "sunqi", name: "孙琦",
+          org: "北京大学化学与分子工程学院", reason: "机器学习力场训练集扩充任务延续，需继续访问第2级力场参数与多极矩数据。",
+          scopes: ["二维材料", "机器学习力场"], termMode: "day",
+          startDate: addDays(t, 4), endDate: sunqiEnd, termText: "续期至 " + sunqiEnd + "（延长 90 天）",
+          status: "待审核", appliedAt: addDays(t, -2) + " 09:12", reviewer: "", reviewedAt: "", reviewReason: ""
+        },
+        {
+          id: "PA-2026-0018", type: "身份申请", userId: "wangwu", name: "王武",
+          org: "宁德时代新能源科技股份有限公司", reason: "催化材料表面吸附构型筛选，用于电解液添加剂研发。",
+          scopes: ["催化材料"], termMode: "month",
+          startDate: addMonths(t, -2), endDate: endOfMonth(addMonths(t, 4)), termText: addMonths(t, -2) + " 至 " + endOfMonth(addMonths(t, 4)) + "（共 6 个月）",
+          status: "已通过", appliedAt: addMonths(t, -2) + " 11:00", reviewer: "数据库管理员",
+          reviewedAt: addMonths(t, -2) + " 14:20", reviewReason: "企业研发用途真实，范围合理，同意开通。"
+        }
+      ],
+      mails: []
+    };
+  }
+
+  var memoryStore = null;
+  function loadStore() {
+    try {
+      var raw = window.localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var obj = JSON.parse(raw);
+        if (obj && obj.version === STORE_VERSION && obj.applications) return obj;
+      }
+    } catch (e) { /* 隐私模式 / file 协议限制时静默降级 */ }
+    if (memoryStore) return memoryStore;
+    var seeded = seedStore();
+    memoryStore = seeded;
+    persist(seeded);
+    return seeded;
+  }
+  function persist(s) {
+    memoryStore = s;
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) { }
+  }
+  var store = loadStore();
+  function save() { persist(store); }
+
+  function identityOf(userId) {
+    if (!store.identities[userId]) {
+      store.identities[userId] = { role: "普通用户", scopes: [], expireAt: "", since: "" };
+    }
+    return store.identities[userId];
+  }
+  /* 到期自动降级：专业用户身份超过使用期限后自动转为普通用户 */
+  function normalizeExpiry() {
+    var changed = false;
+    Object.keys(store.identities).forEach(function (uid) {
+      var id = store.identities[uid];
+      if (id.role === "专业用户" && id.expireAt && diffDays(todayStr(), id.expireAt) < 0) {
+        id.role = "普通用户";
+        id.scopes = [];
+        id.expireAt = "";
+        id.downgradedAt = todayStr();
+        changed = true;
+      }
+    });
+    if (changed) save();
+  }
+  /* 到期前 7 天：自动发送续期提醒邮件（演示：写一封站内邮件记录） */
+  function ensureReminderMail(userId) {
+    var id = identityOf(userId);
+    if (id.role !== "专业用户" || !id.expireAt) return null;
+    var left = diffDays(todayStr(), id.expireAt);
+    if (left < 0 || left > 7) return null;
+    var key = userId + "@" + id.expireAt;
+    var mail = (store.mails || []).filter(function (m) { return m.key === key; })[0];
+    if (!mail) {
+      mail = {
+        key: key, userId: userId, to: (userId === ME.userId ? ME.email : userId + "@example.org"),
+        subject: "【低维材料主题库】专业用户身份到期提醒",
+        time: nowStr(),
+        body: "您的专业用户身份将于 " + id.expireAt + " 到期（剩余 " + left + " 天）。到期后系统将自动转为普通用户，仅能查阅和下载第1级数据。如需延续，请登录系统在「数据管理 ▸ 我的申请」中提交续期申请，并等待数据库管理员审核。"
+      };
+      store.mails = store.mails || [];
+      store.mails.unshift(mail);
+      save();
+    }
+    return mail;
+  }
+
+  /* ---------- 3. 样式 ---------- */
+  var STYLE_ID = "ldm-proid-style-20261104";
+  function injectStyle() {
+    if (byId(STYLE_ID)) return;
+    var css = [
+      /* 列表页入口 */
+      ".proid-entry{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex:0 0 auto}",
+      ".proid-apply-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 16px;border:1px solid #165DFF;border-radius:8px;background:#fff;color:#165DFF;font-size:13px;font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}",
+      ".proid-apply-btn:hover{background:#eef4ff;border-color:#0f4bd8}",
+      ".proid-apply-btn:active{background:#e2edff}",
+      ".proid-apply-btn.is-solid{background:#165DFF;color:#fff}",
+      ".proid-apply-btn.is-solid:hover{background:#0f4bd8}",
+      ".proid-info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid #9fb2cd;background:#fff;color:#64809f;font-size:11px;font-style:normal;font-weight:700;line-height:1;cursor:help;user-select:none;flex:0 0 auto}",
+      ".proid-info:hover{border-color:#165DFF;color:#165DFF;background:#eef4ff}",
+      /* 悬浮提示 */
+      "#proidTooltip{position:fixed;z-index:9999;max-width:390px;padding:12px 14px;border-radius:8px;background:#1f2d3d;color:#fff;font-size:12.5px;line-height:1.9;box-shadow:0 8px 24px rgba(15,23,42,.28);pointer-events:none;opacity:0;transform:translate(-50%,4px);transition:opacity .14s,transform .14s}",
+      "#proidTooltip.show{opacity:1;transform:translate(-50%,0)}",
+      "#proidTooltip::before{content:'';position:absolute;top:-5px;left:50%;margin-left:-5px;width:10px;height:10px;background:#1f2d3d;transform:rotate(45deg)}",
+      "#proidTooltip.is-above::before{top:auto;bottom:-5px}",
+      /* 卡片 / 徽标 */
+      ".proid-card{background:#fff;border:1px solid #dde7f5;border-radius:12px;padding:18px 20px}",
+      ".proid-identity{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:16px}",
+      ".proid-id-tile{padding:14px 16px;border:1px solid #e3ecf9;border-radius:10px;background:linear-gradient(135deg,#ffffff,#f6f9ff)}",
+      ".proid-id-tile span{display:block;font-size:12px;color:#7b8da7}",
+      ".proid-id-tile strong{display:block;margin-top:6px;font-size:15px;color:#253957;font-weight:700;line-height:1.5;word-break:break-all}",
+      ".proid-id-tile strong em{font-style:normal;font-size:12px;color:#8fa1ba;font-weight:500}",
+      ".proid-badge{display:inline-flex;align-items:center;height:22px;padding:0 10px;border-radius:11px;font-size:12px;font-weight:700}",
+      ".proid-badge.pro{background:#e8f0ff;color:#165DFF}",
+      ".proid-badge.normal{background:#f1f4f8;color:#73859b}",
+      ".proid-badge.warn{background:#fff4e6;color:#d97706}",
+      ".proid-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}",
+      ".proid-chip{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:6px;background:#eef4ff;color:#2453d4;border:1px solid #d5e2fb;font-size:12px;font-weight:600}",
+      ".proid-chip.is-empty{background:#f7f9fc;color:#9aa9bd;border-color:#e2e9f2;font-weight:400}",
+      ".proid-banner{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:10px;background:#fff8e8;border:1px solid #f6dfae;color:#8a5b00;font-size:13px;line-height:1.8;margin-bottom:16px}",
+      ".proid-banner strong{color:#a35c00}",
+      ".proid-banner .proid-banner-icon{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#f0a92a;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}",
+      ".proid-banner-mail{display:block;margin-top:6px;color:#9a6b12;font-size:12px}",
+      ".proid-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:16px}",
+      ".proid-stat{padding:14px 18px;border:1px solid #e3ecf9;border-radius:10px;background:#f8fbff}",
+      ".proid-stat span{display:block;font-size:12px;color:#7b8da7}",
+      ".proid-stat strong{display:block;margin-top:4px;font-size:22px;font-weight:800;color:#165DFF;line-height:1.3}",
+      ".proid-stat.is-warn strong{color:#d97706}",
+      /* 过滤条 */
+      ".proid-filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}",
+      ".proid-filter-bar .proid-filter-label{font-size:12px;color:#8fa1ba;margin-right:2px}",
+      /* 表格内元素 */
+      ".proid-term-cell strong{display:block;font-size:13px;color:#293f60;font-weight:600;white-space:nowrap}",
+      ".proid-term-cell span{display:block;margin-top:2px;font-size:12px;color:#8fa1ba}",
+      ".proid-applicant strong{display:block;font-size:13px;color:#253957}",
+      ".proid-applicant span{display:block;margin-top:2px;font-size:12px;color:#8fa1ba}",
+      ".proid-empty{padding:44px 0;text-align:center;color:#93a5bd;font-size:13px}",
+      /* 弹窗 */
+      ".proid-modal .field>span{display:flex;align-items:center;gap:4px;margin-bottom:8px;font-size:13px;font-weight:700;color:#44597b}",
+      ".proid-modal .field>span .proid-req{color:#e34d59;font-style:normal;font-weight:700}",
+      ".proid-modal .field input[readonly]{background:#f6f9ff;color:#5a6f8f;cursor:not-allowed}",
+      ".proid-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}",
+      ".proid-form-grid .wide{grid-column:1/-1}",
+      ".proid-field-hint{display:block;margin-top:6px;font-size:12px;color:#93a5bd;font-style:normal}",
+      ".proid-hint{display:block;margin:8px 0 0;font-size:12px;color:#93a5bd;line-height:1.7;font-style:normal}",
+      /* 多选下拉 */
+      ".proid-ms{position:relative}",
+      ".proid-ms-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:40px;padding:6px 12px;border:1px solid #b5c6e6;border-radius:8px;background:#fff;cursor:pointer;text-align:left;font-size:14px;color:#253957}",
+      ".proid-ms-trigger:hover{border-color:#165DFF}",
+      ".proid-ms-trigger .proid-ms-caret{color:#8fa1ba;font-size:12px;font-style:normal}",
+      ".proid-ms-value{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 auto}",
+      ".proid-ms-placeholder{color:#98aac8;font-size:14px}",
+      ".proid-ms-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;padding:8px;border:1px solid #d7e2f2;border-radius:10px;background:#fff;box-shadow:0 12px 28px rgba(23,45,80,.14);max-height:240px;overflow:auto}",
+      ".proid-ms-option{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:13px;color:#33475f;cursor:pointer}",
+      ".proid-ms-option:hover{background:#f2f7ff}",
+      ".proid-ms-option input{width:15px;height:15px;accent-color:#165DFF;cursor:pointer}",
+      ".proid-ms-option.is-checked{background:#eef4ff;color:#165DFF;font-weight:600}",
+      /* 期限选择器 */
+      ".proid-term{border:1px solid #e3ecf9;border-radius:10px;padding:14px;background:#fbfdff}",
+      ".proid-term-tabs{display:inline-flex;padding:3px;border-radius:8px;background:#eef3fb;margin-bottom:12px}",
+      ".proid-term-tab{border:0;background:transparent;padding:6px 16px;border-radius:6px;font-size:13px;color:#5c7392;cursor:pointer;font-weight:600}",
+      ".proid-term-tab.active{background:#fff;color:#165DFF;box-shadow:0 1px 4px rgba(22,93,255,.16)}",
+      ".proid-term-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}",
+      ".proid-term-quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}",
+      ".proid-term-quick button{height:28px;padding:0 12px;border:1px solid #d7e2f2;border-radius:14px;background:#fff;color:#4a678f;font-size:12px;cursor:pointer}",
+      ".proid-term-quick button:hover{border-color:#165DFF;color:#165DFF;background:#f2f7ff}",
+      ".proid-term-preview{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:#eef4ff;color:#1d4ed8;font-size:13px;line-height:1.8}",
+      ".proid-term-preview.is-error{background:#fff1f0;color:#c9372c}",
+      /* 详情 / 审核 */
+      ".proid-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}",
+      ".proid-detail-item{padding:12px 14px;border:1px solid #e8eff9;border-radius:9px;background:#fbfdff;min-width:0}",
+      ".proid-detail-item.wide{grid-column:1/-1}",
+      ".proid-detail-item label{display:block;font-size:12px;color:#8fa1ba;margin-bottom:6px}",
+      ".proid-detail-item div{font-size:13.5px;color:#253957;line-height:1.8;word-break:break-word}",
+      ".proid-radio-group{display:grid;grid-template-columns:1fr 1fr;gap:12px}",
+      ".proid-radio{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid #d7e2f2;border-radius:9px;background:#fff;cursor:pointer;transition:border-color .15s,background .15s}",
+      ".proid-radio:hover{border-color:#9dbcf5}",
+      ".proid-radio input{margin-top:3px;accent-color:#165DFF}",
+      ".proid-radio strong{display:block;font-size:13.5px;color:#253957}",
+      ".proid-radio span{display:block;margin-top:2px;font-size:12px;color:#8fa1ba;line-height:1.6}",
+      ".proid-radio.is-active{border-color:#165DFF;background:#f2f7ff}",
+      ".proid-history{margin-top:4px;font-size:12.5px;color:#5a7391;line-height:1.9}",
+      "/* 防换行：状态徽标 / 操作按钮 / 表头（覆盖 .action-cell button 的 white-space:normal!important） */",
+      "#page-my-applications .status-badge,#page-identity-review .status-badge,#proidDetailBody .status-badge,#proidReviewBody .status-badge{white-space:nowrap!important;display:inline-flex!important}",
+      "#page-my-applications .action-cell,#page-identity-review .action-cell{white-space:nowrap!important}",
+      "#page-my-applications .action-cell button,#page-identity-review .action-cell button{white-space:nowrap!important;overflow-wrap:normal!important;word-break:keep-all!important}",
+      "#page-my-applications th,#page-identity-review th{white-space:nowrap}",
+      "#page-my-applications .proid-banner .btn,.proid-banner .btn{white-space:nowrap!important}",
+      "@media (max-width:1200px){.proid-identity{grid-template-columns:repeat(2,minmax(0,1fr))}.proid-form-grid{grid-template-columns:1fr}.proid-detail-grid{grid-template-columns:1fr}}"
+    ].join("\n");
+    var style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = css;
+    (document.head || document.documentElement).appendChild(style);
+  }
+
+  /* ---------- 4. 悬浮提示 ---------- */
+  function ensureTooltip() {
+    var tip = byId("proidTooltip");
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.id = "proidTooltip";
+      tip.setAttribute("role", "tooltip");
+      document.body.appendChild(tip);
+    }
+    return tip;
+  }
+  function showTip(icon) {
+    var tip = ensureTooltip();
+    tip.textContent = icon.getAttribute("data-proid-tip") || TIP_TEXT;
+    tip.classList.remove("is-above");
+    tip.classList.add("show");
+    var rect = icon.getBoundingClientRect();
+    var left = rect.left + rect.width / 2;
+    var maxLeft = window.innerWidth - 20;
+    tip.style.left = Math.min(Math.max(left, 210), maxLeft - 190) + "px";
+    var top = rect.bottom + 10;
+    var height = tip.offsetHeight;
+    if (top + height > window.innerHeight - 12) {
+      top = rect.top - height - 10;
+      tip.classList.add("is-above");
+    }
+    tip.style.top = top + "px";
+  }
+  function hideTip() {
+    var tip = byId("proidTooltip");
+    if (tip) tip.classList.remove("show");
+  }
+
+  /* ---------- 5. 侧边栏菜单 + 两个新页面容器 ---------- */
+  var PAGE_MY = "my-applications";
+  var PAGE_RV = "identity-review";
+
+  function injectNav() {
+    var group = document.querySelector('.sidebar-group[data-group="workflow"] .nav');
+    if (!group) return false;
+    if (group.querySelector('[data-page="' + PAGE_MY + '"]')) return true;
+    var mine = document.createElement("button");
+    mine.className = "nav-btn";
+    mine.type = "button";
+    mine.dataset.group = "workflow";
+    mine.dataset.page = PAGE_MY;
+    mine.dataset.label = "我的申请";
+    mine.innerHTML = "<span>我的申请</span>";
+
+    var review = document.createElement("button");
+    review.className = "nav-btn";
+    review.type = "button";
+    review.dataset.group = "workflow";
+    review.dataset.page = PAGE_RV;
+    review.dataset.label = "身份申请审核";
+    review.innerHTML = '<span>身份申请审核 <span class="admin-badge">管理</span></span>';
+
+    var mySubmit = group.querySelector('[data-page="my-submissions"]');
+    var twodReview = group.querySelector('[data-page="twod-review"]');
+    if (mySubmit && mySubmit.nextSibling) group.insertBefore(mine, mySubmit.nextSibling);
+    else group.appendChild(mine);
+    if (twodReview) group.insertBefore(review, twodReview.nextSibling);
+    else group.appendChild(review);
+
+    [mine, review].forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (window.MarvisRouter && window.MarvisRouter.go) window.MarvisRouter.go("page-" + btn.dataset.page);
+        else {
+          document.querySelectorAll(".page").forEach(function (node) {
+            node.classList.toggle("active", node.id === "page-" + btn.dataset.page);
+          });
+          document.querySelectorAll(".nav-btn").forEach(function (node) {
+            node.classList.toggle("active", node.dataset.page === btn.dataset.page);
+          });
+        }
+      });
+    });
+    return true;
+  }
+
+  function injectPages() {
+    var shell = document.querySelector(".main-shell");
+    if (!shell) return false;
+    if (!byId("page-" + PAGE_MY)) {
+      var s1 = document.createElement("section");
+      s1.className = "page";
+      s1.id = "page-" + PAGE_MY;
+      shell.appendChild(s1);
+    }
+    if (!byId("page-" + PAGE_RV)) {
+      var s2 = document.createElement("section");
+      s2.className = "page";
+      s2.id = "page-" + PAGE_RV;
+      shell.appendChild(s2);
+    }
+    return true;
+  }
+
+  /* 路由钩子：进入新页面时渲染内容并修正面包屑（不依赖 PAGE_LAYOUT 是否补齐） */
+  function hookRouter() {
+    if (!window.MarvisRouter || typeof window.MarvisRouter.go !== "function" || window.MarvisRouter.__proidHooked) return false;
+    var orig = window.MarvisRouter.go;
+    window.MarvisRouter.go = function (pageId) {
+      var res = orig.apply(this, arguments);
+      var clean = String(pageId || "").replace(/^page-/, "");
+      if (clean === PAGE_MY || clean === PAGE_RV) {
+        setTimeout(function () { afterEnter(clean); }, 0);
+      }
+      return res;
+    };
+    window.MarvisRouter.__proidHooked = true;
+    return true;
+  }
+  function afterEnter(page) {
+    injectNav();
+    injectPages();
+    fixChrome(page);
+    if (page === PAGE_MY) renderMyApplications();
+    if (page === PAGE_RV) renderReviewPage();
+  }
+  function fixChrome(page) {
+    var title = page === PAGE_MY ? "我的申请" : "身份申请审核";
+    var bc = byId("breadcrumb");
+    if (bc) bc.innerHTML = "<span>数据管理</span><span>/</span><strong>" + title + "</strong>";
+    document.querySelectorAll(".portal-link").forEach(function (node) {
+      node.classList.toggle("active", node.getAttribute("data-portal") === "workflow");
+    });
+    var grp = document.querySelector('.sidebar-group[data-group="workflow"]');
+    if (grp && !grp.classList.contains("is-open")) {
+      document.querySelectorAll(".sidebar-group").forEach(function (g) { g.classList.remove("is-open"); });
+      grp.classList.add("is-open");
+    }
+  }
+
+  /* ---------- 6. 列表页入口按钮挂载 ---------- */
+  var LIST_TARGETS = {
+    twod: [".module-tab-strip"],
+    electrolyte: [".module-tab-strip"],
+    opto: [".module-tab-strip"],
+    mlff: [".module-tab-strip"],
+    catalyst: [".module-tab-strip"],
+    "lowdim-database-twod": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
+    "lowdim-database-opto": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
+    "lowdim-database-electrolyte": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
+    "lowdim-database-mlff": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
+    "lowdim-database-catalyst": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"]
+  };
+
+  function entryHTML(solid) {
+    return '<div class="proid-entry">' +
+      '<button class="proid-apply-btn' + (solid ? " is-solid" : "") + '" type="button" data-proid-apply>专业用户身份申请</button>' +
+      '<i class="proid-info" data-proid-tip tabindex="0" role="button" aria-label="身份与数据级别说明">i</i>' +
+      '</div>';
+  }
+  function mountEntry(pageId) {
+    var page = byId("page-" + pageId);
+    var selectors = LIST_TARGETS[pageId];
+    if (!page || !selectors) return;
+    for (var i = 0; i < selectors.length; i += 1) {
+      var host = page.querySelector(selectors[i]);
+      if (!host) continue;
+      if (host.querySelector("[data-proid-apply]")) return;    /* 已挂载，幂等 */
+      var wrap = document.createElement("div");
+      wrap.innerHTML = entryHTML(false);
+      var entry = wrap.firstChild;
+      host.appendChild(entry);
+      return;
+    }
+  }
+  function mountAll() {
+    Object.keys(LIST_TARGETS).forEach(mountEntry);
+  }
+  function observeListPages() {
+    if (!window.MutationObserver) return;
+    Object.keys(LIST_TARGETS).forEach(function (pageId) {
+      var page = byId("page-" + pageId);
+      if (!page || page.dataset.proidObserved === "1") return;
+      page.dataset.proidObserved = "1";
+      var timer = null;
+      var mo = new MutationObserver(function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () { mountEntry(pageId); }, 120);
+      });
+      mo.observe(page, { childList: true, subtree: true });
+    });
+  }
+
+  /* ---------- 7. 申请弹窗 ---------- */
+  function buildModals() {
+    if (byId("proidApplyModal")) return;
+    var html = '' +
+      /* 身份申请弹窗 */
+      '<div class="overlay" id="proidApplyModal">' +
+      '  <div class="modal modal-md proid-modal" style="width:min(100%,820px)">' +
+      '    <div class="modal-header">' +
+      '      <div><h3>专业用户身份申请</h3><p>提交后由数据库管理员审核；审核通过后开通第 2 级（半公开）数据查阅与下载权限。</p></div>' +
+      '      <button class="modal-close" type="button" data-proid-close="proidApplyModal" aria-label="关闭">×</button>' +
+      '    </div>' +
+      '    <div class="modal-body modal-scroll" id="proidApplyBody"></div>' +
+      '    <div class="modal-footer">' +
+      '      <button class="btn" type="button" data-proid-close="proidApplyModal">取消</button>' +
+      '      <button class="btn-primary" type="button" data-proid-submit-apply>提交申请</button>' +
+      '    </div>' +
+      '  </div>' +
+      '</div>' +
+      /* 续期弹窗 */
+      '<div class="overlay" id="proidRenewModal">' +
+      '  <div class="modal modal-md proid-modal" style="width:min(100%,720px)">' +
+      '    <div class="modal-header">' +
+      '      <div><h3>专业用户身份续期申请</h3><p>到期前 7 天系统会自动发送续期提醒邮件；续期需经数据库管理员审核，驳回将降级为普通用户。</p></div>' +
+      '      <button class="modal-close" type="button" data-proid-close="proidRenewModal" aria-label="关闭">×</button>' +
+      '    </div>' +
+      '    <div class="modal-body modal-scroll" id="proidRenewBody"></div>' +
+      '    <div class="modal-footer">' +
+      '      <button class="btn" type="button" data-proid-close="proidRenewModal">取消</button>' +
+      '      <button class="btn-primary" type="button" data-proid-submit-renew>提交续期申请</button>' +
+      '    </div>' +
+      '  </div>' +
+      '</div>' +
+      /* 申请详情弹窗 */
+      '<div class="overlay" id="proidDetailModal">' +
+      '  <div class="modal modal-md proid-modal" style="width:min(100%,760px)">' +
+      '    <div class="modal-header">' +
+      '      <div><h3 id="proidDetailTitle">申请详情</h3><p>申请信息与审核结果</p></div>' +
+      '      <button class="modal-close" type="button" data-proid-close="proidDetailModal" aria-label="关闭">×</button>' +
+      '    </div>' +
+      '    <div class="modal-body modal-scroll" id="proidDetailBody"></div>' +
+      '    <div class="modal-footer"><button class="btn" type="button" data-proid-close="proidDetailModal">关闭</button></div>' +
+      '  </div>' +
+      '</div>' +
+      /* 审核弹窗 */
+      '<div class="overlay" id="proidReviewModal">' +
+      '  <div class="modal modal-lg proid-modal" style="width:min(100%,900px)">' +
+      '    <div class="modal-header">' +
+      '      <div><h3>身份申请审核</h3><p>数据库管理员审核：批准后开通/延长第 2 级数据权限，驳回则维持或降级为普通用户。</p></div>' +
+      '      <button class="modal-close" type="button" data-proid-close="proidReviewModal" aria-label="关闭">×</button>' +
+      '    </div>' +
+      '    <div class="modal-body modal-scroll" id="proidReviewBody"></div>' +
+      '    <div class="modal-footer">' +
+      '      <button class="btn" type="button" data-proid-close="proidReviewModal">取消</button>' +
+      '      <button class="btn-primary" type="button" data-proid-submit-review>提交审核结果</button>' +
+      '    </div>' +
+      '  </div>' +
+      '</div>';
+    var box = document.createElement("div");
+    box.innerHTML = html;
+    while (box.firstChild) document.body.appendChild(box.firstChild);
+  }
+
+  /* 期限选择器状态（两份：申请 / 续期） */
+  var termState = {
+    apply: { mode: "month", startMonth: "", endMonth: "", startDay: "", days: 90 },
+    renew: { mode: "month", endMonth: "", days: 90, baseDate: "" }
+  };
+
+  function monthOptionsHTML(kind) {
+    var st = termState[kind];
+    var start = st.startMonth || todayStr().slice(0, 7);
+    var end = st.endMonth || start;
+    return '' +
+      '<div class="proid-term-row">' +
+      '  <label class="field"><span>开始月份</span><input type="month" data-proid-term="startMonth" value="' + esc(start) + '"></label>' +
+      '  <label class="field"><span>结束月份</span><input type="month" data-proid-term="endMonth" value="' + esc(end) + '"></label>' +
+      '</div>' +
+      '<div class="proid-term-quick">' +
+      '  <button type="button" data-proid-preset="3">3 个月</button>' +
+      '  <button type="button" data-proid-preset="6">6 个月</button>' +
+      '  <button type="button" data-proid-preset="12">12 个月</button>' +
+      '  <button type="button" data-proid-preset="24">24 个月</button>' +
+      '</div>';
+  }
+  function dayOptionsHTML(kind) {
+    var st = termState[kind];
+    var start = st.startDay || todayStr();
+    return '' +
+      '<div class="proid-term-row">' +
+      '  <label class="field"><span>开始日期</span><input type="date" data-proid-term="startDay" value="' + esc(start) + '"></label>' +
+      '  <label class="field"><span>使用天数</span><input type="number" min="1" max="3650" step="1" data-proid-term="days" value="' + esc(st.days || 90) + '"></label>' +
+      '</div>' +
+      '<div class="proid-term-quick">' +
+      '  <button type="button" data-proid-preset="30">30 天</button>' +
+      '  <button type="button" data-proid-preset="90">90 天</button>' +
+      '  <button type="button" data-proid-preset="180">180 天</button>' +
+      '  <button type="button" data-proid-preset="365">365 天</button>' +
+      '</div>';
+  }
+  function termHTML(kind, label) {
+    var st = termState[kind];
+    return '' +
+      '<div class="proid-term" data-proid-term-box="' + kind + '">' +
+      '  <div class="proid-term-tabs">' +
+      '    <button type="button" class="proid-term-tab' + (st.mode === "month" ? " active" : "") + '" data-proid-term-mode="month">按月选择</button>' +
+      '    <button type="button" class="proid-term-tab' + (st.mode === "day" ? " active" : "") + '" data-proid-term-mode="day">按天选择</button>' +
+      '  </div>' +
+      '  <div data-proid-term-panel="month"' + (st.mode === "month" ? "" : " hidden") + '>' + monthOptionsHTML(kind) + '</div>' +
+      '  <div data-proid-term-panel="day"' + (st.mode === "day" ? "" : " hidden") + '>' + dayOptionsHTML(kind) + '</div>' +
+      '  <p class="proid-term-preview" data-proid-term-preview></p>' +
+      '</div>';
+  }
+
+  /* 计算当前期限 → { startDate, endDate, months, days, text, valid, warn } */
+  function computeTerm(kind) {
+    var st = termState[kind];
+    if (kind === "renew") {
+      var base = st.baseDate || todayStr();
+      if (st.mode === "month") {
+        var endMonth = st.endMonth || base.slice(0, 7);
+        var end = endOfMonth(endMonth);
+        if (!end || diffDays(base, end) <= 0) {
+          return { valid: false, warn: "续期后的到期日需晚于当前有效期（" + base + "）", text: "", endDate: end || "" };
+        }
+        var mo = monthsBetween(base, end);
+        return { startDate: addDays(base, 1), endDate: end, months: mo, days: diffDays(base, end), valid: true, text: "续期至 " + end + "（延长约 " + mo + " 个月）" };
+      }
+      var days = parseInt(st.days, 10) || 0;
+      if (days <= 0) return { valid: false, warn: "请填写续期天数（≥1 天）", text: "" };
+      var newEnd = addDays(base, days);
+      return { startDate: addDays(base, 1), endDate: newEnd, days: days, months: 0, valid: true, text: "续期至 " + newEnd + "（延长 " + days + " 天）" };
+    }
+    /* 身份申请 */
+    if (st.mode === "month") {
+      var sMon = st.startMonth || todayStr().slice(0, 7);
+      var eMon = st.endMonth || sMon;
+      var sDate = sMon + "-01";
+      var eDate = endOfMonth(eMon);
+      if (!eDate || diffDays(sDate, eDate) < 0) {
+        return { valid: false, warn: "结束月份不能早于开始月份", text: "" };
+      }
+      var months = monthsBetween(sDate, eDate) + 1;
+      return { startDate: sDate, endDate: eDate, months: months, days: diffDays(sDate, eDate) + 1, valid: true, text: "有效期 " + sDate + " 至 " + eDate + "（共 " + months + " 个月）" };
+    }
+    var sDay = st.startDay || todayStr();
+    var dnum = parseInt(st.days, 10) || 0;
+    if (dnum <= 0) return { valid: false, warn: "请填写使用天数（≥1 天）", text: "" };
+    var endD = addDays(sDay, dnum - 1);
+    return { startDate: sDay, endDate: endD, days: dnum, months: 0, valid: true, text: "有效期 " + sDay + " 至 " + endD + "（共 " + dnum + " 天）" };
+  }
+  function refreshTermPreview(kind) {
+    var box = document.querySelector('[data-proid-term-box="' + kind + '"]');
+    if (!box) return;
+    var p = box.querySelector("[data-proid-term-preview]");
+    var res = computeTerm(kind);
+    if (!p) return;
+    p.classList.toggle("is-error", !res.valid);
+    p.textContent = res.valid ? res.text : res.warn;
+  }
+
+  function applyFormHTML() {
+    var st = termState.apply;
+    var defaultMonth = todayStr().slice(0, 7);
+    st.startMonth = st.startMonth || defaultMonth;
+    st.endMonth = st.endMonth || addMonths(todayStr(), 5).slice(0, 7);
+    st.startDay = st.startDay || todayStr();
+    st.days = st.days || 90;
+    return '' +
+      '<div class="proid-form-grid">' +
+      '  <label class="field"><span>用户ID <i class="proid-req">*</i></span>' +
+      '    <input type="text" readonly value="' + esc(ME.userId) + '" data-proid-field="userId">' +
+      '    <em class="proid-field-hint">系统自动获取，不可修改</em>' +
+      '  </label>' +
+      '  <label class="field"><span>姓名 <i class="proid-req">*</i></span>' +
+      '    <input type="text" placeholder="请输入真实姓名，便于管理员核验" data-proid-field="name" maxlength="20">' +
+      '  </label>' +
+      '  <label class="field wide"><span>所在机构 <i class="proid-req">*</i></span>' +
+      '    <input type="text" placeholder="请输入所在机构全称（高校 / 科研院所 / 企业）" data-proid-field="org" maxlength="60">' +
+      '  </label>' +
+      '  <label class="field wide"><span>申请理由 <i class="proid-req">*</i></span>' +
+      '    <textarea rows="4" placeholder="说明需要访问半公开数据的用途" data-proid-field="reason" maxlength="500"></textarea>' +
+      '  </label>' +
+      '  <div class="field wide">' +
+      '    <span>申请数据范围 <i class="proid-req">*</i></span>' +
+      '    <div class="proid-ms" data-proid-ms>' +
+      '      <button type="button" class="proid-ms-trigger" data-proid-ms-trigger>' +
+      '        <span class="proid-ms-value" data-proid-ms-value><span class="proid-ms-placeholder">请选择需访问的材料类型</span></span>' +
+      '        <i class="proid-ms-caret">▾</i>' +
+      '      </button>' +
+      '      <div class="proid-ms-panel" data-proid-ms-panel hidden>' +
+      MAT_TYPES.map(function (t) {
+        return '<label class="proid-ms-option"><input type="checkbox" value="' + esc(t) + '" data-proid-scope>' + esc(t) + '</label>';
+      }).join("") +
+      '      </div>' +
+      '    </div>' +
+      '    <em class="proid-hint">仅勾选您当前研究急需的材料类型，管理员将根据申请理由严格审批。</em>' +
+      '  </div>' +
+      '  <div class="field wide">' +
+      '    <span>预计使用期限 <i class="proid-req">*</i></span>' +
+      termHTML("apply") +
+      '  </div>' +
+      '</div>';
+  }
+
+  function openApplyModal() {
+    injectStyle();
+    termState.apply = { mode: "month", startMonth: todayStr().slice(0, 7), endMonth: addMonths(todayStr(), 5).slice(0, 7), startDay: todayStr(), days: 90 };
+    var body = byId("proidApplyBody");
+    if (body) body.innerHTML = applyFormHTML();
+    refreshTermPreview("apply");
+    openOverlay("proidApplyModal");
+    var first = document.querySelector('#proidApplyBody [data-proid-field="name"]');
+    if (first) setTimeout(function () { first.focus(); }, 60);
+  }
+
+  function readScopes() {
+    var out = [];
+    document.querySelectorAll('#proidApplyBody [data-proid-scope]:checked').forEach(function (cb) { out.push(cb.value); });
+    return out;
+  }
+  function syncScopeUI() {
+    var valueBox = document.querySelector("#proidApplyBody [data-proid-ms-value]");
+    if (!valueBox) return;
+    var picked = readScopes();
+    if (!picked.length) {
+      valueBox.innerHTML = '<span class="proid-ms-placeholder">请选择需访问的材料类型</span>';
+    } else {
+      valueBox.innerHTML = picked.map(function (t) { return '<span class="proid-chip">' + esc(t) + "</span>"; }).join("");
+    }
+    document.querySelectorAll("#proidApplyBody .proid-ms-option").forEach(function (label) {
+      var cb = label.querySelector("input");
+      label.classList.toggle("is-checked", !!(cb && cb.checked));
+    });
+  }
+
+  function submitApply() {
+    var body = byId("proidApplyBody");
+    if (!body) return;
+    var name = (body.querySelector('[data-proid-field="name"]').value || "").trim();
+    var org = (body.querySelector('[data-proid-field="org"]').value || "").trim();
+    var reason = (body.querySelector('[data-proid-field="reason"]').value || "").trim();
+    var scopes = readScopes();
+    var term = computeTerm("apply");
+    if (!name) return toast("申请校验", "请填写姓名。");
+    if (!org) return toast("申请校验", "请填写所在机构。");
+    if (!reason) return toast("申请校验", "请填写申请理由，说明需要访问半公开数据的用途。");
+    if (reason.length < 10) return toast("申请校验", "申请理由不少于 10 个字，便于管理员判断用途。");
+    if (!scopes.length) return toast("申请校验", "请至少勾选一个需访问的材料类型。");
+    if (!term.valid) return toast("申请校验", term.warn || "请正确选择预计使用期限。");
+
+    var seq = 45 + store.applications.filter(function (a) { return a.type === "身份申请"; }).length;
+    var rec = {
+      id: "PA-2026-00" + seq,
+      type: "身份申请",
+      userId: ME.userId,
+      name: name,
+      org: org,
+      reason: reason,
+      scopes: scopes,
+      termMode: termState.apply.mode,
+      startDate: term.startDate,
+      endDate: term.endDate,
+      termText: term.text.replace(/^有效期\s*/, ""),
+      status: "待审核",
+      appliedAt: nowStr(),
+      reviewer: "",
+      reviewedAt: "",
+      reviewReason: ""
+    };
+    store.applications.unshift(rec);
+    save();
+    closeOverlay("proidApplyModal");
+    renderMyApplications();
+    renderReviewPage();
+    toast("申请已提交", rec.id + " 已提交，等待数据库管理员审核。审核期间仍可查阅和下载第 1 级数据。");
+  }
+
+  /* ---------- 8. 我的申请 ---------- */
+  var myFilter = { type: "全部", status: "全部" };
+
+  function myRecords() {
+    return store.applications.filter(function (a) { return a.userId === ME.userId; });
+  }
+  function statusBadge(status) {
+    var map = { "待审核": "info", "已通过": "success", "已驳回": "danger", "已过期": "muted" };
+    return '<span class="status-badge ' + (map[status] || "muted") + '">' + esc(status) + '</span>';
+  }
+  function scopesHTML(list) {
+    if (!list || !list.length) return '<span class="proid-chip is-empty">未限定</span>';
+    return list.map(function (t) { return '<span class="proid-chip">' + esc(t) + "</span>"; }).join("");
+  }
+
+  function renderMyApplications() {
+    var page = byId("page-" + PAGE_MY);
+    if (!page) return;
+    injectStyle();
+    normalizeExpiry();
+    var id = identityOf(ME.userId);
+    var left = id.role === "专业用户" && id.expireAt ? diffDays(todayStr(), id.expireAt) : null;
+    var mail = ensureReminderMail(ME.userId);
+
+    var head = '' +
+      '<div class="page-head">' +
+      '  <div><h2>我的申请</h2><p>查看专业用户身份申请与续期申请记录，跟踪审核状态、数据范围与有效期。</p></div>' +
+      '  <div class="page-tools"><button class="btn-primary" type="button" data-proid-apply>＋ 专业用户身份申请</button>' +
+      '  <i class="proid-info" data-proid-tip tabindex="0" role="button" aria-label="身份与数据级别说明" style="vertical-align:middle;margin-left:6px">i</i></div>' +
+      '</div>';
+
+    var identityCard = '' +
+      '<div class="proid-card" style="margin-bottom:16px">' +
+      '  <div class="proid-identity">' +
+      '    <div class="proid-id-tile"><span>当前身份</span><strong>' +
+      (id.role === "专业用户" ? '<span class="proid-badge pro">专业用户</span>' : '<span class="proid-badge normal">普通用户</span>') +
+      '</strong></div>' +
+      '    <div class="proid-id-tile"><span>身份有效期至</span><strong>' + (id.expireAt ? esc(id.expireAt) + (left != null ? ' <em>剩余 ' + Math.max(left, 0) + ' 天</em>' : '') : '— <em>长期有效（普通用户）</em>') + '</strong></div>' +
+      '    <div class="proid-id-tile"><span>可访问数据级别</span><strong>' + (id.role === "专业用户" ? '第1级 + 第2级' : '第1级') + ' <em>' + (id.role === "专业用户" ? '（含半公开数据）' : '（仅完全公开数据）') + '</em></strong></div>' +
+      '    <div class="proid-id-tile"><span>已授权数据范围</span><div class="proid-chips">' + scopesHTML(id.scopes) + '</div></div>' +
+      '  </div>' +
+      '  <p class="proid-hint" style="margin-top:2px">说明：专业用户身份有使用期限，超过使用期限后系统自动转为普通用户；如需延续，请提交续期申请并经数据库管理员审核。</p>' +
+      '</div>';
+
+    var banner = '';
+    if (id.role === "专业用户" && left != null && left >= 0 && left <= 7) {
+      banner = '' +
+        '<div class="proid-banner">' +
+        '  <span class="proid-banner-icon">!</span>' +
+        '  <div><strong>续期提醒：</strong>您的专业用户身份将于 <b>' + esc(id.expireAt) + '</b> 到期（剩余 ' + left + ' 天）。系统已在到期前 7 天自动发送续期提醒邮件，请及时提交续期申请；逾期未通过审核将自动转为普通用户，仅能查阅和下载第 1 级数据。' +
+        (mail ? '<span class="proid-banner-mail">✉ 已发送邮件至 ' + esc(mail.to) + '（' + esc(mail.time) + '）：' + esc(mail.subject) + '</span>' : '') +
+        '  </div>' +
+        '  <button class="btn btn-sm" type="button" data-proid-renew="' + esc(currentApprovedId()) + '" style="margin-left:auto;flex:0 0 auto">立即续期</button>' +
+        '</div>';
+    } else if (id.role === "普通用户" && id.downgradedAt) {
+      banner = '<div class="proid-banner"><span class="proid-banner-icon">!</span><div>您的专业用户身份已于 <b>' + esc(id.downgradedAt) + '</b> 到期，系统已自动转为普通用户。如需继续查阅和下载第 2 级数据，请重新提交身份申请。</div></div>';
+    }
+
+    var records = myRecords();
+    var filtered = records.filter(function (a) {
+      var okType = myFilter.type === "全部" || a.type === myFilter.type;
+      var okStatus = myFilter.status === "全部" || a.status === myFilter.status;
+      return okType && okStatus;
+    });
+
+    var chips = '' +
+      '<div class="proid-filter-bar">' +
+      '  <span class="proid-filter-label">申请类型</span>' +
+      ["全部", "身份申请", "续期申请"].map(function (t) {
+        return '<button class="twod-filter-chip' + (myFilter.type === t ? " active" : "") + '" type="button" data-proid-my-type="' + t + '">' + t + '</button>';
+      }).join("") +
+      '  <span class="proid-filter-label" style="margin-left:12px">审核状态</span>' +
+      ["全部", "待审核", "已通过", "已驳回"].map(function (t) {
+        return '<button class="twod-filter-chip' + (myFilter.status === t ? " active" : "") + '" type="button" data-proid-my-status="' + t + '">' + t + '</button>';
+      }).join("") +
+      '</div>';
+
+    var rows = filtered.map(function (a) {
+      var canRenew = a.status === "已通过" || (a.status === "待审核" && a.type === "身份申请");
+      var renewBtn = '<button class="btn btn-sm" type="button" data-proid-renew="' + esc(a.id) + '"' + (canRenew ? "" : ' disabled title="待审核或已驳回的记录不可发起续期" style="opacity:.5;cursor:not-allowed"') + '>续期</button>';
+      return '<tr>' +
+        '<td><code>' + esc(a.id) + '</code></td>' +
+        '<td>' + esc(a.type) + '</td>' +
+        '<td>' + esc(a.appliedAt) + '</td>' +
+        '<td><div class="proid-chips">' + scopesHTML(a.scopes) + '</div></td>' +
+        '<td><div class="proid-term-cell"><strong>' + esc(a.termText.split("（")[0]) + '</strong><span>' + esc((a.termText.split("（")[1] || "").replace("）", "")) + '</span></div></td>' +
+        '<td>' + statusBadge(a.status) + '</td>' +
+        '<td style="max-width:220px;color:#5a7391;font-size:12.5px">' + (a.reviewReason ? esc(a.reviewReason) : '<span style="color:#b6c2d2">—</span>') + '</td>' +
+        '<td class="action-cell"><button class="btn btn-sm" type="button" data-proid-detail="' + esc(a.id) + '">查看详情</button> ' + renewBtn + '</td>' +
+        '</tr>';
+    }).join("");
+
+    var table = '' +
+      '<div class="card pad">' +
+      '  <h3 class="section-title">申请记录</h3>' +
+      chips +
+      '  <div class="table-wrap">' +
+      '    <table>' +
+      '      <thead><tr><th>申请编号</th><th>申请类型</th><th>申请时间</th><th>申请数据范围</th><th>有效期</th><th>状态</th><th>审批原因</th><th>操作</th></tr></thead>' +
+      '      <tbody>' + (rows || '<tr><td colspan="8"><div class="proid-empty">暂无符合条件的申请记录，点击右上角「专业用户身份申请」发起申请。</div></td></tr>') + '</tbody>' +
+      '    </table>' +
+      '  </div>' +
+      '  <div class="result-footer"><span>共 ' + filtered.length + ' 条申请记录</span></div>' +
+      '</div>';
+
+    page.innerHTML = head + identityCard + banner + table;
+  }
+  function currentApprovedId() {
+    var list = myRecords().filter(function (a) { return a.status === "已通过" && a.type === "身份申请"; });
+    return list.length ? list[0].id : "";
+  }
+
+  /* ---------- 9. 身份申请审核 ---------- */
+  var rvFilter = { type: "全部", status: "待审核" };
+
+  function renderReviewPage() {
+    var page = byId("page-" + PAGE_RV);
+    if (!page) return;
+    injectStyle();
+    normalizeExpiry();
+    var all = store.applications.slice();
+    var pending = all.filter(function (a) { return a.status === "待审核"; });
+    var doneToday = all.filter(function (a) { return a.reviewedAt && a.reviewedAt.indexOf(todayStr()) === 0; });
+    var passed = all.filter(function (a) { return a.status === "已通过"; });
+
+    var head = '' +
+      '<div class="page-head">' +
+      '  <div><h2>身份申请审核 <span class="page-role-tag admin">数据库管理员</span></h2>' +
+      '  <p>审核用户提交的专业用户身份申请与续期申请；批准后开通或延长第 2 级数据访问权限，驳回则维持或降级为普通用户。</p></div>' +
+      '</div>';
+
+    var stats = '' +
+      '<div class="proid-stats">' +
+      '  <div class="proid-stat is-warn"><span>待审核申请</span><strong>' + pending.length + '</strong></div>' +
+      '  <div class="proid-stat"><span>今日已处理</span><strong>' + doneToday.length + '</strong></div>' +
+      '  <div class="proid-stat"><span>累计通过</span><strong>' + passed.length + '</strong></div>' +
+      '</div>';
+
+    var filtered = all.filter(function (a) {
+      var okType = rvFilter.type === "全部" || a.type === rvFilter.type;
+      var okStatus = rvFilter.status === "全部" ? true
+        : rvFilter.status === "待审核" ? a.status === "待审核"
+          : a.status !== "待审核";
+      return okType && okStatus;
+    }).sort(function (a, b) {
+      var pa = a.status === "待审核" ? 0 : 1;
+      var pb = b.status === "待审核" ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      return String(b.appliedAt).localeCompare(String(a.appliedAt));
+    });
+
+    var chips = '' +
+      '<div class="proid-filter-bar">' +
+      '  <span class="proid-filter-label">申请类型</span>' +
+      ["全部", "身份申请", "续期申请"].map(function (t) {
+        return '<button class="twod-filter-chip' + (rvFilter.type === t ? " active" : "") + '" type="button" data-proid-rv-type="' + t + '">' + t + '</button>';
+      }).join("") +
+      '  <span class="proid-filter-label" style="margin-left:12px">审核状态</span>' +
+      ["待审核", "已处理", "全部"].map(function (t) {
+        return '<button class="twod-filter-chip' + (rvFilter.status === t ? " active" : "") + '" type="button" data-proid-rv-status="' + t + '">' + t + '</button>';
+      }).join("") +
+      '</div>';
+
+    var rows = filtered.map(function (a) {
+      var isPending = a.status === "待审核";
+      var op = isPending
+        ? '<button class="btn-primary btn-sm" type="button" data-proid-review="' + esc(a.id) + '">审核</button>'
+        : '<button class="btn btn-sm" type="button" data-proid-detail="' + esc(a.id) + '">查看</button>';
+      return '<tr>' +
+        '<td><code>' + esc(a.id) + '</code></td>' +
+        '<td><div class="proid-applicant"><strong>' + esc(a.name) + '</strong><span>' + esc(a.org) + '</span></div></td>' +
+        '<td>' + esc(a.userId) + '</td>' +
+        '<td>' + esc(a.type) + '</td>' +
+        '<td><div class="proid-chips">' + scopesHTML(a.scopes) + '</div></td>' +
+        '<td><div class="proid-term-cell"><strong>' + esc(a.termText.split("（")[0]) + '</strong><span>' + esc((a.termText.split("（")[1] || "").replace("）", "")) + '</span></div></td>' +
+        '<td>' + esc(a.appliedAt) + '</td>' +
+        '<td>' + statusBadge(a.status) + '</td>' +
+        '<td class="action-cell">' + op + '</td>' +
+        '</tr>';
+    }).join("");
+
+    var table = '' +
+      '<div class="card pad">' +
+      '  <h3 class="section-title">申请审核队列</h3>' +
+      '  <p class="proid-hint" style="margin:-4px 0 12px">默认仅展示待审核内容；审核结果将实时同步至申请人的身份状态与有效期。</p>' +
+      chips +
+      '  <div class="table-wrap">' +
+      '    <table>' +
+      '      <thead><tr><th>申请编号</th><th>申请人</th><th>用户ID</th><th>申请类型</th><th>申请数据范围</th><th>申请期限</th><th>申请时间</th><th>状态</th><th>操作</th></tr></thead>' +
+      '      <tbody>' + (rows || '<tr><td colspan="9"><div class="proid-empty">当前没有待审核的身份申请或续期申请。</div></td></tr>') + '</tbody>' +
+      '    </table>' +
+      '  </div>' +
+      '  <div class="result-footer"><span>共 ' + filtered.length + ' 条记录</span></div>' +
+      '</div>';
+
+    page.innerHTML = head + stats + table;
+  }
+
+  /* ---------- 10. 详情 / 续期 / 审核弹窗 ---------- */
+  function findApp(id) {
+    return store.applications.filter(function (a) { return a.id === id; })[0] || null;
+  }
+  function detailItem(label, value, wide) {
+    return '<div class="proid-detail-item' + (wide ? " wide" : "") + '"><label>' + esc(label) + '</label><div>' + value + '</div></div>';
+  }
+
+  function openDetailModal(id) {
+    var a = findApp(id);
+    if (!a) return;
+    var title = byId("proidDetailTitle");
+    if (title) title.textContent = "申请详情 · " + a.id;
+    var body = byId("proidDetailBody");
+    if (body) {
+      body.innerHTML = '<div class="proid-detail-grid">' +
+        detailItem("申请编号", esc(a.id)) +
+        detailItem("申请类型", esc(a.type)) +
+        detailItem("用户ID", esc(a.userId)) +
+        detailItem("姓名", esc(a.name)) +
+        detailItem("所在机构", esc(a.org), true) +
+        detailItem("申请数据范围", '<div class="proid-chips">' + scopesHTML(a.scopes) + '</div>', true) +
+        detailItem("申请理由", esc(a.reason), true) +
+        detailItem("申请期限", esc(a.termText), true) +
+        detailItem("申请时间", esc(a.appliedAt)) +
+        detailItem("审核状态", statusBadge(a.status)) +
+        detailItem("审核人", esc(a.reviewer || "—")) +
+        detailItem("审核时间", esc(a.reviewedAt || "—")) +
+        detailItem("审批原因", esc(a.reviewReason || "—"), true) +
+        '</div>';
+    }
+    openOverlay("proidDetailModal");
+  }
+
+  function openRenewModal(id) {
+    var a = findApp(id);
+    var idt = identityOf(ME.userId);
+    var base = (a && a.status === "已通过" && a.endDate) ? a.endDate : (idt.expireAt || todayStr());
+    termState.renew = { mode: "month", endMonth: addMonths(base, 6).slice(0, 7), days: 90, baseDate: base };
+    var body = byId("proidRenewBody");
+    if (body) {
+      body.innerHTML = '<div class="proid-form-grid">' +
+        '<label class="field"><span>用户ID</span><input type="text" readonly value="' + esc(ME.userId) + '"><em class="proid-field-hint">系统自动获取</em></label>' +
+        '<label class="field"><span>当前有效期至</span><input type="text" readonly value="' + esc(base) + '"><em class="proid-field-hint">到期后将自动转为普通用户</em></label>' +
+        '<div class="field wide"><span>续期时间范围 <i class="proid-req">*</i></span>' + termHTML("renew") + '</div>' +
+        '<label class="field wide"><span>续期理由 <i class="proid-req">*</i></span><textarea rows="3" placeholder="说明延续专业用户身份的必要性" data-proid-renew-reason maxlength="300"></textarea></label>' +
+        '</div>' +
+        '<p class="proid-hint">提交后需数据库管理员审核：批准则按所选范围延长有效期，驳回则降级为普通用户（仅可查阅和下载第 1 级数据）。</p>';
+    }
+    refreshTermPreview("renew");
+    openOverlay("proidRenewModal");
+  }
+
+  function submitRenew() {
+    var body = byId("proidRenewBody");
+    if (!body) return;
+    var reason = (body.querySelector("[data-proid-renew-reason]").value || "").trim();
+    var term = computeTerm("renew");
+    if (!term.valid) return toast("续期校验", term.warn || "请正确选择续期时间范围。");
+    if (!reason) return toast("续期校验", "请填写续期理由。");
+    var idt = identityOf(ME.userId);
+    var name = "";
+    var org = "";
+    var prev = myRecords().filter(function (a) { return a.status === "已通过"; })[0];
+    if (prev) { name = prev.name; org = prev.org; }
+    var seq = 46 + store.applications.filter(function (a) { return a.type === "续期申请"; }).length;
+    var rec = {
+      id: "PA-2026-00" + seq,
+      type: "续期申请",
+      userId: ME.userId,
+      name: name || "李思远",
+      org: org || "中国科学院物理研究所",
+      reason: reason,
+      scopes: idt.scopes && idt.scopes.length ? idt.scopes.slice() : ["二维材料"],
+      termMode: termState.renew.mode,
+      startDate: term.startDate,
+      endDate: term.endDate,
+      termText: term.text,
+      status: "待审核",
+      appliedAt: nowStr(),
+      reviewer: "",
+      reviewedAt: "",
+      reviewReason: "",
+      originalExpire: termState.renew.baseDate
+    };
+    store.applications.unshift(rec);
+    save();
+    closeOverlay("proidRenewModal");
+    renderMyApplications();
+    renderReviewPage();
+    toast("续期申请已提交", rec.id + " 已提交，等待数据库管理员审核。");
+  }
+
+  function openReviewModal(id) {
+    var a = findApp(id);
+    if (!a) return;
+    var history = store.applications.filter(function (x) { return x.userId === a.userId; });
+    var body = byId("proidReviewBody");
+    if (body) {
+      body.innerHTML = '<div class="proid-detail-grid" style="margin-bottom:16px">' +
+        detailItem("申请编号", esc(a.id)) +
+        detailItem("申请类型", esc(a.type)) +
+        detailItem("用户ID", esc(a.userId)) +
+        detailItem("姓名 / 所在机构", esc(a.name) + " · " + esc(a.org)) +
+        detailItem("申请数据范围", '<div class="proid-chips">' + scopesHTML(a.scopes) + '</div>', true) +
+        detailItem("申请理由", esc(a.reason), true) +
+        detailItem("申请期限", esc(a.termText), true) +
+        detailItem("申请时间", esc(a.appliedAt)) +
+        detailItem("当前身份", esc(identityOf(a.userId).role)) +
+        detailItem("历史申请记录", '<div class="proid-history">' + history.map(function (x) {
+          return esc(x.appliedAt) + "　" + esc(x.id) + "　" + esc(x.type) + "　" + esc(x.status);
+        }).join("<br>") + '</div>', true) +
+        '</div>' +
+        '<div class="field" style="margin-bottom:14px"><span>审批结果 <i class="proid-req">*</i></span>' +
+        '  <div class="proid-radio-group" data-proid-decision-group>' +
+        '    <label class="proid-radio is-active"><input type="radio" name="proidDecision" value="approve" checked><div><strong>审核批准</strong><span>' + (a.type === "续期申请" ? "延长有效期至申请范围" : "转为专业用户，开通第 2 级数据权限") + '</span></div></label>' +
+        '    <label class="proid-radio"><input type="radio" name="proidDecision" value="reject"><div><strong>驳回</strong><span>' + (a.type === "续期申请" ? "驳回后续期失败，降级为普通用户" : "维持普通用户身份") + '</span></div></label>' +
+        '  </div>' +
+        '</div>' +
+        '<label class="field wide"><span>审批原因 <i class="proid-req">*</i></span>' +
+        '  <textarea rows="4" placeholder="请填写审批原因；驳回时请说明具体原因，将同步通知申请人" data-proid-review-reason maxlength="300"></textarea>' +
+        '</div>';
+    }
+    openOverlay("proidReviewModal");
+  }
+
+  function submitReview() {
+    var body = byId("proidReviewBody");
+    if (!body) return;
+    var checked = body.querySelector('input[name="proidDecision"]:checked');
+    var decision = checked ? checked.value : "";
+    var reason = (body.querySelector("[data-proid-review-reason]").value || "").trim();
+    var id = body.dataset.appId || "";
+    var a = findApp(id);
+    if (!a) return;
+    if (!decision) return toast("审核校验", "请选择审批结果。");
+    if (!reason) return toast("审核校验", "请填写审批原因。");
+
+    a.status = decision === "approve" ? "已通过" : "已驳回";
+    a.reviewer = "数据库管理员";
+    a.reviewedAt = nowStr();
+    a.reviewReason = reason;
+
+    var idt = identityOf(a.userId);
+    if (decision === "approve") {
+      idt.role = "专业用户";
+      idt.scopes = a.scopes.slice();
+      idt.expireAt = a.endDate;
+      if (!idt.since) idt.since = todayStr();
+      delete idt.downgradedAt;
+    } else if (a.type === "续期申请") {
+      idt.role = "普通用户";
+      idt.scopes = [];
+      idt.expireAt = "";
+      idt.downgradedAt = todayStr();
+    }
+    store.mails = store.mails || [];
+    store.mails.unshift({
+      key: a.id + "-review", userId: a.userId, to: (a.userId === ME.userId ? ME.email : a.userId + "@example.org"),
+      subject: "【低维材料主题库】专业用户申请审核结果",
+      time: nowStr(),
+      body: "申请编号 " + a.id + "（" + a.type + "）审核结果：" + a.status + "。审批原因：" + reason
+    });
+    save();
+    closeOverlay("proidReviewModal");
+    renderReviewPage();
+    renderMyApplications();
+    toast("审核结果已提交", a.id + " " + a.status + (decision === "approve" ? "，有效期至 " + a.endDate + "。" : "。"));
+  }
+
+  /* ---------- 11. 事件绑定（全局委托，页面重渲染后依然有效） ---------- */
+  function bindEvents() {
+    document.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (!t || !t.closest) return;
+
+      var applyBtn = t.closest("[data-proid-apply]");
+      if (applyBtn) { ev.preventDefault(); openApplyModal(); return; }
+
+      var closeBtn = t.closest("[data-proid-close]");
+      if (closeBtn) { ev.preventDefault(); closeOverlay(closeBtn.getAttribute("data-proid-close")); return; }
+
+      var subApply = t.closest("[data-proid-submit-apply]");
+      if (subApply) { ev.preventDefault(); submitApply(); return; }
+
+      var subRenew = t.closest("[data-proid-submit-renew]");
+      if (subRenew) { ev.preventDefault(); submitRenew(); return; }
+
+      var subReview = t.closest("[data-proid-submit-review]");
+      if (subReview) { ev.preventDefault(); submitReview(); return; }
+
+      var myType = t.closest("[data-proid-my-type]");
+      if (myType) { myFilter.type = myType.getAttribute("data-proid-my-type"); renderMyApplications(); return; }
+
+      var myStatus = t.closest("[data-proid-my-status]");
+      if (myStatus) { myFilter.status = myStatus.getAttribute("data-proid-my-status"); renderMyApplications(); return; }
+
+      var rvType = t.closest("[data-proid-rv-type]");
+      if (rvType) { rvFilter.type = rvType.getAttribute("data-proid-rv-type"); renderReviewPage(); return; }
+
+      var rvStatus = t.closest("[data-proid-rv-status]");
+      if (rvStatus) { rvFilter.status = rvStatus.getAttribute("data-proid-rv-status"); renderReviewPage(); return; }
+
+      var detailBtn = t.closest("[data-proid-detail]");
+      if (detailBtn) { ev.preventDefault(); openDetailModal(detailBtn.getAttribute("data-proid-detail")); return; }
+
+      var renewBtn = t.closest("[data-proid-renew]");
+      if (renewBtn) {
+        ev.preventDefault();
+        openRenewModal(renewBtn.getAttribute("data-proid-renew"));
+        return;
+      }
+
+      var reviewBtn = t.closest("[data-proid-review]");
+      if (reviewBtn) {
+        ev.preventDefault();
+        var bodyEl = byId("proidReviewBody");
+        if (bodyEl) bodyEl.dataset.appId = reviewBtn.getAttribute("data-proid-review");
+        openReviewModal(reviewBtn.getAttribute("data-proid-review"));
+        return;
+      }
+
+      /* 多选下拉 */
+      var msTrigger = t.closest("[data-proid-ms-trigger]");
+      if (msTrigger) {
+        ev.preventDefault();
+        var panel = msTrigger.parentElement.querySelector("[data-proid-ms-panel]");
+        if (panel) panel.hidden = !panel.hidden;
+        return;
+      }
+      if (!t.closest("[data-proid-ms]")) {
+        var openPanel = document.querySelector("[data-proid-ms-panel]:not([hidden])");
+        if (openPanel) openPanel.hidden = true;
+      }
+
+      /* 期限方式切换 */
+      var termMode = t.closest("[data-proid-term-mode]");
+      if (termMode) {
+        ev.preventDefault();
+        var kind = termMode.closest("[data-proid-term-box]").getAttribute("data-proid-term-box");
+        termState[kind].mode = termMode.getAttribute("data-proid-term-mode");
+        var box = termMode.closest("[data-proid-term-box]");
+        box.querySelectorAll("[data-proid-term-mode]").forEach(function (b) {
+          b.classList.toggle("active", b === termMode);
+        });
+        box.querySelectorAll("[data-proid-term-panel]").forEach(function (p) {
+          p.hidden = p.getAttribute("data-proid-term-panel") !== termState[kind].mode;
+        });
+        refreshTermPreview(kind);
+        return;
+      }
+
+      /* 快捷时长 */
+      var preset = t.closest("[data-proid-preset]");
+      if (preset) {
+        ev.preventDefault();
+        var pbox = preset.closest("[data-proid-term-box]");
+        var pkind = pbox.getAttribute("data-proid-term-box");
+        var n = parseInt(preset.getAttribute("data-proid-preset"), 10);
+        if (termState[pkind].mode === "month") {
+          termState[pkind].startMonth = termState[pkind].startMonth || todayStr().slice(0, 7);
+          termState[pkind].endMonth = addMonths(termState[pkind].startMonth + "-01", n - 1).slice(0, 7);
+          var em = pbox.querySelector('[data-proid-term="endMonth"]');
+          if (em) em.value = termState[pkind].endMonth;
+          var sm = pbox.querySelector('[data-proid-term="startMonth"]');
+          if (sm) sm.value = termState[pkind].startMonth;
+        } else {
+          termState[pkind].days = n;
+          var dn = pbox.querySelector('[data-proid-term="days"]');
+          if (dn) dn.value = n;
+        }
+        refreshTermPreview(pkind);
+        return;
+      }
+
+      /* 审批结果单选高亮 */
+      var radio = t.closest(".proid-radio");
+      if (radio) {
+        var group = radio.closest("[data-proid-decision-group]");
+        if (group) {
+          group.querySelectorAll(".proid-radio").forEach(function (r) { r.classList.remove("is-active"); });
+          radio.classList.add("is-active");
+        }
+      }
+    });
+
+    document.addEventListener("change", function (ev) {
+      var t = ev.target;
+      if (!t || !t.closest) return;
+
+      if (t.matches('[data-proid-scope]')) { syncScopeUI(); return; }
+
+      var termField = t.getAttribute && t.getAttribute("data-proid-term");
+      if (termField) {
+        var box = t.closest("[data-proid-term-box]");
+        var kind = box.getAttribute("data-proid-term-box");
+        termState[kind][termField] = t.value;
+        refreshTermPreview(kind);
+        return;
+      }
+
+      var radio2 = t.closest(".proid-radio");
+      if (radio2) {
+        var group2 = radio2.closest("[data-proid-decision-group]");
+        if (group2) {
+          group2.querySelectorAll(".proid-radio").forEach(function (r) { r.classList.remove("is-active"); });
+          radio2.classList.add("is-active");
+        }
+      }
+    });
+
+    /* 悬浮提示：鼠标 / 键盘 / 触屏 */
+    document.addEventListener("mouseover", function (ev) {
+      var icon = ev.target.closest && ev.target.closest("[data-proid-tip]");
+      if (icon) showTip(icon);
+    });
+    document.addEventListener("mouseout", function (ev) {
+      var icon = ev.target.closest && ev.target.closest("[data-proid-tip]");
+      if (icon) hideTip();
+    });
+    document.addEventListener("focusin", function (ev) {
+      var icon = ev.target.closest && ev.target.closest("[data-proid-tip]");
+      if (icon) showTip(icon);
+    });
+    document.addEventListener("focusout", function () { hideTip(); });
+    document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") hideTip(); });
+    window.addEventListener("scroll", hideTip, true);
+
+    /* 遮罩空白处点击关闭（沿用既有 .overlay 交互） */
+    ["proidApplyModal", "proidRenewModal", "proidDetailModal", "proidReviewModal"].forEach(function (id) {
+      var el = byId(id);
+      if (el && !el.dataset.proidBound) {
+        el.dataset.proidBound = "1";
+        el.addEventListener("click", function (event) { if (event.target === el) el.classList.remove("show"); });
+      }
+    });
+  }
+
+  /* ---------- 12. 初始化 ---------- */
+  function boot() {
+    injectStyle();
+    buildModals();
+    bindEvents();
+    injectNav();
+    injectPages();
+    hookRouter();
+    mountAll();
+    observeListPages();
+    normalizeExpiry();
+    /* 存量页面重渲染后补挂（tab 切换、筛选等场景） */
+    [400, 1200, 2600, 4200].forEach(function (ms) {
+      setTimeout(function () { injectNav(); injectPages(); mountAll(); observeListPages(); }, ms);
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})();
+</script>
+
 </body>
 </html>
