@@ -127069,6 +127069,1196 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
   /* ================================================== 数据采集审核（2026-10-08 新增） */
+  /* ================================================== 审核结果评估（2026-11-05 新增 / 2026-11-05 按材料类型分化）
+     基础格式校验 / 数据可信度 / 数据适用性：数据采集审核、数据录入审核两个弹窗共用。
+     需求依据：材料类型切换后，审核规则、字段列与容差随之切换。
+       · 二维材料：可信度比对带隙，相对误差 > 10% 需重算；适用性标注计算方法与实验条件。
+       · 有机光电：可信度比对熔点（同分子不同来源），相对误差 > 10% 需重新计算验证；
+                   适用性标注计算方法（B3LYP/def2svp）与实验条件（熔点测定压力）。
+       · 电解质：  可信度比对燃点（误差 < 10 ℃ 合格），相对误差 > 20% 需重新计算验证；
+                   固态电解质改比对离子电导率；适用性标注计算方法（VASP-PBE）与实验条件（电导率测定温度）。
+       · 机器学习力场：可信度比对单分子能量（误差 < 0.001 AU 合格），相对误差 > 5% 需重新采样计算；
+                   适用性标注采样系综（NVT）与计算参数（CCSD(T)/def2-QZVP）。
+       · 催化材料：可信度比对吸附能，相对误差 > 10% 需重算；适用性标注计算方法与反应条件。 */
+
+  var AUDIT_EVAL_PROFILES = {
+    twod: {
+      key: "twod",
+      label: "二维材料",
+      reportDefault: "表字段规则校验通过 · 格式统一完成",
+      metric: { key: "bandGap", label: "带隙", unit: " eV", digits: 2, relLimit: 10, absPass: null },
+      refTitle: "文献值",
+      rejectTitle: "驳回 / 要求重算",
+      errorWord: "重算",
+      methodHint: "请补充计算软件 / 泛函 / 基组（如 VASP-PBE、HSE06）",
+      condLabel: "实验条件",
+      condHint: "请补充真空层厚度、测试温度等实验条件",
+      methodRe: /(VASP|PBE0?|HSE06?|GGA|DFT|Quantum\s*ESPRESSO|CASTEP|AIMD|第一性原理|PAW|USPP)/i,
+      basisRe: /(def2[-A-Za-z0-9*]+|6-31G\*?|cc-pV[A-Z]Z)/i,
+      condRe: /(真空[^，。；;、]{0,12}|温度[^，。；;、]{0,14}|室温|\d+\s*[~-]?\s*\d*\s*(K|℃))/,
+      fileHints: [{ re: /OUTCAR|POSCAR|INCAR|KPOINTS/i, label: "VASP（PBE/PAW）" }],
+      checks: [
+        { kind: "formula", label: "化学式格式" },
+        { label: "带隙数值范围", key: "bandGap", unit: "eV", min: 0, max: 10, digits: 2 },
+        { label: "晶格常数 a", key: "latticeA", alt: ["lattice", "latticeConstant"], unit: "Å", min: 0, max: 30, digits: 2, kind: "structure-fallback" }
+      ],
+      samples: [
+        { keys: ["mos2", "mos₂", "二硫化钼"], name: "MoS₂", formula: "MoS₂", value: 1.68, ref: 1.88, digits: 2, refNote: "MoS₂ 带隙 1.88 eV（实验值）", refTitle: "文献实验值", source: "Materials Project / 文献值", extra: { latticeA: 3.16 } },
+        { keys: ["ws2", "二硫化钨"], name: "WS₂", formula: "WS₂", value: 1.95, ref: 2.05, digits: 2, refNote: "WS₂ 带隙 2.05 eV（实验值）", refTitle: "文献实验值", source: "C2DB / 文献值", extra: { latticeA: 3.15 } },
+        { keys: ["wse2", "二硒化钨"], name: "WSe₂", formula: "WSe₂", value: 1.52, ref: 1.65, digits: 2, refNote: "WSe₂ 带隙 1.65 eV（实验值）", refTitle: "文献实验值", source: "C2DB / 文献值", extra: { latticeA: 3.28 } },
+        { keys: ["h-bn", "hbn", "氮化硼"], name: "h-BN", formula: "BN", value: 4.60, ref: 5.90, digits: 2, refNote: "h-BN 带隙 5.90 eV（实验值）", refTitle: "文献实验值", source: "C2DB / 文献值", extra: { latticeA: 2.50 } },
+        { keys: ["graphene", "石墨烯"], name: "石墨烯", formula: "C", value: 0.00, ref: null, digits: 2, refNote: "", source: "Materials Project（库内参考值）", extra: { latticeA: 2.46 } }
+      ]
+    },
+
+    opto: {
+      key: "opto",
+      label: "有机光电材料",
+      reportDefault: "分子级字段规则校验通过 · 格式统一完成",
+      metric: { key: "meltingPoint", label: "熔点", unit: " ℃", digits: 1, relLimit: 10, absPass: null },
+      refTitle: "PubChem 实测值",
+      rejectTitle: "驳回 / 要求重新计算验证",
+      errorWord: "重新计算验证",
+      methodHint: "请补充计算方法与基组（如 B3LYP/def2svp），激发能数据须声明溶剂模型",
+      condLabel: "实验条件",
+      condHint: "请补充熔点测定压力、升温速率等实验条件（如 101.3 kPa、2 K/min）",
+      methodRe: /(B3LYP|CAM-B3LYP|PBE0|HSE06?|M06|WB97|DFT|TD-?DFT|Gaussian|ORCA|Multiwfn|\bHF\b)/i,
+      basisRe: /(def2[-A-Za-z0-9*]+|6-31G\*?|6-311G\*?|cc-pV[A-Z]Z|STO-3G)/i,
+      condRe: /(压力[^，。；;、]{0,14}|常压|真空[^，。；;、]{0,10}|升温速率[^，。；;、]{0,10}|温度[^，。；;、]{0,14}|\d+(\.\d+)?\s*kPa|\d+\s*[~-]?\s*\d*\s*℃)/,
+      fileHints: [{ re: /LOG|FCHK|GJF|CHK/i, label: "Gaussian16（泛函 / 基组待确认）" }],
+      checks: [
+        { kind: "formula", label: "分子式格式" },
+        { label: "分子量", key: "mw", unit: "g/mol", min: 1, max: 5000, digits: 2 },
+        { label: "熔点数值范围", key: "meltingPoint", alt: ["mp"], unit: "℃", min: -200, max: 600, digits: 1 }
+      ],
+      samples: [
+        { keys: ["dpp-dtt", "dppdtt", "dpp"], name: "DPP-DTT", formula: "C22H30N2O2S2", value: 412.0, ref: 405.0, digits: 1, refNote: "DPP-DTT 熔点 405 ℃（PubChem 实测值）", source: "PubChem（熔点）", extra: { mw: 418.62 } },
+        { keys: ["pm6"], name: "PM6", formula: "C30H40N2O2S4", value: 512.0, ref: 508.0, digits: 1, refNote: "PM6 熔点 508 ℃（文献报道）", source: "SciFinder / 文献值", extra: { mw: 604.92 } },
+        { keys: ["y6"], name: "Y6", formula: "C82H86N8O2S4", value: 331.0, ref: 327.0, digits: 1, refNote: "Y6 熔点 327 ℃（文献报道）", source: "SciFinder / 文献值", extra: { mw: 1371.94 } },
+        { keys: ["p3ht"], name: "P3HT", formula: "C10H14S", value: 238.0, ref: 232.0, digits: 1, refNote: "P3HT 熔点 232 ℃（文献报道）", source: "Reaxys / 文献值", extra: { mw: 166.29 } },
+        { keys: ["rubrene", "红荧烯"], name: "Rubrene", formula: "C42H28", value: 338.0, ref: 331.0, digits: 1, refNote: "Rubrene 熔点 331 ℃（PubChem 实测值）", source: "PubChem（熔点）", extra: { mw: 532.67 } }
+      ]
+    },
+
+    electrolyte: {
+      key: "electrolyte",
+      label: "电解质材料",
+      reportDefault: "理化字段规则校验通过 · 格式统一完成",
+      metric: { key: "ignitionPoint", label: "燃点", unit: " ℃", digits: 0, relLimit: 20, absPass: 10 },
+      refTitle: "PubChem / 文献值",
+      rejectTitle: "驳回 / 要求重新计算验证",
+      errorWord: "重新计算验证",
+      methodHint: "请补充计算方法与泛函（如 VASP-PBE 或 Gaussian16-B3LYP），并声明截断能 / K 点或基组",
+      condLabel: "实验条件",
+      condHint: "请补充电导率测定温度（如 298 K）、燃点测定压力等实验条件",
+      methodRe: /(VASP|PBE0?|PBEsol|HSE06?|GGA|DFT|Gaussian|Quantum\s*ESPRESSO|CASTEP|AIMD|第一性原理|PAW)/i,
+      basisRe: /(def2[-A-Za-z0-9*]+|6-31G\*?|PAW|USPP)/i,
+      condRe: /(温度[^，。；;、]{0,14}|\d+\s*[~-]?\s*\d*\s*K|℃|室温|压力[^，。；;、]{0,10}|真空[^，。；;、]{0,10}|湿度[^，。；;、]{0,10})/,
+      fileHints: [{ re: /OUTCAR|POSCAR|INCAR|KPOINTS/i, label: "VASP（PBE/PAW，泛函待确认）" }],
+      checks: [
+        { kind: "formula", label: "化学式格式" },
+        { label: "熔点数值范围", key: "meltingPoint", alt: ["mp"], unit: "℃", min: -200, max: 1600, digits: 1, optional: true },
+        { label: "燃点数值范围", key: "ignitionPoint", alt: ["ignition"], unit: "℃", min: -50, max: 800, digits: 0, optional: true }
+      ],
+      samples: [
+        { keys: ["llzo", "li7la3zr2o12", "石榴石"], name: "LLZO", formula: "Li7La3Zr2O12", value: 3.2e-4, ref: 3.5e-4, digits: 6, refNote: "LLZO 离子电导率 3.5×10⁻⁴ S/cm（298 K 文献值）", source: "Materials Project / 文献值", refTitle: "Materials Project 文献值", metricOverride: { key: "conductivity", label: "离子电导率", unit: " S/cm", digits: 6, relLimit: 20, absPass: null }, extra: { meltingPoint: 1200 } },
+        { keys: ["ec", "碳酸乙烯酯"], name: "EC（碳酸乙烯酯）", formula: "C3H4O3", value: 465, ref: 452, digits: 0, refNote: "EC 燃点 452 ℃（PubChem 实测值）", source: "PubChem（燃点）", extra: { meltingPoint: 36.4, ignitionPoint: 465 } },
+        { keys: ["dmc", "碳酸二甲酯"], name: "DMC（碳酸二甲酯）", formula: "C3H6O3", value: 465, ref: 455, digits: 0, refNote: "DMC 燃点 455 ℃（PubChem 实测值）", source: "PubChem（燃点）", extra: { meltingPoint: 4.6, ignitionPoint: 465 } },
+        { keys: ["li6ps5cl", "硫银锗矿", "lgps"], name: "Li₆PS₅Cl", formula: "Li6PS5Cl", value: 3.2e-3, ref: 2.5e-3, digits: 6, refNote: "Li₆PS₅Cl 离子电导率 2.5×10⁻³ S/cm（298 K 文献值）", source: "Materials Project / 文献值", refTitle: "Materials Project 文献值", metricOverride: { key: "conductivity", label: "离子电导率", unit: " S/cm", digits: 6, relLimit: 20, absPass: null }, extra: { meltingPoint: 480 } },
+        { keys: ["peo", "peo-litfsi"], name: "PEO-LiTFSI", formula: "(C2H4O)n", value: 1.1e-5, ref: 1.6e-5, digits: 8, refNote: "PEO-LiTFSI 离子电导率 1.6×10⁻⁵ S/cm（303 K 文献值）", source: "Reaxys / 文献值", refTitle: "Reaxys 文献值", metricOverride: { key: "conductivity", label: "离子电导率", unit: " S/cm", digits: 8, relLimit: 20, absPass: null }, extra: { meltingPoint: 65 } }
+      ]
+    },
+
+    mlff: {
+      key: "mlff",
+      label: "机器学习力场",
+      reportDefault: "构象级字段规则校验通过 · 格式统一完成",
+      metric: { key: "energy", label: "单分子能量", unit: " Hartree", digits: 4, relLimit: 5, absPass: 0.001 },
+      refTitle: "QM9 参考值",
+      rejectTitle: "驳回 / 要求重新采样计算",
+      errorWord: "重新采样计算",
+      methodHint: "请补充量子化学方法与基组（如 CCSD(T)/def2-QZVP）",
+      condLabel: "采样条件",
+      condHint: "请补充采样系综（NVT / NPT）、采样温度与构象数",
+      methodRe: /(CCSD\(?T\)?|MP2|B3LYP|PBE0|DFT|Q-?Chem|VASP|ORCA|GFN2?-xTB|GFN-FF)/i,
+      basisRe: /(def2[-A-Za-z0-9*]+|6-31G\*?|cc-pV[A-Z]Z|STO-3G)/i,
+      condRe: /(NVT|NPT|NVE|采样温度[^，。；;、]{0,10}|\d+\s*K|构象数[^，。；;、]{0,10})/i,
+      fileHints: [
+        { re: /MDP|TOP|GRO/i, label: "Gromacs（采样参数待确认）" },
+        { re: /LOG|INP/i, label: "Q-Chem（方法 / 基组待确认）" }
+      ],
+      checks: [
+        { kind: "formula", label: "分子式格式" },
+        { label: "构象数（≥1000 个 / 体系）", key: "conformers", unit: "个", min: 1000, max: 10000000, digits: 0 },
+        { label: "单分子能量范围", key: "energy", unit: "Hartree", min: -2000, max: 0, digits: 6 }
+      ],
+      samples: [
+        { keys: ["h2o", "水", "water"], name: "H₂O", formula: "H2O", value: -76.4189, ref: -76.4197, digits: 4, refNote: "H₂O 能量 -76.4197 Hartree（QM9 CCSD(T) 参考值）", source: "QM9（CCSD(T)）", extra: { conformers: 1200 } },
+        { keys: ["ch4", "甲烷"], name: "CH₄", formula: "CH4", value: -40.4882, ref: -40.4893, digits: 4, refNote: "CH₄ 能量 -40.4893 Hartree（QM9 CCSD(T) 参考值）", source: "QM9（CCSD(T)）", extra: { conformers: 980 } },
+        { keys: ["nh3", "氨"], name: "NH₃", formula: "NH3", value: -56.5603, ref: -56.5598, digits: 4, refNote: "NH₃ 能量 -56.5598 Hartree（QM9 CCSD(T) 参考值）", source: "QM9（CCSD(T)）", extra: { conformers: 1040 } },
+        { keys: ["gly-gly", "glygly", "甘氨酸二肽"], name: "Gly-Gly", formula: "C4H8N2O3", value: -491.2341, ref: -491.2402, digits: 4, refNote: "Gly-Gly 能量 -491.2402 Hartree（文献 CCSD(T) 参考值）", source: "PDB / 文献值", extra: { conformers: 1350 } },
+        { keys: ["peo", "聚环氧乙烷"], name: "PEO 片段", formula: "C2H4O", value: -154.1024, ref: -154.1098, digits: 4, refNote: "PEO 片段能量 -154.1098 Hartree（文献 MP2 参考值）", source: "Reaxys / 文献值", extra: { conformers: 620 } }
+      ]
+    },
+
+    catalyst: {
+      key: "catalyst",
+      label: "催化材料",
+      reportDefault: "吸附能字段规则校验通过 · 格式统一完成",
+      metric: { key: "adsorptionEnergy", label: "分子吸附能量", unit: " eV", digits: 3, relLimit: 10, absPass: null },
+      refTitle: "Catalysis-Hub 参考值",
+      rejectTitle: "驳回 / 要求重新计算",
+      errorWord: "重新计算",
+      methodHint: "请补充计算方法与泛函（如 VASP-PBE / RPBE）及真空层、收敛判据",
+      condLabel: "反应条件",
+      condHint: "请补充反应温度、压力与电化学测试条件（如 298 K、1 atm）",
+      methodRe: /(VASP|PBE0?|RPBE|BEEF-?vdW|GGA|DFT|CASTEP|Quantum\s*ESPRESSO|第一性原理|PAW)/i,
+      basisRe: /(PAW|USPP|def2[-A-Za-z0-9*]+)/i,
+      condRe: /(温度[^，。；;、]{0,14}|\d+\s*[~-]?\s*\d*\s*K|℃|压力[^，。；;、]{0,10}|atm|真空[^，。；;、]{0,10}|电位[^，。；;、]{0,10}|\d+(\.\d+)?\s*V)/,
+      fileHints: [{ re: /OUTCAR|POSCAR|INCAR|KPOINTS/i, label: "VASP（PBE/PAW，泛函待确认）" }],
+      checks: [
+        { kind: "formula", label: "化学式格式", key: "chemicalFormula" },
+        { label: "吸附能数值范围", key: "adsorptionEnergy", alt: ["e_ads", "adsEnergy"], unit: "eV", min: -10, max: 3, digits: 3 },
+        { label: "活化能数值范围", key: "activationEnergy", alt: ["ea"], unit: "eV", min: 0, max: 10, digits: 3, optional: true }
+      ],
+      samples: [
+        { keys: ["cu(211)", "cu211", "co2rr"], name: "Cu(211)-CO₂", formula: "Cu", extra: { chemicalFormula: "Cu" }, value: -0.86, ref: -0.86, digits: 2, refNote: "Cu(211) 上 CO₂ 吸附能 -0.86 eV（Catalysis-Hub 参考值）", source: "Catalysis-Hub / 文献值" },
+        { keys: ["pt(111)", "pt111"], name: "Pt(111)-CO", formula: "Pt", extra: { chemicalFormula: "Pt" }, value: -1.35, ref: -1.28, digits: 2, refNote: "Pt(111) 上 CO 吸附能 -1.28 eV（文献值）", source: "Catalysis-Hub / 文献值" },
+        { keys: ["cu(111)", "cu111"], name: "Cu(111)-CO", formula: "Cu", extra: { chemicalFormula: "Cu" }, value: -0.52, ref: -0.47, digits: 2, refNote: "Cu(111) 上 CO 吸附能 -0.47 eV（文献值）", source: "Catalysis-Hub / 文献值" },
+        { keys: ["cu-ag", "cuag", "合金"], name: "Cu-Ag(111)-CO", formula: "CuAg", extra: { chemicalFormula: "CuAg" }, value: -0.61, ref: -0.58, digits: 2, refNote: "Cu-Ag(111) 上 CO 吸附能 -0.58 eV（文献值）", source: "OC20 / 文献值" },
+        { keys: ["oc20"], name: "OC20-Cu(100)-CO", formula: "Cu", extra: { chemicalFormula: "Cu" }, value: -0.72, ref: -0.65, digits: 2, refNote: "Cu(100) 上 CO 吸附能 -0.65 eV（OC20 参考值）", source: "OC20 / 文献值" }
+      ]
+    }
+  };
+
+  /* ================================================== 数据录入审核三项要求（2026-11-05 补充）
+     对应要求原文：
+       （a）针对其他现有数据库的数据，录入前对同一低维材料、同一计算方法下的数据进行交叉对比；
+       （b）针对计算所得的数据，提供计算方法和计算参数，保证数据处理结果可重复；
+       （c）数据录入前统一不同数据来源的数据类型，以统一格式录入和展示。
+     依据：《低维材料数据质量衡量标准》《计算条件标准》《摘要规范》各材料分册。
+     ------------------------------------------------------------------ */
+  var AUDIT_REQ_SPECS = {
+    twod: {
+      cross: {
+        basis: "同一二维材料 · 同一计算方法（泛函 / 截断能 / K 点一致）",
+        threshold: "带隙相对偏差 ≤ 10%；晶格常数相对偏差 ≤ 5%",
+        source: "《二维材料数据质量衡量标准》2.2 / 4.1 / 5.2",
+        lib: {
+          "mos2": { metric: "带隙", unit: " eV", digits: 2, key: "bandGap", method: "PBE · 500 eV · 4×4×1", dbs: [
+            { name: "Materials Project", method: "PBE · 520 eV · 6×6×1", value: 1.68 },
+            { name: "C2DB", method: "PBE · 500 eV · 4×4×1", value: 1.67 },
+            { name: "2DMatPedia", method: "PBE · 500 eV · 4×4×1", value: 1.70 }
+          ] },
+          "ws2": { metric: "带隙", unit: " eV", digits: 2, key: "bandGap", method: "PBE · 500 eV · 4×4×1", dbs: [
+            { name: "Materials Project", method: "PBE · 520 eV · 6×6×1", value: 1.98 },
+            { name: "C2DB", method: "PBE · 500 eV · 4×4×1", value: 1.95 },
+            { name: "2DMatPedia", method: "PBE · 500 eV · 4×4×1", value: 2.01 }
+          ] },
+          "cri3": { metric: "带隙", unit: " eV", digits: 2, key: "bandGap", method: "PBE+U · 500 eV · 6×6×1", dbs: [
+            { name: "Materials Project", method: "PBE+U · 520 eV · 6×6×1", value: 0.86 },
+            { name: "C2DB", method: "HSE06 · 500 eV · 6×6×1", value: 1.05 },
+            { name: "2DMatPedia", method: "PBE+U · 500 eV · 6×6×1", value: 0.92 }
+          ] },
+          "ti3c2": { metric: "带隙", unit: " eV", digits: 2, key: "bandGap", method: "PBE · 520 eV · 8×8×1", dbs: [
+            { name: "Materials Project", method: "PBE · 520 eV · 8×8×1", value: 0 },
+            { name: "C2DB", method: "PBE · 520 eV · 8×8×1", value: 0 },
+            { name: "2DMatPedia", method: "PBE · 500 eV · 6×6×1", value: 0.02 }
+          ] }
+        }
+      },
+      repeat: {
+        files: [
+          { name: "结构文件 POSCAR / CIF", re: /POSCAR|\.cif/i },
+          { name: "输入参数 INCAR / KPOINTS", re: /INCAR|KPOINTS/i },
+          { name: "输出文件 OUTCAR / vasprun.xml", re: /OUTCAR|vasprun|\.xml/i },
+          { name: "运行日志 out.log", re: /\.log|日志/i }
+        ],
+        params: [
+          { label: "计算软件及版本", re: /VASP\s*\d[\w.]*|Quantum\s*ESPRESSO|CASTEP/i, need: "如 VASP 5.4.4", must: true },
+          { label: "交换关联泛函", re: /PBE\+U|PBE0|PBE|HSE06|G0W0|GGA/i, need: "如 PBE / HSE06", must: true },
+          { label: "赝势类型及版本", re: /PAW[-\w.]*|USPP/i, need: "如 PAW-PBE 5.4", must: true },
+          { label: "截断能", re: /(\d{3,4}\s*eV)/, need: "标准 500 eV", must: true },
+          { label: "K 点网格", re: /(\d\s*[×x]\s*\d\s*[×x]\s*\d)/, need: "≥ 4×4×1", must: true },
+          { label: "真空层厚度", re: /(\d{2}(?:\.\d+)?\s*[ÅA])/, need: "标准 15 Å", must: true },
+          { label: "色散修正", re: /DFT-?D3|GD3\(?BJ\)?|D3\(BJ\)|D2/, need: "DFT-D3 或注明「无」", must: true },
+          { label: "SOC 是否启用", re: /(SOC\s*[:：]?\s*[是否]|自旋轨道)/, need: "是 / 否", must: false },
+          { label: "收敛标准", re: /(\d+(?:\.\d+)?\s*eV\/[ÅA])/, need: "力收敛 ≤ 0.01 eV/Å", must: true }
+        ]
+      },
+      format: {
+        source: "Materials Project API(JSON) / C2DB(JSON) / 2DMatPedia(JSON) / 文献(PDF 表)",
+        rows: [
+          { field: "化学式", key: "formula", srcType: "自由文本（含 Unicode 下标）", stdType: "string", rule: "元素符号规范化 + 原子数下标", mode: "formula" },
+          { field: "带隙", key: "bandGap", srcType: "JSON 数值（MP 返回 eV 浮点）", stdType: "float(eV)", rule: "统一 eV、保留 2 位；标注直接 / 间接与泛函", mode: "num", digits: 2, unit: " eV" },
+          { field: "晶格常数 a", key: "latticeA", alt: "lattice", srcType: "CIF 文本（Å）", stdType: "float(Å)", rule: "统一 Å、保留 3 位小数", mode: "num", digits: 3, unit: " Å" },
+          { field: "空间群", key: "spaceGroup", srcType: "自由文本（P6₃/mmc 或 194）", stdType: "enum", rule: "统一 Hermann-Mauguin 符号 + 点群", mode: "text" },
+          { field: "数据类型", key: "dataType", srcType: "各来源自定义命名", stdType: "enum", rule: "映射到库内 8 大资源对象枚举", mode: "text" }
+        ]
+      }
+    },
+
+    opto: {
+      cross: {
+        basis: "同一有机光电分子 · 同一计算方法（泛函 / 基组一致）",
+        threshold: "熔点相对偏差 ≤ 10%（绝对偏差仅作参考）",
+        source: "《有机光电材料数据质量衡量标准》4.1 / 5.1",
+        lib: {
+          "y6": { metric: "熔点", unit: " ℃", digits: 1, key: "meltingPoint", method: "实验测定 · 常压", dbs: [
+            { name: "PubChem", method: "实验测定 · 常压", value: 327 },
+            { name: "SciFinder", method: "实验测定 · 常压", value: 330 },
+            { name: "Reaxys", method: "实验测定 · 常压", value: 329 }
+          ] },
+          "p3ht": { metric: "熔点", unit: " ℃", digits: 1, key: "meltingPoint", method: "实验测定 · 常压", dbs: [
+            { name: "PubChem", method: "实验测定 · 常压", value: 232 },
+            { name: "SciFinder", method: "实验测定 · 常压", value: 236 },
+            { name: "Reaxys", method: "实验测定 · 常压", value: 235 }
+          ] },
+          "dpp-dtt": { metric: "熔点", unit: " ℃", digits: 1, key: "meltingPoint", method: "实验测定 · 常压", dbs: [
+            { name: "PubChem", method: "实验测定 · 常压", value: 405 },
+            { name: "SciFinder", method: "实验测定 · 常压", value: 408 },
+            { name: "Reaxys", method: "实验测定 · 常压", value: 407 }
+          ] },
+          "pm6": { metric: "熔点", unit: " ℃", digits: 1, key: "meltingPoint", method: "实验测定 · 常压", dbs: [
+            { name: "PubChem", method: "实验测定 · 常压", value: 508 },
+            { name: "SciFinder", method: "实验测定 · 常压", value: 505 },
+            { name: "Reaxys", method: "实验测定 · 常压", value: 510 }
+          ] }
+        }
+      },
+      repeat: {
+        files: [
+          { name: "输入文件 .gjf / .com", re: /\.gjf|\.com/i },
+          { name: "输出文件 .log / .out", re: /\.log|\.out/i },
+          { name: "格式化检查点 .fchk / .chk", re: /\.fchk|\.chk/i },
+          { name: "结构文件 .mol / .sdf / .pdb", re: /\.mol|\.sdf|\.pdb/i }
+        ],
+        params: [
+          { label: "计算软件及版本", re: /Gaussian\s*16(?:\s*rev\.?\s*[A-Z]\.\d+)?|Gaussian|ORCA|Turbomole|PSI4/i, need: "如 Gaussian 16 Rev. C.01", must: true },
+          { label: "交换关联泛函", re: /B3LYP|CAM-B3LYP|ωB97X|PBE0|M06/i, need: "B3LYP 及以上", must: true },
+          { label: "基组", re: /def2-[A-Z]+|6-31G\*|6-311G|cc-pV[A-Z]Z/i, need: "≥ def2-SVP", must: true },
+          { label: "溶剂模型", re: /PCM|SMD|气相/i, need: "必须显式声明（PCM / SMD / 气相）", must: true },
+          { label: "色散校正", re: /GD3\(?BJ\)?|GD3|GD2|D3/i, need: "启用 GD3(BJ)", must: true },
+          { label: "SCF 收敛判据", re: /(1e-6|1\.0D-0?6)/i, need: "≤ 1e-6", must: true },
+          { label: "频率验证（虚频数）", re: /无虚频|虚频\s*\d*/, need: "无虚频", must: true }
+        ]
+      },
+      format: {
+        source: "PubChem API(JSON) / SciFinder(CSV) / Gaussian(.log) / 文献(PDF 表)",
+        rows: [
+          { field: "分子式", key: "formula", srcType: "自由文本（含 Unicode 下标）", stdType: "string", rule: "元素符号规范化 + 原子数下标", mode: "formula" },
+          { field: "分子量", key: "mw", srcType: "JSON 数值 / 文献 mg·mol⁻¹", stdType: "float(g/mol)", rule: "统一 g/mol、保留 2 位", mode: "num", digits: 2, unit: " g/mol" },
+          { field: "熔点", key: "meltingPoint", srcType: "文献表（含 ℃ / K 混用）", stdType: "float(℃)", rule: "统一 ℃、保留 1 位；K 值按 −273.15 换算", mode: "num", digits: 1, unit: " ℃" },
+          { field: "HOMO-LUMO 能隙", key: "bandGap", srcType: "计算输出（eV / Hartree 混用）", stdType: "float(eV)", rule: "统一 eV（1 Hartree = 27.2114 eV）、保留 2 位", mode: "num", digits: 2, unit: " eV" },
+          { field: "数据类型", key: "dataType", srcType: "各来源自定义命名", stdType: "enum", rule: "映射到库内 4 类核心对象枚举", mode: "text" }
+        ]
+      }
+    },
+
+    electrolyte: {
+      cross: {
+        basis: "同一电解质材料 · 同一计算方法（软件 / 泛函 / 基组一致）",
+        threshold: "燃点绝对误差 ≤ 10 ℃、相对误差 ≤ 20%；离子电导率相对偏差 ≤ 20%（25 ℃±2 ℃ 测试）",
+        source: "《电解质材料数据质量衡量标准》4.1 / 5.2",
+        lib: {
+          "li7la3zr2o12": { metric: "离子电导率", unit: " S/cm", digits: 6, key: "conductivity", method: "VASP-PBE · MD 300 K", dbs: [
+            { name: "Materials Project", method: "VASP-PBE · MD 300 K", value: 3.5e-4 },
+            { name: "文献（实验）", method: "EIS 实测 298 K", value: 3.9e-4 },
+            { name: "ICSD 衍生计算", method: "VASP-PBE · MD 300 K", value: 3.4e-4 }
+          ] },
+          "li6ps5cl": { metric: "离子电导率", unit: " S/cm", digits: 6, key: "conductivity", method: "VASP-PBE · MD 300 K", dbs: [
+            { name: "Materials Project", method: "VASP-PBE · MD 300 K", value: 2.5e-3 },
+            { name: "文献（实验）", method: "EIS 实测 298 K", value: 3.0e-3 },
+            { name: "Reaxys", method: "VASP-PBE · MD 300 K", value: 2.6e-3 }
+          ] },
+          "peo-litfsi": { metric: "燃点", unit: " ℃", digits: 0, key: "ignitionPoint", method: "实验测定 · 常压", dbs: [
+            { name: "PubChem", method: "实验测定 · 常压", value: 410 },
+            { name: "文献（实验）", method: "实验测定 · 常压", value: 405 },
+            { name: "Reaxys", method: "实验测定 · 常压", value: 412 }
+          ] },
+          "lifsi-dme": { metric: "燃点", unit: " ℃", digits: 0, key: "ignitionPoint", method: "实验测定 · 常压", dbs: [
+            { name: "PubChem", method: "实验测定 · 常压", value: 418 },
+            { name: "Reaxys", method: "实验测定 · 常压", value: 430 },
+            { name: "文献（实验）", method: "实验测定 · 常压", value: 421 }
+          ] }
+        }
+      },
+      repeat: {
+        files: [
+          { name: "分子 / 结构输入 .gjf / .com", re: /\.gjf|\.com/i },
+          { name: "Gaussian 输出 .log / .fchk", re: /\.log|\.fchk/i },
+          { name: "VASP 输入 POSCAR / INCAR / KPOINTS", re: /POSCAR|INCAR|KPOINTS|\.cif/i, only: /VASP|PAW/i },
+          { name: "VASP 输出 OUTCAR / DOSCAR", re: /OUTCAR|DOSCAR|\.xml/i, only: /VASP|PAW/i },
+          { name: "电荷分析输出（Multiwfn）", re: /multiwfn|bader|电荷/i, only: /Multiwfn|Bader|电荷/ }
+        ],
+        params: [
+          { label: "计算软件及版本", re: /Gaussian\s*16(?:\s*rev\.?\s*[A-Z]\.\d+)?|VASP\s*\d[\w.]*|Q-Chem|Molpro/i, need: "如 Gaussian 16 Rev. C.01 / VASP 5.4.4", must: true },
+          { label: "交换关联泛函", re: /B3LYP|PBE0|PBE|PBEsol|HSE06|M06|ωB97X/i, need: "如 B3LYP / PBE", must: true },
+          { label: "基组 / 赝势", re: /def2-[A-Z]+|6-31G\*|6-311G|PAW[-\w.]*/, need: "如 6-311+G(d,p) / PAW-PBE", must: true },
+          { label: "溶剂模型", re: /PCM|SMD|气相/i, need: "PCM / SMD，未使用注明「气相」", must: true },
+          { label: "色散修正", re: /GD3\(?BJ\)?|GD3|DFT-?D3|D3/, need: "如 GD3BJ，未使用注明「无」", must: true },
+          { label: "收敛标准", re: /1e-6|1e-5/, need: "分子 ≤ 1e-6 Hartree；周期 ≤ 1e-5 eV", must: true },
+          { label: "频率验证（虚频数）", re: /无虚频|虚频\s*\d*/, need: "是 / 否，虚频数量", must: true }
+        ]
+      },
+      format: {
+        source: "Materials Project(JSON) / PubChem(JSON) / Reaxys(CSV) / VASP 输出 / 实验文献",
+        rows: [
+          { field: "化学式", key: "formula", srcType: "自由文本（含电荷 / 连字符）", stdType: "string", rule: "元素符号规范化，电荷平衡", mode: "formula" },
+          { field: "离子电导率", key: "conductivity", srcType: "mS/cm 与 S/cm 混用", stdType: "float(S/cm)", rule: "统一 S/cm、科学计数法 2 位有效数字", mode: "sci", digits: 6, unit: " S/cm" },
+          { field: "燃点", key: "ignitionPoint", srcType: "文献表（℉ / ℃ / K 混用）", stdType: "float(℃)", rule: "统一 ℃、取整；℉ 按 (℉−32)×5/9 换算", mode: "num", digits: 0, unit: " ℃" },
+          { field: "熔点", key: "meltingPoint", srcType: "文献表（℃ / K 混用）", stdType: "float(℃)", rule: "统一 ℃、保留 1 位", mode: "num", digits: 1, unit: " ℃" },
+          { field: "电解质类型", key: "type", srcType: "各来源自定义分类", stdType: "enum", rule: "映射到 3 类核心对象（有机电解液 / 固态有机 / 固态无机）", mode: "text" }
+        ]
+      }
+    },
+
+    mlff: {
+      cross: {
+        basis: "同一分子体系 · 同一参考方法（CCSD(T) / MP2 与基组一致）",
+        threshold: "单分子能量绝对误差 ≤ 0.001 AU、相对误差 ≤ 5%",
+        source: "《机器学习力场数据质量衡量标准》4.1 / 5",
+        lib: {
+          "h2o": { metric: "单分子能量", unit: " Hartree", digits: 4, key: "energy", method: "CCSD(T)/def2-QZVP", dbs: [
+            { name: "QM9", method: "CCSD(T)/def2-QZVP", value: -76.3212 },
+            { name: "MD17", method: "CCSD(T)/def2-QZVP", value: -76.3208 },
+            { name: "文献 CCSD(T)", method: "CCSD(T)/def2-QZVP", value: -76.3215 }
+          ] },
+          "ch4": { metric: "单分子能量", unit: " Hartree", digits: 4, key: "energy", method: "CCSD(T)/def2-QZVP", dbs: [
+            { name: "QM9", method: "CCSD(T)/def2-QZVP", value: -40.5123 },
+            { name: "MD17", method: "CCSD(T)/def2-QZVP", value: -40.5119 },
+            { name: "文献 CCSD(T)", method: "CCSD(T)/def2-QZVP", value: -40.5127 }
+          ] },
+          "peo": { metric: "单分子能量", unit: " Hartree", digits: 4, key: "energy", method: "MP2/def2-TZVP", dbs: [
+            { name: "QM9", method: "MP2/def2-TZVP", value: -154.2075 },
+            { name: "Reaxys", method: "MP2/def2-TZVP", value: -154.209 },
+            { name: "文献 MP2", method: "MP2/def2-TZVP", value: -154.2081 }
+          ] },
+          "gly-gly": { metric: "单分子能量", unit: " Hartree", digits: 4, key: "energy", method: "CCSD(T)/def2-QZVP", dbs: [
+            { name: "QM9", method: "CCSD(T)/def2-QZVP", value: -491.3355 },
+            { name: "PDB 衍生计算", method: "CCSD(T)/def2-QZVP", value: -491.3374 },
+            { name: "文献 CCSD(T)", method: "CCSD(T)/def2-QZVP", value: -491.3362 }
+          ] }
+        }
+      },
+      repeat: {
+        files: [
+          { name: "训练集 XYZ / NPZ / TRAJ", re: /xyz|npz|traj|hdf5/i },
+          { name: "采样输入 MDP / TOP / GRO", re: /mdp|top|gro/i },
+          { name: "模型权重 .pth / .pt / .model", re: /\.pth|\.pt|model/i },
+          { name: "环境依赖清单 requirements / environment.yml", re: /requirement|environment|conda/i }
+        ],
+        params: [
+          { label: "MLIP 软件包及版本", re: /MACE[-\w.]*|DeePMD[-\w.]*|NequIP[-\w.]*|SchNet|sGDML|Gromacs|Amber/i, need: "如 MACE-OFF23 v1", must: true },
+          { label: "量子化学方法", re: /CCSD\(T\)|MP2|PBE0|HSE06/, need: "CCSD(T) / MP2", must: true },
+          { label: "基组", re: /def2-QZVP|def2-TZVP|def2-SVP|6-31G\*/i, need: "≥ def2-TZVP", must: true },
+          { label: "采样系综", re: /\b(NVT|NPT|NVE)\b/, need: "NVT / NPT（禁止 NVE）", must: true },
+          { label: "采样温度", re: /(\d{2,4})\s*K/, need: "200 ~ 1000 K", must: true, min: 200, max: 1000 },
+          { label: "构象数", re: /构象数\D{0,3}(\d{3,})|(\d{3,})\s*个/, need: "≥ 1000 个 / 体系", must: true, min: 1000 },
+          { label: "Python / PyTorch / CUDA 版本", re: /(\d+\.\d+\s*\/\s*\d+\.\d+\s*\/\s*\d+\.\d+)/, need: "三项版本号", must: true },
+          { label: "GPU / CPU 规格", re: /(A100|H100|V100|RTX\s*\d{4})(\s*\d+\s*GB)?/i, need: "型号 + 显存 / 内存", must: false }
+        ]
+      },
+      format: {
+        source: "QM9(XYZ) / MD17(NPZ) / Reaxys(CSV) / Gromacs 轨迹 / 本地计算输出",
+        rows: [
+          { field: "分子式", key: "formula", srcType: "自由文本", stdType: "string", rule: "元素符号规范化，原子数与坐标数一致", mode: "formula" },
+          { field: "单分子能量", key: "energy", srcType: "XYZ 注释行（Hartree / kcal·mol⁻¹ 混用）", stdType: "float(Hartree)", rule: "统一 Hartree、保留 6 位（1 kcal/mol = 0.0015936 Hartree）", mode: "num", digits: 4, unit: " Hartree" },
+          { field: "构象数", key: "conformers", srcType: "文本（含「约 / ≈」修饰）", stdType: "int(个)", rule: "统一整数、去除修饰词", mode: "num", digits: 0, unit: " 个" },
+          { field: "采样系综", key: "ensemble", srcType: "枚举（nvt / NVT / 正则系综）", stdType: "enum", rule: "统一大写枚举 NVT / NPT / NVE", mode: "text" },
+          { field: "采样温度", key: "temp", srcType: "输入卡（K / ℃ 混用）", stdType: "int(K)", rule: "统一 K、取整；℃ 按 +273.15 换算", mode: "num", digits: 0, unit: " K" }
+        ]
+      }
+    },
+
+    catalyst: {
+      cross: {
+        basis: "同一催化表面 · 同一吸附构型 · 同一计算方法（泛函 / 截断能 / K 点一致）",
+        threshold: "吸附能相对偏差 ≤ 10%（或 ±0.05 eV，取宽者）",
+        source: "《催化材料数据质量衡量标准》4.1 / 5",
+        lib: {
+          "cu(211)-co2rr": { metric: "分子吸附能量", unit: " eV", digits: 3, key: "adsorptionEnergy", method: "VASP-PBE · 400 eV · 3×3×1", dbs: [
+            { name: "Catalysis-Hub", method: "VASP-PBE · 400 eV · 3×3×1", value: -0.86 },
+            { name: "OC20", method: "VASP-PBE · 400 eV · 3×3×1", value: -0.84 },
+            { name: "文献（DFT）", method: "VASP-RPBE · 400 eV · 3×3×1", value: -0.88 }
+          ] },
+          "cu(111)-corr": { metric: "分子吸附能量", unit: " eV", digits: 3, key: "adsorptionEnergy", method: "VASP-PBE · 400 eV · 3×3×1", dbs: [
+            { name: "Catalysis-Hub", method: "VASP-PBE · 400 eV · 3×3×1", value: -1.10 },
+            { name: "OC20", method: "VASP-PBE · 400 eV · 3×3×1", value: -1.15 },
+            { name: "文献（DFT）", method: "VASP-PBE · 400 eV · 3×3×1", value: -1.09 }
+          ] },
+          "ag-cu(211)-co2rr": { metric: "分子吸附能量", unit: " eV", digits: 3, key: "adsorptionEnergy", method: "VASP-PBE · 400 eV · 3×3×1", dbs: [
+            { name: "Catalysis-Hub", method: "VASP-PBE · 400 eV · 3×3×1", value: -0.98 },
+            { name: "OC20", method: "VASP-PBE · 400 eV · 3×3×1", value: -1.01 },
+            { name: "文献（DFT）", method: "VASP-BEEF-vdW · 400 eV · 3×3×1", value: -1.06 }
+          ] },
+          "pt1-cu(111)-her": { metric: "分子吸附能量", unit: " eV", digits: 3, key: "adsorptionEnergy", method: "VASP-PBE · 400 eV · 3×3×1", dbs: [
+            { name: "Catalysis-Hub", method: "VASP-PBE · 400 eV · 3×3×1", value: -0.45 },
+            { name: "OC20", method: "VASP-PBE · 400 eV · 3×3×1", value: -0.4 },
+            { name: "文献（DFT）", method: "VASP-PBE · 400 eV · 3×3×1", value: -0.43 }
+          ] }
+        }
+      },
+      repeat: {
+        files: [
+          { name: "结构文件 POSCAR / CIF", re: /POSCAR|\.cif/i },
+          { name: "输入参数 INCAR / KPOINTS", re: /INCAR|KPOINTS/i },
+          { name: "输出文件 OUTCAR / CONTCAR", re: /OUTCAR|CONTCAR/i },
+          { name: "过渡态频率输出（活化能必填）", re: /频率|freq|dimer|neb/i }
+        ],
+        params: [
+          { label: "计算软件及版本", re: /VASP\s*\d[\w.]*|Quantum\s*ESPRESSO|CASTEP/i, need: "如 VASP 5.4.4", must: true },
+          { label: "交换关联泛函", re: /BEEF-vdW|RPBE|PBE/, need: "PBE / RPBE 或 BEEF-vdW", must: true },
+          { label: "截断能", re: /(\d{3,4}\s*eV)/, need: "≥ 400 eV", must: true },
+          { label: "K 点密度", re: /(\d\s*[×x]\s*\d\s*[×x]\s*\d)/, need: "≥ 3×3×1（按单胞折算）", must: true },
+          { label: "真空层厚度", re: /(\d{2}(?:\.\d+)?\s*[ÅA])/, need: "表面模型 ≥ 12 Å", must: true },
+          { label: "力收敛判据", re: /(\d+(?:\.\d+)?\s*eV\/[ÅA])/, need: "≤ 0.02 eV/Å", must: true },
+          { label: "色散修正", re: /BEEF-vdW|DFT-?D3|GD3\(?BJ\)?|D3/, need: "按体系注明（D3 / 无）", must: false }
+        ]
+      },
+      format: {
+        source: "Catalysis-Hub(JSON) / OC20(JSON) / 文献(PDF 表) / VASP 输出",
+        rows: [
+          { field: "体系标识", key: "formula", srcType: "自由文本（掺杂-晶面-反应）", stdType: "string", rule: "统一「掺杂元素-晶面-反应」命名，元素符号规范", mode: "formula" },
+          { field: "表面晶面", key: "facet", srcType: "枚举（Cu211 / Cu(211) / 211）", stdType: "enum", rule: "统一密勒指数写法 M(hkl)", mode: "text" },
+          { field: "分子吸附能量", key: "adsorptionEnergy", srcType: "JSON 数值（eV / kcal·mol⁻¹ 混用）", stdType: "float(eV)", rule: "统一 eV、保留 3 位（1 kcal/mol = 0.04336 eV）", mode: "num", digits: 3, unit: " eV" },
+          { field: "活化能", key: "activationEnergy", srcType: "文献表（kJ·mol⁻¹ / eV 混用）", stdType: "float(eV)", rule: "统一 eV、保留 3 位", mode: "num", digits: 3, unit: " eV" },
+          { field: "吸附分子 / 中间体", key: "adsorbate", srcType: "枚举（CO2 / co2 / *CO2）", stdType: "enum", rule: "统一去星号、元素符号规范书写", mode: "text" }
+        ]
+      }
+    }
+  };
+
+  function auditReqSpec() { return AUDIT_REQ_SPECS[auditEvalKey()] || AUDIT_REQ_SPECS.twod; }
+
+  /* 泛函 / 方法指纹：用于判定「是否同一计算方法」 */
+  function auditMethodFp(text) {
+    var t = String(text == null ? "" : text);
+    var m = t.match(/CCSD\(T\)|MP2|BEEF-?vdW|RPBE|PBE\+U|PBEsol|PBE0|PBE|HSE06|G0W0|B3LYP|CAM-B3LYP|ωB97X|M06/i);
+    return m ? m[0].toUpperCase() : "";
+  }
+
+  function auditEvalKey() {
+    var k = "";
+    try { k = keyOf(PAGE_ID); } catch (e) { k = ""; }
+    if (!k) { try { k = CFG_KEY; } catch (e2) { k = ""; } }
+    return AUDIT_EVAL_PROFILES[k] ? k : "twod";
+  }
+
+  function auditEvalProfile() { return AUDIT_EVAL_PROFILES[auditEvalKey()]; }
+
+  /* 表字段规则：随材料类型切换（审核弹窗「表字段规则校验」表） */
+  function auditFieldRules() {
+    var k = auditEvalKey();
+    if (k === "opto") {
+      return [
+        ["分子式", "字符", "元素符号按国际通行规范书写，原子个数归一化（如 C22H30N2O2S2）", "通过"],
+        ["分子量", "数值", "单位 g/mol，保留小数点后 2 位，须大于 0", "通过"],
+        ["熔点", "数值", "单位 ℃，保留小数点后 1 位，取值 -200 ~ 600 ℃", "通过"],
+        ["闪点", "数值", "单位 ℃，须低于沸点且高于熔点", "通过"],
+        ["HOMO-LUMO 能隙", "数值", "单位 eV，保留小数点后 2 位，取值 0 ~ 10 eV", "通过"],
+        ["激发能 / 发射能", "数值", "单位 eV，须标注泛函、基组与溶剂模型", "通过"]
+      ];
+    }
+    if (k === "electrolyte") {
+      return [
+        ["化学式", "字符", "元素符号规范书写，电荷平衡（如 Li6PS5Cl）", "通过"],
+        ["熔点", "数值", "单位 ℃，保留小数点后 1 位，取值 -200 ~ 1600 ℃", "通过"],
+        ["燃点", "数值", "单位 ℃，取值 -50 ~ 800 ℃，须高于闪点", "通过"],
+        ["离子电导率", "数值", "单位 S/cm，科学计数法保留 2 位有效数字，须标注测试温度", "通过"],
+        ["介电常数", "数值", "无量纲，须大于 0", "通过"],
+        ["带隙", "数值", "单位 eV，保留小数点后 2 位，取值 0 ~ 10 eV", "通过"]
+      ];
+    }
+    if (k === "mlff") {
+      return [
+        ["分子式", "字符", "元素符号规范书写，原子数与坐标数一致", "通过"],
+        ["构象数", "数值", "单位 个，须 ≥ 1000 个 / 体系", "通过"],
+        ["单分子能量", "数值", "单位 Hartree，保留小数点后 6 位，须标注方法与基组", "通过"],
+        ["原子受力", "数值", "单位 eV/Å，最大分量 ≤ 0.05 eV/Å", "通过"],
+        ["采样系综", "枚举", "NVT / NPT，禁止 NVE（未控温）", "通过"],
+        ["采样温度", "数值", "单位 K，取值 200 ~ 1000 K", "通过"]
+      ];
+    }
+    if (k === "catalyst") {
+      return [
+        ["化学式", "字符", "元素符号规范书写，与元素组成一致（如 PtNi）", "通过"],
+        ["催化表面晶面", "枚举", "密勒指数格式（如 Cu(211)），与结构文件一致", "通过"],
+        ["分子吸附能量", "数值", "单位 eV，保留小数点后 3 位，取值 -10 ~ 3 eV", "通过"],
+        ["反应能", "数值", "单位 eV，保留小数点后 3 位", "通过"],
+        ["活化能", "数值", "单位 eV，保留小数点后 3 位，须附过渡态频率验证", "通过"],
+        ["真空层厚度", "数值", "单位 Å，表面模型须 ≥ 12 Å", "通过"]
+      ];
+    }
+    return TABLE_RULES;
+  }
+
+  function auditDefaultReport() { return auditEvalProfile().reportDefault; }
+
+  function auditEvalSeed(text) {
+    var s = String(text == null ? "" : text), h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100003;
+    return h;
+  }
+
+  function auditEvalNormFormula(text) {
+    var subs = { "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9" };
+    return String(text == null ? "" : text)
+      .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, function (c) { return subs[c] || ""; })
+      .replace(/\s+/g, "");
+  }
+
+  function auditEvalNum(v) {
+    if (v === "" || v == null) return null;
+    var raw = String(v).trim().replace(/,/g, "");
+    var mm = raw.match(/([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/);
+    if (!mm) return null;
+    var n = parseFloat(mm[1]);
+    return isFinite(n) ? n : null;
+  }
+
+  function auditEvalNumText(v, d) {
+    var n = auditEvalNum(v);
+    if (n === null) return String(v == null ? "" : v);
+    if (d == null) return String(n);
+    if (n !== 0 && Math.abs(n) < 0.001) {
+      var sup = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "-": "⁻" };
+      var ex = n.toExponential(2).replace("e", "|").split("|");
+      return ex[0] + "×10" + String(ex[1]).replace(/[-0-9]/g, function (ch) { return sup[ch] || ch; });
+    }
+    return String(Number(n.toFixed(d)));
+  }
+
+  function auditEvalSampleFor(text) {
+    var prof = auditEvalProfile();
+    var hay = auditEvalNormFormula(String(text == null ? "" : text)).toLowerCase();
+    var hit = null;
+    prof.samples.some(function (s) {
+      var ok = s.keys.some(function (k) { return hay.indexOf(String(k).toLowerCase()) >= 0; });
+      if (ok) hit = s;
+      return ok;
+    });
+    if (!hit) hit = prof.samples[auditEvalSeed(String(text || "")) % prof.samples.length];
+    return hit;
+  }
+
+  /* 计算方法：优先取显式标注，其次按原始文件类型识别 */
+  function auditEvalMethod(text, fileLabel, prof) {
+    var body = String(text || "");
+    var hit = body.match(prof.methodRe);
+    if (hit) {
+      var basis = body.match(prof.basisRe);
+      return { state: "explicit", label: hit[0] + (basis ? "/" + basis[0] : "") };
+    }
+    var files = String(fileLabel || "");
+    var hints = prof.fileHints || [];
+    for (var i = 0; i < hints.length; i++) {
+      if (hints[i].re.test(files)) return { state: "inferred", label: hints[i].label };
+    }
+    return { state: "missing", label: "" };
+  }
+
+  function auditEvalCondition(text, explicit, prof) {
+    if (explicit && String(explicit).trim()) return { state: "explicit", label: String(explicit).trim() };
+    var hit = String(text || "").match(prof.condRe);
+    if (hit) return { state: "explicit", label: hit[0] };
+    return { state: "missing", label: "" };
+  }
+
+  /* 核心评估：校验项 / 可信度指标 / 阈值全部来自材料配置 */
+  function buildAuditEvalCore(input) {
+    input = input || {};
+    var prof = input.profile || auditEvalProfile();
+    var values = input.values || {};
+    var checks = [];
+
+    (prof.checks || []).forEach(function (item) {
+      if (item.kind === "formula") {
+        var raw = String(values[item.key] || input.formula || values.formula || "");
+        var f = auditEvalNormFormula(raw);
+        /* 体系标识允许「掺杂元素-晶面-反应」这类复合写法：去掉括注与连接符后按元素序列校验 */
+        var core = f.replace(/\([^)]*\)/g, "").replace(/[-_/·\s]/g, "");
+        var ok = !!core && /^([A-Z][a-z]?\d*(\.\d+)?)+$/.test(core) && /^[A-Z]/.test(core);
+        var poly = /^\(.*\)n?$/i.test(f);
+        var compound = /[-_/()]/.test(f);
+        checks.push({
+          label: item.label,
+          value: raw || "未录入",
+          status: (ok || poly) ? "pass" : (raw ? "fail" : "warn"),
+          badge: (ok || poly) ? (compound ? "符合（体系标识）" : "符合（Pass）") : (raw ? "格式不符" : "缺失（待补）")
+        });
+        return;
+      }
+      if (item.kind === "structure-fallback") {
+        var n0 = null;
+        var keys0 = [item.key].concat(item.alt || []);
+        for (var j = 0; j < keys0.length; j++) { n0 = auditEvalNum(values[keys0[j]]); if (n0 !== null) break; }
+        if (n0 !== null) {
+          var ok0 = n0 > item.min && n0 < item.max;
+          checks.push({
+            label: item.label,
+            value: auditEvalNumText(n0, item.digits) + " " + item.unit,
+            status: ok0 ? "pass" : "fail",
+            badge: ok0 ? "符合（Pass）" : "超出合理区间"
+          });
+          return;
+        }
+        if (input.structureLabel) {
+          checks.push({ label: "晶体结构标注", value: input.structureLabel, status: "pass", badge: "符合（Pass）" });
+          return;
+        }
+        checks.push({
+          label: "原始文件关联",
+          value: input.fileLabel || "未关联文件",
+          status: input.fileOk ? "pass" : "warn",
+          badge: input.fileOk ? "符合（Pass）" : "缺失（待补）"
+        });
+        return;
+      }
+      var n = null;
+      var keys = [item.key].concat(item.alt || []);
+      for (var i = 0; i < keys.length; i++) { n = auditEvalNum(values[keys[i]]); if (n !== null) break; }
+      var inRange = n !== null && n >= item.min && n <= item.max;
+      var missingBadge = item.optional ? "非必填" : "缺失（待补）";
+      checks.push({
+        label: item.label,
+        value: n === null ? (item.optional ? "未要求（非必填）" : "未录入") : (auditEvalNumText(n, item.digits) + (item.unit ? " " + item.unit : "")),
+        status: inRange ? "pass" : (n === null ? (item.optional ? "pass" : "warn") : "fail"),
+        badge: inRange ? "符合（Pass）" : (n === null ? missingBadge : (n < item.min ? "低于 " + item.min + (item.unit ? " " + item.unit : "") : "超出 " + item.max + (item.unit ? " " + item.unit : "")))
+      });
+    });
+
+    var passCount = 0, warnCount = 0, failCount = 0;
+    checks.forEach(function (item) {
+      if (item.status === "pass") passCount++;
+      else if (item.status === "warn") warnCount++;
+      else failCount++;
+    });
+    var checksTone = failCount ? "fail" : (warnCount ? "warn" : "pass");
+    var checksTag = failCount ? (failCount + " 项异常") : (warnCount ? (warnCount + " 项待补") : (passCount + " 项通过"));
+
+    /* 2. 数据可信度：同一样品在不同来源之间比对 */
+    var metric = input.metric || prof.metric;
+    var cur = auditEvalNum(values[metric.key]);
+    if (cur === null) cur = auditEvalNum(input.metricValue);
+    var ref = auditEvalNum(input.refValue);
+    var refName = input.refTitle || prof.refTitle;
+    var curMissing = cur === null;
+    var noRef = ref === null || ref === undefined;
+    var relPct = null, errAbs = null, errBasis;
+    if (!curMissing && !noRef) {
+      errAbs = Math.abs(cur - ref);
+      relPct = ref === 0 ? null : errAbs / Math.abs(ref) * 100;
+      errBasis = "录入 " + auditEvalNumText(cur, metric.digits) + metric.unit +
+        " 与" + refName + " " + auditEvalNumText(ref, metric.digits) + metric.unit +
+        " 比对，绝对偏差 " + auditEvalNumText(errAbs, metric.digits) + metric.unit +
+        (relPct === null ? "（参考值为 0，按绝对偏差判定）" : "");
+    } else if (curMissing) {
+      errBasis = "本条记录未录入" + metric.label + "，暂无法与" + refName + "比对，请补充后复核";
+    } else {
+      errBasis = "暂无可比的" + refName + "，系统不臆造偏差；请人工补充同材料 · 同方法的参考值后复核";
+    }
+    var pctText = function (v) { return v == null ? "—" : ((v >= 0.1 ? v.toFixed(1) : (v > 0 ? v.toFixed(3) : "0")) + "%"); };
+    var fmtAbs = (metric.absPass != null) ? auditEvalNumText(metric.absPass, metric.digits) + metric.unit : "";
+    var limitText = (fmtAbs ? "绝对误差 ≤ " + fmtAbs + "、" : "") + "相对误差 ≤ " + metric.relLimit + "%";
+    var overRel = !curMissing && !noRef && relPct !== null && relPct > metric.relLimit;
+    var overAbs = !curMissing && !noRef && metric.absPass != null && errAbs !== null && errAbs > metric.absPass;
+    var credTone = curMissing ? "note" : (noRef ? "note" : (overRel ? "reject" : (overAbs ? "note" : "pass")));
+    var credTitle = curMissing ? ("无法比对（" + metric.label + "未录入）")
+      : (noRef ? "无法比对（无参考值）"
+        : (overRel ? prof.rejectTitle : (overAbs ? "需人工复核" : "通过（误差在阈值内）")));
+    var credNote = curMissing
+      ? "备注：本条记录未录入" + metric.label + "，无法与" + refName + "比对，请补充实测 / 计算值后再判定可信度"
+      : (noRef ? "备注：本条记录虽有" + metric.label + "，但未取得同材料 · 同方法的参考值，无法判定可信度，请补充参考数据源（见下方（a）交叉对比）"
+        : (overRel ? "备注：相对误差超出 " + metric.relLimit + "% 阈值，已通知录入员核对原始来源并" + prof.errorWord
+          : (overAbs ? "备注：绝对偏差超出 " + fmtAbs + " 合格线（相对误差仍在 " + metric.relLimit + "% 内），请录入员复核来源后确认"
+            : "备注：误差未超出判定阈值（" + limitText + "），可信度满足入库要求" +
+              (/实验|实测|文献实验/.test(refName) ? "（参考值为实验口径，与计算值存在系统性偏差，阈值判定仅供复核参考）" : ""))));
+    var credTag = curMissing ? "待补指标" : (noRef ? "无参考值" : (overRel ? "超出阈值" : (overAbs ? "超合格线" : "阈值内")));
+    var errBadge = curMissing ? "待补指标" : (noRef ? "无参考值" : (overRel ? ("超出 " + metric.relLimit + "% 阈值") : (overAbs ? ("超出 " + fmtAbs + " 合格线") : "未超阈值")));
+    var errMain = curMissing ? "—（指标缺失）"
+      : (noRef ? "—（无参考值）"
+        : ((errAbs !== null && metric.absPass != null)
+          ? ("Δ " + auditEvalNumText(errAbs, metric.digits) + metric.unit + "（" + pctText(relPct) + "）")
+          : pctText(relPct)));
+
+    /* 3. 数据适用性：计算方法 + 实验 / 采样条件 */
+    var method = auditEvalMethod(input.methodText, input.rawFiles || input.fileLabel, prof);
+    var cond = auditEvalCondition(input.methodText, input.condText, prof);
+    var methodOk = method.state === "explicit";
+    var condOk = cond.state === "explicit";
+    var appTone = (methodOk && condOk) ? "pass" : "note";
+    var appTitle, appNote;
+    if (methodOk && condOk) {
+      appTitle = "通过（适用性说明完整）";
+      appNote = "备注：计算方法（" + method.label + "）与" + prof.condLabel + "（" + cond.label + "）均已标注，可供用户判断是否符合研究需求";
+    } else if (method.state === "missing" && cond.state === "missing") {
+      appTitle = "人工备注补充";
+      appNote = "备注：计算方法与" + prof.condLabel + "均未标注（信息缺失）。" + prof.methodHint + "；" + prof.condHint;
+    } else if (method.state === "missing") {
+      appTitle = "人工备注补充";
+      appNote = "备注：" + prof.condLabel + "已标注，但计算方法未标注。" + prof.methodHint;
+    } else if (cond.state === "missing") {
+      appTitle = "人工备注补充";
+      appNote = "备注：计算方法已标注（" + method.label + "），但" + prof.condLabel + "未标注。" + prof.condHint;
+    } else {
+      appTitle = "待确认（依据原始文件识别）";
+      appNote = "备注：计算方法依据原始文件类型识别为 " + method.label + "，" + prof.condLabel + "已标注，建议录入员确认泛函 / 基组后再入库";
+    }
+
+    /* 1）/2）/3）三项要求：(a) 跨库交叉对比 / (b) 可重复性 / (c) 格式统一 */
+    var cross = auditCrossBuild(values, input, prof);
+    var repeat = auditRepeatBuild(input);
+    var fmtB = auditFormatBuild(values, input);
+
+    /* 可信度话术：区分「有值可比对」「指标缺失」「无参考值」三种情形 */
+    var credPhrase;
+    if (curMissing) {
+      credPhrase = "数据可信度：" + metric.label + "未录入，无法与" + refName + "比对（待补充）";
+    } else if (errAbs !== null) {
+      credPhrase = "数据可信度比对" + metric.label + "：录入 " + auditEvalNumText(cur, metric.digits) + metric.unit +
+        "，" + refName + " " + auditEvalNumText(ref, metric.digits) + metric.unit +
+        "，相对误差 " + pctText(relPct) + "（绝对偏差 " + auditEvalNumText(errAbs, metric.digits) + metric.unit + "）";
+    } else {
+      credPhrase = "数据可信度：" + metric.label + "未取得同材料 · 同方法的参考值，无法比对（待补充参考源）";
+    }
+    var appPhrase = "；数据适用性：" + (method.state === "missing" ? "计算方法未标注"
+      : (method.state === "inferred" ? "计算方法依据原始文件识别为 " + method.label + "（待确认）" : "计算方法 " + method.label)) +
+      "，" + prof.condLabel + (condOk ? "已标注（" + cond.label + "）" : "未标注");
+
+    var reqNotes = [];
+    if (cross.tone === "fail") reqNotes.push("同材料同方法跨库交叉对比有 " + cross.overCount + " 个库超出阈值");
+    else if (cross.tone === "note" && cross.entry) reqNotes.push("跨库交叉对比仅 " + cross.passCount + " 个库可直接比对");
+    else if (!cross.entry) reqNotes.push("未纳入跨库比对索引");
+    if (repeat.miss) reqNotes.push("可重复性缺 " + repeat.miss + " 项（关键参数 " + repeat.critical + " 项）");
+    if (fmtB.pending) reqNotes.push("格式统一待归一并 " + fmtB.pending + " 项");
+    var reqTail = reqNotes.length ? "；三项要求核验：" + reqNotes.join("、") : "；三项要求（交叉对比 / 可重复性 / 格式统一）均已满足";
+
+    /* 综合建议：交叉对比超限 → 驳回；缺参考值 / 参数不全 / 格式待统一 → 带条件通过 */
+    var verdict, verdictText, comment;
+    if (overRel || cross.tone === "fail") {
+      verdict = "reject";
+      verdictText = "建议驳回";
+      comment = "【" + prof.label + "】系统核验：基础格式校验" + (failCount ? "存在 " + failCount + " 项异常" : (warnCount ? "有 " + warnCount + " 项待补" : "全部通过")) +
+        "；" + credPhrase + (overRel ? "，超出 " + metric.relLimit + "% 阈值" : "") +
+        (cross.tone === "fail" ? "；跨库交叉对比 " + cross.overCount + " 个数据库超出 " + (auditReqSpec().cross.threshold || "阈值") : "") +
+        "，建议驳回并要求" + prof.errorWord +
+        "（计算方法" + (method.state === "missing" ? "未标注" : "已标注：" + method.label) + "，" + prof.condLabel + (condOk ? "已标注" : "未标注") + "）。";
+    } else if (overAbs || appTone === "note" || curMissing || noRef || repeat.miss || fmtB.pending) {
+      verdict = "note";
+      verdictText = overAbs ? "建议人工复核" : "建议通过 · 需补备注";
+      comment = "【" + prof.label + "】系统核验：基础格式校验" + ((warnCount || failCount) ? "有 " + (warnCount + failCount) + " 项需补充" : "全部通过") +
+        "；" + credPhrase + "，" + (overAbs ? "超出 " + fmtAbs + " 合格线，建议人工复核来源后确认"
+          : (curMissing ? "请补充该指标值后复核" : (noRef ? "请补充同材料 · 同方法参考值后复核" : "在 " + metric.relLimit + "% 阈值内"))) +
+        appPhrase + reqTail + "，请录入员补充说明。";
+    } else {
+      verdict = "pass";
+      verdictText = "建议通过";
+      comment = "【" + prof.label + "】系统核验：基础格式校验全部通过；" + credPhrase + "（" + limitText +
+        "）；计算方法（" + method.label + "）与" + prof.condLabel + "（" + cond.label + "）均已标注，适用性满足要求" +
+        reqTail + "，同意入库。";
+    }
+
+    return {
+      id: input.id || "",
+      profile: prof.key,
+      materialName: input.materialName || "",
+      checks: checks,
+      checksTag: checksTag,
+      checksTone: checksTone,
+      metric: metric,
+      source: (curMissing || noRef) ? "未取得同材料 · 同方法的参考值（见下方（a）交叉对比）"
+        : (input.refNote || input.refSource || (prof.label + "：" + prof.refTitle)),
+      sourceOk: !(curMissing || noRef),
+      limitText: limitText,
+      errPct: relPct,
+      errAbs: errAbs,
+      errBasis: errBasis,
+      seeded: curMissing,
+      overThreshold: overRel,
+      overAbs: overAbs,
+      credTone: credTone,
+      credTitle: credTitle,
+      credNote: credNote,
+      credTag: credTag,
+      errBadge: errBadge,
+      errMain: errMain,
+      methodLabel: method.label,
+      methodState: method.state,
+      condLabel: prof.condLabel,
+      condText: cond.label,
+      condState: cond.state,
+      methodOk: methodOk,
+      condOk: condOk,
+      appTone: appTone,
+      appTitle: appTitle,
+      appNote: appNote,
+      cross: cross,
+      repeat: repeat,
+      fmt: fmtB,
+      verdict: verdict,
+      verdictText: verdictText,
+      comment: comment
+    };
+  }
+
+  /* 采集任务（任务级）：抽检同材料样本，按材料指标与参考值比对 */
+  function buildAuditEvalTask(t) {
+    var prof = auditEvalProfile();
+    var sample = auditEvalSampleFor(String(t.dbName || "") + " " + String(t.name || "") + " " + String(t.desc || ""));
+    var base = prof.metric;
+    var metric = sample.metricOverride
+      ? { key: sample.metricOverride.key, label: sample.metricOverride.label, unit: sample.metricOverride.unit, digits: sample.metricOverride.digits, relLimit: sample.metricOverride.relLimit, absPass: sample.metricOverride.absPass }
+      : { key: base.key, label: base.label, unit: base.unit, digits: (sample.digits != null ? sample.digits : base.digits), relLimit: base.relLimit, absPass: base.absPass };
+    var values = { formula: sample.formula };
+    Object.keys(sample.extra || {}).forEach(function (k) { values[k] = sample.extra[k]; });
+    if (metric.key) values[metric.key] = sample.value;
+    return buildAuditEvalCore({
+      id: t.id,
+      materialName: sample.name,
+      formula: sample.formula,
+      values: values,
+      metric: metric,
+      refValue: sample.ref,
+      refNote: sample.refNote || "",
+      refTitle: sample.refTitle || (sample.source && sample.source.indexOf("/") >= 0 ? sample.source : prof.refTitle),
+      refSource: sample.source || prof.refTitle,
+      methodText: [t.name, t.desc, t.integrationReport, t.rawFiles].filter(Boolean).join("；"),
+      condText: "",
+      fileLabel: t.rawFiles || "",
+      rawFiles: t.rawFiles || "",
+      fileOk: !!t.rawFiles
+    });
+  }
+
+  /* 数据录入记录（材料级）：直接取录入字段与计算参数 */
+  function buildAuditEvalEntry(r) {
+    var prof = auditEvalProfile();
+    var sample = auditEvalSampleFor(String(r.formula || "") + " " + String(r.name || ""));
+    var sameFormula = sample && auditEvalNormFormula(sample.formula) === auditEvalNormFormula(r.formula || "");
+    var base = prof.metric;
+    var metric = (sample.metricOverride && sameFormula)
+      ? { key: sample.metricOverride.key, label: sample.metricOverride.label, unit: sample.metricOverride.unit, digits: sample.metricOverride.digits, relLimit: sample.metricOverride.relLimit, absPass: sample.metricOverride.absPass }
+      : { key: base.key, label: base.label, unit: base.unit, digits: base.digits, relLimit: base.relLimit, absPass: base.absPass };
+    var calc = r.calc || {};
+    var calcText = Object.keys(calc).map(function (k) { return k + " " + calc[k]; }).join("；");
+    return buildAuditEvalCore({
+      id: r.id,
+      materialName: r.name || r.formula || "",
+      formula: r.formula || r.chemicalFormula || "",
+      values: r,
+      metric: metric,
+      metricValue: r[metric.key],
+      refValue: sameFormula ? sample.ref : null,
+      refNote: sameFormula ? sample.refNote : "",
+      refTitle: prof.refTitle,
+      refSource: sameFormula ? sample.source : "",
+      structureLabel: [r.crystal, r.spaceGroup].filter(Boolean).join(" · "),
+      methodText: [calcText, r.calcMethod, r.methodNote, r.dataType].filter(Boolean).join("；"),
+      condText: (r.measureTemp != null && String(r.measureTemp).trim() !== "") ? String(r.measureTemp).trim() + " K" : "",
+      fileLabel: r.rawFiles || r.struct3d || "",
+      rawFiles: [r.rawFiles, r.struct3d, r.topologyFile, r.monomerStructure].filter(Boolean).join(" / "),
+      fileOk: !!(r.rawFiles || r.struct3d)
+    });
+  }
+
+  /* -------- （a）同材料 / 同计算方法 的跨库交叉对比 -------- */
+  function auditCrossBuild(values, input, prof) {
+    var spec = auditReqSpec().cross || {};
+    var lib = spec.lib || {};
+    var cands = [values.formula, input.formula, values.name, input.materialName, input.name]
+      .filter(function (s) { return s != null && String(s).trim() !== ""; })
+      .map(function (s) { return auditEvalNormFormula(s).toLowerCase(); });
+    /* 取最长命中键：避免「Ag-Cu(211)-CO2RR」被较短的「Cu(211)-CO2RR」抢先匹配 */
+    var entry = null, hitKey = "";
+    Object.keys(lib).forEach(function (k) {
+      var hit = cands.some(function (c) { return c && c.indexOf(k) >= 0; });
+      if (hit && (!hitKey || k.length > hitKey.length)) { hitKey = k; entry = lib[k]; }
+    });
+
+    var relLimit = (prof.metric && prof.metric.relLimit) || 10;
+    var digits = entry ? entry.digits : ((prof.metric && prof.metric.digits) || 2);
+    var unit = entry ? entry.unit : ((prof.metric && prof.metric.unit) || "");
+    var cur = entry ? auditEvalNum(values[entry.key]) : null;
+    if (cur === null && entry) cur = auditEvalNum(input.metricValue);
+    var declFp = auditMethodFp(input.methodText);
+    var baseFp = entry ? auditMethodFp(entry.method) : "";
+
+    var rows = [], overCount = 0, diffCount = 0, passCount = 0, zeroRef = false;
+    (entry ? entry.dbs : []).forEach(function (d) {
+      var fp = auditMethodFp(d.method);
+      /* 只有双方都给出方法指纹时才比较泛函 / 基组；实验口径（无泛函）按同材料直接比对 */
+      var same = true;
+      if (fp && baseFp && fp !== baseFp) same = false;
+      if (fp && declFp && fp !== declFp) same = false;
+      var dev = null, pct = null, badge = "", tone = "warn";
+      if (cur === null) {
+        badge = "待补指标";
+        tone = "warn";
+      } else if (!same) {
+        diffCount++;
+        badge = "方法不同 · 仅参考";
+        tone = "note";
+        dev = Math.abs(cur - d.value);
+        if (d.value !== 0) pct = dev / Math.abs(d.value) * 100;
+      } else {
+        dev = Math.abs(cur - d.value);
+        if (Math.abs(d.value) < Math.pow(10, -digits) * 10) {
+          /* 参考值近零（金属 / 无带隙体系）：相对误差无意义，按绝对偏差给出参考结论 */
+          zeroRef = true;
+          pct = null;
+          if (dev <= Math.pow(10, -digits)) { badge = "一致（绝对偏差 0）"; tone = "pass"; passCount++; }
+          else { badge = "参考值近零 · 按绝对偏差参考"; tone = "note"; diffCount++; }
+        } else {
+          pct = dev / Math.abs(d.value) * 100;
+          if (pct <= relLimit) { badge = "一致（阈值内）"; tone = "pass"; passCount++; }
+          else { badge = "超 " + relLimit + "% 阈值"; tone = "fail"; overCount++; }
+        }
+      }
+      var devText = cur === null ? "—"
+        : (pct != null ? (pct >= 0.1 ? pct.toFixed(2) : pct.toFixed(4)) + "%（Δ " + auditEvalNumText(dev, digits) + unit + "）"
+          : "Δ " + auditEvalNumText(dev, digits) + unit);
+      rows.push({
+        db: d.name,
+        method: d.method,
+        refText: auditEvalNumText(d.value, digits) + unit,
+        devText: devText,
+        badge: badge,
+        tone: tone
+      });
+    });
+
+    var tone = !entry ? "note" : (overCount ? "fail" : (diffCount || cur === null ? "note" : "pass"));
+    if (entry && !declFp && tone === "pass") tone = "note";
+    var tag = !entry ? "未建索引"
+      : (overCount ? (overCount + " 库超阈值") : (cur === null ? "指标缺失" : (diffCount ? (passCount + " 库一致 · " + diffCount + " 库仅参考") : (passCount + " 库一致"))));
+    if (entry && !declFp) tag += " · 方法待标注";
+    var basis = spec.basis || "同一材料 · 同一计算方法";
+    var methodText, methodTag, methodTone;
+    if (declFp && !baseFp) {
+      methodText = "本条计算标注 " + declFp + "；参考库为实验 / 实测口径（不涉及泛函），按同材料直接比对";
+      methodTag = "同口径比对";
+      methodTone = "pass";
+    } else if (declFp) {
+      methodText = "本条已标注 " + declFp + "；库内标准方法 " + baseFp;
+      if (declFp !== baseFp) { methodTag = "不一致"; methodTone = "warn"; }
+      else { methodTag = "一致"; methodTone = "pass"; }
+    } else {
+      methodText = "本条未标注计算方法，暂按库内标准方法（" + (entry ? entry.method : "—") + "）比对";
+      methodTag = "待标注";
+      methodTone = "warn";
+    }
+    var note;
+    if (!entry) {
+      note = "该材料尚未纳入跨库比对索引，无法完成「同材料 · 同方法」交叉对比。请人工补充至少一个权威数据库（或文献）的同方法参考值后复核，本条不得标记为「已验证」。";
+    } else {
+      note = "比对基准：" + basis + "；判定阈值：" + (spec.threshold || ("相对偏差 ≤ " + relLimit + "%")) +
+        "；依据：" + (spec.source || "材料数据质量衡量标准") + "。当前比对的现有数据库 " + rows.length + " 个（" + (entry.metric || "") + "）。" +
+        (zeroRef ? "参考值为 0 的条目按绝对偏差判定。" : "") +
+        (diffCount ? "标注「方法不同」的条目因泛函 / 基组不一致，仅作参考，不参与阈值判定。" : "") +
+        (!declFp ? "本条未标注计算方法，跨库比对暂按库内标准方法执行，结论待录入员确认方法后复核；文献 / 实验口径数据不得与计算值按同一阈值判定。" : "");
+    }
+    return { entry: !!entry, metric: entry ? entry.metric : ((prof.metric && prof.metric.label) || ""), unit: unit, rows: rows, tone: tone, tag: tag, basis: basis, methodText: methodText, methodTag: methodTag, methodTone: methodTone, note: note, overCount: overCount, diffCount: diffCount, passCount: passCount };
+  }
+
+  /* -------- （b）计算方法 / 参数 / 输入文件的可重复性 -------- */
+  function auditRepeatBuild(input) {
+    var spec = auditReqSpec().repeat || {};
+    var paramText = String(input.methodText || "");
+    var fileText = String(input.rawFiles || "");
+    var params = (spec.params || []).map(function (p) {
+      var hit = paramText.match(p.re);
+      var val = "";
+      if (hit) {
+        /* 有捕获组时取第一个非空捕获（只取数值 / 版本号，避免把中文标签本身当取值） */
+        for (var gi = 1; gi < hit.length; gi++) {
+          if (hit[gi]) { val = hit[gi]; break; }
+        }
+        if (!val) val = hit[0];
+      }
+      var st = hit ? "pass" : "warn";
+      var num = val ? parseFloat(String(val).replace(/[^\d.\-]/g, "")) : null;
+      if (hit && num !== null && !isNaN(num)) {
+        if (p.min != null && num < p.min) { st = "fail"; val = val + "（低于 " + p.min + "）"; }
+        else if (p.max != null && num > p.max) { st = "fail"; val = val + "（高于 " + p.max + "）"; }
+      }
+      if (hit && !p.must) st = (st === "fail" ? "fail" : "pass");
+      return { label: p.label, value: val, need: p.need, must: !!p.must, state: st };
+    });
+    var files = (spec.files || []).filter(function (f) {
+      /* only：仅当本条记录确实采用该软件时才要求对应文件（如 Gaussian 记录不要求 VASP 文件） */
+      if (!f.only) return true;
+      try { return f.only.test(paramText); } catch (e) { return true; }
+    }).map(function (f) {
+      var ok = false;
+      try { ok = f.re.test(fileText); } catch (e) { ok = false; }
+      return { name: f.name, state: ok ? "pass" : "warn" };
+    });
+    var missP = params.filter(function (x) { return x.state !== "pass"; }).length;
+    var missF = files.filter(function (x) { return x.state !== "pass"; }).length;
+    var critical = params.filter(function (x) { return x.must && x.state !== "pass"; }).length;
+    var badV = params.filter(function (x) { return x.state === "fail"; }).length;
+    var tone = (!missP && !missF) ? "pass" : (critical || badV ? "note" : "warn");
+    var title = (!missP && !missF) ? "可重复（参数与文件齐全）"
+      : (badV ? ("参数低于标准（" + badV + " 项）") : (critical ? ("不可重复（缺 " + critical + " 项关键参数）") : ("基本可重复（" + (missP + missF) + " 项待补）")));
+    var note;
+    if (!missP && !missF) {
+      note = "计算方法、计算参数与输入 / 输出文件均已提供，第三方可依据本条记录复现该结果。";
+    } else {
+      var miss = params.filter(function (x) { return x.state !== "pass"; }).map(function (x) { return x.label; })
+        .concat(files.filter(function (x) { return x.state !== "pass"; }).map(function (x) { return x.name; }));
+      note = "缺失 " + (missP + missF) + " 项（" + miss.join("、") + "），不满足「计算所得数据须提供计算方法与计算参数」的可重复性要求，请录入员补齐后再入库" +
+        (critical ? "；其中 " + critical + " 项为关键参数，缺项将导致结果无法复现。" : "。");
+    }
+    return { params: params, files: files, tone: tone, title: title, note: note, miss: missP + missF, critical: critical };
+  }
+
+  /* -------- （c）跨来源数据类型归一与统一格式 -------- */
+  function auditFormatBuild(values, input) {
+    var spec = auditReqSpec().format || {};
+    var rows = (spec.rows || []).map(function (r) {
+      var raw = values[r.key];
+      if ((raw == null || String(raw).trim() === "") && r.alt) raw = values[r.alt];
+      var txt = "", ok = true;
+      if (raw == null || String(raw).trim() === "") {
+        txt = "未录入";
+        ok = false;
+      } else if (r.mode === "formula") {
+        txt = auditEvalNormFormula(raw);
+      } else if (r.mode === "num" || r.mode === "sci") {
+        var n = auditEvalNum(raw);
+        if (n === null) { txt = String(raw); ok = false; }
+        else { txt = auditEvalNumText(n, r.digits) + (r.unit || ""); }
+      } else {
+        txt = String(raw);
+      }
+      return { field: r.field, srcType: r.srcType, stdType: r.stdType, rule: r.rule, text: txt, state: ok ? "pass" : "warn" };
+    });
+    var pending = rows.filter(function (x) { return x.state !== "pass"; }).length;
+    var tone = pending ? "warn" : "pass";
+    var title = pending ? ("待统一 " + pending + " 项") : ("已统一（" + rows.length + " 项）");
+    var note = pending
+      ? "以上字段仍缺值或未按标准类型归一，须补齐并统一格式后再入库展示（" + (spec.source || "统一格式模板") + "）。"
+      : "各来源数据均已按标准类型归一，可按统一格式录入与展示；来源类型差异（" + (spec.source || "多来源") + "）已在映射阶段消除。";
+    return { rows: rows, tone: tone, title: title, note: note, pending: pending, source: spec.source || "" };
+  }
+
+  function auditEvalPanelHtml(ctx) {
+    var html = "";
+    var metric = ctx.metric || {};
+    var credCls = ctx.credTone === "reject" ? "fail" : (ctx.credTone === "note" ? "warn" : "pass");
+    html += '<div class="review-audit" id="rwAuditEval">' +
+      '<div class="review-audit-head">' +
+      '<div class="review-audit-title"><strong>审核结果评估</strong><span>格式校验 ·（a）交叉对比 ·（b）可重复性 ·（c）格式统一</span></div>' +
+      '<span class="review-audit-verdict ' + (ctx.verdict === "reject" ? "is-reject" : (ctx.verdict === "note" ? "is-note" : "is-pass")) + '">' +
+      esc(ctx.verdictText) + "</span></div>";
+
+    html += '<div class="ra-block">' +
+      '<div class="ra-block-head"><span class="ra-idx">1</span><span class="ra-title">基础格式校验</span>' +
+      '<span class="ra-tag ra-tag-' + ctx.checksTone + '">' + esc(ctx.checksTag) + "</span></div>" +
+      ctx.checks.map(function (c) {
+        return '<div class="ra-row"><span class="ra-label">' + esc(c.label) + "</span>" +
+          '<span class="ra-value">' + esc(c.value) + "</span>" +
+          '<span class="ra-badge ra-' + c.status + '">' + esc(c.badge) + "</span></div>";
+      }).join("") +
+      "</div>";
+
+    /* ---- 2. 数据可信度 + （a）跨库交叉对比 ---- */
+    var cross = ctx.cross || { rows: [], tone: "note", tag: "", basis: "", methodText: "", methodTag: "", methodTone: "warn", note: "" };
+    html += '<div class="ra-block">' +
+      '<div class="ra-block-head"><span class="ra-idx">2</span><span class="ra-title">数据可信度审核结果 · ' + esc(metric.label || "") + '</span>' +
+      '<span class="ra-tag ra-tag-' + credCls + '">' +
+      esc(ctx.credTag || (ctx.credTone === "reject" ? "超出阈值" : (ctx.credTone === "note" ? "超合格线" : "阈值内"))) + "</span></div>" +
+      '<div class="ra-row"><span class="ra-label">比对数据源</span><span class="ra-value">' + esc(ctx.source) + "</span>" +
+      '<span class="ra-badge ra-' + (ctx.sourceOk ? "pass" : "warn") + '">' + (ctx.sourceOk ? "已比对" : "待补") + "</span></div>" +
+      '<div class="ra-row"><span class="ra-label">判定阈值</span><span class="ra-value">' + esc(ctx.limitText) + "</span>" +
+      '<span class="ra-badge ra-warn">材料规则</span></div>' +
+      '<div class="ra-row"><span class="ra-label">系统比对误差</span><span class="ra-value">' + esc(ctx.errMain || (ctx.errPct.toFixed(1) + "%")) +
+      '<span style="display:block;font-size:11.5px;color:#7b8ca6;margin-top:2px;">' + esc(ctx.errBasis) + "</span></span>" +
+      '<span class="ra-badge ra-' + credCls + '">' + esc(ctx.errBadge) + "</span></div>" +
+      '<div class="ra-conclusion is-' + ctx.credTone + '"><b>审核结论：' + esc(ctx.credTitle) + "</b>" +
+      '<span class="ra-note">' + esc(ctx.credNote) + "</span></div>";
+
+    html += '<div class="ra-sub">（a）同一材料 · 同一计算方法下的跨库交叉对比</div>'
+      + '<div class="ra-row"><span class="ra-label">比对基准</span><span class="ra-value">' + esc(cross.basis) + "</span>" +
+      '<span class="ra-badge ra-' + (cross.tone === "fail" ? "fail" : (cross.tone === "pass" ? "pass" : "warn")) + '">' + esc(cross.tag) + "</span></div>"
+      + '<div class="ra-row"><span class="ra-label">计算方法一致性</span><span class="ra-value">' + esc(cross.methodText) + "</span>" +
+      '<span class="ra-badge ra-' + cross.methodTone + '">' + esc(cross.methodTag) + "</span></div>";
+    if (cross.rows && cross.rows.length) {
+      html += '<div class="ra-tbl-wrap"><table class="ra-tbl"><thead><tr><th>现有数据库</th><th>参考值</th><th>与本条偏差</th><th>判定</th></tr></thead><tbody>'
+        + cross.rows.map(function (r) {
+          return '<tr><td class="ra-tbl-db">' + esc(r.db) + '<span class="ra-tbl-sub">' + esc(r.method) + "</span></td>"
+            + "<td>" + esc(r.refText) + "</td><td>" + esc(r.devText) + "</td>"
+            + '<td class="' + (r.tone === "pass" ? "ra-ok" : (r.tone === "fail" ? "ra-ng" : "ra-wt")) + '">' + esc(r.badge) + "</td></tr>";
+        }).join("") + "</tbody></table></div>";
+    }
+    html += '<div class="ra-mini">' + esc(cross.note) + "</div></div>";
+
+    /* ---- 3. 数据适用性 + （b）可重复性 ---- */
+    var methodBadge = ctx.methodState === "explicit" ? '<span class="ra-badge ra-pass">已标注</span>'
+      : (ctx.methodState === "inferred" ? '<span class="ra-badge ra-warn">待确认</span>' : '<span class="ra-badge ra-warn">待补</span>');
+    var condBadge = ctx.condState === "explicit" ? '<span class="ra-badge ra-pass">已标注</span>' : '<span class="ra-badge ra-warn">待补</span>';
+    var rep = ctx.repeat || { params: [], files: [], tone: "warn", title: "", note: "" };
+    html += '<div class="ra-block">' +
+      '<div class="ra-block-head"><span class="ra-idx">3</span><span class="ra-title">数据适用性审核结果</span>' +
+      '<span class="ra-tag ra-tag-' + (ctx.appTone === "pass" ? "pass" : "warn") + '">' + (ctx.appTone === "pass" ? "标注完整" : "待补充") + "</span></div>" +
+      '<div class="ra-row"><span class="ra-label">计算方法</span><span class="ra-value">' +
+      esc(ctx.methodState === "explicit" ? ctx.methodLabel + "（已标注）" : (ctx.methodState === "inferred" ? ctx.methodLabel + "（依据原始文件识别）" : "未标注（信息缺失）")) + "</span>" +
+      methodBadge + "</div>" +
+      '<div class="ra-row"><span class="ra-label">' + esc(ctx.condLabel) + '</span><span class="ra-value">' +
+      esc(ctx.condState === "explicit" ? ctx.condText + "（已标注）" : "未标注（信息缺失）") + "</span>" +
+      condBadge + "</div>" +
+      '<div class="ra-conclusion is-' + ctx.appTone + '"><b>审核结论：' + esc(ctx.appTitle) + "</b>" +
+      '<span class="ra-note">' + esc(ctx.appNote) + "</span></div>";
+
+    html += '<div class="ra-sub">（b）计算参数与输入文件（保证数据处理结果可重复）</div>'
+      + '<div class="ra-tbl-wrap"><table class="ra-tbl"><thead><tr><th>计算参数</th><th>本条取值</th><th>标准要求</th><th>状态</th></tr></thead><tbody>'
+      + rep.params.map(function (p) {
+        return "<tr><td>" + esc(p.label) + "</td><td>" + esc(p.value || "未提供") + "</td><td>" + esc(p.need) + "</td>"
+          + '<td class="' + (p.state === "pass" ? "ra-ok" : (p.state === "fail" ? "ra-ng" : "ra-wt")) + '">' + (p.state === "pass" ? "已提供" : (p.state === "fail" ? "低于标准" : (p.must ? "待补（关键）" : "待补"))) + "</td></tr>";
+      }).join("") + "</tbody></table></div>"
+      + '<div class="ra-tbl-wrap" style="margin-top:6px"><table class="ra-tbl"><thead><tr><th>可复现所需输入 / 输出文件</th><th>状态</th></tr></thead><tbody>'
+      + rep.files.map(function (f) {
+        return "<tr><td>" + esc(f.name) + '</td><td class="' + (f.state === "pass" ? "ra-ok" : "ra-wt") + '">' + (f.state === "pass" ? "已关联" : "缺失") + "</td></tr>";
+      }).join("") + "</tbody></table></div>"
+      + '<div class="ra-conclusion is-' + (rep.tone === "pass" ? "pass" : (rep.tone === "note" ? "" : "note")) + '"><b>可重复性：' + esc(rep.title) + "</b>"
+      + '<span class="ra-note">' + esc(rep.note) + "</span></div></div>";
+
+    /* ---- 4. （c）数据格式统一 ---- */
+    var fmt = ctx.fmt || { rows: [], tone: "warn", title: "", note: "", source: "" };
+    html += '<div class="ra-block">' +
+      '<div class="ra-block-head"><span class="ra-idx">4</span><span class="ra-title">数据格式统一 · 跨来源类型归一</span>' +
+      '<span class="ra-tag ra-tag-' + (fmt.tone === "pass" ? "pass" : "warn") + '">' + esc(fmt.title) + "</span></div>"
+      + '<div class="ra-tbl-wrap"><table class="ra-tbl"><thead><tr><th>标准字段<span class="ra-tbl-sub">来源原始类型</span></th><th>标准类型</th><th>统一规则</th><th>统一后展示</th></tr></thead><tbody>'
+      + fmt.rows.map(function (r) {
+        return "<tr><td><b>" + esc(r.field) + '</b><span class="ra-tbl-sub">' + esc(r.srcType) + "</span></td>"
+          + "<td>" + esc(r.stdType) + "</td><td>" + esc(r.rule) + "</td>"
+          + '<td class="' + (r.state === "pass" ? "ra-ok" : "ra-wt") + '">' + esc(r.text) + "</td></tr>";
+      }).join("") + "</tbody></table></div>"
+      + '<div class="ra-mini">' + esc(fmt.note) + "</div></div>";
+
+    html += '<div class="review-audit-foot">' +
+      '<button class="rw-btn" type="button" id="rwAuditEvalAdopt">' +
+      (ctx.verdict === "reject" ? "采纳建议：驳回并要求" + auditEvalProfile().errorWord : (ctx.verdict === "note" ? "采纳建议：通过并补充意见" : "采纳建议：通过")) + "</button>" +
+      '<span>采纳后将同步下方「审核是否通过」与审核意见，仍可手动调整</span></div>' +
+      "</div>";
+    return html;
+  }
+
+  function bindAuditEval(mask, ctx, radioName, opinionId) {
+    if (!mask || !ctx) return;
+    var btn = mask.querySelector("#rwAuditEvalAdopt");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var value = ctx.verdict === "reject" ? "不通过" : "通过";
+      var radio = mask.querySelector('input[name="' + radioName + '"][value="' + value + '"]');
+      if (radio) radio.checked = true;
+      var op = document.getElementById(opinionId);
+      if (op && !String(op.value || "").trim()) op.value = ctx.comment;
+      toast("已采纳系统建议", ctx.verdict === "reject" ? "已勾选「审核不通过」并生成审核意见" : "已勾选「审核通过」并生成审核意见", "ok");
+    });
+  }
+
   function auditTagOf(t) {
     var a = (t && t.audit && t.audit.status) || "待审核";
     var cls = a === "审核通过" ? "rw-tag--done" : (a === "审核驳回" ? "rw-tag--fail" : "rw-tag--warn");
@@ -127085,7 +128275,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + '<td class="rw-id">' + esc(t.id) + "</td>"
         + "<td>" + esc(auditSourceOf(t)) + "</td>"
         + "<td><b>" + esc(t.dbName || t.name) + "</b></td>"
-        + "<td>" + esc(t.integrationReport || "表字段规则校验通过 · 格式统一完成") + "</td>"
+        + "<td>" + esc(t.integrationReport || auditDefaultReport()) + "</td>"
         + "<td>" + auditTagOf(t)
         + (t.audit && t.audit.opinion
           ? '<div class="rw-field-tip">审核' + esc(t.audit.status || "-") + "：" + esc(t.audit.opinion)
@@ -127129,13 +128319,15 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var isTable = t.collectObject !== "图";
     var rulesHtml = t.collectObject
       ? '<div class="rw-section-title" style="margin-top:14px">' + (isTable ? "表字段规则校验" : "图像校验规则") + "</div>"
-        + rulesTable(isTable ? TABLE_RULES : IMAGE_RULES, isTable)
+        + rulesTable(isTable ? auditFieldRules() : IMAGE_RULES, isTable)
       : "";
     var auditResultHtml = a.status && a.status !== "待审核"
       ? '<div class="rw-banner' + (a.status === "审核驳回" ? " rw-banner--warn" : "") + '" style="margin-top:14px"><span>' + (a.status === "审核通过" ? "✓" : "✕") + "</span><div>已有审核结果：<b>" + esc(a.status) + "</b>"
         + (a.opinion ? "，审核意见：" + esc(a.opinion) : "")
         + (a.at ? "（" + esc(a.by || "管理员") + " · " + esc(a.at) + "）" : "") + "。重新提交将覆盖原结果。</div></div>"
       : "";
+    /* 2026-11-05：审核结果评估面板（按材料类型取校验项 / 可信度阈值 / 适用性标注项） */
+    var auditCtx = buildAuditEvalTask(t);
     mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
       + '<div class="rw-modal-head">'
       + '<div><h3>数据采集审核 · ' + esc(t.id) + "</h3><p>展示采集任务的全部配置内容与校验结果，管理员填写审核结果与意见。审核只需一次：通过后即可进入入库流程。</p></div>"
@@ -127152,7 +128344,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + auditKvRow("数据来源描述", t.desc)
       + auditKvRow("数据类型", t.dataType || "结构化")
       + auditKvRow("数据采集对象", t.collectObject || "表")
-      + auditKvRow("数据整合报告", t.integrationReport || "表字段规则校验通过 · 格式统一完成")
+      + auditKvRow("数据整合报告", t.integrationReport || auditDefaultReport())
       + auditKvRow("更新频率", t.updateMode === "自动" ? (t.updateFreqText || t.updateFreq || "每周") : "—")
       + auditKvRow("抽取数量", t.extractCount ? t.extractCount + " 条" : "—")
       + auditKvRow("更新执行方式", t.updateMode || "手动")
@@ -127160,6 +128352,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "</div>"
       + rulesHtml
       + auditResultHtml
+      + auditEvalPanelHtml(auditCtx)
       + '<div class="rw-section-title" style="margin-top:16px">审核结果</div>'
       + '<div class="rw-form">'
       + '<div class="rw-field"><label>审核是否通过<i>*</i></label>'
@@ -127183,6 +128376,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="submit-audit">提交审核结果</button>'
       + "</div>"
       + "</div>";
+    bindAuditEval(mask, auditCtx, "rwAuditResult", "rwAuditOpinion");
   }
 
   function submitAudit() {
@@ -127499,7 +128693,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 
     var actions = '<div class="rw-card">'
       + '<div class="rw-card-head"><div><h3>数据录入工作台</h3>'
-      + "<p>按数据来源选择录入方式：公开库 / C2DB 走定制插件批量导入，VASP 自主计算走自动化流程，文献与用户上传走手动录入并自动校验。</p></div>"
+      + "<p>" + esc(C().entryIntro || ENTRY_INTRO_DEFAULT) + "</p></div>"
       + '<div style="display:flex;gap:10px;flex:0 0 auto;flex-wrap:wrap">'
       + (HIDE_ENTRY_BATCH
         ? ""
@@ -127679,11 +128873,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
      - 手动输入：展示原有的「基本信息 + 关联规范 + 结构文件」完整表单；
      - 前两种：只展示统一格式模板与文件上传区域，按模板批量导入。
      ======================================================================== */
+  var ENTRY_INTRO_DEFAULT = "按数据来源选择录入方式：公开库 / C2DB 走定制插件批量导入，VASP 自主计算走自动化流程，文献与用户上传走手动录入并自动校验。";
+
   var ENTRY_MODES = [
     { key: "parse", label: "原始数据解析结果导入", desc: "上传原始数据解析后的结果文件，按统一格式模板批量入库" },
     { key: "calc", label: "计算结果录入", desc: "上传计算结果文件（VASP 输出 / 计算结果汇总表），按统一格式模板入库" },
     { key: "manual", label: "手动输入", desc: "逐字段填写材料基本信息、关联规范与结构文件" }
   ];
+
+  function entryModeDesc(o) {
+    var d = C().entryModeDescs;
+    return (d && d[o.key]) || o.desc;
+  }
 
   function entryModeOf(m) {
     return (m && m.mode) ? m.mode : "manual";
@@ -127699,7 +128900,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + 'border-radius:10px;padding:12px 14px">'
         + '<input type="radio" name="rwEntryMode" value="' + o.key + '" data-rw-em="' + o.key + '"' + (on ? " checked" : "") + ' style="margin:3px 0 0">'
         + '<div><div style="font-size:13.5px;font-weight:600;line-height:1.4;color:' + (on ? "#165DFF" : "#22364f") + '">' + esc(o.label) + "</div>"
-        + '<div style="font-size:12px;line-height:1.55;color:#7d8ca3;margin-top:4px">' + esc(o.desc) + "</div></div></label>";
+        + '<div style="font-size:12px;line-height:1.55;color:#7d8ca3;margin-top:4px">' + esc(entryModeDesc(o)) + "</div></div></label>";
     }).join("");
     return '<div style="border:1px solid #e6ecf5;background:#fbfdff;border-radius:12px;padding:14px 16px 16px">'
       + '<div style="font-size:13.5px;font-weight:700;color:#22364f;margin-bottom:10px">数据录入方式<i style="color:#d03050;font-style:normal;margin-left:2px">*</i>'
@@ -128570,6 +129771,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + "。重新提交将覆盖原结果。</div></div>"
       : "";
 
+    var entryAuditCtx = buildAuditEvalEntry(r);
     mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
       + '<div class="rw-modal-head"><div><h3>数据录入审核 · ' + esc(r.id) + "</h3>"
       + "<p>展示该条录入的全部内容，管理员填写审核是否通过及审核建议后提交。审核只需一次：通过后记录直接入库，无需二次审批。</p></div>"
@@ -128595,6 +129797,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         : "")
       + '<div class="rw-section-title" style="margin-top:14px">数据录入规范</div>' + stdHtml
       + prev
+      + auditEvalPanelHtml(entryAuditCtx)
       + '<div class="rw-section-title" style="margin-top:16px">审核结果</div>'
       + '<div class="rw-form">'
       + '<div class="rw-field"><label>审核是否通过<i>*</i></label>'
@@ -128619,6 +129822,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "</div>"
       + "</div>";
     document.body.appendChild(mask);
+    bindAuditEval(mask, entryAuditCtx, "rwEntryAuditResult", "rwEntryAuditOpinion");
   }
 
   function submitEntryAudit() {
@@ -131743,7 +132947,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var taskRows = s.tasks.map(function (t) {
       var src = t.sourceType || t.source || methodMeta(t.method).label;
       var dbName = t.dbName || t.name;
-      var report = t.integrationReport || "表字段规则校验通过 · 格式统一完成";
+      var report = t.integrationReport || auditDefaultReport();
       var isSel = t.id === selectedId;
       return "<tr" + (isSel ? ' style="background:#f0f7ff"' : "") + ' data-rw-act="select-task" data-id="' + esc(t.id) + '">'
         + '<td class="rw-id">' + esc(t.id) + "</td>"
@@ -133083,10 +134287,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     listCols: [{ key: "crystal", label: "晶系" }, { key: "spaceGroup", label: "空间群" }, { key: "bandGap", label: "带隙", unit: " eV" }],
     metric: { key: "bandGap", label: "带隙", unit: " eV" },
     batchSamples: [
-      { formula: "MoS2", dataType: "结构特征", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "1.68", quality: "高精度" },
-      { formula: "WS2", dataType: "电子结构", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "1.98", quality: "高精度" },
-      { formula: "CrI3", dataType: "磁学性质", crystal: "Trigonal", spaceGroup: "R-3", bandGap: "0.85", quality: "低精度" },
-      { formula: "Ti3C2", dataType: "电学性质", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "0.00", quality: "高精度" }
+      { formula: "MoS2", dataType: "结构特征", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "1.68", latticeA: "3.168", quality: "高精度",
+        calc: { "计算软件": "VASP 5.4.4", "交换关联泛函": "PBE", "赝势": "PAW-PBE 5.4", "截断能": "500 eV", "K 点": "4×4×1", "真空层": "15 Å", "色散修正": "DFT-D3", "SOC": "否", "收敛标准": "0.01 eV/Å" },
+        rawFiles: "MoS2/POSCAR / INCAR / KPOINTS / OUTCAR / out.log" },
+      { formula: "WS2", dataType: "电子结构", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "1.98", latticeA: "3.153", quality: "高精度",
+        calc: { "计算软件": "VASP 5.4.4", "交换关联泛函": "PBE", "赝势": "PAW-PBE 5.4", "截断能": "500 eV", "K 点": "4×4×1", "真空层": "15 Å", "色散修正": "DFT-D3", "SOC": "否", "收敛标准": "0.01 eV/Å" },
+        rawFiles: "WS2/WS2.cif / INCAR / KPOINTS / vasprun.xml / out.log" },
+      { formula: "CrI3", dataType: "磁学性质", crystal: "Trigonal", spaceGroup: "R-3", bandGap: "0.85", latticeA: "6.980", quality: "低精度",
+        calc: { "计算软件": "VASP 5.4.4", "交换关联泛函": "PBE+U", "赝势": "PAW-PBE 5.4", "截断能": "500 eV", "K 点": "6×6×1", "真空层": "15 Å", "收敛标准": "0.02 eV/Å" },
+        rawFiles: "CrI3/CrI3.cif / INCAR / KPOINTS / OUTCAR" },
+      { formula: "Ti3C2", dataType: "电学性质", crystal: "Hexagonal", spaceGroup: "P6₃/mmc", bandGap: "0.00", latticeA: "3.070", quality: "高精度",
+        calc: { "计算软件": "VASP 5.4.4", "交换关联泛函": "PBE", "截断能": "520 eV", "K 点": "8×8×1", "真空层": "18 Å", "色散修正": "DFT-D3", "SOC": "否", "收敛标准": "0.01 eV/Å" },
+        rawFiles: "Ti3C2/POSCAR / INCAR / KPOINTS / OUTCAR / out.log" }
     ],
     /* 2026-10-08：数据产品按数据集划分，清单与数据库（04.js LOWDIM_DB_OVERVIEW_CONFIGS）逐项对齐，
        加工产出的每个数据产品都明确归入所属数据集，字段/格式/存量均与数据库一致。 */
@@ -133184,6 +134396,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '&nbsp;&nbsp;<span class="k">&quot;formula&quot;</span>:&nbsp;<span class="s">&quot;C22H30N2O2S2&quot;</span>,&nbsp;<span class="k">&quot;mw&quot;</span>:&nbsp;<span class="n">418.62</span>,&nbsp;<span class="k">&quot;cas&quot;</span>:&nbsp;<span class="s">&quot;1446789-12-4&quot;</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;excitation&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;e_exc&quot;</span>:&nbsp;<span class="n">2.14</span>,&nbsp;<span class="k">&quot;e_emi&quot;</span>:&nbsp;<span class="n">1.86</span>,&nbsp;<span class="k">&quot;mu&quot;</span>:&nbsp;<span class="n">3.42</span>,&nbsp;<span class="k">&quot;unit&quot;</span>:&nbsp;<span class="s">&quot;eV / Debye&quot;</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;orbitals&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;homo&quot;</span>:&nbsp;<span class="n">-5.12</span>,&nbsp;<span class="k">&quot;lumo&quot;</span>:&nbsp;<span class="n">-2.98</span>,&nbsp;<span class="k">&quot;gap&quot;</span>:&nbsp;<span class="n">2.14</span>,&nbsp;<span class="k">&quot;solvent&quot;</span>:&nbsp;<span class="s">&quot;PCM-toluene&quot;</span>&nbsp;}<br>}',
+    entryIntro: "按数据来源选择录入方式：开源 / 商用数据（PubChem / CCDC / SciFinder / Reaxys）走定制插件批量导入，Gaussian16 自主计算走自动化流程提取，文献提取与用户上传数据走手动录入并自动校验。",
+    entryModeDescs: {
+      parse: "开源 / 商用数据：PubChem / CCDC / SciFinder / Reaxys 定制插件自动解析原始数据并转换为统一格式（如 mol 结构文件转为 pdb），按统一格式模板批量入库",
+      calc: "自主计算数据：开发自动化流程，Gaussian16 计算完成后自动提取激发能、发射能、HOMO / LUMO 能级等数据，按统一格式模板录入数据库",
+      manual: "特殊数据：手动录入无法自动化解析的数据（如文献提取的测试条件与谱图原始数据）"
+    },
     entryMethodRows: [
       ["PubChem / CCDC 等公开库", "定制插件批量导入", "文件头含 “PubChem” / “CSD” 标识", "采集参数配置"],
       ["SciFinder / Reaxys 商用库", "定制插件批量导入", "商用授权文件头校验", "采购范围核对"],
@@ -133359,10 +134577,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     listCols: [{ key: "name", label: "中英文名称" }, { key: "mw", label: "分子量", unit: " g/mol" }, { key: "bandGap", label: "HOMO-LUMO 能隙", unit: " eV" }],
     metric: { key: "bandGap", label: "HOMO-LUMO", unit: " eV" },
     batchSamples: [
-      { formula: "C22H30N2O2S2", dataType: "计算数据对象", name: "DPP-DTT", mw: "418.62", bandGap: "2.14", quality: "高精度" },
-      { formula: "C30H40N2O2S4", dataType: "计算数据对象", name: "PM6", mw: "604.92", bandGap: "1.92", quality: "高精度" },
-      { formula: "C82H86N8O2S4", dataType: "物理性质对象", name: "Y6", mw: "1371.94", bandGap: "1.48", quality: "低精度" },
-      { formula: "C10H14S", dataType: "物理性质对象", name: "P3HT", mw: "166.29", bandGap: "2.02", quality: "高精度" }
+      { formula: "C22H30N2O2S2", dataType: "计算数据对象", name: "DPP-DTT", mw: "418.62", meltingPoint: "412.0", bandGap: "2.14", quality: "高精度",
+        calc: { "计算软件": "Gaussian16 rev C.01", "泛函": "B3LYP", "基组": "def2-SVP", "溶剂模型": "PCM", "色散校正": "GD3(BJ)", "SCF 收敛": "1e-6", "频率验证": "无虚频" },
+        rawFiles: "DPP-DTT/DPP-DTT.gjf / DPP-DTT.log / DPP-DTT.fchk" },
+      { formula: "C30H40N2O2S4", dataType: "计算数据对象", name: "PM6", mw: "604.92", meltingPoint: "512.0", bandGap: "1.92", quality: "高精度",
+        calc: { "计算软件": "Gaussian16 rev C.01", "泛函": "B3LYP", "基组": "def2-SVP" },
+        rawFiles: "PM6/PM6.log" },
+      { formula: "C82H86N8O2S4", dataType: "物理性质对象", name: "Y6", mw: "1371.94", meltingPoint: "331.0", bandGap: "1.48", quality: "低精度",
+        calc: { "计算软件": "Gaussian16", "泛函": "B3LYP", "基组": "def2-TZVP", "溶剂模型": "SMD", "色散校正": "GD3(BJ)", "频率验证": "无虚频" },
+        rawFiles: "Y6/Y6.gjf / Y6.log" },
+      { formula: "C10H14S", dataType: "物理性质对象", name: "P3HT", mw: "166.29", meltingPoint: "238.0", bandGap: "2.02", quality: "高精度",
+        calc: { "计算软件": "Gaussian16 rev C.01", "泛函": "B3LYP", "基组": "6-31G*", "溶剂模型": "气相", "色散校正": "GD3(BJ)", "SCF 收敛": "1e-6", "频率验证": "无虚频" },
+        rawFiles: "P3HT/P3HT.gjf / P3HT.log / P3HT.fchk" }
     ],
     tasks: [
       { id: "OP-CL-2026-0922-001", name: "OLED 发光分子（DPP-DTT）激发能数据采集", method: "open", desc: "从 PubChem 开放 API 采集 DPP-DTT 分子基础信息与物性数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "PubChem（化合物数据库）", version: "2026.08", rawFiles: "JSON / MOL", security: "第1级" },
@@ -133463,6 +134689,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '&nbsp;&nbsp;<span class="k">&quot;structure&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;formula&quot;</span>:&nbsp;<span class="s">&quot;Li6PS5Cl&quot;</span>,&nbsp;<span class="k">&quot;space_group&quot;</span>:&nbsp;<span class="s">&quot;F-43m&quot;</span>,&nbsp;<span class="k">&quot;a&quot;</span>:&nbsp;<span class="n">10.15</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;transport&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;conductivity&quot;</span>:&nbsp;<span class="n">3.2e-3</span>,&nbsp;<span class="k">&quot;unit&quot;</span>:&nbsp;<span class="s">&quot;S/cm&quot;</span>,&nbsp;<span class="k">&quot;ea&quot;</span>:&nbsp;<span class="n">0.31</span>,&nbsp;<span class="k">&quot;carrier&quot;</span>:&nbsp;<span class="s">&quot;Li+&quot;</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;window&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;oxid&quot;</span>:&nbsp;<span class="n">2.6</span>,&nbsp;<span class="k">&quot;red&quot;</span>:&nbsp;<span class="n">0.4</span>,&nbsp;<span class="k">&quot;gap&quot;</span>:&nbsp;<span class="n">2.35</span>&nbsp;}<br>}',
+    entryIntro: "按数据来源选择录入方式：开源 / 商用数据（Materials Project / ICSD 等）走定制插件批量导入，VASP / Gaussian 自主计算走自动化流程提取，电解液与电极兼容性等特殊实验数据走手动录入。",
+    entryModeDescs: {
+      parse: "开源 / 商用数据：Materials Project / ICSD 等定制插件自动解析原始数据并转换为统一格式（如将 ICSD 的 cif 文件转为 VASP 可读取的 POSCAR），按统一格式模板批量入库",
+      calc: "自主计算数据：开发自动化流程，VASP / Gaussian 计算完成后自动提取带隙、溶剂化自由能等数据，按统一格式模板录入数据库",
+      manual: "特殊数据：手动录入无法自动化解析的数据（如电解液与电极兼容性实验数据）"
+    },
     entryMethodRows: [
       ["Materials Project / ICSD 等公开库", "定制插件批量导入", "文件头含 “Materials Project” / “ICSD” 标识", "采集参数配置"],
       ["Reaxys 商用库（电解质应用数据）", "定制插件批量导入", "商用授权文件头校验", "采购范围核对"],
@@ -133682,10 +134914,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     listCols: [{ key: "type", label: "电解质类型" }, { key: "conductivity", label: "离子电导率", unit: " S/cm" }, { key: "bandGap", label: "带隙", unit: " eV" }],
     metric: { key: "conductivity", label: "离子电导率", unit: " S/cm" },
     batchSamples: [
-      { formula: "Li7La3Zr2O12", dataType: "物性数据", type: "固态无机电解质", conductivity: "8.5e-4", bandGap: "4.86", quality: "高精度" },
-      { formula: "Li6PS5Cl", dataType: "物性数据", type: "固态无机电解质", conductivity: "3.2e-3", bandGap: "2.35", quality: "高精度" },
-      { formula: "PEO-LiTFSI", dataType: "物性数据", type: "固态有机电解质", conductivity: "1.1e-5", bandGap: "", quality: "低精度" },
-      { formula: "LiFSI-DME", dataType: "物性数据", type: "有机电解液", conductivity: "6.4e-3", bandGap: "", quality: "高精度" }
+      { formula: "Li7La3Zr2O12", dataType: "物性数据", type: "固态无机电解质", conductivity: "3.6e-4", meltingPoint: "1200.0", bandGap: "4.86", quality: "高精度",
+        calc: { "计算软件": "VASP 6.3", "泛函": "PBE", "基组/赝势": "PAW-PBE", "收敛标准": "1e-5 eV", "力收敛": "0.02 eV/Å" },
+        rawFiles: "LLZO/POSCAR / INCAR / KPOINTS / OUTCAR / DOSCAR" },
+      { formula: "Li6PS5Cl", dataType: "物性数据", type: "固态无机电解质", conductivity: "2.7e-3", meltingPoint: "480.0", bandGap: "2.35", quality: "高精度",
+        calc: { "计算软件": "VASP 6.3", "泛函": "PBE", "基组/赝势": "PAW-PBE", "色散修正": "DFT-D3", "收敛标准": "1e-5 eV", "力收敛": "0.02 eV/Å" },
+        rawFiles: "Li6PS5Cl/POSCAR / INCAR / KPOINTS / OUTCAR / DOSCAR" },
+      { formula: "PEO-LiTFSI", dataType: "物性数据", type: "固态有机电解质", conductivity: "1.1e-5", ignitionPoint: "402", meltingPoint: "65.0", bandGap: "", quality: "低精度",
+        calc: { "计算软件": "Gaussian16 rev C.01", "泛函": "B3LYP", "基组": "6-31G*", "溶剂模型": "SMD", "色散修正": "GD3(BJ)", "收敛标准": "1e-6", "频率验证": "无虚频" },
+        rawFiles: "PEO-LiTFSI/PEO-LiTFSI.gjf / PEO-LiTFSI.log / PEO-LiTFSI.fchk" },
+      { formula: "LiFSI-DME", dataType: "物性数据", type: "有机电解液", conductivity: "6.4e-3", ignitionPoint: "425", meltingPoint: "-12.0", bandGap: "", quality: "高精度",
+        calc: { "计算软件": "Gaussian16", "泛函": "B3LYP", "溶剂模型": "SMD" },
+        rawFiles: "LiFSI-DME/LiFSI-DME.gjf / LiFSI-DME.log" }
     ],
     tasks: [
       { id: "EL-CL-2026-0922-001", name: "固态无机电解质（LLZO）晶体结构数据采集", method: "open", desc: "从 Materials Project 开放 API 采集 LLZO 晶格常数、带隙与能带结构数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "Materials Project（材料项目数据库）", version: "v2025.03", rawFiles: "JSON / CIF", security: "第1级" },
@@ -133784,6 +135024,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '&nbsp;&nbsp;<span class="k">&quot;sampling&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;ensemble&quot;</span>:&nbsp;<span class="s">&quot;NVT&quot;</span>,&nbsp;<span class="k">&quot;temp&quot;</span>:&nbsp;<span class="n">300</span>,&nbsp;<span class="k">&quot;conformers&quot;</span>:&nbsp;<span class="n">1200</span>,&nbsp;<span class="k">&quot;rmsd&quot;</span>:&nbsp;<span class="n">0.42</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;energy&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;e_total&quot;</span>:&nbsp;<span class="n">-76.321154</span>,&nbsp;<span class="k">&quot;unit&quot;</span>:&nbsp;<span class="s">&quot;Hartree&quot;</span>,&nbsp;<span class="k">&quot;method&quot;</span>:&nbsp;<span class="s">&quot;CCSD(T)&quot;</span>,&nbsp;<span class="k">&quot;fmax&quot;</span>:&nbsp;<span class="n">0.042</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;atomic&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;q_O&quot;</span>:&nbsp;<span class="n">-0.812</span>,&nbsp;<span class="k">&quot;dipole&quot;</span>:&nbsp;<span class="n">1.85</span>,&nbsp;<span class="k">&quot;polar&quot;</span>:&nbsp;<span class="n">1.45</span>,&nbsp;<span class="k">&quot;c6&quot;</span>:&nbsp;<span class="n">12.6</span>&nbsp;}<br>}',
+    entryIntro: "按数据来源选择录入方式：开源 / 商用数据（QM9 / PDB 等）走定制插件批量导入，Gromacs / Amber 采样与 Q-Chem / VASP 计算走自动化流程提取，力场参数等特殊数据走手动录入。",
+    entryModeDescs: {
+      parse: "开源 / 商用数据：QM9 / PDB 等定制插件自动解析原始数据并转换为统一格式（如将 QM9 的 xyz 文件转为 pdb，能量数据转为 csv），按统一格式模板批量入库",
+      calc: "自主采样计算数据：开发自动化流程，Gromacs / Amber 采样完成后自动提取构象文件（pdb），Q-Chem / VASP 计算完成后自动提取能量 / 受力数据（csv），关联录入数据库",
+      manual: "特殊数据：手动录入力场参数（如色散系数 C₆）、采样过程描述（如「NVT 系综，300 K，10 ns」）"
+    },
     entryMethodRows: [
       ["QM9 / PDB 等公开库", "定制插件批量导入", "文件头含 “QM9” / “PDB” 标识", "采集参数配置"],
       ["Reaxys / ProteinDataBank 商用库", "定制插件批量导入", "商用授权文件头校验", "采购范围核对"],
@@ -133980,10 +135226,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     listCols: [{ key: "systemType", label: "分子体系类型" }, { key: "conformers", label: "构象数", unit: " 个" }, { key: "energy", label: "单分子能量", unit: " Hartree" }],
     metric: { key: "conformers", label: "构象数", unit: " 个" },
     batchSamples: [
-      { formula: "H2O", dataType: "有机小分子力场对象", systemType: "有机小分子体系", conformers: "1200", energy: "-76.321154", quality: "高精度" },
-      { formula: "CH4", dataType: "有机小分子力场对象", systemType: "有机小分子体系", conformers: "1080", energy: "-40.512340", quality: "高精度" },
-      { formula: "PEO", dataType: "高分子力场对象", systemType: "高分子片段体系", conformers: "860", energy: "-154.208100", quality: "低精度" },
-      { formula: "Gly-Gly", dataType: "蛋白质力场对象", systemType: "蛋白质体系", conformers: "1420", energy: "-491.336200", quality: "高精度" }
+      { formula: "H2O", dataType: "有机小分子力场对象", systemType: "有机小分子体系", conformers: "1200", energy: "-76.321154", ensemble: "NVT", temp: "300", quality: "高精度",
+        calc: { "MLIP 软件": "MACE-OFF23 v1", "量子化学方法": "CCSD(T)", "基组": "def2-QZVP", "采样系综": "NVT", "采样温度": "300 K", "构象数": "1200", "Python/PyTorch/CUDA": "3.11 / 2.3 / 12.1", "GPU": "A100 80GB" },
+        rawFiles: "H2O/train.xyz / md.mdp / md.gro / mace.model.pth / requirements.txt" },
+      { formula: "CH4", dataType: "有机小分子力场对象", systemType: "有机小分子体系", conformers: "1080", energy: "-40.512340", ensemble: "NPT", temp: "298", quality: "高精度",
+        calc: { "MLIP 软件": "MACE-OFF23 v1", "量子化学方法": "CCSD(T)", "基组": "def2-QZVP", "采样系综": "NPT", "采样温度": "298 K", "构象数": "1080", "Python/PyTorch/CUDA": "3.11 / 2.3 / 12.1", "GPU": "A100 80GB" },
+        rawFiles: "CH4/train.xyz / md.mdp / md.gro / mace.model.pth / environment.yml" },
+      { formula: "PEO", dataType: "高分子力场对象", systemType: "高分子片段体系", conformers: "860", energy: "-154.208100", ensemble: "NVT", temp: "350", quality: "低精度",
+        calc: { "MLIP 软件": "DeePMD-kit 2.2", "量子化学方法": "MP2", "基组": "def2-TZVP", "采样系综": "NVT", "采样温度": "350 K", "构象数": "860", "Python/PyTorch/CUDA": "3.10 / 2.1 / 11.8" },
+        rawFiles: "PEO/PEO.xyz / md.mdp / md.gro" },
+      { formula: "Gly-Gly", dataType: "蛋白质力场对象", systemType: "蛋白质体系", conformers: "1420", energy: "-491.336200", ensemble: "NVT", temp: "310", quality: "高精度",
+        calc: { "MLIP 软件": "NequIP 0.6", "量子化学方法": "CCSD(T)", "基组": "def2-QZVP", "采样系综": "NVT", "采样温度": "310 K", "构象数": "1420", "Python/PyTorch/CUDA": "3.11 / 2.3 / 12.1", "GPU": "H100 80GB" },
+        rawFiles: "GlyGly/train.xyz / md.mdp / md.gro / nequip.model.pth / requirements.txt" }
     ],
     tasks: [
       { id: "ML-CL-2026-0922-001", name: "有机小分子（H2O）CCSD(T) 能量数据采集", method: "open", desc: "从 QM9 开放数据集采集 H2O、CH4 的 CCSD(T) 能量与原子受力数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "QM9（量子化学小分子数据集）", version: "v2024", rawFiles: "CSV / XYZ", security: "第1级" },
@@ -134075,6 +135329,12 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '&nbsp;&nbsp;<span class="k">&quot;surface&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;facet&quot;</span>:&nbsp;<span class="s">&quot;Cu(211)&quot;</span>,&nbsp;<span class="k">&quot;dopant&quot;</span>:&nbsp;<span class="s">&quot;none&quot;</span>,&nbsp;<span class="k">&quot;vacuum&quot;</span>:&nbsp;<span class="n">14.2</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;adsorption&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;molecule&quot;</span>:&nbsp;<span class="s">&quot;CO2&quot;</span>,&nbsp;<span class="k">&quot;site&quot;</span>:&nbsp;<span class="s">&quot;step-bridge&quot;</span>,&nbsp;<span class="k">&quot;e_ads&quot;</span>:&nbsp;<span class="n">-0.86</span>&nbsp;},<br>'
       + '&nbsp;&nbsp;<span class="k">&quot;pathway&quot;</span>:&nbsp;{&nbsp;<span class="k">&quot;reactant&quot;</span>:&nbsp;<span class="s">&quot;*CO2&quot;</span>,&nbsp;<span class="k">&quot;product&quot;</span>:&nbsp;<span class="s">&quot;*COOH&quot;</span>,&nbsp;<span class="k">&quot;dE&quot;</span>:&nbsp;<span class="n">-0.42</span>,&nbsp;<span class="k">&quot;ea&quot;</span>:&nbsp;<span class="n">0.78</span>&nbsp;}<br>}',
+    entryIntro: "按数据来源选择录入方式：公开库 / 商用数据（Catalysis-Hub / OC20 等）走定制插件批量导入，VASP 表面自主计算走自动化流程提取，掺杂原子参数等特殊字段走手动录入。",
+    entryModeDescs: {
+      parse: "公开库 / 购买数据：Catalysis-Hub / OC20 等定制插件自动解析原始数据，转换为统一的 POSCAR / CIF 与数据表格式，按统一格式模板批量入库",
+      calc: "自主计算数据：针对吸附能与反应路径计算定制自动化流程，VASP 计算完成后自动提取吸附构型与反应能、活化能等数据，按统一格式模板录入数据库",
+      manual: "特殊数据：手动录入掺杂原子参数、吸附位置描述等无法自动化解析的字段"
+    },
     entryMethodRows: [
       ["Catalysis-Hub / OC20 等公开库", "定制插件批量导入", "文件头含 “Catalysis-Hub” / “OC20” 标识", "采集参数配置"],
       ["文献催化性能专题库", "定制插件批量导入", "专题库文件头校验", "采集范围核对"],
@@ -134279,10 +135539,18 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     listCols: [{ key: "facet", label: "催化表面晶面" }, { key: "adsorbate", label: "吸附分子种类" }, { key: "adsorptionEnergy", label: "分子吸附能量", unit: " eV" }],
     metric: { key: "adsorptionEnergy", label: "吸附能", unit: " eV" },
     batchSamples: [
-      { formula: "Cu(211)-CO2RR", dataType: "催化表面分子吸附数据", facet: "Cu(211)", adsorbate: "CO2", adsorptionEnergy: "-0.86", quality: "高精度" },
-      { formula: "Cu(111)-CORR", dataType: "催化表面反应路径数据", facet: "Cu(111)", adsorbate: "CO", adsorptionEnergy: "-1.12", quality: "高精度" },
-      { formula: "Ag-Cu(211)-CO2RR", dataType: "催化表面分子吸附数据", facet: "Cu(211)", adsorbate: "COOH", adsorptionEnergy: "-1.04", quality: "低精度" },
-      { formula: "Pt1-Cu(111)-HER", dataType: "催化表面反应路径数据", facet: "Cu(111)", adsorbate: "H", adsorptionEnergy: "-0.42", quality: "高精度" }
+      { formula: "Cu(211)-CO2RR", dataType: "催化表面分子吸附数据", facet: "Cu(211)", adsorbate: "CO2", adsorptionEnergy: "-0.86", quality: "高精度",
+        calc: { "计算软件": "VASP 5.4.4", "泛函": "PBE", "截断能": "400 eV", "K 点": "3×3×1", "真空层": "15 Å", "力收敛": "0.02 eV/Å" },
+        rawFiles: "Cu211/POSCAR / INCAR / KPOINTS / OUTCAR / CONTCAR" },
+      { formula: "Cu(111)-CORR", dataType: "催化表面反应路径数据", facet: "Cu(111)", adsorbate: "CO", adsorptionEnergy: "-1.12", quality: "高精度",
+        calc: { "计算软件": "VASP 5.4.4", "泛函": "PBE", "截断能": "400 eV", "K 点": "3×3×1", "力收敛": "0.02 eV/Å" },
+        rawFiles: "Cu111/POSCAR / INCAR / KPOINTS / OUTCAR / CONTCAR" },
+      { formula: "Ag-Cu(211)-CO2RR", dataType: "催化表面分子吸附数据", facet: "Cu(211)", adsorbate: "COOH", adsorptionEnergy: "-1.04", quality: "低精度",
+        calc: { "计算软件": "VASP 5.4.4", "泛函": "PBE", "截断能": "400 eV", "K 点": "3×3×1", "真空层": "15 Å" },
+        rawFiles: "AgCu211/POSCAR / INCAR / KPOINTS / OUTCAR" },
+      { formula: "Pt1-Cu(111)-HER", dataType: "催化表面反应路径数据", facet: "Cu(111)", adsorbate: "H", adsorptionEnergy: "-0.42", quality: "高精度",
+        calc: { "计算软件": "VASP 5.4.4", "函": "PBE", "泛函": "PBE", "截断能": "400 eV", "K 点": "3×3×1", "真空层": "15 Å", "力收敛": "0.02 eV/Å" },
+        rawFiles: "PtCu111/POSCAR / INCAR / KPOINTS / OUTCAR / 频率计算输出 freq.out" }
     ],
     tasks: [
       { id: "CA-CL-2026-0922-001", name: "Cu(211) 表面 CO2 还原吸附能数据采集", method: "open", desc: "从 Catalysis-Hub 开放数据集采集 Cu 基表面吸附构型与吸附能数据", status: "已完成", createdAt: "2026-09-22 10:24", source: "Catalysis-Hub（催化反应数据库）", version: "2026.05", rawFiles: "JSON / CIF", security: "第1级" },
@@ -134472,6 +135740,80 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   .algorithm-title-tip-pop{position:fixed;z-index:100000;display:none;width:440px;max-width:calc(100vw - 32px);max-height:340px;overflow:auto;padding:14px 16px 15px;border:1px solid #e2e9f4;border-radius:10px;background:#fff;box-shadow:0 16px 40px rgba(23,54,102,.18);color:#41506b;font-size:13px;font-weight:400;line-height:1.78;white-space:pre-wrap;word-break:break-word;text-align:left}
   .algorithm-title-tip-pop::-webkit-scrollbar{width:8px}
   .algorithm-title-tip-pop::-webkit-scrollbar-thumb{background:#ccd8ea;border-radius:8px}
+  /* ── 审核弹窗：审核结果评估面板（基础格式 / 数据可信度 / 数据适用性） ── */
+  /* 设计系统默认把 .modal 压到 520px（width:!important + var(--modal-width)），这里用变量只放宽审核弹窗 */
+  #reviewDecisionModal .modal { --modal-width: 800px; }
+  .review-audit {
+    border: 1px solid #d7e5fb;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f7fbff 0%, #ffffff 64%);
+    padding: 14px 16px 12px;
+    margin: 0 0 18px;
+  }
+  .review-audit-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .review-audit-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .review-audit-title strong { font-size: 14px; color: #14315e; }
+  .review-audit-title span { font-size: 12px; color: #7b8ca6; }
+  .review-audit-verdict { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .review-audit-verdict.is-pass { color: #0f7a3d; background: #e8f7ee; border: 1px solid #b7e4c9; }
+  .review-audit-verdict.is-note { color: #a2620a; background: #fdf4e3; border: 1px solid #f3d9a6; }
+  .review-audit-verdict.is-reject { color: #b3261e; background: #fdecec; border: 1px solid #f6c9c6; }
+
+  .ra-block { border-top: 1px dashed #dfe9f7; padding-top: 10px; margin-top: 10px; }
+  .ra-block:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  .ra-block-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .ra-idx {
+    width: 18px; height: 18px; border-radius: 6px; background: #2f73ff; color: #fff;
+    font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  }
+  .ra-title { font-size: 13px; font-weight: 600; color: #1b3a63; }
+  .ra-tag { margin-left: auto; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .ra-tag-pass { color: #0f7a3d; background: #e8f7ee; }
+  .ra-tag-warn { color: #a2620a; background: #fdf4e3; }
+  .ra-tag-fail { color: #b3261e; background: #fdecec; }
+
+  .ra-row { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 2px; font-size: 12.5px; }
+  .ra-row + .ra-row { border-top: 1px solid #f1f6fd; }
+  .ra-label { color: #6b7d96; }
+  .ra-value { color: #223a5c; word-break: break-word; line-height: 1.6; }
+  .ra-badge { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; justify-self: end; }
+  .ra-badge.ra-pass { color: #0f7a3d; background: #e8f7ee; }
+  .ra-badge.ra-warn { color: #a2620a; background: #fdf4e3; }
+  .ra-badge.ra-fail { color: #b3261e; background: #fdecec; }
+
+  .ra-conclusion {
+    margin-top: 8px; padding: 8px 10px; border-radius: 8px; border-left: 3px solid #b3261e;
+    background: #fdf6f6; color: #8c2a23; font-size: 12.5px; line-height: 1.7;
+  }
+  .ra-conclusion.is-pass { border-left-color: #16a34a; background: #f3fbf6; color: #14663a; }
+  .ra-conclusion.is-note { border-left-color: #d97706; background: #fffaf0; color: #8a5a06; }
+  .ra-conclusion b { font-weight: 700; }
+  .ra-note { display: block; margin-top: 2px; color: #6b7d96; font-weight: 400; }
+
+  .review-audit-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #dfe9f7; flex-wrap: wrap; }
+  .review-audit-foot span { font-size: 12px; color: #7b8ca6; }
+
+
+  /* ---------- 2026-11-05：审核面板新增（a）交叉对比 /（b）可重复性 /（c）格式统一 ---------- */
+  .ra-sub { margin: 10px 0 2px; font-size: 12px; font-weight: 700; color: #1b3a63; letter-spacing: .2px; }
+  .ra-sub::before { content: ""; display: inline-block; width: 3px; height: 11px; border-radius: 2px; background: #2f73ff; margin-right: 6px; vertical-align: -1px; }
+  .ra-tbl-wrap { margin-top: 6px; border: 1px solid #e6effa; border-radius: 8px; overflow: hidden; background: #fff; }
+  .ra-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ra-tbl th { background: #f5f9ff; color: #5b7191; font-weight: 600; text-align: left; padding: 6px 9px; border-bottom: 1px solid #e6effa; white-space: nowrap; }
+  .ra-tbl td { padding: 6px 9px; color: #26385a; border-bottom: 1px solid #f2f6fc; vertical-align: top; line-height: 1.55; }
+  .ra-tbl tr:last-child td { border-bottom: 0; }
+  .ra-tbl-db { font-weight: 600; color: #1b3a63; }
+  .ra-tbl .ra-tbl-sub { display: block; font-size: 11px; color: #7b8ca6; font-weight: 400; margin-top: 1px; }
+  .ra-ok { color: #0f7a3d; font-weight: 600; }
+  .ra-ng { color: #b3261e; font-weight: 600; }
+  .ra-wt { color: #a2620a; font-weight: 600; }
+  .ra-mini { font-size: 11.5px; color: #7b8ca6; margin-top: 6px; line-height: 1.7; }
+  @media (max-width: 820px) { .ra-tbl th, .ra-tbl td { padding: 5px 6px; font-size: 11.5px; } }
+
+  @media (max-width: 640px) {
+    .ra-row { grid-template-columns: 1fr auto; }
+    .ra-row .ra-label { grid-column: 1 / -1; }
+  }
 </style>
 <script>
   (function () {
