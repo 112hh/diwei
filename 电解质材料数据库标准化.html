@@ -31219,6 +31219,16 @@ html body :is(#page-twod,#page-electrolyte,#page-opto,#page-mlff,#page-catalyst,
   @media (max-width: 720px) { .lah-grid { grid-template-columns: 1fr; } }
 
 </style>
+<style id="sidebar-nav-indent-unify-20261106">
+    /* 二级菜单统一缩进：所有分组下的二级菜单(.nav)统一左缩进 20px，与一级分组标题拉开层级；
+       仅调整二级菜单缩进，一级菜单样式与整体布局保持不变 */
+    .sidebar .nav { margin-left: 20px !important; }
+    @media (max-width: 900px) {
+      .sidebar .nav,
+      .sidebar.collapsed .nav { margin-left: 0 !important; }
+    }
+  </style>
+
 </head>
 <body>
 <body>
