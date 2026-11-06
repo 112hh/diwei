@@ -130033,35 +130033,46 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var queue = recs.filter(function (r) { return r.status !== "已入库" && r.status !== "已退回"; });
     var done = recs.filter(function (r) { return r.status === "已入库"; });
 
+    /* 2026-11-06：右侧导航按钮组——质量控制 / 数据统计 / 权限管理 / 流程管理；
+       「数据录入统计」按需求移到「已入库数据」旁边的子页签行，点开内容保持不变 */
+    function navBtn(view, icon, label) {
+      return '<button class="rw-btn' + (e.view === view ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="' + view + '">' + icon + " " + esc(label) + "</button>";
+    }
     var actions = '<div class="rw-card">'
       + '<div class="rw-card-head"><div><h3>数据录入工作台</h3>'
       + "<p>" + esc(C().entryIntro || ENTRY_INTRO_DEFAULT) + "</p></div>"
-      + '<div style="display:flex;gap:10px;flex:0 0 auto;flex-wrap:wrap">'
+      + '<div class="rw-entry-nav">'
+      + '<div class="rw-entry-nav-btns">'
       + (HIDE_ENTRY_BATCH
         ? ""
         : '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-batch">⇧ 批量导入</button>')
-      + '<button class="rw-btn rw-btn--blue" type="button" data-rw-act="entry-manual">＋ 数据录入</button>'
-      + '<button class="rw-btn' + (e.view === "stats" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="stats">📈 数据录入统计</button>'
-      + '<button class="rw-btn' + (e.view === "stats" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="stats">📊 数据统计</button>'
-      + '<button class="rw-btn' + (e.view === "quality" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="quality">🛡 质量控制</button>'
-      + '<button class="rw-btn' + (e.view === "perm" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="perm">🔐 权限管理</button>'
-      + '<button class="rw-btn' + (e.view === "flow" ? " rw-btn--blue" : "") + '" type="button" data-rw-act="entry-view" data-view="flow">🧭 流程管理</button>'
-      + "</div></div>"
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="entry-manual">＋ 数据录入</button>'
+      + navBtn("quality", "🛡", "质量控制")
+      + navBtn("stats", "📊", "数据统计")
+      + navBtn("perm", "🔐", "权限管理")
+      + navBtn("flow", "🧭", "流程管理")
+      + "</div></div></div>"
       + "</div>";
     /* 2026-10-08：圈红删除——工作台下方的「数据来源/推荐录入方式/识别规则/人工介入点」来源规则表不再展示，
        数据来源仍在「批量导入 / 单条录入」弹窗内选择，录入功能不受影响。 */
 
-    /* 2026-10-10：页签按视图显隐——点开「数据统计 / 权限管理 / 流程管理」时不展示这排页签，
-       返回数据录入列表（待录入 / 数据录入审核 / 已入库 / 规范说明）时照常展示。 */
-    var sub = (e.view === "stats" || e.view === "perm" || e.view === "flow" || e.view === "quality")
-      ? ""
-      : '<div class="rw-subtabs">'
+    /* 2026-10-10：页签按视图显隐——「质量控制 / 权限管理 / 流程管理」独立页不展示这排页签，返回录入列表
+       （待录入 / 数据录入审核 / 已入库 / 规范说明）时照常展示；「数据录入统计」「数据资源录入权限」
+       「数据资源录入流程」作为子页签与「已入库数据」同排展示，保持在录入工作台内可来回切换 */
+    var subVisible = e.view === "audit" || e.view === "done" || e.view === "stats"
+      || e.view === "entryperm" || e.view === "entryflow" || (!HIDE_ENTRY_SPEC && e.view === "spec");
+    var sub = subVisible
+      ? '<div class="rw-subtabs">'
       + '<button class="rw-subtab' + (e.view === "audit" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="audit">数据录入审核（' + queue.length + "）</button>"
       + '<button class="rw-subtab' + (e.view === "done" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="done">已入库数据（' + done.length + "）</button>"
+      + '<button class="rw-subtab' + (e.view === "stats" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="stats">📈 数据录入统计</button>'
+      + '<button class="rw-subtab' + (e.view === "entryperm" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="entryperm">🔐 数据资源录入权限</button>'
+      + '<button class="rw-subtab' + (e.view === "entryflow" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="entryflow">🧭 数据资源录入流程</button>'
       + (HIDE_ENTRY_SPEC
         ? ""
         : '<button class="rw-subtab' + (e.view === "spec" ? " is-active" : "") + '" type="button" data-rw-act="entry-view" data-view="spec">录入规范说明</button>')
-      + "</div>";
+      + "</div>"
+      : "";
 
     var body = e.view === "audit" ? renderAuditView(queue)
       : e.view === "done" ? renderEntryDoneView(done)
@@ -130069,6 +130080,8 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       : e.view === "stats" ? renderEntryStats()
       : e.view === "perm" ? renderEntryPerm()
       : e.view === "flow" ? renderEntryFlow()
+      : e.view === "entryperm" ? renderEntryPermPage()
+      : e.view === "entryflow" ? renderEntryFlowPage()
       : e.view === "quality" ? renderEntryQuality()
       : renderAuditView(queue);
 
@@ -130158,13 +130171,14 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           + "<td>" + esc(r.auditedAt || "-") + "</td>"
           + '<td class="rw-nowrap">'
           + '<button class="rw-op" type="button" data-rw-act="audit-detail" data-id="' + esc(r.id) + '">详情</button>'
-          + '<button class="rw-op" type="button" data-rw-act="entry-to-proc" data-id="' + esc(r.id) + '">送去加工</button>'
+          /* 2026-11-06：圈红删除——「送去加工」按钮下线，已入库数据列表仅保留「详情」 */
           + "</td></tr>";
       }).join("")
       : '<tr><td colspan="' + (7 + listCols().length) + '"><div class="rw-empty" style="padding:26px 0">暂无已入库数据</div></td></tr>';
     return '<div class="rw-card">'
       + '<div class="rw-card-head"><div><h3>已入库数据</h3><p>' + esc(C().doneNote) + "</p></div>"
-      + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="tab" data-rw-tab="process">进入资源加工 →</button></div></div>'
+      /* 2026-11-06：圈红删除——头部「进入资源加工」按钮下线，加工入口仍保留在顶部页签「数据资源加工」 */
+      + "</div>"
       + '<div class="rw-tbl-wrap"><table class="rw-tbl rw-done-table"><thead><tr><th>材料唯一标识</th><th>标识</th><th>数据类型</th>' + listThs()
       + "<th>质量等级</th><th>入库时间</th><th>操作</th></tr></thead><tbody>" + rows + "</tbody></table></div>"
       + "</div>";
@@ -130819,9 +130833,13 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     }
 
     return '<div class="rw-card">'
-      + '<div class="rw-card-head"><div><h3>质量控制 · 数据质量控制方案</h3>'
-      + "<p>在数据库建设过程中，本项目制定了相应的质量控制方案，对资料的来源及录入汇总等各环节进行严格监督。</p></div>"
-      + '<div style="flex:0 0 auto"><button class="rw-btn" type="button" data-rw-act="entry-view" data-view="audit">← 返回数据录入审核</button></div></div>'
+      + '<div class="rw-card-head">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px">'
+      + '<button class="rw-btn" type="button" data-rw-act="entry-view" data-view="audit" style="flex:0 0 auto">← 返回</button>'
+      + "<div><h3>质量控制 · 数据质量控制方案</h3>"
+      + "<p>在数据库建设过程中，本项目制定了相应的质量控制方案，对资料的来源及录入汇总等各环节进行严格监督。</p></div></div>"
+      + '<div style="flex:0 0 auto"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="qc-plan-open">＋ 新增质量控制方案</button></div>'
+      + "</div>"
 
       + '<div class="rw-banner"><span>✓</span><div>该控制体系具体包括三项：第三方数据库准确性对比、录入汇总格式统一、数据库更新及时性（30 天周期）。下面按控制环节、量化指标与执行记录逐项展示。</div></div>'
 
@@ -130864,6 +130882,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + (remain > 0
         ? '<div class="rw-banner" style="margin-top:14px"><span>✓</span><div>当前处于更新周期内（' + QUALITY_CYCLE_DAYS + " 天/次），距下次更新还有 " + remain + " 天；到期前系统将提醒维护人员归集近期计算结果。</div></div>"
         : '<div class="rw-banner rw-banner--warn" style="margin-top:14px"><span>⚠</span><div>已超过 ' + QUALITY_CYCLE_DAYS + " 天更新周期，请尽快将近期计算所得结果更新进数据库。</div></div>")
+      + '<div class="rw-section-title" style="margin-top:20px">④ 质量控制方案列表</div>'
+      + '<div class="rw-field-tip" style="margin-bottom:10px">已配置的质量控制方案共 <b>' + qualityPlanList().length + '</b> 套；点击「查看详情」可复核方案的资料来源、汇总配置与更新配置。</div>'
+      + qualityPlanListHtml()
       + "</div>";
   }
 
@@ -130878,7 +130899,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="rw-card-head"><div><h3>（4）权限管理 · 用户分级与授权</h3>'
       + "<p>不同用户对数据库的访问与修改取决于被赋予的权限；为防止数据丢失、以及过于密集的数据请求对数据库造成过大压力，按等级区分用户权限。</p></div>"
       + '<div style="flex:0 0 auto;display:flex;gap:10px;flex-wrap:wrap">'
-      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="perm-req-open">＋ 权限申请</button>'
+      /* 2026-11-06：圈红删除——头部「＋ 权限申请」下线，申请入口保留在下方「① 权限申请与审批记录」区块 */
       + '<button class="rw-btn" type="button" data-rw-act="entry-view" data-view="audit">← 返回数据录入审核</button></div></div>'
 
       + permBanner
@@ -131032,6 +131053,485 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + "</div>"
       + "</div>";
   }
+
+  /* ================================================== 2026-11-06 新增
+     一、质量控制方案（质量控制页 ④）：方案名称 / 资料与数据来源 / 数据录入汇总统一存储配置 /
+     更新配置（默认 30 天、支持自定义）；提交后以列表展示，支持查看详情。
+     二、数据资源录入权限页：角色划分 / 申请发起 / 审批流程 / 状态展示。
+     三、数据资源录入流程页：人员权限审批 / 数据录入审批 / 操作工单备案 / 定期备份 + 状态跟踪。
+     ====================================================================== */
+  var QC_FORMAT_OPTIONS = [
+    { key: "csv", label: "CSV（UTF-8 · 逗号分隔）", note: "统一表头 + UTF-8 编码，便于批量解析与快速检索" },
+    { key: "json", label: "JSON（UTF-8 · OPTIMADE 兼容）", note: "嵌套结构与数组字段统一序列化" },
+    { key: "xlsx", label: "Excel（XLSX · 单表单对象）", note: "实验与文献数据汇总的通用格式" },
+    { key: "hdf5", label: "HDF5（计算原始数据归档）", note: "大体量计算结果与图谱的二进制归档" },
+    { key: "parquet", label: "Parquet（列式分析存储）", note: "面向统计分析的列式压缩格式" }
+  ];
+  var QC_PRECISION_DEFAULT = "数值保留 4 位有效数字；坐标保留 7 位小数";
+  var QC_SCHEMA_DEFAULT = "统一字段字典 v1.0（字段名小写英文 + 下划线）";
+  var QC_MISSING_OPTIONS = ["记 NULL 并进入待补队列", "标注缺失原因后保留空值", "丢弃该条并记录异常"];
+  var QC_UNIT_OPTIONS = ["统一标准单位（eV / Å / %）", "保留源单位并附换算系数", "统一为国际单位制（SI）"];
+
+  function qcFormatMeta(key) {
+    for (var i = 0; i < QC_FORMAT_OPTIONS.length; i++) {
+      if (QC_FORMAT_OPTIONS[i].key === key) return QC_FORMAT_OPTIONS[i];
+    }
+    return QC_FORMAT_OPTIONS[0];
+  }
+
+  function qcShortText(text, n) {
+    var t = String(text == null ? "" : text);
+    return t.length > n ? t.slice(0, n) + "…" : t;
+  }
+
+  function qcCycleText(p) {
+    if (!p.updateOn) return "已停用（不自动更新）";
+    return "每 " + p.cycleDays + " " + (p.cycleUnit || "天") + " 更新入库";
+  }
+
+  function qualityPlanList() {
+    var e = entryState();
+    if (!e.qualityPlans) {
+      var dbName = (C().databases && C().databases[0]) || "Materials Project（材料项目数据库）";
+      e.qualityPlans = [{
+        id: "QCP-" + (C().code || "DB") + "-0001",
+        name: (C().short || "本库") + "计算数据入库质量控制方案（默认）",
+        source: "第三方数据库：" + dbName + " 等公开库与商用授权库，按批次随机抽样 30 条与源库逐条比对并记录质控台账；本库自主计算结果由 VASP 输出文件（OUTCAR / vasprun.xml）回溯校验。",
+        format: "csv",
+        schema: QC_SCHEMA_DEFAULT,
+        unitMode: QC_UNIT_OPTIONS[0],
+        precision: QC_PRECISION_DEFAULT,
+        missing: QC_MISSING_OPTIONS[0],
+        updateOn: true,
+        cycleDays: QUALITY_CYCLE_DAYS,
+        cycleUnit: "天",
+        scope: "计算结果 + 第三方库增量 + 修正记录回写",
+        creator: "管理员9527",
+        createdAt: "2026-11-01 09:30",
+        status: "启用"
+      }];
+    }
+    return e.qualityPlans;
+  }
+
+  function qualityPlanListHtml() {
+    var list = qualityPlanList();
+    var rows = list.length
+      ? list.map(function (p) {
+        var fmt = qcFormatMeta(p.format);
+        return "<tr>"
+          + '<td class="rw-id rw-nowrap">' + esc(p.id) + "</td>"
+          + "<td><b>" + esc(p.name) + "</b></td>"
+          + '<td><div style="max-width:320px;line-height:1.65;color:#5b7292">' + esc(qcShortText(p.source, 68)) + "</div></td>"
+          + "<td>" + esc(fmt.label) + '<div class="rw-field-tip">' + esc(p.schema) + "</div></td>"
+          + "<td>" + esc(qcCycleText(p)) + '<div class="rw-field-tip">' + esc(qcShortText(p.scope, 24)) + "</div></td>"
+          + '<td class="rw-nowrap">' + esc(p.createdAt) + "</td>"
+          + '<td><span class="rw-tag ' + (p.status === "启用" ? "rw-tag--done" : "rw-tag--gray") + '">' + esc(p.status) + "</span></td>"
+          + '<td class="rw-nowrap"><button class="rw-op" type="button" data-rw-act="qc-plan-view" data-id="' + esc(p.id) + '">查看详情</button></td>'
+          + "</tr>";
+      }).join("")
+      : '<tr><td colspan="8"><div class="rw-empty" style="padding:22px 0">暂无质量控制方案，点击右上角「＋ 新增质量控制方案」创建</div></td></tr>';
+    return '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr>'
+      + "<th>方案编号</th><th>方案名称</th><th>资料 / 数据来源</th><th>数据录入汇总配置</th><th>更新配置</th><th>创建时间</th><th>状态</th><th>操作</th>"
+      + "</tr></thead><tbody>" + rows + "</tbody></table></div>"
+      + '<div class="rw-card-note" style="margin-top:10px">方案约束三个环节：第三方数据库准确性（抽样对比）、录入汇总格式统一（同一套存储格式与字段字典）、数据库更新及时性（按周期回写计算结果）。</div>';
+  }
+
+  function qualityPlanFormHtml() {
+    var IN = 'style="width:100%;padding:7px 10px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;color:#22364f"';
+    var TA = 'style="width:100%;min-height:82px;padding:7px 10px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;color:#22364f;font-family:inherit;line-height:1.6"';
+    function opt(v, label, sel) { return '<option value="' + esc(v) + '"' + (sel ? " selected" : "") + ">" + esc(label) + "</option>"; }
+    function subTitle(text, tip) {
+      return '<div class="rw-field is-full" style="gap:2px">'
+        + '<div class="rw-section-title" style="font-size:13px;margin:8px 0 0">' + esc(text) + "</div>"
+        + '<div class="rw-field-tip">' + esc(tip) + "</div></div>";
+    }
+    return '<div class="rw-form">'
+      + '<div class="rw-field is-full"><label>质量控制方案名称<i>*</i></label>'
+      + '<input type="text" data-rw-qcf="name" placeholder="如：' + esc((C().short || "本库") + "计算数据入库质量控制方案") + '" ' + IN + "></div>"
+      + '<div class="rw-field is-full"><label>资料 / 数据来源<i>*</i></label>'
+      + '<textarea data-rw-qcf="source" placeholder="请填写第三方数据库信息：数据库名称、版本、许可与获取批次，以及抽样调查、对比校验的方式（如：Materials Project v2024.11，每批随机抽样 30 条与源库逐条比对）" ' + TA + "></textarea>"
+      + '<div class="rw-field-tip">用于确保第三方数据库的准确性：适度抽样调查、对比后记入质控台账，异常项回溯至采集任务。</div></div>'
+
+      + subTitle("数据录入汇总配置 · 统一存储格式（通用配置）", "录入汇总统一采用下列存储格式与字段规范，保障数据整合性，便于快速检索和访问。")
+      + '<div class="rw-field"><label>存储格式<i>*</i></label><select data-rw-qcf="format" ' + IN + ">"
+      + QC_FORMAT_OPTIONS.map(function (o) { return opt(o.key, o.label, o.key === "csv"); }).join("")
+      + "</select></div>"
+      + '<div class="rw-field"><label>字段与命名规范</label>'
+      + '<input type="text" data-rw-qcf="schema" value="' + esc(QC_SCHEMA_DEFAULT) + '" ' + IN + "></div>"
+      + '<div class="rw-field"><label>单位规范</label><select data-rw-qcf="unitMode" ' + IN + ">"
+      + QC_UNIT_OPTIONS.map(function (o) { return opt(o, o, o === QC_UNIT_OPTIONS[0]); }).join("")
+      + "</select></div>"
+      + '<div class="rw-field"><label>数值精度</label>'
+      + '<input type="text" data-rw-qcf="precision" value="' + esc(QC_PRECISION_DEFAULT) + '" ' + IN + "></div>"
+      + '<div class="rw-field"><label>缺失值处理</label><select data-rw-qcf="missing" ' + IN + ">"
+      + QC_MISSING_OPTIONS.map(function (o) { return opt(o, o, o === QC_MISSING_OPTIONS[0]); }).join("")
+      + "</select></div>"
+
+      + subTitle("更新配置", "保障数据库及时性：按周期将近期计算所得结果更新到数据库，默认 30 天，可按需自定义周期与范围。")
+      + '<div class="rw-field is-full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer">'
+      + '<input type="checkbox" data-rw-qc="updateOn" checked> 将计算结果更新到数据库</label>'
+      + '<div class="rw-field-tip">勾选后系统按下方周期自动提醒并把计算结果回写入库；不勾选则仅保留人工更新。</div></div>'
+      + '<div class="rw-field"><label>更新周期<i>*</i></label>'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<input type="number" min="1" step="1" data-rw-qcf="cycleDays" value="' + QUALITY_CYCLE_DAYS + '" style="width:120px;padding:7px 10px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;color:#22364f">'
+      + '<select data-rw-qcf="cycleUnit" style="width:110px;padding:7px 10px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;color:#22364f">'
+      + ["天", "周", "月"].map(function (u) { return opt(u, u, u === "天"); }).join("")
+      + "</select>"
+      + '<span class="rw-field-tip" style="white-space:nowrap">默认 30 天</span>'
+      + "</div></div>"
+      + '<div class="rw-field"><label>更新范围</label>'
+      + '<input type="text" data-rw-qcf="scope" value="计算结果 + 第三方库增量 + 修正记录回写" ' + IN + "></div>"
+      + "</div>"
+      + '<div class="rw-card-note" style="margin-top:12px">提交后方案存入本材料的质量控制方案列表；后续可据此对来源抽样、汇总格式与更新周期进行统一核查。</div>';
+  }
+
+  function openQualityPlanModal() {
+    ensureStyle();
+    closeMask("rwQcPlanMask");
+    var mask = document.createElement("div");
+    mask.className = "rw-mask";
+    mask.id = "rwQcPlanMask";
+    mask.setAttribute("data-rw-root", "qcPlanForm");
+    mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwQcPlanMask"); });
+    mask.innerHTML = '<div class="rw-modal" role="dialog" aria-modal="true">'
+      + '<div class="rw-modal-head"><div><h3>新增质量控制方案</h3>'
+      + "<p>填写方案名称、资料与数据来源，配置统一的存储格式与更新周期，提交后在质量控制页按列表管理。</p></div>"
+      + '<div class="rw-modal-head-side"><button class="rw-modal-close" type="button" data-rw-act="qc-plan-close" aria-label="关闭">×</button></div></div>'
+      + '<div class="rw-modal-body">' + qualityPlanFormHtml() + "</div>"
+      + '<div class="rw-modal-foot">'
+      + '<span class="rw-foot-tip">保存后可在方案列表点击「查看详情」复核全部配置</span>'
+      + '<button class="rw-btn" type="button" data-rw-act="qc-plan-close">取消</button>'
+      + '<button class="rw-btn rw-btn--primary" type="button" data-rw-act="qc-plan-submit">提交方案</button></div>'
+      + "</div>";
+    document.body.appendChild(mask);
+  }
+
+  function qcFormMaskOf(node) {
+    if (!node) return document.getElementById("rwQcPlanMask");
+    return (node.closest ? node.closest(".rw-mask") : null) || document.getElementById("rwQcPlanMask");
+  }
+
+  function qcFormVal(mask, k) {
+    var el = mask ? mask.querySelector('[data-rw-qcf="' + k + '"]') : null;
+    return el ? String(el.value || "").trim() : "";
+  }
+
+  function submitQualityPlan(node) {
+    var mask = qcFormMaskOf(node);
+    var name = qcFormVal(mask, "name");
+    var source = qcFormVal(mask, "source");
+    if (!name) { toast("请填写质量控制方案名称", "err"); return; }
+    if (!source) { toast("请填写资料 / 数据来源（含第三方数据库信息）", "err"); return; }
+    var days = Number(qcFormVal(mask, "cycleDays"));
+    if (!days || days <= 0) { toast("更新周期需为大于 0 的数值", "err"); return; }
+    var onEl = mask ? mask.querySelector('[data-rw-qc="updateOn"]') : null;
+    var list = qualityPlanList();
+    list.unshift({
+      id: "QCP-" + (C().code || "DB") + "-" + ("000" + (list.length + 1)).slice(-4),
+      name: name,
+      source: source,
+      format: qcFormVal(mask, "format") || "csv",
+      schema: qcFormVal(mask, "schema") || QC_SCHEMA_DEFAULT,
+      unitMode: qcFormVal(mask, "unitMode") || QC_UNIT_OPTIONS[0],
+      precision: qcFormVal(mask, "precision") || QC_PRECISION_DEFAULT,
+      missing: qcFormVal(mask, "missing") || QC_MISSING_OPTIONS[0],
+      updateOn: !!(onEl && onEl.checked),
+      cycleDays: days,
+      cycleUnit: qcFormVal(mask, "cycleUnit") || "天",
+      scope: qcFormVal(mask, "scope") || "计算结果 + 第三方库增量",
+      creator: "管理员9527",
+      createdAt: nowText(),
+      status: "启用"
+    });
+    closeMask("rwQcPlanMask");
+    renderRwPage();
+    toast("质量控制方案已保存：" + name, "ok");
+  }
+
+  function openQualityPlanDetail(id) {
+    ensureStyle();
+    var plan = null;
+    qualityPlanList().forEach(function (p) { if (p.id === id) plan = p; });
+    if (!plan) return;
+    closeMask("rwQcPlanViewMask");
+    var fmt = qcFormatMeta(plan.format);
+    function kvRow(k, v) {
+      return "<tr><td><b>" + esc(k) + "</b></td><td>" + esc(v == null || v === "" ? "-" : v) + "</td></tr>";
+    }
+    var mask = document.createElement("div");
+    mask.className = "rw-mask";
+    mask.id = "rwQcPlanViewMask";
+    mask.setAttribute("data-rw-root", "qcPlanView");
+    mask.addEventListener("click", function (ev) { if (ev.target === mask) closeMask("rwQcPlanViewMask"); });
+    mask.innerHTML = '<div class="rw-modal rw-modal--narrow" role="dialog" aria-modal="true">'
+      + '<div class="rw-modal-head"><div><h3>质量控制方案详情 · ' + esc(plan.id) + "</h3>"
+      + "<p>展示该方案的资料 / 数据来源、数据录入汇总配置与更新配置全部信息。</p></div>"
+      + '<div class="rw-modal-head-side"><button class="rw-modal-close" type="button" data-rw-act="qc-plan-view-close" aria-label="关闭">×</button></div></div>'
+      + '<div class="rw-modal-body">'
+      + '<div class="rw-kv">'
+      + "<div><b>方案名称</b>" + esc(plan.name) + "</div>"
+      + "<div><b>状态</b>" + esc(plan.status) + "</div>"
+      + "<div><b>创建人</b>" + esc(plan.creator || "-") + "</div>"
+      + "<div><b>创建时间</b>" + esc(plan.createdAt) + "</div>"
+      + "</div>"
+      + '<div class="rw-section-title" style="margin-top:14px">资料 / 数据来源</div>'
+      + '<div class="rw-card-note" style="line-height:1.8">' + esc(plan.source) + "</div>"
+      + '<div class="rw-section-title" style="margin-top:14px">数据录入汇总配置 · 更新配置</div>'
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th style="width:180px">配置项</th><th>方案取值</th></tr></thead><tbody>'
+      + kvRow("存储格式", fmt.label + "（" + fmt.note + "）")
+      + kvRow("字段与命名规范", plan.schema)
+      + kvRow("单位规范", plan.unitMode)
+      + kvRow("数值精度", plan.precision)
+      + kvRow("缺失值处理", plan.missing)
+      + kvRow("更新入库", plan.updateOn ? "启用" : "停用")
+      + kvRow("更新周期", plan.updateOn
+        ? "每 " + plan.cycleDays + " " + (plan.cycleUnit || "天") + (plan.cycleDays === QUALITY_CYCLE_DAYS && (plan.cycleUnit || "天") === "天" ? "（默认 30 天）" : "（自定义）")
+        : "未启用自动更新")
+      + kvRow("更新范围", plan.scope)
+      + "</tbody></table></div>"
+      + "</div>"
+      + '<div class="rw-modal-foot"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="qc-plan-view-close">关闭</button></div>'
+      + "</div>";
+    document.body.appendChild(mask);
+  }
+
+  /* ---------------------------------------- 数据资源录入权限页（子页签） */
+  var ENTRY_PERM_ROLES = [
+    { title: "系统管理员", tag: "最高权限", desc: "拥有数据库最高读写权限，负责授权与审批。", points: ["读取 / 修改 / 删除全部数据", "授予或回收工作人员对指定数据库的读取与修改权限", "审批录入申请、抽查录入质量"] },
+    { title: "数据库工作人员", tag: "需管理员授权", desc: "默认无录入权限，须先申请获批后方可录入。", points: ["向管理员发起录入权限申请", "批准后在有效期内读取与修改指定数据库", "按方案执行录入并留存工单"] },
+    { title: "普通数据使用者", tag: "无录入权限", desc: "仅按等级读取数据，不参与录入。", points: ["按安全等级读取公开数据", "不具备录入、修改与删除权限", "不可发起录入权限申请"] }
+  ];
+
+  function entryPermReqTableHtml() {
+    var list = permReqList();
+    var rows = list.length
+      ? list.map(function (q) {
+        var perms = [];
+        if (q.entry) perms.push("数据录入");
+        if (q.read) perms.push("数据读取");
+        if (q.write) perms.push("数据修改");
+        var ops = q.status === "待审批"
+          ? '<button class="rw-op rw-op--primary" type="button" data-rw-act="perm-req-approve" data-id="' + esc(q.id) + '">批准</button>'
+            + '<button class="rw-op" type="button" data-rw-act="perm-req-reject" data-id="' + esc(q.id) + '">驳回</button>'
+          : '<button class="rw-op" type="button" data-rw-act="perm-req-view" data-id="' + esc(q.id) + '">查看</button>';
+        return "<tr>"
+          + '<td class="rw-id rw-nowrap">' + esc(q.id) + "</td>"
+          + "<td>" + esc(q.applicant || "-") + "</td>"
+          + "<td>" + esc(q.role || "-") + "</td>"
+          + '<td class="rw-nowrap"><code style="color:#165DFF">' + esc(q.acct || "-") + "</code></td>"
+          + "<td>" + esc(q.dataName || "-") + "</td>"
+          + "<td>" + esc(perms.join(" / ") || "-") + "</td>"
+          + "<td>" + esc(q.days || "-") + "</td>"
+          + '<td><span class="rw-tag ' + permReqStatusTag(q.status) + '">' + esc(q.status) + "</span>"
+          + (q.decidedAt ? '<div class="rw-field-tip">' + esc(q.decider || "管理员") + " · " + esc(q.decidedAt) + "</div>" : "")
+          + "</td>"
+          + '<td class="rw-nowrap">' + esc(q.at) + "</td>"
+          + '<td class="rw-nowrap">' + ops + "</td></tr>";
+      }).join("")
+      : '<tr><td colspan="10"><div class="rw-empty" style="padding:22px 0">暂无权限申请记录；数据库工作人员可点击右上角「＋ 权限申请」向管理员发起申请</div></td></tr>';
+    return '<div class="rw-tbl-wrap"><table class="rw-tbl rw-permreq-table"><thead><tr>'
+      + "<th>申请编号</th><th>申请人</th><th>申请角色</th><th>数据库账号</th><th>申请数据名称</th><th>申请权限</th><th>有效期</th><th>审批状态</th><th>提交时间</th><th>操作</th>"
+      + "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+  }
+
+  function renderEntryPermPage() {
+    var list = permReqList();
+    var pending = list.filter(function (q) { return q.status === "待审批"; }).length;
+    var granted = list.filter(function (q) { return q.status === "已批准"; }).length;
+    var roles = ENTRY_PERM_ROLES.map(function (r) {
+      return '<article class="rw-qc-role">'
+        + "<h4>" + esc(r.title) + "</h4>"
+        + '<span class="rw-qc-role-tag">' + esc(r.tag) + "</span>"
+        + "<p>" + esc(r.desc) + "</p>"
+        + "<ul>" + r.points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></article>";
+    }).join("");
+    var steps = ["工作人员提交申请", "管理员审核", "授予读写权限", "执行数据录入", "到期自动回收"];
+    return '<div class="rw-card">'
+      + '<div class="rw-card-head">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px">'
+      + '<button class="rw-btn" type="button" data-rw-act="entry-view" data-view="audit" style="flex:0 0 auto">← 返回</button>'
+      + "<div><h3>数据资源录入权限</h3>"
+      + "<p>为防止数据录入过程中出现数据重复和丢失，规范录入权限管理：管理员拥有最高权限，可授予数据库工作人员相应数据库的读取和修改权限，普通数据使用者不具备录入权限。</p></div></div>"
+      + '<div style="flex:0 0 auto"><button class="rw-btn rw-btn--primary" type="button" data-rw-act="perm-req-open">＋ 权限申请</button></div>'
+      + "</div>"
+
+      + '<div class="rw-banner' + (pending ? " rw-banner--warn" : "") + '"><span>' + (pending ? "⏳" : "✓") + "</span><div>"
+      + (pending
+        ? "当前有 <b>" + pending + "</b> 条录入权限申请待管理员审批；批准前该工作人员无法执行录入。"
+        : "当前没有待审批的录入权限申请；每次录入需由工作人员先向管理员发起申请，批准后方可执行。")
+      + " 累计已批准 <b>" + granted + "</b> 条。</div></div>"
+
+      + '<div class="rw-section-title" style="margin-top:16px">① 权限角色划分</div>'
+      + '<div class="rw-qc-grid">' + roles + "</div>"
+
+      + '<div class="rw-section-title" style="margin-top:20px">② 录入权限申请与审批状态</div>'
+      + entryPermReqTableHtml()
+      + '<div class="rw-card-note" style="margin-top:10px">状态流转：待审批 → 已批准（授予读写权限，工作人员可执行录入）/ 已驳回（可在补充材料后重新提交）；权限有效期届满自动回收。</div>'
+
+      + '<div class="rw-section-title" style="margin-top:20px">③ 审批流程</div>'
+      + '<div class="rw-flow-steps">'
+      + steps.map(function (t, i) {
+        return '<span class="rw-flow-step"><b>' + (i + 1) + "</b>" + esc(t) + "</span>"
+          + (i < steps.length - 1 ? '<span class="rw-flow-arrow">→</span>' : "");
+      }).join("")
+      + "</div>"
+      + '<div class="rw-card-note">管理员批准后系统按申请的数据范围与权限组合写入权限矩阵（见下），该账号随即获得对应数据库的读取 / 修改权限，录入行为与工单号一一对应，便于回溯。</div>'
+
+      + '<div class="rw-section-title" style="margin-top:20px">④ 用户等级与权限矩阵（数据录入 / 读取 / 修改 可勾选配置）</div>'
+      + permMatrixHtml(true)
+      + "</div>";
+  }
+
+  /* ---------------------------------------- 数据资源录入流程页（子页签） */
+  function flowTrainList() {
+    var e = entryState();
+    if (!e.flowTrain) {
+      e.flowTrain = [
+        { name: "李昊", post: "数据库工作人员", course: "数据录入规范与字段校验（8 学时）", score: "92", status: "资格有效", expire: "2027-06-30" },
+        { name: "王璐", post: "数据库工作人员", course: "数据库安全与权限边界（6 学时）", score: "88", status: "资格有效", expire: "2027-03-31" },
+        { name: "张敏", post: "数据库工作人员", course: "统一存储格式与质控抽样（6 学时）", score: "—", status: "待培训", expire: "—" },
+        { name: "赵磊", post: "数据库维护员", course: "备份恢复与故障演练（4 学时）", score: "95", status: "资格有效", expire: "2027-09-30" }
+      ];
+    }
+    return e.flowTrain;
+  }
+
+  function flowBatchList() {
+    var e = entryState();
+    if (!e.flowBatch) {
+      e.flowBatch = [
+        { id: "EB-" + (C().code || "DB") + "-0007", volume: "1,200 条", sample: "抽检 60 条 · 一致率 98.3%", status: "已通过", auditor: "管理员9527", at: "2026-10-28 15:20" },
+        { id: "EB-" + (C().code || "DB") + "-0008", volume: "3,600 条", sample: "抽检 120 条 · 一致率 96.1%", status: "审核中", auditor: "管理员9527", at: "2026-11-03 10:05" },
+        { id: "EB-" + (C().code || "DB") + "-0009", volume: "800 条", sample: "待抽检（大规模录入前须完成）", status: "待提交审核", auditor: "—", at: "2026-11-05 16:40" }
+      ];
+    }
+    return e.flowBatch;
+  }
+
+  function flowStatusTag(st) {
+    if (st === "资格有效" || st === "已通过") return "rw-tag--done";
+    if (st === "资格过期" || st === "已退回") return "rw-tag--fail";
+    if (st === "待培训" || st === "待提交审核") return "rw-tag--warn";
+    return "rw-tag--run";
+  }
+
+  function flowSectionHead(idx, title, desc, tagText, tagCls) {
+    return '<div class="rw-card-head"><div style="display:flex;align-items:flex-start;gap:10px">'
+      + '<span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:#1f63ff;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">' + idx + "</span>"
+      + "<div><h3>" + esc(title) + "</h3><p>" + esc(desc) + "</p></div></div>"
+      + (tagText ? '<span class="rw-tag ' + (tagCls || "rw-tag--run") + '" style="flex:0 0 auto">' + esc(tagText) + "</span>" : "")
+      + "</div>";
+  }
+
+  function renderEntryFlowPage() {
+    var train = flowTrainList();
+    var batch = flowBatchList();
+    var validCount = train.filter(function (t) { return t.status === "资格有效"; }).length;
+    var pendingTrain = train.filter(function (t) { return t.status !== "资格有效"; }).length;
+    var batchPending = batch.filter(function (b) { return b.status === "待提交审核" || b.status === "审核中"; }).length;
+    var batchDone = batch.filter(function (b) { return b.status === "已通过"; }).length;
+
+    var trainRows = train.map(function (t, i) {
+      return "<tr>"
+        + "<td><b>" + esc(t.name) + "</b></td>"
+        + "<td>" + esc(t.post) + "</td>"
+        + "<td>" + esc(t.course) + "</td>"
+        + '<td class="rw-nowrap">' + esc(t.score) + "</td>"
+        + '<td><span class="rw-tag ' + flowStatusTag(t.status) + '">' + esc(t.status) + "</span></td>"
+        + '<td class="rw-nowrap">' + esc(t.expire) + "</td>"
+        + '<td class="rw-nowrap">' + (t.status === "资格有效"
+          ? '<span class="rw-field-tip">已具备修改权限</span>'
+          : '<button class="rw-op rw-op--primary" type="button" data-rw-act="flow-train-register" data-idx="' + i + '">登记培训结果</button>')
+        + "</td></tr>";
+    }).join("");
+
+    var batchOps = function (b, i) {
+      if (b.status === "待提交审核") return '<button class="rw-op rw-op--primary" type="button" data-rw-act="flow-batch-next" data-idx="' + i + '">提交审核</button>';
+      if (b.status === "审核中") return '<button class="rw-op rw-op--primary" type="button" data-rw-act="flow-batch-pass" data-idx="' + i + '">审核通过</button>'
+        + '<button class="rw-op" type="button" data-rw-act="flow-batch-reject" data-idx="' + i + '">退回</button>';
+      if (b.status === "已退回") return '<button class="rw-op" type="button" data-rw-act="flow-batch-next" data-idx="' + i + '">重新提交</button>';
+      return '<span class="rw-field-tip">已归档</span>';
+    };
+    var batchRows = batch.map(function (b, i) {
+      return "<tr>"
+        + '<td class="rw-id rw-nowrap">' + esc(b.id) + "</td>"
+        + '<td class="rw-nowrap">' + esc(b.volume) + "</td>"
+        + "<td>" + esc(b.sample) + "</td>"
+        + '<td><span class="rw-tag ' + flowStatusTag(b.status) + '">' + esc(b.status) + "</span></td>"
+        + '<td class="rw-nowrap">' + esc(b.auditor || "-") + "</td>"
+        + '<td class="rw-nowrap">' + esc(b.at) + "</td>"
+        + '<td class="rw-nowrap">' + batchOps(b, i) + "</td></tr>";
+    }).join("");
+
+    var workRows = workOrderRows().map(function (r) {
+      return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>";
+    }).join("");
+
+    var overview = [
+      ["人员权限审批", "培训记录与资格管理", validCount + " 人资格有效" + (pendingTrain ? " · " + pendingTrain + " 人待培训" : ""), pendingTrain ? "需跟进" : "正常", pendingTrain ? "rw-tag--warn" : "rw-tag--done"],
+      ["数据录入审批", "大规模录入前质量审核", batchDone + " 批已通过" + (batchPending ? " · " + batchPending + " 批待审" : ""), batchPending ? "审核中" : "正常", batchPending ? "rw-tag--run" : "rw-tag--done"],
+      ["操作工单备案", "录入 / 删除与工单号对应", workOrderRows().length + " 条工单已备案", "正常", "rw-tag--done"],
+      ["定期备份", "降低硬件故障与误操作损失", backupCfgList().filter(function (b) { return b.enable; }).length + " 项备份已启用", "正常", "rw-tag--done"]
+    ].map(function (o) {
+      return '<article class="rw-qc-card" style="background:#fff">'
+        + "<h4>" + esc(o[0]) + "</h4>"
+        + "<p>" + esc(o[1]) + "</p>"
+        + '<div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px">'
+        + '<span class="rw-field-tip">' + esc(o[2]) + "</span>"
+        + '<span class="rw-tag ' + o[4] + '">' + esc(o[3]) + "</span></div></article>";
+    }).join("");
+
+    return '<div class="rw-card">'
+      + '<div class="rw-card-head">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px">'
+      + '<button class="rw-btn" type="button" data-rw-act="entry-view" data-view="audit" style="flex:0 0 auto">← 返回</button>'
+      + "<div><h3>数据资源录入流程</h3>"
+      + "<p>为维护数据库正常运行，对数据录入相关环节建立流程管理：人员权限审批、数据录入审批、操作工单备案与定期备份，并按状态跟踪推进。</p></div></div>"
+      + "</div>"
+      + '<div class="rw-qc-grid">' + overview + "</div>"
+
+      + '<div class="rw-card" style="margin:16px 0 0;border-color:#e6ecf5">'
+      + flowSectionHead("a", "人员权限审批 · 培训记录与资格管理",
+        "对拥有修改权限的工作人员进行培训记录与资格管理，确保其满足技术与安全要求后方可执行录入。",
+        pendingTrain ? pendingTrain + " 人待培训" : "资格齐全", pendingTrain ? "rw-tag--warn" : "rw-tag--done")
+      + '<div class="rw-flow-steps">'
+      + ["权限授予", "安全与规范培训", "考核登记", "资格生效", "到期复核"].map(function (t, i, arr) {
+        return '<span class="rw-flow-step"><b>' + (i + 1) + "</b>" + esc(t) + "</span>" + (i < arr.length - 1 ? '<span class="rw-flow-arrow">→</span>' : "");
+      }).join("")
+      + "</div>"
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>工作人员</th><th>岗位</th><th>培训课程</th><th>考核成绩</th><th>资格状态</th><th>有效期至</th><th>操作</th></tr></thead><tbody>'
+      + trainRows + "</tbody></table></div>"
+      + '<div class="rw-card-note" style="margin-top:10px">仅「资格有效」的工作人员可执行数据修改；培训记录与考核成绩留档，资格到期前系统提醒复核。</div>'
+      + "</div>"
+
+      + '<div class="rw-card" style="margin:16px 0 0;border-color:#e6ecf5">'
+      + flowSectionHead("b", "数据录入审批 · 大规模录入前质量审核",
+        "大规模录入前先提交录入批次进行数据质量审核，抽检一致率达标后方可入库，防止错误数据进入数据库。",
+        batchPending ? batchPending + " 批待审" : "无待审批次", batchPending ? "rw-tag--run" : "rw-tag--done")
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>批次号</th><th>预计录入量</th><th>质量抽检</th><th>审批状态</th><th>审批人</th><th>提交时间</th><th>操作</th></tr></thead><tbody>'
+      + batchRows + "</tbody></table></div>"
+      + '<div class="rw-card-note" style="margin-top:10px">审核要点：来源可信度、字段完整率、抽样一致率（≥ 95%）、与库内数据去重结果；不通过则退回采集 / 录入环节整改。</div>'
+      + "</div>"
+
+      + '<div class="rw-card" style="margin:16px 0 0;border-color:#e6ecf5">'
+      + flowSectionHead("c", "操作工单备案 · 录入与删除一律留痕",
+        "数据录入和删除操作与工单号一一对应，数据出错时可据此回溯错误发生时间及相应责任人。",
+        workOrderRows().length + " 条已备案", "rw-tag--done")
+      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>工单号</th><th>操作类型</th><th>操作对象</th><th>操作人</th><th>审批人</th><th>操作时间</th></tr></thead><tbody>'
+      + workRows + "</tbody></table></div>"
+      + '<div class="rw-card-note" style="margin-top:10px">工单号规则：WO-库代号-年月日-序号；无工单号的写入请求在数据库侧直接拒绝执行。</div>'
+      + "</div>"
+
+      + '<div class="rw-card" style="margin:16px 0 0;border-color:#e6ecf5">'
+      + flowSectionHead("d", "定期备份 · 降低硬件故障与误操作损失",
+        "按配置周期对数据库执行全量 / 增量备份，保留多份副本并做完整性校验，最大限度降低硬件故障和人员误操作带来的损失。",
+        backupCfgList().filter(function (b) { return b.enable; }).length + " 项启用", "rw-tag--done")
+      + renderBackupCfgHtml()
+      + "</div>"
+      + "</div>";
+  }
+
 
   /* ------------------------------------------------------------------
      数据备份配置（2026-10-10：由固定「定期备份」表改为可配置项）
@@ -134726,6 +135226,71 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       case "entry-view":
         entryState().view = node.getAttribute("data-view") || "todo";
         rerenderBody();
+        return;
+      /* ---- 2026-11-06：质量控制方案（新增 / 查看详情） ---- */
+      case "qc-plan-open":
+        openQualityPlanModal();
+        return;
+      case "qc-plan-close":
+        closeMask("rwQcPlanMask");
+        return;
+      case "qc-plan-submit":
+        submitQualityPlan(node);
+        return;
+      case "qc-plan-view":
+        openQualityPlanDetail(node.getAttribute("data-id") || "");
+        return;
+      case "qc-plan-view-close":
+        closeMask("rwQcPlanViewMask");
+        return;
+      /* ---- 2026-11-06：数据资源录入流程 · 状态跟踪 ---- */
+      case "flow-train-register":
+        (function () {
+          var ti = Number(node.getAttribute("data-idx"));
+          var t = flowTrainList()[ti];
+          if (!t) return;
+          t.status = "资格有效";
+          if (!t.score || t.score === "—") t.score = "90";
+          t.expire = qualityDateText(new Date(), 365);
+          rerenderBody();
+          toast("已登记 " + t.name + " 的培训与考核结果，资格生效至 " + t.expire, "ok");
+        })();
+        return;
+      case "flow-batch-next":
+        (function () {
+          var bi = Number(node.getAttribute("data-idx"));
+          var b = flowBatchList()[bi];
+          if (!b) return;
+          b.status = "审核中";
+          b.auditor = "管理员9527";
+          b.at = nowText();
+          rerenderBody();
+          toast("录入批次 " + b.id + " 已提交数据质量审核", "ok");
+        })();
+        return;
+      case "flow-batch-pass":
+        (function () {
+          var bi = Number(node.getAttribute("data-idx"));
+          var b = flowBatchList()[bi];
+          if (!b) return;
+          b.status = "已通过";
+          b.auditor = "管理员9527";
+          b.at = nowText();
+          rerenderBody();
+          toast("批次 " + b.id + " 数据质量审核通过，可执行入库", "ok");
+        })();
+        return;
+      case "flow-batch-reject":
+        (function () {
+          var bi = Number(node.getAttribute("data-idx"));
+          var b = flowBatchList()[bi];
+          if (!b) return;
+          b.status = "已退回";
+          b.auditor = "管理员9527";
+          b.at = nowText();
+          rerenderBody();
+          toast("批次 " + b.id + " 已退回，请整改后重新提交", "err");
+        })();
         return;
       case "entry-batch":
         /* 2026-10-08：批量导入功能暂时下线，动作入口一并拦下 */
@@ -138448,5 +139013,41 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
 })();
 </script>
 
+  <style>
+    /* 2026-11-06 · 低维材料主题应用：五个二级菜单检索列表隐藏「发起预测」按钮
+       —— 仅隐藏按钮本身，列表其余列、查询详情、下载等功能与数据完全不变 */
+    #page-twod [data-material-view="prediction"],
+    #page-opto [data-material-view="prediction"],
+    #page-electrolyte [data-material-view="prediction"],
+    #page-mlff [data-material-view="prediction"],
+    #page-catalyst [data-material-view="prediction"],
+    #page-twod [data-algo-predict-material],
+    #page-opto [data-algo-predict-material],
+    #page-electrolyte [data-algo-predict-material],
+    #page-mlff [data-algo-predict-material],
+    #page-catalyst [data-algo-predict-material] { display: none !important; }
+
+    /* 2026-11-06 · 数据资源录入页右侧导航按钮组 */
+    .rw-entry-nav { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: 0 0 auto; }
+    .rw-entry-nav-lead { font-size: 12px; color: #8a99ae; letter-spacing: 1px; }
+    .rw-entry-nav-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 760px; }
+    .rw-entry-nav-btns .rw-btn { min-height: 34px; padding: 0 14px; font-size: 13px; }
+    .rw-entry-nav-btns .rw-btn--primary { min-height: 34px; padding: 0 14px; }
+
+    /* 2026-11-06 · 质量控制方案 / 录入流程：通用小卡与步骤条 */
+    .rw-qc-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+    .rw-qc-card { flex: 1 1 260px; min-width: 240px; border: 1px solid #e6ecf5; border-radius: 10px; padding: 14px 16px; background: #f9fbfe; }
+    .rw-qc-card h4 { margin: 0 0 6px; font-size: 14px; color: #22364f; }
+    .rw-qc-card p { margin: 0; font-size: 12.5px; line-height: 1.7; color: #5b7292; }
+    .rw-qc-role { flex: 1 1 240px; min-width: 220px; border: 1px solid #e6ecf5; border-top: 3px solid #1f63ff; border-radius: 10px; padding: 14px 16px; background: #fff; }
+    .rw-qc-role h4 { margin: 0 0 4px; font-size: 14px; color: #22364f; }
+    .rw-qc-role .rw-qc-role-tag { display: inline-block; margin-bottom: 8px; font-size: 12px; color: #165DFF; }
+    .rw-qc-role p { margin: 0 0 6px; font-size: 12.5px; line-height: 1.7; color: #5b7292; }
+    .rw-qc-role ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.8; color: #7d8ca3; }
+    .rw-flow-steps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 4px 0 10px; }
+    .rw-flow-steps .rw-flow-step { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #dbe4f2; border-radius: 18px; background: #fff; font-size: 12.5px; color: #40536e; }
+    .rw-flow-steps .rw-flow-step b { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #eaf1ff; color: #1f63ff; font-size: 11px; }
+    .rw-flow-steps .rw-flow-arrow { color: #b9c6d8; font-size: 12px; }
+  </style>
 </body>
 </html>
