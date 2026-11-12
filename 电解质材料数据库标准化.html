@@ -70640,7 +70640,6 @@ print(resp.json())`;
             </div>
             <div class="lowdim-standard-head-actions">
               <button class="btn" type="button" data-lowdim-standard-back>返回列表</button>
-              <button class="btn-primary" type="button" data-lowdim-standard-download-all="${record.id}">下载全部文件</button>
             </div>
           </div>
           <section class="lowdim-standard-panel">
@@ -105260,7 +105259,6 @@ function renderElectrolyteCategoryTabs() {
             </div>
             <p class="lowdim-standard-browser-filter-tip">填写条件后点击「检索」查询（标准名称输入框内回车亦可检索）；「重置」清空全部条件并展示本类全部标准。</p>
           </section>
-          <div class="lowdim-standard-browser-list-head"><strong>共 ${filtered.length} 条标准</strong></div>
           <section class="lowdim-standard-browser-grid">${records.length ? records.map(browserCard).join("") : `<div class="lowdim-standard-browser-empty">暂无符合条件的标准文件</div>`}</section>
           ${browserPagination(filtered.length, totalPages)}
         </div>
@@ -122471,8 +122469,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         return '<td class="wrap">' + textCell(v) + '</td>';
       }).join("");
       return '<tr><td class="num">' + (index + 1) + '</td>'
-        + '<td><div class="t2d-mat"><span class="t2d-mat-name">' + esc(m.name) + '</span>'
-        + '<span class="t2d-mat-id">' + esc(m.id) + '</span></div></td>'
+        + '<td><div class="t2d-mat"><span class="t2d-mat-name">' + esc(m.name) + '</span></div></td>'
         + tds + '</tr>';
     }).join("");
 
@@ -122541,8 +122538,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         return '<td class="wrap">' + textCell(v) + '</td>';
       }).join("");
       return '<tr><td class="num">' + (index + 1) + '</td>'
-        + '<td><div class="t2d-mat"><span class="t2d-mat-name">' + esc(m.name) + '</span>'
-        + '<span class="t2d-mat-id">' + esc(m.id) + '</span></div></td>' + tds + '</tr>';
+        + '<td><div class="t2d-mat"><span class="t2d-mat-name">' + esc(m.name) + '</span></div></td>' + tds + '</tr>';
     }).join("");
 
     var fnote = '';
@@ -134911,17 +134907,14 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
   /* ---------- 6. 列表页入口按钮挂载 ---------- */
+  /* 2026-11-10：仅下线数据库模块（lowdim-database-*）页右上角「专业用户身份申请」入口；
+     数据应用模块（twod / electrolyte / opto / mlff / catalyst）的入口按原样保留。 */
   var LIST_TARGETS = {
     twod: [".module-tab-strip"],
     electrolyte: [".module-tab-strip"],
     opto: [".module-tab-strip"],
     mlff: [".module-tab-strip"],
-    catalyst: [".module-tab-strip"],
-    "lowdim-database-twod": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
-    "lowdim-database-opto": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
-    "lowdim-database-electrolyte": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
-    "lowdim-database-mlff": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"],
-    "lowdim-database-catalyst": [".t2d-title-row", ".ldbm-toolbar", ".ldb-toolbar"]
+    catalyst: [".module-tab-strip"]
   };
 
   function entryHTML(solid) {
