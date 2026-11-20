@@ -120928,176 +120928,93 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         ];
         var kinds = [
           {
-            k: "monomer", l: "单分子机器学习力场数据集", g: "单分子", cv: "1,200 个分子体系", r: 1200, s: 96.5,
-            d: "收录单个分子体系的构象采样结果，含原子电荷、多极矩、极化率、色散系数、单分子能量与单分子结构。",
+            k: "monomer", l: "单分子数据集", g: "单分子", cv: "1,200 个分子体系", r: 1200, s: 96.5,
+            d: "收录单个分子体系的构象采样结果，含原子电荷、偶极矩、四极矩及多极矩、极化率、色散系数、单分子能量与单分子结构。",
             m: [["ML-MO-001", "水分子"], ["ML-MO-002", "甲烷"], ["ML-MO-003", "苯"], ["ML-MO-004", "乙腈"], ["ML-MO-005", "丙酮"], ["ML-MO-006", "甲酰胺"]],
             tabs: [
               {
-                k: "base", l: "机器学习力场基础数据集",
-                n: "记录单分子体系的基础标识与采样概况：分子名称、分子式、采样温度与已收录构象数。",
-                c: baseCols
-              },
-              {
-                k: "atom", l: "单分子原子性质数据集",
-                n: "记录单分子的原子级电子性质：原子电荷给出静电作用参数，偶极矩 / 四极矩 / 多极矩描述电荷分布的多极展开，极化率与色散系数分别对应诱导与色散相互作用的力场参数。",
+                k: "flat", l: "单分子数据集",
+                n: "单分子数据集以单个分子为体系边界进行构象采样，列表统一展示原子电荷、偶极矩、四极矩及多极矩、极化率、色散系数、单分子能量与单分子结构七类字段。",
                 c: [
-                  ["atom_charges", "原子电荷（e）", "各原子的净电荷，力场静电项参数", ""],
-                  ["multipole", "偶极矩 / 四极矩 / 多极矩（D / D·Å）", "分子电荷分布的多极展开矩", ""],
-                  ["polarizability", "极化率（a.u.）", "分子在外电场下的诱导极化能力", ""],
-                  ["dispersion_coefficient", "色散系数 C₆（a.u.）", "色散相互作用参数 C₆", ""]
-                ]
-              },
-              {
-                k: "calc", l: "单分子计算数据集",
-                n: "记录单分子的量化计算结果：单分子能量为构象的能量标签，单分子结构给出该构象对应的坐标文件（pdb / xyz）。",
-                c: [
-                  ["total_energy", "单分子能量（Hartree）", "该构象的单点能 / 参考能量标签", ""],
+                  ["atom_charges", "原子电荷", "各原子的净电荷，力场静电项参数", ""],
+                  ["dipole_moment", "偶极矩", "分子偶极矩，电荷分布的一阶矩", ""],
+                  ["multipole", "四极矩及多极矩", "分子电荷分布的二阶及高阶多极展开矩", ""],
+                  ["polarizability", "极化率", "分子在外电场下的诱导极化能力", ""],
+                  ["dispersion_coefficient", "色散系数", "色散相互作用参数 C6", ""],
+                  ["total_energy", "单分子能量", "该构象的单点能 / 参考能量标签", ""],
                   ["structure_file_path", "单分子结构", "构象对应的坐标文件（pdb / xyz）", "image"]
                 ]
-              },
-              { k: "category", l: "结构种类细分", n: "", c: [] }
+              }
             ],
             data: {
-              base: [
-                ["水分子", "H2O", "300", "1200"],
-                ["甲烷", "CH4", "300", "1050"],
-                ["苯", "C6H6", "350", "1500"],
-                ["乙腈", "C2H3N", "300", "980"],
-                ["丙酮", "C3H6O", "320", "1150"],
-                ["甲酰胺", "CH3NO", "300", "860"]
-              ],
-              atom: [
-                ["O −0.834 / H +0.417", "μ=1.85 D，Θ=2.12 D·Å", "9.62", "45.2"],
-                ["C −0.412 / H +0.103", "μ=0.00 D，Θ=0.00 D·Å", "17.28", "128.6"],
-                ["C −0.128 / H +0.128", "μ=0.00 D，Q=−8.60 D·Å²", "66.42", "1024.5"],
-                ["N −0.482 / C≡ −0.121", "μ=3.92 D，Θ=4.36 D·Å", "27.86", "312.4"],
-                ["O −0.512 / C(=O) +0.742", "μ=2.91 D，Θ=3.05 D·Å", "38.15", "486.7"],
-                ["O −0.526 / N −0.418", "μ=3.73 D，Θ=3.88 D·Å", "22.94", "268.3"]
-              ],
-              calc: [
-                ["-76.3628", "water_001.pdb"],
-                ["-40.2137", "methane_001.pdb"],
-                ["-232.1685", "benzene_001.pdb"],
-                ["-132.1084", "acetonitrile_001.pdb"],
-                ["-193.4012", "acetone_001.pdb"],
-                ["-169.7245", "formamide_001.pdb"]
+              flat: [
+                ["O −0.834 / H +0.417", "1.85 D", "Θ=2.12 D·Å", "9.62", "45.2", "-76.3628", "water_001.pdb"],
+                ["C −0.412 / H +0.103", "0.00 D", "Θ=0.00 D·Å", "17.28", "128.6", "-40.2137", "methane_001.pdb"],
+                ["C −0.128 / H +0.128", "0.00 D", "Q=−8.60 D·Å²", "66.42", "1024.5", "-232.1685", "benzene_001.pdb"],
+                ["N −0.482 / C≡ −0.121", "3.92 D", "Θ=4.36 D·Å", "27.86", "312.4", "-132.1084", "acetonitrile_001.pdb"],
+                ["O −0.512 / C(=O) +0.742", "2.91 D", "Θ=3.05 D·Å", "38.15", "486.7", "-193.4012", "acetone_001.pdb"],
+                ["O −0.526 / N −0.418", "3.73 D", "Θ=3.88 D·Å", "22.94", "268.3", "-169.7245", "formamide_001.pdb"]
               ]
             }
           },
           {
-            k: "dimer", l: "双分子机器学习力场数据集", g: "双分子", cv: "15,000 条构象", r: 15000, s: 486.2,
-            d: "收录两个分子组成的二聚体体系，给出双分子结构与相互作用能、原子受力。",
+            k: "dimer", l: "双分子数据集", g: "双分子", cv: "15,000 条构象", r: 15000, s: 486.2,
+            d: "收录两个分子组成的二聚体体系，列表统一展示双分子结构、双分子相互作用能与原子受力。",
             m: [["ML-DI-001", "水二聚体"], ["ML-DI-002", "甲烷二聚体"], ["ML-DI-003", "苯二聚体"], ["ML-DI-004", "乙腈二聚体"], ["ML-DI-005", "丙酮二聚体"], ["ML-DI-006", "甲酰胺二聚体"]],
             tabs: [
               {
-                k: "base", l: "机器学习力场基础数据集",
-                n: "记录二聚体体系的基础标识与采样概况：分子名称、分子式、采样温度与已收录构象数。",
-                c: baseCols
-              },
-              {
-                k: "geom", l: "双分子结构数据集",
-                n: "记录双分子二聚体的几何结构：给出二聚体构象的坐标文件（pdb / xyz），是计算相互作用能的输入结构。",
-                c: [["dimer_structure_path", "双分子结构", "二聚体构象坐标文件（pdb / xyz）", "image"]]
-              },
-              {
-                k: "calc", l: "双分子计算数据集",
-                n: "记录双分子体系的计算结果：相互作用能为二聚体相对两个单体的能量差，原子受力为每个原子上的力分量（Fx / Fy / Fz）。",
+                k: "flat", l: "双分子数据集",
+                n: "双分子数据集以两个分子组成的二聚体为体系，列表统一展示双分子结构、双分子相互作用能与原子受力三类字段。",
                 c: [
-                  ["interaction_energy", "相互作用能（kJ/mol）", "二聚体相对两个单体的能量差", ""],
-                  ["atomic_forces", "原子受力（kJ/(mol·Å)）", "各原子力分量 Fx / Fy / Fz", ""]
+                  ["dimer_structure_path", "双分子结构", "二聚体构象坐标文件（pdb / xyz）", "image"],
+                  ["interaction_energy", "双分子相互作用能", "二聚体相对两个单体的能量差", ""],
+                  ["atomic_forces", "原子受力", "各原子力分量 Fx / Fy / Fz", ""]
                 ]
-              },
-              { k: "category", l: "结构种类细分", n: "", c: [] }
+              }
             ],
             data: {
-              base: [
-                ["水二聚体", "(H2O)2", "300", "1200"],
-                ["甲烷二聚体", "(CH4)2", "300", "1050"],
-                ["苯二聚体", "(C6H6)2", "350", "1500"],
-                ["乙腈二聚体", "(C2H3N)2", "300", "980"],
-                ["丙酮二聚体", "(C3H6O)2", "320", "1150"],
-                ["甲酰胺二聚体", "(CH3NO)2", "300", "860"]
-              ],
-              geom: [
-                ["water_dimer_001.pdb"],
-                ["methane_dimer_001.pdb"],
-                ["benzene_dimer_001.pdb"],
-                ["acetonitrile_dimer_001.pdb"],
-                ["acetone_dimer_001.pdb"],
-                ["formamide_dimer_001.pdb"]
-              ],
-              calc: [
-                ["-21.45", "{\"O\": [0.42, -0.18, 0.06]}"],
-                ["-8.62", "{\"C\": [-0.09, 0.04, 0.11]}"],
-                ["-18.76", "{\"C\": [0.15, -0.22, 0.08]}"],
-                ["-24.33", "{\"N\": [-0.28, 0.16, 0.09]}"],
-                ["-19.85", "{\"O\": [0.24, -0.11, 0.13]}"],
-                ["-27.64", "{\"O\": [-0.31, 0.19, 0.07]}"]
+              flat: [
+                ["water_dimer_001.pdb", "-21.45", "{\"O\": [0.42, -0.18, 0.06]}"],
+                ["methane_dimer_001.pdb", "-8.62", "{\"C\": [-0.09, 0.04, 0.11]}"],
+                ["benzene_dimer_001.pdb", "-18.76", "{\"C\": [0.15, -0.22, 0.08]}"],
+                ["acetonitrile_dimer_001.pdb", "-24.33", "{\"N\": [-0.28, 0.16, 0.09]}"],
+                ["acetone_dimer_001.pdb", "-19.85", "{\"O\": [0.24, -0.11, 0.13]}"],
+                ["formamide_dimer_001.pdb", "-27.64", "{\"O\": [-0.31, 0.19, 0.07]}"]
               ]
             }
           },
           {
-            k: "cluster", l: "多分子团簇机器学习力场数据集", g: "多分子团簇", cv: "9,000 条片段", r: 9000, s: 372.8,
-            d: "收录三个及以上分子组成的团簇体系，给出团簇结构与相互作用能、原子受力。",
+            k: "cluster", l: "多分子团簇数据集", g: "多分子团簇", cv: "9,000 条片段", r: 9000, s: 372.8,
+            d: "收录三个及以上分子组成的团簇体系，列表统一展示多分子团簇结构、多分子相互作用能与原子受力。",
             m: [["ML-CL-001", "水团簇 (n=8)"], ["ML-CL-002", "水团簇 (n=16)"], ["ML-CL-003", "甲烷团簇 (n=10)"], ["ML-CL-004", "苯团簇 (n=6)"], ["ML-CL-005", "乙腈团簇 (n=8)"], ["ML-CL-006", "甲酰胺团簇 (n=6)"]],
             tabs: [
               {
-                k: "base", l: "机器学习力场基础数据集",
-                n: "记录团簇体系的基础标识与采样概况：分子名称、分子式、采样温度与团簇包含的分子个数。",
+                k: "flat", l: "多分子团簇数据集",
+                n: "多分子团簇数据集以三个及以上分子组成的团簇为体系，列表统一展示多分子团簇结构、多分子相互作用能与原子受力三类字段。",
                 c: [
-                  ["molecule_name", "分子名称", "团簇中分子的规范中文名称", ""],
-                  ["formula", "分子式", "团簇组分的分子式", ""],
-                  ["sampling_temp", "采样温度（K）", "构象采样所用系综温度", ""],
-                  ["cluster_size", "团簇尺寸（分子数）", "该团簇结构包含的分子个数", ""]
+                  ["cluster_structure_path", "多分子团簇结构", "团簇构象坐标文件（pdb / xyz）", "image"],
+                  ["interaction_energy", "多分子相互作用能", "团簇相对孤立单体的能量差", ""],
+                  ["atomic_forces", "原子受力", "各原子力分量 Fx / Fy / Fz", ""]
                 ]
-              },
-              {
-                k: "geom", l: "团簇结构数据集",
-                n: "记录多分子团簇的几何结构：给出团簇构象的坐标文件（pdb / xyz），是计算多体相互作用能的输入结构。",
-                c: [["cluster_structure_path", "团簇结构", "团簇构象坐标文件（pdb / xyz）", "image"]]
-              },
-              {
-                k: "calc", l: "团簇计算数据集",
-                n: "记录多分子团簇的计算结果：相互作用能为团簇相对孤立单体的能量差，原子受力为每个原子上的力分量（Fx / Fy / Fz）。",
-                c: [
-                  ["interaction_energy", "相互作用能（kJ/mol）", "团簇相对孤立单体的能量差", ""],
-                ["atomic_forces", "原子受力（kJ/(mol·Å)）", "各原子力分量 Fx / Fy / Fz", ""]
-                ]
-              },
-              { k: "category", l: "结构种类细分", n: "", c: [] }
+              }
             ],
             data: {
-              base: [
-                ["水团簇 (n=8)", "(H2O)8", "300", "8"],
-                ["水团簇 (n=16)", "(H2O)16", "300", "16"],
-                ["甲烷团簇 (n=10)", "(CH4)10", "300", "10"],
-                ["苯团簇 (n=6)", "(C6H6)6", "350", "6"],
-                ["乙腈团簇 (n=8)", "(C2H3N)8", "300", "8"],
-                ["甲酰胺团簇 (n=6)", "(CH3NO)6", "300", "6"]
-              ],
-              geom: [
-                ["water_cluster_8_001.pdb"],
-                ["water_cluster_16_001.pdb"],
-                ["methane_cluster_10_001.pdb"],
-                ["benzene_cluster_6_001.pdb"],
-                ["acetonitrile_cluster_8_001.pdb"],
-                ["formamide_cluster_6_001.pdb"]
-              ],
-              calc: [
-                ["-186.42", "{\"O\": [0.52, -0.24, 0.11]}"],
-                ["-398.15", "{\"O\": [-0.36, 0.28, 0.09]}"],
-                ["-92.68", "{\"C\": [0.12, -0.08, 0.15]}"],
-                ["-118.41", "{\"C\": [-0.19, 0.24, 0.06]}"],
-                ["-204.71", "{\"N\": [0.22, -0.15, 0.12]}"],
-                ["-176.28", "{\"O\": [-0.27, 0.18, 0.10]}"]
+              flat: [
+                ["water_cluster_8_001.pdb", "-186.42", "{\"O\": [0.52, -0.24, 0.11]}"],
+                ["water_cluster_16_001.pdb", "-398.15", "{\"O\": [-0.36, 0.28, 0.09]}"],
+                ["methane_cluster_10_001.pdb", "-92.68", "{\"C\": [0.12, -0.08, 0.15]}"],
+                ["benzene_cluster_6_001.pdb", "-118.41", "{\"C\": [-0.19, 0.24, 0.06]}"],
+                ["acetonitrile_cluster_8_001.pdb", "-204.71", "{\"N\": [0.22, -0.15, 0.12]}"],
+                ["formamide_cluster_6_001.pdb", "-176.28", "{\"O\": [-0.27, 0.18, 0.10]}"]
               ]
             }
           }
+
         ];
         return mkSubCfg({ parentKey: "mlff_base", intro: intro, tabs: tabs, cats: cats, kinds: kinds });
       })(),
       (function () {
-        var intro = "有机小分子机器学习力场数据集按小分子所含特征官能团分为醚类与酰胺类两个子数据集，字段沿用单分子体系定义：原子电荷、偶极矩 / 四极矩 / 多极矩、极化率、色散系数、单分子能量、单分子结构与双分子相互作用能、原子受力。";
+        var intro = "有机小分子机器学习力场数据集按小分子所含特征官能团分为醚类与酰胺类两个子数据集：醚类收录含 R–O–R′ 醚键的有机小分子，酰胺类收录含酰胺基（−CON−）的有机小分子。两类子数据集均采集单分子、双分子与多分子团簇结构，采用第一性原理方法计算单分子能量、原子受力及分子间相互作用能，并在此基础上采用机器学习方法训练、不断优化力场模型与参数，形成可用于有机小分子体系的高精度机器学习力场数据集。";
         var baseCols = [
           ["molecule_name", "分子名称", "有机小分子的规范中文名称", ""],
           ["formula", "分子式", "分子的元素组成式", ""],
@@ -121133,8 +121050,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         var kinds = [
           {
             k: "ether", l: "醚类有机小分子机器学习力场数据集", g: "醚类", cv: "8,400 条构象", r: 8400, s: 262.4,
-            d: "收录含醚键（C–O–C）的有机小分子构象采样与力场参数。",
-            m: [["ML-ET-001", "二甲醚"], ["ML-ET-002", "乙二醇二甲醚"], ["ML-ET-003", "二乙二醇二甲醚"], ["ML-ET-004", "四氢呋喃"], ["ML-ET-005", "1,3-二氧戊环"], ["ML-ET-006", "苯甲醚"]],
+            d: "收录含醚键（C–O–C）的有机小分子构象采样与力场参数。",            m: [["ML-ET-001", "二甲醚"], ["ML-ET-002", "乙二醇二甲醚"], ["ML-ET-003", "二乙二醇二甲醚"], ["ML-ET-004", "四氢呋喃"], ["ML-ET-005", "1,3-二氧戊环"], ["ML-ET-006", "苯甲醚"]],
             data: {
               base: [
                 ["二甲醚", "C2H6O", "DME.pdb"],
@@ -121164,8 +121080,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
           },
           {
             k: "amide", l: "酰胺类有机小分子机器学习力场数据集", g: "酰胺类", cv: "6,600 条构象", r: 6600, s: 223.8,
-            d: "收录含酰胺基的有机小分子构象采样与力场参数，是蛋白质力场的重点训练对象。",
-            m: [["ML-AM-001", "甲酰胺"], ["ML-AM-002", "乙酰胺"], ["ML-AM-003", "N-甲基乙酰胺"], ["ML-AM-004", "N,N-二甲基甲酰胺"], ["ML-AM-005", "N-甲基吡咯烷酮"], ["ML-AM-006", "尿素"]],
+            d: "收录含酰胺基的有机小分子构象采样与力场参数，是蛋白质力场的重点训练对象。",            m: [["ML-AM-001", "甲酰胺"], ["ML-AM-002", "乙酰胺"], ["ML-AM-003", "N-甲基乙酰胺"], ["ML-AM-004", "N,N-二甲基甲酰胺"], ["ML-AM-005", "N-甲基吡咯烷酮"], ["ML-AM-006", "尿素"]],
             data: {
               base: [
                 ["甲酰胺", "CH3NO", "formamide.pdb"],
@@ -122603,7 +122518,9 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
     var tab = subTabDef(tabs, s.tab) || tabs[0];
     var parent = DS[ds.parentKey];
 
-    var tabsHtml = tabs.map(function (t) {
+    /* 单页签且 key=flat 时视作「纯列表」数据集：不渲染页签栏，直接展示合并后的字段列表 */
+    var isFlat = tabs.length === 1 && tabs[0].key === "flat";
+    var tabsHtml = isFlat ? "" : tabs.map(function (t) {
       return '<button class="t2d-tab' + (t.key === tab.key ? ' is-active' : '') + '" type="button" data-t2d-tab="' + esc(t.key) + '">'
         + esc(t.label) + '</button>';
     }).join("");
@@ -122615,7 +122532,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
       + '<div class="t2d-title-row"><h2>' + esc(ds.label) + '</h2>'
       + '<span class="t2d-badge">' + esc(kd.group) + '</span>'
       + '<span class="t2d-badge is-plain">子数据集</span></div>'
-      + '<div class="t2d-tabs">' + tabsHtml + '</div>'
+      + (isFlat ? "" : '<div class="t2d-tabs">' + tabsHtml + '</div>')
       + body;
   }
 
@@ -127781,27 +127698,17 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   function entryTemplateBodyHtml(m) {
     var isCalc = entryModeOf(m) === "calc";
     var modeLabel = isCalc ? "计算结果" : "原始数据解析结果";
-    var rows = entryTemplateRows().map(function (r) {
-      return "<tr><td><b>" + esc(r.label) + "</b></td><td>" + esc(r.type) + "</td>"
-        + "<td>" + (r.req ? '<span class="rw-tag rw-tag--open">必填</span>' : '<span class="rw-tag rw-tag--gray">选填</span>') + "</td>"
-        + "<td>" + esc(r.unit) + "</td>"
-        + '<td style="color:#7d8ca3">' + esc(r.sample || "—") + "</td></tr>";
-    }).join("");
-    var accept = isCalc ? ".csv,.xlsx,.xls,.json,.out,.xml,.txt" : ".csv,.xlsx,.xls,.json";
-    return '<div class="rw-banner"><span>ⓘ</span><div>该方式按统一格式模板导入：系统解析文件后与录入规范逐字段比对，不合规的行将在提交后进入人工复核。</div></div>'
-      + '<div class="rw-section-title">① 统一格式模板</div>'
-      + '<div class="rw-card-note">' + esc(modeLabel) + '统一格式模板（V1.0）字段与「' + esc(C().title) + '」录入规范（1.2 节）一致，请勿增删表头列；一行一条数据，单位列按模板标注填写。</div>'
-      + '<div class="rw-tbl-wrap"><table class="rw-tbl"><thead><tr><th>字段名</th><th>数据类型</th><th>是否必填</th><th>单位</th><th>示例值</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
-      + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px">'
+    return '<div class="rw-banner"><span>ⓘ</span><div>该方式按统一格式模板导入：下载统一模板填好数据后上传，系统解析文件后与录入规范逐字段比对，不合规的行将在提交后进入人工复核。</div></div>'
+      + '<div class="rw-section-title">① 下载统一模板</div>'
+      + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'
       + '<button class="rw-btn rw-btn--sm rw-btn--ghost" type="button" data-rw-act="entry-tpl-download">⇩ 下载统一格式模板（CSV）</button>'
-      + '<span class="rw-field-tip" style="margin:0">模板版本 V1.0 · 更新日期 2026-10-27 · 字段数 ' + entryTemplateRows().length + " 项</span>"
       + "</div>"
       + '<div class="rw-section-title" style="margin-top:18px">② 文件上传</div>'
       + '<label class="rw-upload-zone" for="rwEntryFileInput" style="display:block;cursor:pointer">'
       + "<strong>" + (m.uploadFile ? esc(m.uploadFile) : "点击选择或拖拽「" + esc(modeLabel) + "」文件到此处") + "</strong>"
-      + "<span>" + (isCalc ? "支持 .csv / .xlsx / .json / .out / .xml，单个文件不超过 50 MB" : "支持 .csv / .xlsx / .json，单个文件不超过 50 MB") + "</span>"
+      + "<span>支持 .csv，单个文件不超过 50 MB</span>"
       + "</label>"
-      + '<input type="file" id="rwEntryFileInput" accept="' + accept + '" style="display:none">'
+      + '<input type="file" id="rwEntryFileInput" accept=".csv" style="display:none">'
       + '<div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">'
       + '<button class="rw-btn rw-btn--sm rw-btn--ghost" type="button" data-rw-act="entry-demo-file">填充示例文件</button>'
       + (m.uploadFile ? '<button class="rw-btn rw-btn--sm" type="button" data-rw-act="entry-clear-file">移除已选文件</button>' : "")
