@@ -122434,7 +122434,7 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
   }
 
 
-  /* 六个页签的样例数据表 + 字段含义说明 */
+  /* 六个页签的样例数据表 */
   function renderSubTable(ds, kd, tab, s) {
     var cols = tab.cols || [];
     var rows = (kd.data && kd.data[tab.key]) || [];
@@ -122456,20 +122456,10 @@ const valueFor = (item, keys, fallback = "未记录") => { for (const key of key
         + '<td><div class="t2d-mat"><span class="t2d-mat-name">' + esc(m.name) + '</span></div></td>' + tds + '</tr>';
     }).join("");
 
-    var fnote = '';
-    if (cols.length) {
-      fnote = '<div class="t2d-fnote"><div class="t2d-fnote-h">字段含义说明</div><dl>'
-        + cols.map(function (c) {
-            return '<div><dt>' + esc(c.t) + '</dt><dd>' + esc(c.d || "—") + '</dd></div>';
-          }).join("")
-        + '</dl>' + (tab.note ? '<p class="t2d-fnote-p">' + esc(tab.note) + '</p>' : '') + '</div>';
-    }
 
     return '<div class="t2d-card"><div class="t2d-tw"><table class="t2d-table is-sample"><thead>' + head + '</thead><tbody>'
       + (body || '<tr><td colspan="' + (cols.length + 2) + '"><div class="t2d-empty">该子数据集暂无样例数据，等待「数据标准化」归档后推送入库。</div></td></tr>')
-      + '</tbody></table></div>' + renderPager(p, "条样例记录") + '</div>'
-      + '<div class="t2d-foot"><span>列为 ' + esc(tab.label) + ' 的字段口径，数据由所属父数据集标准化表单录入</span></div>'
-      + fnote;
+      + '</tbody></table></div>' + renderPager(p, "条样例记录") + '</div>';
   }
 
   /* 结构种类细分：四类划分口径、通式与官能团、定义与范围 */
